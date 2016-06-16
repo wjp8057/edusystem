@@ -46,7 +46,7 @@ class TeacherAction extends RightAction {
             $listUpdated = json_decode($updated);
             foreach ($listUpdated as $one){
                 $condition['ID']= $one->id; //这里区分大小写
-                $data['MEWEMTER']=(int)$one->newenter;
+                $data['NEWENTER']=(int)$one->newenter;
                 $data['DISABLE']=(int)$one->disable;
                 $data['REM']=$one->rem;
                 $data['LEAVEDAY']=$one->leaveday;
@@ -81,17 +81,23 @@ class TeacherAction extends RightAction {
         $this->ajaxReturn($result,'JSON');
     }
 
-
-    public function init($year="",$term=""){
+    /**同步教师信息
+     * @param string $year
+     */
+    public function init($year=""){
         $info="";
         $status=1;
-        if(is_numeric($year)&&is_numeric($term)){
+        if(is_numeric($year)){
             $Trans=D();
             $Trans->startTrans();
             $Model = new Model(); // 实例化一个model对象 没有对应任何数据表
-
-
-
+            $effectRow=$Model->execute("INSERT INTO  WORKTEACHER(YEAR,TEACHERNO,SCHOOL,TYPE,POSITION,JOB)
+                        SELECT ".$year.",TEACHERNO,SCHOOL,TYPE,POSITION,JOB FROM TEACHERS
+                        WHERE EXISTS (
+                        SELECT  * FROM WORKDETAIL
+                       WHERE EXISTS (SELECT * FROM WORKS WHERE WORKS.YEAR=".$year." AND WORKS.ID=WORKDETAIL.MAP) AND WORKDETAIL.TEACHERNO=TEACHERS.TEACHERNO
+                       AND NOT EXISTS (SELECT * FROM WORKTEACHER WHERE YEAR=".$year." AND WORKTEACHER.TEACHERNO=WORKDETAIL.TEACHERNO))");
+            if( $effectRow>0) $info.= $effectRow.'条教师信息新加入！</br>';
 
             $effectRow=$Model->execute("UPDATE WORKTEACHER
                     SET SCHOOL=TEACHERS.SCHOOL,TYPE=TEACHERS.TYPE,POSITION=TEACHERS.POSITION,
@@ -130,13 +136,13 @@ class TeacherAction extends RightAction {
 
         }
         else{
-            $info="学年学期参数不正确！";
+            $info="学年参数不正确！";
         }
         $result=array('info'=>$info,'status'=>$status);
         $this->ajaxReturn($result,'JSON');
 
     }
-    public function initwork1($year="2014"){
+    public function initwork1($year="2015"){
         $info="";
         $status=1;
         if(is_numeric($year)){
@@ -144,7 +150,7 @@ class TeacherAction extends RightAction {
             $Trans->startTrans();
             $Model = new Model(); // 实例化一个model对象 没有对应任何数据表
             $effectRow=$Model->execute("UPDATE WORKTEACHER
-                    SET WORKTWO=TEMP.WORK
+                    SET WORKONE=TEMP.WORK
                     FROM  WORKTEACHER INNER JOIN (SELECT WORKDETAIL.TEACHERNO,SUM(WORKDETAIL.WORK*WORKDETAIL.REPEAT) AS WORK FROM WORKS INNER JOIN WORKDETAIL ON WORKDETAIL.MAP=WORKS.ID
                     WHERE WORKS.YEAR=".$year." AND TERM=1 AND DISABLE=0 AND WORKS.WORKTYPE NOT IN ('H','K','L')
                     GROUP BY WORKDETAIL.TEACHERNO) AS TEMP ON TEMP.TEACHERNO=WORKTEACHER.TEACHERNO
@@ -153,10 +159,10 @@ class TeacherAction extends RightAction {
 
 
             $Model->execute("UPDATE WORKTEACHER
-                  SET WORKTWOUP=0
+                  SET WORKONEUP=0
                   WHERE WORKTEACHER.YEAR=".$year);
             $effectRow=$Model->execute("UPDATE WORKTEACHER
-                    SET WORKTWOUP=TEMP.WORK
+                    SET WORKONEUP=TEMP.WORK
                     FROM WORKTEACHER
                     INNER JOIN (
                     SELECT WORKDETAIL.TEACHERNO,SUM(WORKDETAIL.WORK*WORKDETAIL.REPEAT) AS WORK FROM WORKS INNER JOIN WORKDETAIL ON WORKS.ID=WORKDETAIL.MAP
@@ -166,10 +172,10 @@ class TeacherAction extends RightAction {
             if( $effectRow>0) $info.= $effectRow.'条专升本数据更新(仅提取备注中写明”专升本“的课程)！</br>';
 
             $Model->execute("UPDATE WORKTEACHER
-                  SET WORKTWOPRATICE=0
+                  SET WORKONEPRATICE=0
                   WHERE WORKTEACHER.YEAR=".$year);
             $effectRow=$Model->execute("UPDATE WORKTEACHER
-                    SET WORKTWOPRATICE=TEMP.WORK
+                    SET WORKONEPRATICE=TEMP.WORK
                     FROM WORKTEACHER
                     INNER JOIN (
                     SELECT WORKDETAIL.TEACHERNO,SUM(WORKDETAIL.WORK*WORKDETAIL.REPEAT) AS WORK FROM WORKS INNER JOIN WORKDETAIL ON WORKS.ID=WORKDETAIL.MAP
@@ -199,7 +205,7 @@ class TeacherAction extends RightAction {
         $this->ajaxReturn($result,'JSON');
 
     }
-    public function initwork2($year="2014"){
+    public function initwork2($year="2015"){
         $info="";
         $status=1;
         if(is_numeric($year)){

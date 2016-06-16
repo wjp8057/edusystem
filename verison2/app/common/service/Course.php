@@ -21,7 +21,7 @@ class Course  extends  MyService{
         $result=null;
         $condition=null;
         $condition['courseno']=$courseno;
-        $data=$this->query->table('courses')->where($condition)->field('rtrim(coursename) as coursename')->find();
+        $data=$this->query->table('courses')->where($condition)->field('rtrim(coursename) as coursename')->select();
         if(!is_array($data)||count($data)!=1)
             throw new \think\Exception('courseno'.$courseno, MyException::PARAM_NOT_CORRECT);
         return $data[0]['coursename'];

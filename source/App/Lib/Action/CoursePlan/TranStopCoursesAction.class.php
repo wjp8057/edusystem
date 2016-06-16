@@ -36,7 +36,7 @@ class TranStopCoursesAction extends RightAction{
             $this->ajaxReturn($arr,"JSON");
             exit;
         }
-        $school = $this->model->sqlFind("SELECT * FROM SCHOOLS WHERE SCHOOL = (SELECT T.SCHOOL FROM TEACHERS T WHERE T.TEACHERNO=:TEACHERNO)",array(":TEACHERNO"=>$_SESSION["S_USER_INFO"]["TEACHERNO"]));
+        $school = $this->model->sqlFind("SELECT * FROM SCHOOLS WHERE SCHOOL = (SELECT T.SCHOOL FROM TEACHERS T WHERE T.TEACHERNO=:TEACHERNO)",array(":TEACHERNO"=>session('S_TEACHERNO')));
         $this->assign("userSchool",$school);
         $this->assign("school",M("schools")->select());
         $this->__done("apply");

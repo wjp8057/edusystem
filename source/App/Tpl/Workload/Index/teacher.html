@@ -215,10 +215,10 @@
                     $.messager.alert("错误","亲，非教务处管理人员不能同步噢！^_^",'error');
                 }
                 else{
-                    $.messager.confirm('确认', "真的要同步么？<br />本操作将更新第二学期工作量。<br/>注意：专升本工作量仅提取备注中带有“专升本”的课程", function(r){
+                    $.messager.confirm('确认', "真的要同步么？<br />本操作将更新第一学期工作量。<br/>注意：专升本工作量仅提取备注中带有“专升本”的课程", function(r){
                         if (r){
                             $('#w').window('open');
-                            $.post('/Workload/Teacher/initwork2?hasJson=true',{year:$('#year', parent.document).val()},function(result){
+                            $.post('/Workload/Teacher/initwork1?hasJson=true',{year:$('#year', parent.document).val()},function(result){
                                 if (result.status==1){
                                     $.messager.alert("成功",result.info,'info');
 

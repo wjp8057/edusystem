@@ -23,7 +23,7 @@ class Teacher extends  MyService
         if ($name != '%') $condition['teachers.name'] = array('like', $name);
         if ($school != '') $condition['teachers.school'] = $school;
         $data = $this->query->table('teachers')->join('teachertype ', ' teachertype.name=teachers.type')
-            ->join('teacherjob ', ' teacherjob.job=teachers.job')
+            ->join('teacherjob ', ' teacherjob.job=teachers.job','LEFT')
             ->join('positions ', ' positions.name=teachers.position')
             ->join('schools ', ' schools.school=teachers.school')
             ->join('sexcode ', ' sexcode.code=teachers.sex')

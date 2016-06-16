@@ -48,7 +48,7 @@ class CheckAction extends RightAction {
                 $data['LOCK']=$one->lock;
                 $data['DISABLE']=$one->disable;
                 $data['REM']=$one->rem;
-                if($one->worktype=='A') {
+                if($one->worktype=='A'&&$one->lock==0) {
                     $data['WORK'] = $one->total * ($one->factor + $one->addfactor);
                     $data['ADDFACTOR']=$one->addfactor;
                 }

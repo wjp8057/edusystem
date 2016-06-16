@@ -173,7 +173,7 @@
                     rec.sunb=get_lesson(rec.sun,11);
                     rec.sunc=get_lesson(rec.sun,12);
 
-                    return "<a class='blue_link' href='javascript:print(\""+rec.roomno+"\",false)' >"+rec.roomno+"</a>" ;
+                    return "<a class='blue_link' href='javascript:print(\""+rec.roomno+"\",true)' >"+rec.roomno+"</a>" ;
                 }},
                 {field:'name',title:'名称',width:75,align:'center'},
                 {field:'seats',title:'座位',width:30,align:'center'},
@@ -377,18 +377,18 @@
             <label for="name">名称：</label><input id="name" class="easyui-validatebox" size="8" value="%"/>
             <label for="area">校区：</label><input id="area" size="15">
             <label for="equipment">设施：</label><input id="equipment" size="15">
+            <label for="school">优先学院：</label><input id="school" size="15">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-schedule',plain:'true'" id="reserve">借用选定教室</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印课表</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="printall">打印课表(含借用)</a>
         </div>
         <span id="toolbar_hide">
             <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
-            <label for="school">优先学院：</label><input id="school" size="15">
             <label for="weekday">空闲日期：</label><input id="weekday" size="5">
             <label for="oew">单双周：</label><input id="oew" size="5">
             <label for="time">节次：</label><input id="time" size="12">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="refresh">刷新教室资源时间表</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="printall">打印课表(含借用)</a>
         </span>
     </div>
     <table id="dg"></table>

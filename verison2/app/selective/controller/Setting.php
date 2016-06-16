@@ -25,8 +25,8 @@ class Setting  extends MyController{
         try {
             $obj=new SchedulePlan();
             $condition=null;
-            $condition['scheduleplan.halflock']=$halflock;
-            $condition['scheduleplan.lock']=$lock;
+            if($halflock!='') $condition['scheduleplan.halflock']=$halflock;
+            if($lock!='') $condition['scheduleplan.lock']=$lock;
             $result =$obj->getList($page,$rows,$year,$term,$courseno,$coursename,$classno,$school,$condition);
             return json($result);
         } catch (\Exception $e) {
