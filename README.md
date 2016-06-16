@@ -1,2 +1,2 @@
 # edusystem
-edusystem base on thinkphp5+easyu+sqlserver
+edusystem base on thinkphp5+easyui+sqlserver
