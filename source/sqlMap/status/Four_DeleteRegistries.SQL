@@ -1,0 +1,1 @@
+delete from REGISTRIES where RECNO=:recno

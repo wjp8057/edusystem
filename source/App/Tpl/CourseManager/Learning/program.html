@@ -1,0 +1,85 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            url : "__ROOT__/index.php?g=CourseManager&m=Learning&a=program&hasJson=true"
+        });
+
+        $('#datagrid2').datagrid({
+            onLoadError : function(XMLHttpRequest, textStatus, errorThrown){
+                msgShow("系统提示","读取数据时发生错误","error");
+            }
+        });
+
+        $("#handlerShow").bind("click", function(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示","你没有选择任一条数据进行查看","error");
+                return;
+            }
+
+            $('#win').window('setTitle', "&nbsp;&nbsp;["+row.CODE+"] " + row.NAME);
+            $('#win').window('open');
+            if($('#datagrid2').datagrid("options").url==null) $('#datagrid2').datagrid("options").url = "__ROOT__/index.php?g=CourseManager&m=Learning&a=programDetail&hasJson=true";
+            $('#datagrid2').datagrid("load", {programNo : row.CODE})
+            //$('#win').window('maximize');
+        });
+
+        $("#handlerSearch").bind("click",function(){
+            datagrid.datagrid("load",{SCHOOLCODE:$("#SCHOOLCODE").val()})
+        })
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="培养方案" iconCls="icon icon-plan" fitColumns="false"
+           width="100%" singleSelect="true" fit="true" idField="CODE"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'CODE',align:'center',width:120" >编号</th>
+            <th data-options="field:'NAME',align:'center'">名称</th>
+            <th data-options="field:'DATE',align:'center',width:120">制定日期</th>
+            <th data-options="field:'REM',align:'center'">备注</th>
+            <th data-options="field:'TYPE',align:'center',width:120">计划类别</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:160">学院</th></tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar">
+    <a href="#" id="handlerShow" class="easyui-linkbutton" data-options="iconCls:'icon-help',plain:true">查看教学计划的课程</a>
+    查看其他学院：<Cwebs:sqlselect id="SCHOOLCODE" name="SCHOOLCODE" selected="0" value="CODE" title="NAME" file="school/schoolOptions.sql" />
+    <a href="#" id="handlerSearch" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" >查 询</a>
+</div>
+
+<div id="win" class="easyui-window" title="&nbsp;&nbsp;培养方案查看" style="width:600px;height:400px"
+     data-options="iconCls:'icon-help',modal:false,collapsible:false,minimizable:false,closed:true">
+    <table id="datagrid2" fitColumns="true"
+           width="100%" singleSelect="true" fit="true" idField="CODE"
+           pagination="false" pageSize="20" pageList="[20,40,60]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENO',align:'center'" >课号</th>
+            <th data-options="field:'COURSENAME',align:'center'">课名</th>
+            <th data-options="field:'CREDITS',align:'center'">学分</th>
+            <th data-options="field:'APPROACHES',align:'center'">修课</th>
+            <th data-options="field:'EXAMTYPE',align:'center'">考核</th>
+            <th data-options="field:'WEEKHOURS',align:'center'">周学时</th>
+            <th data-options="field:'EXPERIMENTS',align:'center'">周实验</th>
+            <th data-options="field:'COMPUTING',align:'center'">周上机</th>
+            <th data-options="field:'YEAR',align:'center'">学年</th>
+            <th data-options="field:'TERM',align:'center'">学期</th>
+            <th data-options="field:'WEEKS',align:'center'">周次</th>
+            <th data-options="field:'COURSETYPE',align:'center'">类别</th>
+            <th data-options="field:'TESTLEVELVAL',align:'center'">考核层次</th>
+            <th data-options="field:'SYLLABUS',align:'center'">教学大纲</th></tr>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+</body>
+</html>

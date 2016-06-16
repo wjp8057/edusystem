@@ -1,0 +1,173 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+<div data-options="region:'center',border:false">
+    <div id="datagrid"></div>
+</div>
+<div id="toobar">
+  <form action="__ROOT__/Book/Excel/expApply/" method="post" id="expForm">
+    <label>学年：</label><input name="YEAR" size="4" maxlength="4">
+    <label>学期：</label><input name="TERM" size="1" maxlength="1">
+    <label>修课方式：</label>
+    <select class="easyui-combobox" name="COURSETYPE" data-options="editable:false">
+	    <option value="%">所有</option>
+	    <volist name="approaches" id="a">
+	    	<option value="{$a.NAME}">{$a.VALUE}</option>
+	    </volist>
+    </select>
+    <label>课号：</label><input name="COURSENO" size="12" value='%' maxlength="9">
+    <label>课名：</label><input name="COURSENAME" value='%'  size="16">
+    <label>班号：</label><input name="CLASSNO" size="10" value='%'  maxlength="10">
+    <label>征订状态：</label>
+    <select class="easyui-combobox" name="STATUS" data-options="editable:false">
+        <option value="%">全部</option>
+        <option value="0">未征订</option>
+        <option value="1">已征订</option>
+        <option value="2">暂不征订</option>
+        <option value="3">已发放</option>
+    </select>
+    <p style="height:4px;padding:0px;margin: 0px;"></p>
+    <label>教师姓名：</label><input name="TEACHERNAME"  value='%' size="10" maxlength="10">
+    <if condition="$user_school eq 'A1'">  
+		<label>开课学院：</label>  
+	    <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+		    <option value="%">所有</option>
+		    <volist name="school" id="s">
+		    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+		    </volist>
+	    </select>
+    </if>
+    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'"  id="searcher">检索征订记录</a>
+    <a href="javascript:void(0)" id="applyBut" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">修改教材记录</a>
+    <a href="javascript:void(0)" id="applyDelBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除</a>
+	<a href="javascript:void(0)" id="expBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出征订记录</a>
+ </form>
+</div>
+<script type="text/javascript">
+var list=null;//选中的数据列表
+var datagrid=null;
+$(function(){
+    $("[name='YEAR']").val(parent.$("#YEAR").val());
+    $("[name='TERM']").val(parent.$("#TERM").val());
+	/******************************************检索征订记录***********************************/
+	//征订记录信息
+	datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        border:false,
+        fit:true,
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#datagrid');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        striped:true,
+        columns:[[{field:'apply_id',checkbox:true},
+                  {field:'courseno',title:'课号',align:'center',width:60},
+                  {field:'coursename',title:'课名',align:'center',width:120},
+                  {field:'value',title:'修课方式',align:'center',width:60},
+                  {field:'attendents',title:'预计人数',align:'center',width:60},
+                  {field:'stu_quantity',title:'学生征订数',align:'center',width:60},
+                  {field:'name',title:'开课学院',align:'center',width:60},
+                  {field:'tea_quantity',title:'任课教师（人）',align:'center',width:60},
+  		          {field:'status',title:'征订状态',align:'center',formatter:function(value,row,index){
+	              	  if(value == 1)
+	              		  return "<font color=\"#0000FF\">已征订</font>";
+	              	  else if(value == 3)
+	              		  return "<font color=\"#0000FF\">已发放</font>";
+	              	  else if(value == 2)
+	              		  return "暂不征订";
+	              	  else if(value == 0)
+	              		  return "未征订";
+		          }},
+		          {field:'booktime',title:'征订时间',align:'center'} ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+        datagrid.datagrid("options").url = "__URL__/query/hasJson/1";
+        datagrid.datagrid("load",getData());
+    });
+    
+	//删除征订单
+    function ddel(){
+        list=datagrid.datagrid('getSelections');
+        if (list.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var ary=[];                      //存储删除信息的数组
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].status!=0){
+                            msgShow("系统提示：","您只能选择删除状态为“未征订”的记录，请重新选择","info");
+                            return;
+                        }
+                        ary[i]=list[i].apply_id;
+                    }
+                    $.ajax({
+                        url:'__URL__/del/hasJson/1',
+                        data:{'ids':ary},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","删除成功！","info");
+                                datagrid.datagrid('reload');
+                            }else{
+                                msgShow("系统提示：","删除失败,没权限操作","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+ 	//删除征订申请
+    $("#applyDelBut").bind('click',ddel);
+    $('#admin_del').bind('click',ddel);
+    //导出征订单
+    $("#expBut").click(function(){
+    	list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		$("#expForm").submit();
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的征订信息","info");
+    	}
+    });
+});
+function getData(){
+	var data={
+			YEAR:$.trim($("[name='YEAR']").val()),
+			TERM:$.trim($("[name='TERM']").val()),
+        	COURSETYPE:$.trim($("[name='COURSETYPE']").val()),
+        	COURSENO:$.trim($("[name='COURSENO']").val()),
+        	COURSENAME:$.trim($("[name='COURSENAME']").val()),
+        	CLASSNO:$.trim($("[name='CLASSNO']").val()),
+        	SCHOOL:$.trim($("[name='SCHOOL']").val()),
+        	TEACHERNAME:$.trim($("[name='TEACHERNAME']").val()),
+        	STATUS:$.trim($("[name='STATUS']").val())
+        };
+	return data;
+}
+</script>
+
+<!--修改教材记录 -->
+<div id="apply_wd" title=" ">
+	<include file="editApply"/>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑本条目</div>
+    <div id='admin_del'>删除本条目</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    body{background:#FFF;}
+    .query{border: solid 1px #ccc;margin:5px;padding: 5px 5px 7px 5px;}
+    legend{margin-left: 20px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    #searcher{margin-left: 20px;}
+    #queryForm table{margin:100px auto 0px;border-collapse:collapse;}
+    #queryForm td,#queryForm th{border-bottom:dotted 1px #CCC;height:40px;}
+    #document{display:none;}
+</style>
+<body>
+<form id="queryForm" action="" method="post">
+    <table border="0" align="center" width="70%" style="border-collapse: collapse;">
+        <tbody>
+        <tr>
+            <th align="right">学年：</th>
+            <td align="left"><input value="{$yearTerm.YEAR}" name="YEAR" size="10" maxlength="4"></td>
+            <th align="right">教室类型要求：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="ROOMTYPE" data-options="editable:false">
+                    <option value="%">所有类型</option>
+                    <volist name="room" id="r">
+                        <option value="{$r.NAME}">{$r.VALUE}</option>
+                    </volist>
+                </select></td>
+        </tr>
+        <tr>
+            <th align="right">学期：</th>
+            <td align="left"><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1"></td>
+            <th align="right">选课有人数限制：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="limit" data-options="editable:false">
+                    <option value="">所有情况</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+                <input type="hidden" name="BLOCK">
+                <input type="hidden" name="LOCK">
+            </td>
+        </tr>
+        <tr>
+            <th align="right">课号：</th>
+            <td align="left"><input name="COURSENO" size="10" maxlength="7" value="%"></td>
+            <th align="right">预计人数上限：</th>
+            <td align="left"><input name="BESTIMATE" size="10" maxlength="5" value="5000"></td>
+        </tr>
+        <tr>
+            <th align="right">组号：</th>
+            <td align="left"><input name="GROUP" size="5" maxlength="2" value="%"></td>
+            <th align="right">预计人数下限：</th>
+            <td align="left"><input name="ESTIMATE" size="10" maxlength="5" value="-5000"></td>
+        </tr>
+        <tr>
+            <th align="right">开课学院：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+                    <option value="%">全校</option>
+                    <volist name="school" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select></td>
+            <th align="right">实际修课人数上限：</th>
+            <td align="left"><input name="BATTENDENTS" size="10" maxlength="5" value="5000"></td>
+        </tr>
+        <tr>
+            <th align="right">排课类型：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="COURSETYPE" data-options="editable:false">
+                    <option value="%">所有类别</option>
+                    <volist name="coursetype" id="c">
+                        <option value="{$c.NAME}">{$c.VALUE}</option>
+                    </volist>
+                </select></td>
+            <th align="right">实际修课人数下限：</th>
+            <td align="left"><input name="ATTENDENTS" size="10" maxlength="5" value="0"></td>
+        </tr>
+        <tr>
+            <th align="right">排课情况：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="SCHEDULED" data-options="editable:false">
+                    <option value="%">所有情况</option>
+                    <option value="Y">已排</option>
+                    <option value="N">未排</option>
+                    </volist>
+                </select></td>
+            <th align="right">期末统一排考：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="EXAM" data-options="editable:false">
+                    <option value="%">所有情况</option>
+                    <option value="统一排考">统一排考</option>
+                    <option value="不统一排考">不统一排考</option>
+                </select></td>
+        </tr>
+        <tr>
+            <th align="right">排课天数：</th>
+            <td align="left">
+                <select class="easyui-combobox" name="DAYS" data-options="editable:false">
+                    <option selected value="%">所有情况</option>
+                    <option value="5">5天制</option>
+                    <option value="7">7天制</option>
+                </select></td>
+            <th align="right">班号：</th>
+            <td align="left"><input name="CLASSNO" size="15" maxlength="10" value="%"></td>
+        </tr>
+
+        <tr><td colspan="4" align="center"><a href="javascript:void(0)" id="searcher">检&nbsp;索</a></td></tr>
+        </tbody>
+    </table>
+</form>
+
+<div class="easyui-layout" id="document" data-options="border:false,fit:true" >
+
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar">
+    <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL报表</a>
+    <a href="javascript:void(0)" id="queryBut" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">检索</a>
+</div>
+<script type="text/javascript">
+    $(function(){
+        var datagrid=$('#content').datagrid({
+            fit:true,
+            striped:true,
+
+            fitColumns:true,
+            singleSelect:true,
+            columns:[[{field:"COURSENO",title:"课号",align:"center"},
+                {field:"GROUP",title:"组号",align:"center"},
+                {field:"COURSENAME",title:"课名",align:"center"},
+                {field:"COURSETYPE",title:"修课方式",align:"center"},
+                {field:"EXAMTYPE",title:"考核方式",align:"center"},
+                {field:"CREDITS",title:"学分",align:"center",formatter:function(value,row,index){
+                    return parseFloat(value);
+                }},
+                {field:"LHOURS",title:"周讲课",align:"center",formatter:function(value,row,index){
+                    return parseFloat(value);
+                }},
+                {field:"EHOURS",title:"周实验",align:"center",formatter:function(value,row,index){
+                    return parseFloat(value);
+                }},
+                {field:"WEEKS",title:"周次",align:"center",formatter:function(value,row,index){
+                    return TransformWeeks(value);
+                }},
+                {field:"SCHOOLNAME",title:"学院名称",align:"center"},
+                {field:"TIME",title:"时段要求",align:"center"},
+                {field:"ROOMVALUE",title:"教室要求",align:"center"},
+                {field:"EXAM",title:"统一排考",align:"center"},
+                {field:"DAYS",title:"排课天数",align:"center"},
+                {field:"EMPROOM",title:"指定实验室",align:"center"},
+                {field:"ESTIMATE",title:"预计人数",align:"center"},
+                {field:"ATTENDENTS",title:"实际人数",align:"center"},
+                {field:"REM",title:"备注",align:"center"},
+                {field:"CLASSNAME",title:"上课班级",align:"center"},
+                {field:"TEACHERNAME",title:"教师",align:"center"}
+            ]],
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+            toolbar:'#toobar'
+        });
+
+        /*
+         * 条件查询开始
+         */
+        $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+        $('#searcher').click(function(){
+            var year=$.trim($("[name='YEAR']").val());
+            var term=$.trim($("[name='TERM']").val());
+            if(year=="" || term==""){
+                msgShow("系统提示：","请输入要检索的学年与学期！","error");
+                return;
+            }
+            $("[name='title']").html("第"+year+"学年，第"+term+"学期的排课计划列表");
+            datagrid.datagrid("options").url = "__URL__/coursePlan/hasJson/1";
+            datagrid.datagrid('load',getDate());
+            $("#queryForm").hide();
+            $("#document").show();
+        });
+
+        //弹出检索窗口
+        $("#queryBut").click(function(){
+            datagrid.datagrid('loadData',{total:0,rows:[]});//清空原有数据
+            $("#queryForm").show();
+            $("#document").hide();
+        });
+        //导出EXCEL
+        $("#ExportBut").click(function(){
+            var list=datagrid.datagrid('getRows');
+            if(list.length){
+                var total = datagrid.datagrid('getPager').data("pagination").options.total;
+                if(total > 2000){
+                    msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+                    return;
+                }
+                //预计人数上限默认值设置
+                var lock=$.trim($("[name='limit']").val());
+                if(lock==""){
+                    $("[name='BLOCK']").val("1");
+                    $("[name='LOCK']").val("0");
+                }else{
+                    $("[name='BLOCK']").val(lock);
+                    $("[name='LOCK']").val(lock);
+                }
+                //预计人数上限默认值设置
+                var value=$.trim($("[name='BESTIMATE']").val());
+                if(value==""){$("[name='BESTIMATE']").val("5000");}
+                //预计人数下限默认值设置
+                value=$.trim($("[name='ESTIMATE']").val());
+                if(value==""){$("[name='ESTIMATE']").val("-5000");}
+                //实际修课人数上限默认值设置
+                value=$.trim($("[name='BATTENDENTS']").val());
+                if(value==""){$("[name='BATTENDENTS']").val("5000");}
+                //实际修课人数下限默认值设置
+                value=$.trim($("[name='ATTENDENTS']").val());
+                if(value==""){$("[name='ATTENDENTS']").val("0");}
+
+                $("#queryForm").attr("action","__URL__/coursePlanExp/");
+                $("#queryForm").submit();
+            }else{
+                msgShow("系统提示：","请先检索出您要导出的数据","info");
+            }
+        });
+    });
+    //获取数据
+    function getDate(){
+        var block=null;
+        var lock=$.trim($("[name='limit']").val());
+        if(lock==""){
+            block="1";lock="0";
+        }else block=lock;
+
+        //预计人数上限默认值设置
+        var yjrssx=$.trim($("[name='BESTIMATE']").val());
+        yjrssx=yjrssx==""?"5000":yjrssx;
+        //预计人数下限默认值设置
+        var yjrsxx=$.trim($("[name='ESTIMATE']").val());
+        yjrsxx=yjrsxx==""?"-5000":yjrsxx;
+        //实际修课人数上限默认值设置
+        var sjxksx=$.trim($("[name='BATTENDENTS']").val());
+        sjxksx=sjxksx==""?"5000":sjxksx;
+        //实际修课人数下限默认值设置
+        var sjxkxx=$.trim($("[name='ATTENDENTS']").val());
+        sjxkxx=sjxkxx==""?"0":sjxkxx;
+
+        var data={
+            YEAR:$.trim($("[name='YEAR']").val()),
+            ROOMTYPE:$.trim($("[name='ROOMTYPE']").val()),
+            TERM:$.trim($("[name='TERM']").val()),
+            BLOCK:block,LOCK:lock,
+            COURSENO:$.trim($("[name='COURSENO']").val()),
+            BESTIMATE:yjrssx,ESTIMATE:yjrsxx,
+            GROUP:$.trim($("[name='GROUP']").val()),
+            SCHOOL:$.trim($("[name='SCHOOL']").val()),
+            BATTENDENTS:sjxksx,ATTENDENTS:sjxkxx,
+            COURSETYPE:$.trim($("[name='COURSETYPE']").val()),
+            SCHEDULED:$.trim($("[name='SCHEDULED']").val()),
+            EXAM:$.trim($("[name='EXAM']").val()),
+            DAYS:$.trim($("[name='DAYS']").val()),
+            CLASSNO:$.trim($("[name='CLASSNO']").val())
+        };
+        return data;
+    }
+    //计算周次
+    function TransformWeeks(Weeks){
+        var WeekString=0;
+        temp=1;
+        for(var j=0;j<18;j++){
+            if((temp&Weeks)!=0){
+                WeekString++;
+            }
+            temp=temp<<1;
+        }
+        return WeekString;
+    }
+</script>
+</body>
+</html>

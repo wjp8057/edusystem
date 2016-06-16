@@ -1,0 +1,124 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var school='{$school.SCHOOL}'
+    var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+    $('[name=SCHOOL]').val(school)
+    var arr=[];
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+/*
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','您只能对自己学院开设的课程进行开锁！')
+                    }*/
+                    var datag=$('#yingyuA');
+                    $('#title').html($('[name=SCHOOL] :selected').text()+$('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'学期课程列表');
+                    $('#title').css('font-size','15px')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Three_one_select.SQL','count':'Results/Three_one_count.SQL'
+                    },'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+
+                })
+
+
+
+        $('#look_cj').bind('click',function(){
+            var row=$('#yingyuA').datagrid('getSelected')
+            open('__URL__/Three_CJSR_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh)
+        });
+
+        $('#kaifang').bind('click',function(){
+            var rowList=$('#yingyuA').datagrid('getSelections');
+            var tip = "";
+            for(var i = 0; i < rowList.length; i++){
+                if(i != (rowList.length -1)){
+                    tip += rowList[i].kh+',';
+                }else{
+                    tip += rowList[i].kh;
+                }
+            }
+            $.messager.confirm('提示','请确认开放的课程为：<br />'+tip,function(c){
+                if(c){
+                    $.post('__URL__/kf_cs/hasJson/1',{bind:rowList,year:$('[name=YEAR]').val(),term:$('[name=TERM]').val()},function(c){
+                        $.messager.alert('提示',c)
+                        $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Three_one_select.SQL','count':'Results/Three_one_count.SQL'
+                        },'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+                    });
+                }
+            })
+        })
+
+
+        $('#e_excel').bind('click',function(){
+
+            $('[name=year_e]').val($('[name=YEAR]').val());
+            $('[name=term_e]').val($('[name=TERM]').val());
+            $('[name=school_e]').val($('[name=SCHOOL]').val())
+            $('#subexcel').submit();
+        })
+
+
+
+
+
+
+
+    })
+    function coursenoFormater(value,row,index){
+        return "<a target='blank' href='__URL__/Three_CJSR_StudentList/YEAR/"+$('[name=YEAR]').val().trim()+"/TERM/"+$('[name=TERM]').val().trim()+"/COURSENO/"+value+"'>"+value+"</a>";
+    }
+</script>
+<body style="background: #fff">
+
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            学年：<input type="text" name="YEAR"  size="4">&nbsp&nbsp
+
+            学期：<input type="text" name="TERM"  size="1">&nbsp&nbsp
+
+            所在学院：<select name="SCHOOL">
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist></select>
+            <a id="search">查询</a>
+            <a href="javascript:void(0)" id="look_cj" class="easyui-linkbutton" iconCls="icon-search" plain="true">查看成绩登记表</a>
+            <a href="javascript:void(0)" id="kaifang" class="easyui-linkbutton" iconCls="icon-edit" plain="true">开放选中课程</a>
+            <a href="javascript:void(0)" id="e_excel" class="easyui-linkbutton" iconCls="icon-excel" plain="true">导出Excel</a>
+
+        </div>
+        <div data-options="region:'center',border:false,split:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="yingyuA"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pageList:[20,50,100,200,500],title:'',fitColumns:true,pagination:true,fit:true,toolbar:'#tdemo',singleSelect:false">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100,formatter: coursenoFormater" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                    <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                    <th data-options="field:'khfs',width:100" align="center">考核方式</th>
+                    <th data-options="field:'zt',width:100" align="center">状态</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+
+
+
+
+
+</body>
+<form action="__URL__/one_Excel" id="subexcel" method="POST">
+    <input type="hidden" name="year_e">
+    <input type="hidden" name="term_e">
+    <input type="hidden" name="school_e">
+</form>
+</html>

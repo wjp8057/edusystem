@@ -1,0 +1,70 @@
+<include file=":Include:jqueryHeader" />
+
+<body bgcolor="#FFFFFF" style="background: #ffffff">
+
+<SCRIPT>
+$(function() {
+    $("#wType").val("M");
+    <if condition="$hashNewSave eq true">msgShow("系统提示：","{$message.message}","{$message.type}");</if>
+});
+function NewForm_onsubmit() {
+    if($.trim($("#ProgramNO").val())=="" || ($.trim($("#ProgramName").val())=="")){
+        msgShow("系统提示：","带*号的必须填写！","error");
+        return false;
+    }
+    if($("#ProgramNO").val().length!=7 && $("#ProgramNO").val().length!=8){
+        msgShow("系统提示：","教学计划编号必须是7位！","error");
+        return false;
+    }
+    return true;
+}
+</SCRIPT>
+
+
+<form method="POST" action="/Programs/Index/newSave" id="NewForm" name=NewForm onsubmit="return NewForm_onsubmit()">
+<table border="1" width="77%" height="286">
+<tr><td width="47%" align="right" height="23">教学计划编号：</td>
+    <td width="66%" height="23"><input type="text" name="PROGRAMNO" id="ProgramNO" size="7" maxlength="7" >* </td></tr>
+<tr><td width="47%" align="right" height="28">教学计划名称：</td>
+    <td width="66%" height="28"><input type="text" name="PROGRAMNAME" id="ProgramName" size="20" maxlength="20">* </td></tr>
+<tr><td width="47%" align="right" height="23">制定日期：</td>
+    <td width="66%" height="23"><input type="text" name="DATE" value="<php>echo date('Y-m-d');</php>" size="20">如：2000-3-14</td></tr>
+<tr><td width="47%" align="right" height="23">备注：</td>
+    <td width="66%" height="23"><input type="text" name="REM" size="50"></td></tr>
+<tr><td width="47%" align="right" height="23">教学计划网址：</td>
+    <td width="66%" height="23"><input type="text" name="URL" size="50"></td></tr>
+<tr><td width="47%" align="right" height="23">有效：</td>
+    <td width="66%" height="23">
+        <select name="VALID">
+            <option value="1" selected>有效</option>
+            <option value="0">无效</option>
+        </select>
+    </td></tr>
+<tr><td width="47%" align="right" height="23">执行学院：</td>
+    <td width="66%" height="23">{$theacher.SCHOOLNAME}</td></tr>
+<tr><td width="47%" align="right" height="23">教学计划类型：</td>
+    <td width="66%" height="23"><Cwebs:sqlselect id="wType" name="TYPE" value="CODE" title="NAME" file="programs/programTypeOptions.sql" /></td></tr>
+</table>
+<P ALIGN=CENTER><input type="submit" value="提交" name="insert" id="insert"></P>
+<input type="hidden" name="SCHOOL" value="{$theacher.SCHOOL}">
+</form>
+
+<p><font color="#FF0000">教学计划编号应该为10位，不能为空。</font><br>
+    <font color="#FF0000">带*号的的不能为空。</font></p>
+</body>
+
+</html>           
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+

@@ -1,0 +1,72 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var username='{$username}'
+    var height=$(window).height()/2;
+    $(function(){
+    //    var wd3=$('#wd3').window({fit:true,closed:true,modal:true,maximizable:false,minimizable:false})
+        $('#demoHTML').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+
+        $('#demoHTML_bottom').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+        setTimeout(function(){
+          //  wd3.window({'closed':false})
+            $('#demoHTML').datagrid('load',{'Sqlpath':{'count':'Userinfo/SEVEN_TOP_COUNT.SQL','select':'Userinfo/SEVEN_TOP_SELECT.SQL'},bind:{':username':username}})
+            $('#demoHTML_bottom').datagrid('load',{'Sqlpath':{'count':'Userinfo/SEVEN_BOTTOM_COUNT.SQL',
+                'select':'Userinfo/SEVEN_BOTTOM_SELECT.SQL'},bind:{':username':username}})
+        },500);
+
+
+    })
+</script>
+
+<body>
+
+<div id="cc" class="easyui-layout" data-options="fit:true,disabled:true">
+      <div  data-options="region:'center',split:false,border:true,title:'历年学评教成绩'" style="background:#eee;">
+
+            <table id="demoHTML" class="easyui-datagrid" data-options="pagination:true,pageList:[10,20,30,40],pageSize:20,
+            fitColumns:true,singleSelect:true,fit:true">
+                <thead>
+                <tr>
+                    <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                    <th data-options="field:'xq',width:100,align:'center'">学期</th>
+                    <th data-options="field:'km',width:100,align:'center'">课名</th>
+                    <th data-options="field:'yxrs',width:100,align:'center'">有效人数</th>
+                    <th data-options="field:'cjrs',width:100,align:'center'">参加人数</th>
+                    <th data-options="field:'wcrs',width:100,align:'center'">完成人数</th>
+                    <th data-options="field:'td',width:100,align:'center'">态度</th>
+                    <th data-options="field:'nr',width:100,align:'center'">内容</th>
+                    <th data-options="field:'ff',width:100,align:'center'">方法</th>
+                    <th data-options="field:'xg',width:100,align:'center'">效果</th>
+                    <th data-options="field:'lx',width:100,align:'center'">类型</th>
+                    <th data-options="field:'df',width:100,align:'center'">得分</th>
+                    <th data-options="field:'yx',width:100,align:'center'">有效</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    <div id='topdiv' data-options="region:'south',split:false,border:true,title:'历年总评成绩'" style="background:#eee;">
+        <script>
+            $('#topdiv').css('height',height)
+        </script>
+        <table id="demoHTML_bottom" class="easyui-datagrid"
+               data-options="pagination:true,pageList:[10,20,30,40],pageSize:20,fitColumns:true,singleSelect:true,fit:true">
+            <thead>
+            <tr>
+                <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                <th data-options="field:'xy',width:100,align:'center'">学院</th>
+                <th data-options="field:'xpjf',width:100,align:'center'">学评教分</th>
+                <th data-options="field:'xxpf',width:100,align:'center'">学校评分</th>
+                <th data-options="field:'xypf',width:100,align:'center'">学院评分</th>
+                <th data-options="field:'zhpf',width:100,align:'center'">综合评分</th>
+                <th data-options="field:'dj',width:100,align:'center'">等级</th>
+                <th data-options="field:'bz',width:100,align:'center'">备注</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+ </div>
+
+
+</body>
+</html>

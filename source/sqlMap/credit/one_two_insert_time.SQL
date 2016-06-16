@@ -1,0 +1,1 @@
+insert into Creditapplydate(year,term,begintime,endtime,status) values(:year,:term,:start,:end,:status)

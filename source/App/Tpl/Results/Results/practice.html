@@ -1,0 +1,181 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:应用英语A级
+      //  var wd=$('#wd').window(new wind(0,0,false,false,false,true,true))
+
+        // alert(wind);
+    //    var wd_two=$('#wd2').window(new wind(0,0,false,false,true,true,true))
+
+
+      //  var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#bt').linkbutton({
+            text:'提交'
+        }).bind('click',function(){
+                    $('#title_year').html($('[name=YEAR]').val())
+                    $('#title_term').html($('[name=TERM]').val())
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_fifteen_select.SQL','count':'Results/One_fifteen_count.SQL'
+                    },'bind':{
+                        ':CLASSNO':$('[name=CLASSNO]').val(),':STUDENTNO':$('[name=STUDENTNO]').val(),
+                        ':SCHOOL':$('[name=SCHOOL]').val(),':TY':$('[name=TYJLB]').val(),':YY':$('[name=YYZZXL]').val(),
+                        ':JS':$('[name=JSJZZSJ]').val(),':XS':$('[name=XSYZC]').val(),':LK':$('[name=LKSHSJ]').val()}})
+                    $('#wd_two').panel({closed:false})
+                    $('#wd_one').panel({closed:true})
+                })
+
+
+
+
+
+    })
+</script>
+<style>
+    #wd_one td{border:1px #95B8E7 solid;height:18px
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+
+</style>
+<body>
+<div id="wd_one" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:false,fit:true,closed:false,
+                collapsible:false,minimizable:false,maximizable:false">
+    <table border="0"  width="456" style="margin-top: 10px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>学号：</b></td>
+            <td width="160" colspan="2"><input type="text" name="STUDENTNO" size="9" value="%"></td>
+
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>班号：</b></td>
+            <td width="160"><input type="text" name="CLASSNO" size="5" value="{$yearterm.TERM}%"></td>
+            <td>如果查询某年级，请先设定班号</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>体育俱乐部：</b></td>
+            <td width="160" >
+                <select size="1" name="TYJLB" class="easyui-combobox">
+                    <option selected value="%">全部</option>
+                    <option value="合格">合格</option>
+                    <option value=" ">不合格</option>
+                </select>
+            </td>
+            <td>课号：020D05A、020D05B</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>形式与政策：</b></td>
+            <td width="160" >
+                <select size="1" name="XSYZC" class="easyui-combobox">
+                    <option selected value="%">全部</option>
+                    <option value="合格">合格</option>
+                    <option value=" ">不合格</option>
+                </select>
+            </td>
+            <td>课号：070A03A、210M05A</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF">
+                <p align="right"><b>英语自主训练：</b></td>
+            <td width="160" >
+                <select size="1" name="YYZZXL" class="easyui-combobox">
+                    <option selected value="%">全部</option>
+                    <option value="合格">合格</option>
+                    <option value=" ">不合格</option>
+                </select>
+            </td>
+            <td>课号：020B09A、020B10A</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>两课社会实践：</b></td>
+            <td width="160" >
+                <select size="1" name="LKSHSJ" class="easyui-combobox">
+                    <option selected value="%">全部</option>
+                    <option value="合格">合格</option>
+                    <option value=" ">不合格</option>
+                </select>
+            </td>
+            <td>课号：070A04A、070A0BA</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" >
+                <p align="right"><b>计算机自主实践：</b></td>
+            <td width="160" >
+                <select size="1" name="JSJZZSJ" class="easyui-combobox">
+                    <option selected value="%">全部</option>
+                    <option value="合格">合格</option>
+                    <option value=" ">不合格</option>
+                </select>
+            </td>
+            <td>课号：030A03A</td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF">
+                <p align="right"><b>学院：</b></td>
+            <td width="160"  colspan="2">
+
+                <select name="SCHOOL" class="easyui-combobox">
+                    <option value="%">所有</option>
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="border:0px;"  align="center" colspan="3">
+                <a href="javascript:void(0)" id="bt">提交</a> </td>
+        </tr>
+
+    </table>
+    <p align="left">说明：1、查询结果中合格的表示已经通过，空白表示不要求或者暂时没有通过，是否要求请查看该专业的教学计划；</p>
+    <p align="left">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp2、由于开课学院一般每学期上报一次，成绩统计会有一定延迟。如果要获得即时数据，可以在学生页面自主查询；</p>
+    <p align="left">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp3、本查询中学生从05级开始，包含本科班，无退学或已转出学生；</p>
+    <p align="left">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp4、后台统计方式：查询学生的成绩单，是否有相应课号的课程，如有，并且成绩为合格，则为通过。</p>
+</div>
+
+<div id="wd_two" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:false,fit:true,closed:true,
+                collapsible:false,minimizable:false,maximizable:false">
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="yingyuA"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,toolbar:[{
+                     text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                         $('#wd_two').panel({closed:true})
+                         $('#wd_one').panel({closed:false})
+                     }
+                   }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'xh',width:230" align="center">学号</th>
+                    <th data-options="field:'xm',width:100" align="center">姓名</th>
+                    <th data-options="field:'bj',width:100" align="center">班级</th>
+                    <th data-options="field:'xy',width:150" align="center">学院</th>
+                    <th data-options="field:'tyjlb',width:100" align="center">体育俱乐部</th>
+                    <th data-options="field:'yyzzxl',width:100" align="center">英语自主训练</th>
+                    <th data-options="field:'jsjzzsj',width:100" align="center">计算机自主实践</th>
+                    <th data-options="field:'xsyzc',width:100" align="center">形式与政策</th>
+                    <th data-options="field:'lkshsj',width:100" align="center">两课社会实践</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

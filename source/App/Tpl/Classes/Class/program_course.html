@@ -1,0 +1,61 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+        <script>
+            function yitiao(obj){
+                var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+                if(rowList.length>1){
+                    alert('请选择一条,不能选多条');                         //用户选了多行编辑
+                }else if(rowList.length<1){
+                    alert('请选择一条要编辑的数据');                         //用户没选择行
+                }else{
+                    return true;
+                }
+                return false;
+            }
+
+            var no='{$info.PROGRAMNO}'
+            $(function(){
+                var programcourse=$('#programCourse').datagrid({
+                    url:'__URL__/programcourse',
+                    frozenColumns:[[{field:'courseno',title:'课号',width:100,align:'center'}]],
+                    columns:[[
+                        {field:'coursename',title:"课名",width:150,align:'center'},
+                        {field:'xuefen',title:'学分',width:30,align:'center'},
+                        {field:'StudyType',title:'修课类型',width:60,align:'center'},
+                        {field:'astype',title:'考核类型',width:60,align:'center'},
+                        {field:'zxs',title:'周学时',width:50,align:'center'},
+                        {field:'zsy',title:'周实验',width:50,align:'center',formatter:function(c){
+                            var num= parseInt(c)
+                            if(isNaN(num)){
+                                return 0
+                            }
+                            return num;
+                        }},
+                        {field:'zsj',title:'周上机',align:'center',width:50,formatter:function(c){
+                            var num= parseInt(c)
+                            if(isNaN(num)){
+                                return 0
+                            }
+                            return num;
+                        }},
+                        {field:'xuenian',title:'学年',align:'center',width:30},
+                        {field:'xueqi',title:'学期',align:'center',width:30},
+                        {field:'WEEKS',title:'周次',align:'center',width:150},
+                        {field:'CourseType',title:'课程类型',align:'center',width:100},
+                        {field:'cengci',title:'考核层次',align:'center',width:100},
+                        {field:'dagang',title:'教学大纲',align:'center',width:100}
+                    ]],
+                    pagination:true,
+                    fit:true
+                })
+
+                programcourse.datagrid('load',{PROGRAMNO:no})
+            })
+
+        </script>
+<body>
+<div id="programCourse">
+</div>
+</body>
+
+

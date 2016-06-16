@@ -1,0 +1,282 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        $('#sub').linkbutton({
+            text:'提交'
+        }).bind('click',function(){
+           var year=$('[name=YEAR]').val();
+            if(year==""){
+                $.messager.alert('提示','请填写学年');
+                return false
+            }
+                    var hash=$('#form_aa').serialize()
+                    hash= encodeURI(hash)
+
+            if($('[name=ORDER1]:checked').val()=='2'){        //todo:按时段
+                   // $('#form_aa').attr('action','__URL__/is_where_havetime')
+                   // $('#form_aa').submit()
+                openTabsWindows('课程列表','__URL__/is_where_havetime?'+hash,'',true);
+            }else{
+
+              //  function openTabsWindows(subtitle,url,icon,reload){
+                if($('[name=have_time]').attr('checked')=='checked'){       //todo:只列出有时间安排的课程(选中)
+                  //  $('#form_aa').attr('action','__URL__/is_where_havetime')
+
+                    openTabsWindows('课程列表','__URL__/is_where_havetime?'+hash,'',true);
+                  //  $('#form_aa').submit()
+                }else{                                                          //todo:只列出有时间安排的课程 (未选中)
+                   /* $('#form_aa').attr('action','__URL__/is_where')
+                    $('#form_aa').submit()*/
+
+                    openTabsWindows('课程列表','__URL__/is_where?'+hash,'',true);
+
+                }
+            }
+        })
+
+
+        $('#sub_heng').linkbutton({
+            text:'提交(横排)'
+        }).bind('click',function(){
+            var year=$('[name=YEAR]').val();
+            if(year==""){
+                $.messager.alert('提示','请填写学年');
+                return false
+            }
+                    var hash=$('#form_aa').serialize()
+                    hash=encodeURI(hash)
+
+
+            if($('[name=ORDER1]:checked').val()=='2'){        //todo:按时段
+              //  $('#form_aa').attr('action','__URL__/is_where_havetime')
+              //  $('#form_aa').submit()
+                openTabsWindows('课程列表','__URL__/is_where_havetime?'+hash,'',true);
+            }else{
+
+                //  function openTabsWindows(subtitle,url,icon,reload){
+                if($('[name=have_time]').attr('checked')=='checked'){       //todo:只列出有时间安排的课程(选中)
+                    //$('#form_aa').attr('action','__URL__/is_where_havetime')
+
+
+                    openTabsWindows('课程列表','__URL__/is_where_havetime?'+hash,'',true);
+                   // $('#form_aa').submit()
+                }else{                                                          //todo:只列出有时间安排的课程 (未选中)
+                  //  $('#form_aa').attr('action','__URL__/is_where_heng')
+                  //  $('#form_aa').submit()
+                    openTabsWindows('课程列表','__URL__/is_where_heng?'+hash,'',true);
+
+                }
+            }
+        })
+
+        //todo:全部重写
+        $('#back').bind('click',function(){
+
+
+        })
+    })
+/*
+    function submit(e){
+       //var $('#moren :text')
+    }*/
+</script>
+<style>
+td{border:1px #95B8E7 solid;height:15px
+}
+#ttt{font-size: 30px}
+
+span{border:0px solid red;}
+
+</style>
+<body style="background-color: #ffffff">
+<!--todo:默认进来的搜索页面-->
+
+    <form action="" method="post" id="form_aa" TARGET="_blank">
+    <div ><p align="center" id="ttt">检索学期课程表</p></div>
+
+    <table border="0" cellspacing="1" width="80%" align="center">
+        <tr>
+            <td width="133" bgcolor="#E0ECFF" align="right">学年：</td>
+
+            <td align="right">
+                <p align="left"><input type="text" name="YEAR" size="4" value="2013"></td>
+                <td width="96" bgcolor="#E0ECFF" align="right">学期：</td>
+                <td width="502" colspan="4"><select size="1" name="TERM">
+                    <option selected value="1">第一学期</option>
+                    <option value="2">第二学期</option>
+                    <option value="3">短学期</option>
+                </select></td>
+        </tr>
+        <tr>
+            <td width="133" bgcolor="#E0ECFF" align="right">课号：</td>
+            <td width="176" align="right">
+                <p align="left"><input type="text" name="COURSENO" size="10" value="%"></td>
+                <td width="96" bgcolor="#E0ECFF" align="right">课名：</td>
+                <td width="502" colspan="4"><input type="text" name="COURSENAME" size="30" value="%"></td>
+        </tr>
+        <tr>
+            <td width="133" bgcolor="#E0ECFF" align="right">课程组号：</td>
+
+            <td width="176" align="right">
+                <p align="left"><input type="text" name="GROUP" size="3" value="%"></td>
+
+                <td width="96" bgcolor="#E0ECFF" align="right">开课学院：</td>
+            <td width="251" colspan="2">
+                <select name="SCHOOL">
+                        <option value="%">全部</option>
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+            </td>
+            <td  bgcolor="#E0ECFF" width="126" align="right"> 任课教师所在学院:</td>
+            <td width="125">
+                <select name="TEACHERSCHOOL">
+                    <option value="%">全部</option>
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select></td>
+        </tr>
+
+            <tr>
+                <td width="133" bgcolor="#E0ECFF" align="right">课程类别：</td>
+
+        <td width="176" align="right">
+            <p align="left">
+             <select name="COURSETYPE">
+                <option value="%">全部</option>
+                <volist name="coursetypeoptions" id="s">
+                    <option value="{$s.NAME}">{$s.VALUE}</option>
+                </volist>
+             </select>
+        </td>
+
+            <td width="96" bgcolor="#E0ECFF" align="right">班号：</td>
+            <td width="146"><input type="text" name="CLASSNO" size="10" value="%"></td>
+
+        <td width="123" bgcolor="#E0ECFF" colspan="2">
+            <p align="right">班名：</td>
+
+            <td width="221"><input type="text" name="CLASSNAME" size="20" value="%"></td>
+            </tr>
+            <tr>
+                <td width="133" bgcolor="#E0ECFF" align="right">修课方式： </td>
+
+        <td width="176" align="right">
+            <p align="left">
+                <select name="APPROACHES">
+                <option value="%">全部</option>
+                <volist name="courseapproaches" id="s">
+                    <option value="{$s.NAME}">{$s.VALUE}</option>
+                </volist>
+                </select>
+        </td>
+            <td width="96" bgcolor="#E0ECFF" align="right">考核方式：</td>
+        <td width="146" align="right">
+            <p align="left">
+            <select name="EXAMTYPE">
+                <option value="%">全部</option>
+                <volist name="examoptions" id="s">
+                    <option value="{$s.NAME}">{$s.VALUE}</option>
+                </volist>
+            </select>
+            </p>
+        </td>
+        <td width="123" bgcolor="#E0ECFF" colspan="2">
+            <p align="right">每页返回行数：</p>
+        </td>
+
+            <td width="221"><input type="text" name="ROWS" size="4" value="20" readonly="readonly" ></td>
+            </tr>
+            <tr>
+                <td width="133" bgcolor="#E0ECFF" align="right">教师号：</td>
+
+        <td width="176" align="right">
+            <p align="left"><input type="text" name="TEACHERNO" size="10" value="%"></td>
+            <td width="96" bgcolor="#E0ECFF" align="right">教师姓名：</td>
+        <td width="266" align="right" colspan="2">
+            <p align="left"><input type="text" name="TEACHERNAME" size="10" value="%"></td>
+        <td width="110" bgcolor="#E0ECFF" align="right">
+            教师职称：</td>
+        <td width="126" align="right">
+            <p align="left">
+                <select name="ZCSELECT">
+                <option value="%">全部</option>
+                <volist name="positions" id="s">
+                    <option value="{$s.NAME}">{$s.VALUE}</option>
+                </volist>
+            </select>
+        </td>
+        </tr>
+        <tr>
+            <td  align="right" bgcolor="#E0ECFF" width="133">日期：&nbsp;</td>
+            <td width="176" ><select size="1" name="DAY">
+                <option value="1">星期一</option>
+                <option value="2">星期二</option>
+                <option value="3">星期三</option>
+                <option value="4">星期四</option>
+                <option value="5">星期五</option>
+                <option value="6">星期六</option>
+                <option value="7">星期天</option>
+                <option value="0">日期未定</option>
+                <option selected value="%">全部</option>
+            </select></td>
+            <td align="right" bgcolor="#E0ECFF"  width="96">时段：</td>
+            <td width="146" ><select name="TIME">
+                <option value="4095">全部</option>
+                <volist name="timesections" id="s">
+                    <option value="{$s.TIMEBITS}">{$s.VALUE}</option>
+                </volist>
+            </select></td>
+            <td width="123" bgcolor="#E0ECFF" colspan="2">
+                <p align="right">排序：</p>
+            </td>
+            <td width="221">课号：<input type="radio" name="ORDER1" checked value="1" >时段：<input type="radio" name="ORDER1" value="2" LANGUAGE=javascript onclick="return ORDER2_onclick()"></td>
+        </tr>
+        <tr>
+            <td colspan="7" align="center" style="border:0px">
+                只列出有时间安排的课程<input type="checkbox" name="have_time" value="1">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="7" align="center" style="border:0px">
+                <a href="javascript:void(0)" id="sub">提交</a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="sub_heng">提交(横排)</a>&nbsp&nbsp&nbsp
+                <a href="javascript:void(0)" onclick="javascript:form_aa.reset()" class="easyui-linkbutton">全部重写</a>
+            </td>
+        </tr>
+    </table>
+
+
+
+</form>
+<!--todo:教师列表页的 window-->
+<!--<div id="teacher_list_wd" title="">
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',title:'',split:true" style="height:50px;">
+        <br>
+        以下是检索到的教师列表，点中一个教师后，设定学年：<input type="text" name="year"  size="4" maxlength="4" value="2014">&nbsp
+        学期<input type="text" name="term" size="1" maxlength="1" value="1">&nbsp&nbsp
+        <button name="Search">检索分配给该教师的课程</button>
+    </div>
+    <div data-options="region:'center',title:''" style="padding:0px;background:#eee;">
+        <table id="teacher_list" class="easyui-datagrid"
+               data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,fitColumns:true,singleSelect:true,pagination:true,toolbar:[{text:'返回',iconCls:'icon-goleft',handler:function(){
+                $('#teacher_list_wd').window({closed:true})
+               }}]">
+            <thead>
+            <tr>
+                <th data-options="field:'TEACHERNAME',width:100">教师</th>
+                <th data-options="field:'TEACHERNO',width:100">教师号</th>
+                <th data-options="field:'zc',width:100,align:'right'">职称</th>
+                <th data-options="field:'xy',width:100,align:'right'">学院</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+</div>-->
+</body>
+</html>

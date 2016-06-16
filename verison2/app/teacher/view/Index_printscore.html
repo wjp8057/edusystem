@@ -1,0 +1,52 @@
+<layout name="layout" />
+<script type="text/javascript">
+$(function(){
+
+    $("#nextpage").click(function(){
+        var page=getQueryString('page');
+        if(page==null)
+            page=2;
+        location.href=("{$ROOT}/Teacher/Index/printscore?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
+    });
+    $("#print").click(function(){
+        window.print();
+    });
+});
+
+</script>
+<style type="text/css">
+    body{font-size:10pt}
+    .title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}
+    .course{text-align: center;line-height:20px;height: 20px;}
+    #score,#summary{width:100%;margin: 0 auto}
+    td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
+    table{border-collapse: collapse;border: none;}
+    #summary td{width:14}
+    #score td{width:11}
+    .tip ol li,.information ol{margin-left: 30px;}
+    .sign{text-align: right;line-height: 40px;margin-right:20px;}
+    .sign div{width:33%;float: left;text-align: center}
+</style>
+<div class="container">
+    <div class="title">{$year}学年第{$term}学期期末成绩登记表</div>
+    <div class="course">课号：{$course.courseno} 课名：{$course.coursename} 开课学院：{$course.schoolname} 人数：{$course.attendents} <a id="nextpage" href="#">下一页>></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>
+    <div class="course">任课教师：{$course.teachername} 班级：{$course.classname} </div>
+    <table id="score">
+        <tr><td>学号</td><td>姓名</td><td>成绩</td><td>学号</td><td>姓名</td><td>成绩</td><td>学号</td><td>姓名</td><td>成绩</td></tr>
+        {$score}
+    </table>
+    <div style="height: 15px;"></div>
+    <table id="summary">
+        <tr><td>成绩</td><td>优秀(>=90分)</td><td>良好(80-89分)</td><td>中等(70-79分)</td><td>及格(60-69分)</td><td>不及格(<60分)</td><td>其中异常</td></tr>
+        <tr><td>百分比</td><td>{$summary.excellent}</td><td>{$summary.good}</td><td>{$summary.middle}</td><td>{$summary.pass}</td><td>{$summary.fail}</td><td>{$summary.exception}</td></tr>
+    </table>
+    <div class="tip">
+        <ol>
+            <li>请一律使用打印件，手写件、成绩涂改或教师未签名则无效。</li>
+            <li>本表一式两份应于本课程考后三天内交开课学院存档。</li>
+            <li>异常为缺考、缓考、违纪等情况。</li>
+        </ol>
+    </div>
+    <div class="sign"><div>考试日期：{$summary.edate}</div><div> 登记时间：{$summary.date}</div><div>任课教师签名：</div></div>
+</div>

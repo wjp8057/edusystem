@@ -1,0 +1,94 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    var _RECNO = "{$Think.request.RECNO}";
+    var _STUDENTNO = "{$Think.request.STUDENTNO}";
+    //数据初始化
+    var datagrid = $('#datagrid').datagrid({
+        toolbar: '#toobar',
+        url: '__ROOT__/Exam/Unity/signStudent/hasJson/true',
+        queryParams : {RECNO:_RECNO,STUDENTNO:_STUDENTNO},
+        frozenColumns:[[{field:'ck',checkbox:true}]],
+        onBeforeLoad:function(){
+            $(this).datagrid("unselectAll");
+            return true;
+        }
+    });
+
+    //删除报名
+    $("#btDelete").bind("click",function(){
+        var rows = datagrid.datagrid("getSelections");
+        if(rows == null || rows.length==0){
+            msgShow("系统提示：","<br />没有选择任一条记录进行删除！","error");
+            return;
+        }
+
+        var arr = new Array();
+        $.each(rows, function(index,row){
+            arr.push(row.RECNO);
+        });
+        var schoolsarr = new Array();
+        $.each(rows,function(index,row){
+            schoolsarr.push(row.SCHOOLNAME);
+        });
+        $.messager.confirm('系统消息：','你确实要删除选中的考生报名记录吗？',function(r){
+            if (r){
+                $.post("__ROOT__ /Exam/Unity/signStudentDelete/hasJson/true", {RECNO:arr,MAP:_RECNO,SCHOOLNAME:schoolsarr}, function(rsp) {
+                    if(rsp){
+                        $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        datagrid.datagrid("reload");
+                    }
+                },"JSON");
+            }
+        });
+    });
+});
+
+function checkLock(value,row,index){
+    return "<input onclick=\"onCheckLock(this,'"+row.RECNO+"')\" value='"+value+"' type='checkbox'"+(value=="1"?" checked='true'":"")+" />"
+}
+//报名开始/终止
+function onCheckLock(obj,recno){
+    var LOCK = obj.checked ? 1 : 0;
+    $.post( '__ROOT__/Exam/Unity/signFee/hasJson/true', {LOCK:LOCK,RECNO:recno}, function(rsp) {
+        if(rsp){
+            $.messager.alert("系统消息：", rsp.message, rsp.type);
+        }
+    },"JSON");
+}
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'north',split:false,border:false" style="height:70px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 17pt;">统 考 报 名 情 况 表</font></p>
+        <p align=center>
+            <b>考试名称：</b>{$note.EXAMNAME} <b>考试代码：</b>{$note.TESTCODE} <b>考试日期：</b>{$note.DATEOFEXAM}
+            <b>报名截止日期：</b>{$note.DEADLINE} <b>考试说明：</b>{$note.EXAMREM} <b>本次考试说明：</b>{$note.NOTIFICATIONNOTE}</p>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:100">学号</th>
+                <th data-options="field:'STUDENTNAME',align:'center',width:100">姓名</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:100">班级</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:120">学院</th>
+                <th data-options="field:'ENTERYEAR',align:'center',width:80">入学年份</th>
+                <th data-options="field:'FEE',align:'center',width:60,formatter:checkLock">报名费交讫</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <a href="#" id="btDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true">删除</a>
+</div>
+
+
+
+</body>
+
+</html>
+

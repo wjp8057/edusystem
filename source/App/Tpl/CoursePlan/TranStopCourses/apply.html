@@ -1,0 +1,107 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+           /*     $(this).datagrid("clearSelections");
+                $(this).datagrid("unselectAll");*/
+            }
+        });
+
+        //搜索事件
+        $("#searcher").bind("click",function(){
+        //    alert($.trim($('#TEACHERNAME').val()));
+           datagrid.datagrid("options").url = "__ROOT__ /CoursePlan/TranStopCourses/apply/hasJson/true";
+           /*     ajiakesi('__ROOT__ /CoursePlan/TranStopCourses/apply/hasJson/true',{YEAR:$.trim($("#YEAR").val()),TERM:$.trim($("#TERM").val()),COURSENO: $.trim($("#COURSENO").val()),TEACHERNAME: $.trim($('#TEACHERNAME').val())},function(c){
+              alert(c)
+          })*/
+            datagrid.datagrid("load", {YEAR:$.trim($("#YEAR").val()),TERM:$.trim($("#TERM").val()),COURSENO: $.trim($("#COURSENO").val()),TEACHERNAME: $.trim($('#TEACHERNAME').val()),SCHOOL:$("[name='SCHOOL']").val()});
+        })
+
+        //申请事件
+        $('#handlerApply').bind("click",function(){
+
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if("{$theacher.SCHOOL}"!=rows[0].SCHOOL  && "{$theacher.SCHOOL}"!="A1"){
+           /*     alert("{$theacher.SCHOOL}")
+                alert(rows[0].SCHOOL)*/
+                msgShow("系统提示：","<br />您只能对本学院开设的课程申请调停课！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+            });
+
+            $.messager.confirm('系统消息：','对选中的项真的要调停课申请吗？',function(r){
+                if (r){
+                    $.post("__ROOT__ /CoursePlan/TranStopCourses/doApply/hasJson/true", {WEEK:$("#WEEK").val(),REASON:$("#REASON").val(),date:$('#time').val(),ITEMS:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        }
+                    },"JSON");
+                }
+            });
+        });
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+   <!-- <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" cellspacing="0" cellpadding="0" >
+            <tr><th align="left">
+
+            </tr>
+        </table>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" border="0" width="100%"  fit="true" singleSelect="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" idField="RECNO"  >
+            <thead>
+            <tr><th data-options="field:'COURSENO',sortable:true,align:'center',width:100" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:300">课名</th>
+                <th data-options="field:'TEACHERNAME',sortable:true,align:'center',width:100">上课老师</th>
+                <th data-options="field:'TIME',sortable:true,align:'center',width:200">上课时间</th>
+                <th data-options="field:'SCHOOLNAME',sortable:true,align:'center',width:200">开课学院</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+<div id="toobar">
+    学年：<input type="text" id="YEAR" size="10" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    学期：<input type="text" id="TERM" size="10" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    课号：<input type="text" id="COURSENO" size="10"  value="%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    教师姓名：<input type="text" id="TEACHERNAME" size="10" value="%" >
+    开课学院：
+    <if condition="$userSchool.SCHOOL eq 'A1'">
+        <select name="SCHOOL" style="width:100px" id="SCHOOL" class="easyui-combobox">
+            <option value="%">所有学院</option>
+            <volist name="school" id="v">
+                <option value="{$v.SCHOOL}">{$v.NAME}</option>
+            </volist>
+        </select>
+    <else/>
+        {$userSchool.NAME}<input type="hidden" name="SCHOOL" value="{$userSchool.SCHOOL}" />
+    </if>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a><br>
+    周次：<select id="WEEK"><php>for($i=1;$i<20;$i++){echo '<option value='.($i).'>第'.$i.'周</option>';}</php></select>&nbsp;&nbsp;
+    理由：<input type="text" size="30" id="REASON" />&nbsp;&nbsp;
+    补课时间:<input type="text" id="time" class="easyui-datebox">
+    <a href="#" id="handlerApply" class="easyui-linkbutton" data-options="iconCls:'icon-file',plain:true">提交申请</a>
+</div>
+</body>
+
+</html>
+

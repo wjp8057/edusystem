@@ -1,0 +1,62 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+var mid='{$MID}';
+$(function(){
+    $('#edit_dat').datagrid({
+        onLoadSuccess:function(data){
+            ajiakesi('__URL__/methods_edit/hasJson/1',{bind:{'METHODID':mid}},function(c){
+                eval("var one="+c);
+                $('#daihao').val(one['METHODID']);
+                $('#shuoming').val(one['DESCRIPTION']);
+                var list=$('#edit_dat').datagrid('getRows');
+                for(var i=0;i< $.trim(one['ROLES']).length;i++){
+                    for(var j=0;j<list.length;j++){
+                        if($.trim(list[j]['ROLE'])==$.trim(one['ROLES'])[i]){
+                            $('#edit_dat').datagrid('selectRow',$('#edit_dat').datagrid('getRowIndex',list[j]));
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+    });
+    $('#del').bind('click',function(){
+        $('#edit_dat').datagrid('unselectAll');
+    });
+
+    $('#sub').bind('click',function(){
+        var str='';
+        var slist= $('#edit_dat').datagrid('getSelections');
+        for(var i=0;i<slist.length;i++){
+            str+=slist[i].ROLE;
+        }
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'school/update_method.SQL',bind:{':ROLES':str,':DS': $.trim($('#shuoming').val()),':MID':mid}},function(c){
+            $.messager.alert('提示','操作成功');
+        });
+    });
+});
+</script>
+<body style="background: #fff">
+ <div id="tdemo" width="40%">
+        方法代号（4个字符主键）：<input type="text" id='daihao' value="" size="5">
+        <DIV STYLE="margin-top: 8px">
+       说明（最多30个字符）：<input type="text" id="shuoming" value="" size="30">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="sub" iconCls="icon-save">提交</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="del" iconCls="icon-stop">清除所有角色</a>&nbsp;方法角色指派：(最多可以指派20种角色)
+        </div>
+     </div>
+    <table class="easyui-datagrid" align="center" id='edit_dat' style="width:460px;height:400px"
+           data-options="fit:true,url:'__APP__/System/User/newuser/hasJson/1',toolbar:'#tdemo'">
+        <thead>
+        <tr>
+            <th data-options="checkbox:true">选中</th>
+            <th data-options="field:'ROLE',width:100,align:'center'">角色代码</th>
+            <th data-options="field:'DESCRIPTION',width:300,align:'center'">描述</th>
+
+        </tr>
+        </thead>
+    </table>
+
+</body>
+</html>

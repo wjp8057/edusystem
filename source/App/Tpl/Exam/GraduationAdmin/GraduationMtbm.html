@@ -1,0 +1,390 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+ var teacherSCHOOL='{$teacherSCHOOL.SCHOOL}'   //todo:教师学院
+ var studentSCHOOL=''           //todo:要添加特殊课程的学生学院
+var wdWidth=$(window).width() //todo: 窗口的宽度
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var arr=[];
+
+        var teshu_wd=$('#teshu_wd').window(new wind(400,450,false,false,true,false,false))
+     $('#left_dat').datagrid({
+         toolbar:[{
+             'text':'将选中的课程添加到右边',
+             'iconCls':'icon-goright',
+             handler:function(){
+                 var rowList=$('#left_dat').datagrid('getSelections')
+
+                 if(rowList.length==0){
+                     return $.messager.alert('提示','请选择一条要操作的数据')
+                 }
+
+                 for(var i=0;i<rowList.length;i++){
+
+                     var bool=true;
+                     var obj={}
+                     obj.kh=rowList[i].kh
+                     obj.km=rowList[i].km
+                     obj.xf=rowList[i].xf
+                     obj.xkfs=rowList[i].xkfs
+                     obj.khfs=rowList[i].khfs
+                     obj.kkxy=rowList[i].kkxy
+                     obj.PLANTYPE=rowList[i].PLANTYPE
+                     obj.TESTTYPE=rowList[i].TESTTYPE
+                     var rList=$('#right_dat').datagrid('getRows')
+
+                        for(var j=0;j<rList.length;j++){
+                            if(rList[j].kh==rowList[i].kh){
+                                bool=false;
+                                break;
+                            }
+
+                        }
+                   if(bool)$('#right_dat').datagrid('appendRow',obj)
+
+                 }
+             }
+         }]
+     })
+
+
+        $('#right_dat').datagrid({
+            toolbar:[{
+                'text':'将选中的课程从列表中取消',
+                'iconCls':'icon-goleft',
+                'handler':function(){
+                    var rowList=$('#right_dat').datagrid('getSelections')
+                    for(var i=0;i<rowList.length;i++){
+                        $('#right_dat').datagrid('deleteRow',$('#right_dat').datagrid('getRowIndex'));
+                    }
+                }
+            },
+                {
+                'text':'将列表添加到数据库',
+                'iconCls':'icon-add',
+                'handler':function(){
+                    var rowList=$('#right_dat').datagrid('getRows');
+                    ajiakesi('__URL__/GraduationMtbm_insert',{'STUDENTNO':$('#t_UNO').html(),'YEAR':$('[name=year]').val(),'TERM':$('[name=term]').val(),ct:rowList},function(c){
+                        if(c === 'success'){
+                            return $.messager.alert('提示','添加成功!','info');
+                        }else{
+                            return $.messager.alert('提示','添加失败!','error');
+                        }
+                    })
+                }
+            },{
+                'text':'将数据库已选课程清空',
+                'iconCls':'icon-stop',
+                'handler':function(){
+                    $.messager.confirm('提示','您确定要清理数据吗',function(c){
+                        if(c){
+                            if($('#t_UNO').html()==''){
+                                return $.messager.alert('提示','您需要检索学生才能操作')
+                            }
+                            var rowList=$('#right_dat').datagrid('getRows');
+                            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'exam/GraduationMtbm_delete.SQL','bind':{
+                                ':STUDENTNO':$('#t_UNO').html(),':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val()
+                            }},function(c){
+                                $.messager.alert("系统提示：","操作成功","info",function(){
+                                    $('#right_dat').datagrid('reload');
+                                });
+                            });
+                        }
+                    });
+                }
+            }]
+        });
+
+
+        var daaa=$('#daaa')
+        $('#bt').linkbutton({
+            'text':'提交检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    if($('[name=studentno]').val()==""){
+                        return $.messager.alert('提示','请输入学生号,不能为空。')
+                    }
+                    ajiakesi('__URL__/GraduationMtbm/hasJson/1',{'STUDENTNO':$('[name=studentno]').val()},function(c){
+                        eval('var one='+c)
+                        $('#t_SCHOOLNAME').html(one['SCHOOLNAME'])
+                        $('#t_CLASSNAME').html(one['classname'])
+                        $('#t_UNO').html($('[name=studentno]').val())
+                        $('#t_UNAME').html(one['STUDENTNAME'])
+                        $('#t_SCHOOLNAME2').html(one['SCHOOLNAME'])
+                        $('#t_CLASSNAME2').html(one['classname'])
+                        $('#t_UNO2').html($('[name=studentno]').val())
+                        $('#t_UNAME2').html(one['STUDENTNAME'])
+                    })
+
+                    $('#left_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                    $('#left_dat').datagrid('load',{'Sqlpath':{'select':'exam/GraduationMtbm_left_select.SQL',
+                        'count':'exam/GraduationMtbm_left_count.SQL'},bind:{':STUDENTNO':$('[name=studentno]').val()}})
+
+                    $('#right_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                    $('#right_dat').datagrid('load',{'Sqlpath':{'select':'exam/GraduationMtbm_right_select.SQL',
+                        'count':'exam/GraduationMtbm_right_count.SQL'},bind:{':STUDENTNO':$('[name=studentno]').val(),':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val()}})
+                })
+
+
+
+        //todo:特殊课程添加
+        $('#bt3').linkbutton({
+            'text':'特殊课程添加',
+            'iconCls':'icon-add'
+        }).bind('click',function(){
+
+            $('#teshu_wd').window({closed:false})
+
+        })
+
+
+
+
+            //todo:点击弹出 检索考位安排窗口的  按钮
+        $('#kwap').linkbutton({
+            'text':'检索考位安排',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    $('#lici_student_wd').window({closed:false})
+                })
+
+
+
+        $('#Tsadd').linkbutton({
+            'text':'添加',
+            'iconCls':'icon-add'
+        }).bind('click',function(){
+             ajiakesi('__URL__/GraduationMtbm/hasJson/1',{'STUDENTNO':$('[name=STUDENT]').val(),'COURSENO':$('[name=COURSE]').val()},function(c){
+                 $('#queren').css('display','none')
+                 eval("var one="+c)
+                 if(typeof one=='object'){
+                        $('#queren_ct').html(one['SCHOOLNAME']+one['classname']+$('[name=STUDENT]').val()+one['STUDENTNAME']+one['COURSENAME']+one['CREDITS'])
+                        studentSCHOOL=one['SCHOOLNO']
+                        $('#queren').css('display','block')
+                 }else{
+                     $.messager.alert('提示','<font color="red">您输入的课号或学号不正确</font>')
+                 }
+             })
+        })
+
+        $('#Tsclose').linkbutton({
+            'text':'关闭',
+            'iconCls':'icon-cut'
+        }).bind('click',function(){
+                    $('#teshu_wd').window({closed:true})
+                    $('#queren').css('display','none')
+                })
+
+        $('#Tsadd2').linkbutton({
+            'text':'确认添加',
+            'iconCls':'icon-add'
+        }).bind('click',function(){
+                    if(studentSCHOOL!=teacherSCHOOL&&teacherSCHOOL!='A1'){
+                        return $.messager.alert('提示','你不可以为其它学院学生选择毕业免听考课程！')
+                    }
+                    var obj={};
+                    obj[0]={'kh':$('[name=COURSE]').val(),
+                        'TESTTYPE':$('[name=TESTTYPE]').val(),
+                        'PLANTYPE':$('[NAME=PLANTYPE]').val()}
+                    $.post('__URL__/GraduationMtbm_insert/reqtag/methods2',
+                            {
+                                'STUDENTNO':$("#studentno_input").val(),
+                                'YEAR':$('[name=year]').val(),
+                                'TERM':$('[name=term]').val(),
+                        'ct':obj},function(c){
+                            if(c === 'success'){
+                                return $.messager.alert('提示','添加成功!','info');
+                            }else{
+                                return $.messager.alert('提示','添加失败!','error');
+                            }
+
+                    })
+        })
+
+
+
+    })
+
+</script>
+
+<style>
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+    #teshu_wd td{border:1px #95B8E7 solid;}
+
+</style>
+<body style="background-color: #fff">
+<!--todo:特殊课程添加的窗口-->
+<div id="teshu_wd" title=" " >
+    <TABLE BORDER=0 align=center   cellspacing="1" style="margin-top: 30px">
+        <TR>
+            <TD align="right" bgcolor="#E0ECFF">学号：</TD>
+            <TD><input type="text" name="STUDENT" id="studentno_input"  size="9" value=""></TD>
+        </TR>
+        <TR>
+            <TD align="right" bgcolor="#E0ECFF">课号：</TD>
+            <TD><input type="text" name="COURSE"  id="courseno_input" size="7" value=""></TD>
+        </TR>
+        <TR>
+            <TD align="right" bgcolor="#E0ECFF">修课方式：</TD>
+            <td width="176" align="right">
+                <p align="left"><font size="2"><select name="PLANTYPE" id="approach_input">
+                    <option value="M" selected>必修</option>
+                    <option value="E">选修</option>
+                    <option value="F">辅修</option>
+                    <option value="M">必修 </option>
+                    <option value="R">限修 </option>
+                    <option value="T">模块  </option>
+
+                </select></font></td>
+        </TR>
+        <TR>
+            <TD align="right" bgcolor="#E0ECFF">考核方式：</TD>
+            <td width="176" align="right">
+                <p align="left">
+                    <font size="2"><select name="TESTTYPE" id="examtype_input">
+                        <option value="T" selected>考试</option>
+                        <option value="E">考查      </option>
+                        <option value="M">考核      </option>
+                        <option value="T">考试      </option>
+                    </select></font></td>
+        </TR>
+        <TR>
+            <br>
+            <TD colspan="2" align="center" style="border:0px"><a href="javascript:void(0)" id="Tsadd"></a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="Tsclose"></a></TD>
+
+        </TR>
+    </TABLE>
+    <div id="queren" style="width:350px;height:100px;border:1px solid #E0ECFF;margin: auto;display:none">
+        <center><span style="color:#000000;font-size: 15px" >毕业免听特殊课程确认</span></center>
+        <div id="queren_ct"></div><br>
+        <center><a href="javascript:void(0) "id="Tsadd2">确认添加</a></center>
+    </div>
+</div>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',split:false,border:false" style="height:57px;background:#E0ECFF;">
+        <fieldset>
+            <legend >
+                条件
+            </legend>
+            <b>学年:</b>
+            <input name="year" type="text" size='4' value="2011"></td>
+            &nbsp &nbsp
+            <b>学期:</b>
+            <input type="text" name="term" size="1" value="1"></td>
+            &nbsp &nbsp
+            <b>学号:</b>
+            <input type="text" name="studentno" value="">
+            &nbsp &nbsp
+            <a href='javascript:void(0)' id="bt">提交检索</a>&nbsp &nbsp
+            <a href='javascript:void(0)' id="bt3">特殊课程添加</a>
+        </fieldset>
+    </div>
+    <div data-options="region:'center',border:true" style="padding:0px;background:#FFf;">
+        <div class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'north',split:false,border:false" style="height:42px;background:#E0ECFF;">
+                <p align=center><font size=2>
+                    <span id="t_SCHOOLNAME"></span>
+                    <span id="t_CLASSNAME"></span>
+                    <span id="t_UNO"></span>
+                    <span id="t_UNAME"></span>         要增选的毕业免听课程列表</font></p>
+             </div>
+            <div data-options="region:'center',split:false,border:false" style="background:#E0ECFF;">
+                <table class="easyui-datagrid"
+                       data-options="fitColumns:true,fit:true,pagination:true" id="right_dat">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xz',width:100,checkbox:true">选中</th>
+                        <th data-options="field:'kh',width:80">课号</th>
+                        <th data-options="field:'km',width:133,align:'center'">课名</th>
+                        <th data-options="field:'xf',width:100,align:'center'">学分</th>
+                        <th data-options="field:'xkfs',width:100,align:'center'">修课方式</th>
+                        <th data-options="field:'khfs',width:100,align:'center'">考核方式</th>
+                        <th data-options="field:'kkxy',width:100,align:'center'">开课单位</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div data-options="region:'west',border:true" id="west" >
+        <div class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'north',split:false,border:false" style="height:42px;background:#E0ECFF;">
+                <p align=center><font size=2>
+                    <span id="t_SCHOOLNAME2"></span>
+                    <span id="t_CLASSNAME2"></span>
+                    <span id="t_UNO2"></span>
+                    <span id="t_UNAME2"></span>           待选课程列表</font></p>
+            </div>
+            <div data-options="region:'center',split:false,border:false" style="background:#E0ECFF;">
+                <table class="easyui-datagrid"
+                       data-options="fit:true,pagination:true,fitColumns:false" id="left_dat">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'code',width:100,checkbox:true">选中</th>
+                        <th data-options="field:'kh',width:100">课号</th>
+                        <th data-options="field:'km',width:100,align:'center'">课名</th>
+                        <th data-options="field:'xf',width:100,align:'center'">学分</th>
+                        <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                        <th data-options="field:'xq',width:100,align:'center'">学期</th>
+                        <th data-options="field:'xkfs',width:100,align:'center'">修课方式</th>
+                        <th data-options="field:'khfs',width:100,align:'center'">考核方式</th>
+                        <th data-options="field:'kscj',width:100,align:'center'">考试成绩</th>
+                        <th data-options="field:'kccj',width:100,align:'center'">考查成绩</th>
+                        <th data-options="field:'bkks',width:100,align:'center'">补考考试</th>
+                        <th data-options="field:'bkkc',width:100,align:'center'">补考考查</th>
+                        <th data-options="field:'kkxy',width:100,align:'center'">开课学院</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#west').width(wdWidth/2)
+</script>
+<style>
+    #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+<!--todo:检索考位安排-->
+<div id="lici_student_wd" title="检索考位安排 ">
+    <div align="center">
+        <table border="0" cellspacing="1" width="90%" style="margin-top: 20px">
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">学年：</font></td>
+                <td width="70%"><font size="2"><input type="text" name="YEAR2" size="4" value="2011"></font></td>
+            </tr>
+            </center>
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">学期：</font></td>
+                <td width="70%"><font size="2"><input type="text" name="TERM2" size="1" value="1"></font></td>
+            </tr>
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">课号：</font></td>
+                <td width="70%"><input type="text" name="COURSENO" size="9" value="070A15B1F"><font size="2" color="#FF0000">(9位课号)</font></td>
+            </tr>
+        </table>
+    </div>
+    <p align="center"><a href="javascript:void(0)" name="bt1">检索考位安排</a>&nbsp&nbsp<a href="javascript:void(0)" name="bt2"></a></p>
+    <input type="hidden" name="pagename" value="ExamLocation.htm">
+</div>
+<form id="examexcel" action="__APP__/CourseManager/Excel/examExcel" method="POST">
+    <input type="hidden" name="e_YEAR" VALUE="">
+    <input type="hidden" name="e_TERM" VALUE="">
+    <input type="hidden" name="e_CLASSNO" VALUE="">
+    <input type="hidden" name="e_CHANGCI" VALUE="">
+    <input type="hidden" name="e_TEACHERNO" VALUE="">
+    <input type="hidden" name="e_SCHOOL" VALUE="">
+    <input type="hidden" name="e_SCHOOLTWO" VALUE="">
+</form>
+</body>
+</html>

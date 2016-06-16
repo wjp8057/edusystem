@@ -1,0 +1,315 @@
+<include file=":Include:jqueryHeader" />
+<script>
+    $(function(){
+        var index;          //存放详情id
+        var hei=0;          //保存window高度的
+        var h = $(document).height();
+        if(h>'550'){          //表示不是在102*768
+            hei=550
+        }else{
+            hei=450
+        }
+        var tb=$('biaodan2').form({
+        })
+        $('#layout').layout({});             //这个是窗口的layout
+
+        var indexrow=undefined;             //保存索引键的变量
+        var  dat=$('#scinfo').datagrid({
+            striped:true,
+
+            frozenColumns:[[{checkbox:true},{field:'kcmc',title:'课程名称',width:210,sortable:true,align:'center',
+                editor:{type:'validatebox',options:{
+                    required:true
+                }}},
+                {field:'kh',title:'课号',width:100,sortable:true,align:'center',
+                    editor:{type:'validatebox',options:{required:true}}
+                    }]],
+            columns:[[
+                {field:'jkh',title:'旧课号',width:100,sortable:true,align:'center'
+                   },
+                {field:'xf',title:'学分',width:50,sortable:true,align:'center'
+                    },
+                {field:'zzxs',title:'周总学时',width:80,sortable:true,align:'center'
+                    },
+                {field:'zjk',title:'周讲课',width:50,sortable:true,align:'center'
+                   },
+                {field:'zsy',title:'周实验',width:50,sortable:true,align:'center'
+                   },
+                {field:'zsj',title:'周上机',width:50,sortable:true,align:'center'
+                   },
+                {field:'zsx',title:'周实训',width:50,sortable:true,align:'center'
+                  },
+                {field:'ztl',title:'周讨论',width:50,sortable:true,align:'center'
+                  },
+                {field:'zzx',title:'周自学',width:50,sortable:true,align:'center'
+                   },
+                {field:'lb',title:'类别',width:100,sortable:true,align:'center'
+                   },
+                {field:'lx',title:'类型',width:100,sortable:true,align:'center'
+                    },
+                {field:'bz',title:'备注',width:150,sortable:true,align:'center'
+                    },
+                {field:'kkdw',title:'开课单位',width:150,sortable:true,align:'center'
+                   }
+            ]],onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#scinfo');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            pagination:true,
+            pageList:[30,50],
+            pageSize:30,
+            toolbar:'#tdemo',onDblClickRow:function(keyrow,dataRow){                                       //双击时候也能触发弹窗
+                ajia(dataRow.kh)
+
+            },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+            }})
+        $('#dtnfo').layout({
+
+        })
+
+        //搜索方法
+        $('#searcher').bind("click",function(){
+            $('#scinfo').datagrid('options').url='__URL__/scourse/hasJson/1',
+            $('#scinfo').datagrid('load',{COURSENAME:$('#COURSENAME').val(),SCHOOL:$('#SC').val(),COURSENO:$('#COURSENO2').val(),OLDCOURSENO:$('#OLDCOURSENO').val()})
+        })
+
+        var button=$('#bt').linkbutton({
+            text:'修改',
+            iconCls:'icon-edit'
+        })
+        var button2=$('#bt2').linkbutton({
+            text:'重置',
+            iconCls:'icon-back'
+        })
+
+        button2.bind('click',function(){
+                ajia(index);
+        })
+
+        button.bind('click',function(){
+            $('#biaodan2').form('submit',{
+                url:'__URL__/courseup',
+                onSubmit:function(){
+                    $('#chuangkou').window({
+                        closed:true
+                    })
+                },
+                success:function(data){
+
+                    switch ( data){
+                        case 'nopermission':
+                            $.messager.alert('提示','检测到你不是教务处人员，无修改权限');
+                            break;
+                        case 'qsfailed':
+                            $.messager.alert('提示','查询课程原先开课学院的过程出现错误');
+                            break;
+                        case 'true':
+                            $.messager.alert('提示','修改成功');
+                            dat.datagrid('reload');
+                            break;
+                        default :
+                            $.messager.alert('提示','查询出错'+data);
+
+                    }
+                }
+            })
+        });
+
+        function ajia(data){                    //做查看详情时候触发
+                index=data;
+            $.ajax({
+                type:'POST',
+                url:'__URL__/infoaa',                                                    //做ajax请求获取数据
+                data:{
+                    id:data
+                },
+                success:function(content2){
+                    eval("var one2="+content2)
+                    var one=$("#biaodan2 input");
+                    var two=$('#biaodan2 select');
+                    var three=$('#textarea');               //课程介绍
+                    var nm='';
+                    for(var i=0;i<one.length;i++){
+                        nm=one[i].name;
+                        one[i].value=one2[nm];
+                    }
+
+                    for(var i=0;i<two.length;i++){
+                        nm=two[i].id;
+
+                        $("#"+nm+"").val(one2[nm]);
+                    }
+
+                    three.val(one2[three.attr('name')]);
+
+                    $('#chuangkou').window({
+                        closed:false,
+                        modal:true,
+                        height:hei,
+                        top:10,
+                        draggable:false,
+                        minimizable:false,
+                        maximizable:false
+                    })
+                }
+            })
+        }
+
+        function ddel(){
+            var row2 = dat.datagrid('getSelections');
+            if (row2.length){
+                $.messager.confirm('提示','您确定要删除吗',function(b){
+                    if(b){
+                        var infoarr = [];                                                //存储删除信息的数组
+                        for(var i=0;i<row2.length;i++){
+                            infoarr[i]=row2[i].kh;
+                        }
+                        $.ajax({
+                            url:'__URL__/decourse',
+                            data:{'in':infoarr},
+                            type:'POST',
+                            success:function(C){
+                                if(C=='yes'){
+                                    $.messager.alert('提示','删除成功')
+                                }else{
+                                    $.messager.alert('提示','删除失败','');
+                                }
+                                dat.datagrid('reload');
+                            }
+                        })
+                    }
+                });
+            }else{
+                $.messager.alert('提示','请选中要删除的数据')
+            }
+        }
+
+        $('#e_del').bind('click',ddel)
+        $('#admin_del').bind('click',ddel)
+        function eedit(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            if(rowList.length>1){
+                alert('请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+            }else if(rowList.length<1){
+                alert('请选择要编辑的数据');                         //用户没选择行
+            }else{
+
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                ajia(row3.kh);
+                indexrow=row3;
+            }
+        }
+
+        $('#e_edit').bind('click',eedit)
+        $('#admin_edit').bind('click',eedit);
+
+    })
+
+
+</script>
+<body>
+<div class="easyui-window" id='chuangkou' title="编辑课程" data-options="width:650,closed:true">
+            <form action="__URL__/courseyz" method="POST" id="biaodan2">
+                <table style="margin-left:0px;margin-top:10px" align="left" border="0" cellspacing="8">
+                    <tr><td align="right" width="120">课号:</td><td><input type="text" readonly    style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none" name="COURSENO" size="7" maxlength="7" id="COURSENO"></b></td></tr>
+                    <tr><td align="right" width="120">课名:</td><td ><input type="text" name="COURSENAME" size="40" maxlength="120"></td></tr>
+                    <tr>
+                        <td align="right" width="120">开课学院：</td>
+                        <td>
+                            <select id="SCHOOL" name="SCHOOL">
+                                <volist name="school" id="v">
+                                    <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right" width="120">学分：</td><td><input type="text" name="CREDITS" size="4" maxlength="4" value="0" />
+
+                    </td></tr>
+                    <tr><td align="right" width="120">总学时:</td><td><input type="text" name="TOTAL" size="4" maxlength="4" value="0" /></td></tr>
+
+                    <tr><td align="right" width="120">每周总学时:</td><td><input type="text" name="HOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周理论学时:</td><td><input type="text" name="LHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周实验学时:</td><td><input type="text" name="EXPERIMENTS" size="4" maxlength="4" value="0"></td></tr>
+
+                    <tr><td align="right" width="120">每周上机学时:</td><td><input type="text" name="COMPUTING" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周实训学时:</td><td><input type="text" name="SHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周课堂讨论学时:</td><td><input type="text" name="KHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周自主学习学时：</td><td><input type="text" name="ZHOURS" size="4" maxlength="4" value="0"></td></tr>
+
+                    <!--     <tr><td align="right" width="120">学分：</td><td><input type="text" name="CREDITS" size="4" maxlength="4" value="0" />
+                             &nbsp &nbsp&nbsp&nbsp 总学时:&nbsp&nbsp<input type="text" name="TOTAL" size="4" maxlength="4" value="0" />&nbsp
+                             &nbsp每周总学时:&nbsp&nbsp<input type="text" name="HOURS" size="4" maxlength="4" value="0">&nbsp
+                             &nbsp&nbsp&nbsp每周理论学时:&nbsp&nbsp<input type="text" name="LHOURS" size="4" maxlength="4" value="0">&nbsp
+                         </td></tr>
+                         <tr><td align="right" width="120">每周实验学时:</td><td><input type="text" name="EXPERIMENTS" size="4" maxlength="4" value="0">
+                             每周上机学时:&nbsp&nbsp<input type="text" name="COMPUTING" size="4" maxlength="4" value="0">
+                             每周实训学时:&nbsp&nbsp<input type="text" name="SHOURS" size="4" maxlength="4" value="0">
+                             每周课堂讨论学时:&nbsp&nbsp<input type="text" name="KHOURS" size="4" maxlength="4" value="0"></td></tr>
+                         <tr><td align="right" width="120">每周自主学习学时：</td><td><input type="text" name="ZHOURS" size="4" maxlength="4" value="0"></td></tr>
+                      -->   <tr><td align="right" width="120">限制人数：</td><td><input type="text" name="Limit" size="4" maxlength="4" value="0"><b>&nbsp&nbsp只对公选课有意义</b></td></tr>
+                    <tr><td align="right" width="120">开课学期：</td><td><input type="text" name="QUARTER" id="QUARTER" size="4" maxlength="4" value=""><b>&nbsp&nbsp只对公选课有意义,1为第一学期（秋季），2为第二学期（春季）</b></td></tr>
+                    <tr>
+                        <td width="120" align="right" height="23">课程类别：</td>
+                        <td>
+                            <select id="TYPE" name="TYPE">
+                                <volist name="coursetype" id="v">
+                                    <option value="{$v.NAME}">{$v.VALUE}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="120" align="right" height="23">课程类型：</td>
+                        <td>
+                            <select id="TYPE2" name="TYPE2">
+                                <volist name="coursetype2" id="v2">
+                                    <option value="{$v2.NAME}">{$v2.VALUE}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">教学大纲网址：</td><td><input type="text" name="SYLLABUS" maxlength="99" size="40" value=""></td></tr>
+                    <tr><td align="right">备注：</td><td><input type="text" name="REM" maxlength="99" size="40" value=""> </td></tr>
+                    <tr><td align="right" height="20">课程介绍:</td><td  rowspan="2"><textarea rows="5" name="INTRODUCE" id="textarea" cols="75" style="resize:none;overflow: hidden" maxlength="790"> </textarea></td></tr>
+                    <tr><td></td></tr>
+                    <tr><td colspan="2" align="center" height="80"><a href="javascript:void(0)" id="bt"></a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt2"></a></td></tr>
+                </table>
+            </form>
+</div>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+        <form action="__URL__/scjson" method="POST" id="biaodan">
+           <label for="COURSENO2">课号:</label><input type="text" id="COURSENO2" size="10" maxlength="7" value="%">
+           <label for="OLDCOURSENO">旧课号:</label><input type="text" id="OLDCOURSENO" size="10" maxlength="7" value="%">
+           <label for="COURSENAME">课名:</label><input type="text" id="COURSENAME" size="10" maxlength="20" value="%">
+           <label for="SC">学院:</label>
+                        <select id="SC" >
+                            <option value="%" selected>所有</option>
+                            <volist name="school" id="s">
+                                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                            </volist>
+                        </select>
+           <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true"></div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</body>
+</html>

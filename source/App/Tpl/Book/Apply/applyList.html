@@ -1,0 +1,152 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+<div data-options="region:'center',border:false" style=";background:#eee;">
+    <div id="datagrid"></div>
+</div>
+<div id="toobar">
+    <label>学年：</label><input name="YEAR" size="4" maxlength="4">
+    <label>学期：</label><input name="TERM" size="1" maxlength="1">
+    <label>修课方式：</label>
+    <select class="easyui-combobox" name="COURSETYPE" data-options="editable:false">
+        <option value="%">所有</option>
+        <volist name="approaches" id="a">
+            <option value="{$a.NAME}">{$a.VALUE}</option>
+        </volist>
+    </select>
+    <label>课号：</label><input name="COURSENO" size="12" value="%" maxlength="9">
+    <label>课名：</label><input name="COURSENAME" value="%"  size="16">
+    <label>班号：</label><input name="CLASSNO" size="10" value="%"  maxlength="10">
+    <label>申请状态：</label>
+    <input type="radio" name="STATUS" value="%" checked="checked"> <span>全部</span>
+    <input type="radio" name="STATUS" value="0"> <span>未申请</span>
+    <input type="radio" name="STATUS" value="1"> <span>已申请</span>
+    <p style="height:4px;padding:0px;margin: 0px;"></p>
+    <label>教师姓名：</label><input name="TEACHERNAME" value="%"  size="10" maxlength="10">
+    <if condition="$user_school eq 'A1'">
+        <label>开课学院：</label>
+        <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+            <option value="%">所有</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+    </if>
+    <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检索</a>
+    <a href="javascript:void(0)" id="applyBut" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">征定申请</a>
+    <a href="javascript:void(0)" id="queryBut" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">修改申请记录</a>
+</div>
+<script type="text/javascript">
+var wd=null;
+var list=null;
+var datagrid=null;
+$(function(){
+    $("[name='YEAR']").val(parent.$("#YEAR").val());
+    $("[name='TERM']").val(parent.$("#TERM").val());
+	/******************************************开课计划信息读取***********************************/
+	//教师列表窗口
+	wd=$('#wd').window({
+        height:250,width:350, minimizable:false,
+        maximizable:false,collapsible:false,draggable:false,
+        resizable:false,modal:false,closed:true
+    });
+	//开课计划信息
+	datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        border:false,
+        fit:true,
+        striped:true,
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#datagrid');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{field:'RECNO',checkbox:true},
+                  {field:'COURSENO',title:'课号',sortable:true,align:'center',width:60,formatter:function(value,row,index){
+                	  return value+row.GROUP;} },
+                  {field:'COURSENAME',title:'课名',align:'center',width:120,sortable:true},
+                  {field:'VALUE',title:'修课方式',align:'center',width:60,sortable:true},
+                  {field:'CLASSNAME',title:'班级名称',align:'center',width:80,sortable:true},
+                  {field:'ATTENDENTS',title:'预计人数',align:'center',width:60,sortable:true},
+                  {field:'SCHOOLNAME',title:'开课学院',align:'center',width:60,sortable:true},
+                  {field:'TEACHERNAME',title:'任课教师',align:'center',width:60,sortable:true,formatter:function(value,row,index){
+                	  if(row.TEACHERNUM > 1 && value!="" && value != null)
+                		  return "<a style=\"color:#0000FF\" href=\"javascript:void(0)\" title=\"点击查看其它教师信息\" onclick=\"teacherList('"+row.S_RECNO+"')\">"+value+"("+row.TEACHERNUM+")</a>";
+                	  else if(row.TEACHERNUM == 0 || value=="" || value == null)
+                		  return "--暂无--";
+                	  else return value;
+  		          }},
+  		          {field:'APPLYNUM',title:'申请状态',align:'center',formatter:function(value,row,index){
+	              	  if(value > 0)
+	              		  return "<font color=\"#0000FF\">已申请</font>";
+	              	  else return "未申请";
+		          }}]],
+		pagination:true,
+		pageList:[20,50,100,200,500],
+		pageSize:20,
+		toolbar:'#toobar'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+        datagrid.datagrid("options").url = "__URL__/applyList/hasJson/1";
+        datagrid.datagrid("load", {
+        	YEAR:year,TERM:term,
+        	COURSETYPE:$.trim($("[name='COURSETYPE']").val()),
+        	COURSENO:$.trim($("[name='COURSENO']").val()),
+        	COURSENAME:$.trim($("[name='COURSENAME']").val()),
+        	CLASSNO:$.trim($("[name='CLASSNO']").val()),
+        	SCHOOL:$.trim($("[name='SCHOOL']").val()),
+        	TEACHERNAME:$.trim($("[name='TEACHERNAME']").val()),
+        	STATUS:$.trim($("[name='STATUS']:checked").val())
+        });
+    });
+});
+//显示多个教师信息
+function teacherList(recno){
+	var teacherList=$('#teacherList').datagrid({
+    	fit:true,
+    	fitColumns:true,
+    	singleSelect:true,
+        columns:[[{field:'TEACHERNO',title:'教师编号',width:100,align:"center"},
+                  {field:'NAME',title:'教师姓名',width:100,align:"center"}]]
+    });
+	//清空数据
+	$('#teacherList').datagrid('loadData',{total:0,rows:[]});
+	teacherList.datagrid("options").url = "__URL__/getTeacherList/";
+	teacherList.datagrid("load",{RECNO:recno});
+	wd.window({closed:false});
+}
+</script>
+<!-- 教师列表 -->
+<div id="wd" title=" ">
+	<div id="teacherList"></div>
+</div>
+
+<!-- 征订教材 -->
+<div id="apply_wd" title=" ">
+	<include file="addBook" />
+</div>
+
+<!-- 查看征订申请记录 -->
+<div id="query_wd" title=" ">
+	<include file="queryBook" />
+</div>
+
+<!-- 右键菜单 -->
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_apply'>征定申请</div>
+    <div id='admin_query'>查看申请记录</div>
+</div>
+</body>
+</html>

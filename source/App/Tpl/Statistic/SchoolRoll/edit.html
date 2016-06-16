@@ -1,0 +1,282 @@
+<include file=":Include:jqueryHeader" />
+<style >
+#title{text-align:center;line-height:40px;font-size:25px;color:#0000FF}
+.edit{width:75%;margin:20px auto;border: solid 1px #ccc;}
+legend{margin-left: 20px;color:#0000FF;font-size: 14px;}
+.edit table {margin:15px auto;border-collapse:collapse;width:95%;}
+.edit td,.edit th{border:solid 1px #CCC;height:20px;}
+#edit_reg{margin-left:30px;color:#0000FF;cursor:pointer;}
+#edit_reg:hover{text-decoration:underline;color:red;}
+</style>
+<body style="background:#FFFFFF">
+<p id="title">学生「{$stu.NAME}」注册信息</p>
+<fieldset class="edit">
+	<legend>个人基本信息</legend>
+	<table align="center" border="0" cellpadding="4">
+		 <tr>
+		   <th align="right" width="15%">学号：</th>
+		   <td name="STUDENTNO" width="25%">{$stu.STUDENTNO}</td>
+		   <th align="right" width="15%">姓名：</th>
+		   <td width="25%"><input name="NAME" value="{$stu.NAME}" maxlength="16"></td>
+		   <td rowspan="8" width="20%" align="center">
+			   <if condition="($stu.PHOTO neq '') and ($stu.PHOTO neq '-')">
+			   	<img src="{$stu.PHOTO}" width="150" height="200">
+			   <else/>暂无 </if>
+		   </td>
+		 </tr>
+		 <tr>
+		   <th align="right">性别：</th>
+		   <td><assign name="SEX" value="$stu.SEX"/>
+		   <volist name="sex" id="s">
+		   <input type="radio" name="SEX" value="{$s.code}" <if condition="$s.code eq $SEX">checked="checked"</if> style="vertical-align:sub;"><label>{$s.name}</label>&nbsp;&nbsp;
+		   </volist></td>
+		   <th align="right">入学日期：</th>
+		   <td><input name="ENTERDATE" class="easyui-datebox" value="{$stu.ENTERDATE}"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">学制：</th>
+		   <td><input name="YEARS" value="{$stu.YEARS}" maxlength="2" size="10">年</td>
+		   <th align="right">专业：</th>
+		   <td><select name="MAJOR" class="easyui-combobox" data-options="editable:false">
+		   <option value="%">请选择</option>
+		   <assign name="MAJOR" value="$stu.MAJOR"/>
+		   <volist name="major" id="m">
+		   <option value="{$m.CODE}" <if condition="$m.CODE eq $MAJOR">selected="selected"</if>>{$m.NAME}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr>
+		   <th align="right">主修班级编号：</th>
+		   <td><input name="CLASSNO" onblur="ajaxGetClassName($(this),true)" value="{$stu.CLASSNO}" maxlength="7" >  
+		   <font color="red"></font></td>
+		   <th align="right">班级名称：</th>
+		   <td name="CLASSNAME">{$stu.CLASSNAME}</td>
+		 </tr>
+		 <tr>
+		   <th align="right">选课总学分：</th>
+		   <td><script>document.write(parseFloat({$stu.TAKEN}));</script></td>
+		   <th align="right">完成学分：</th>
+		   <td><script>document.write(parseFloat({$stu.PASSED}));</script></td>
+		 </tr>
+		 <tr>
+		   <th align="right">积点分和：</th>
+		   <td><script>document.write(parseFloat({$stu.POINTS}));</script></td>
+		   <th align="right">退学警告次数：</th>
+		   <td><input name="WARN" value="{$stu.WARN}" maxlength="2"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">学籍状态：</th>
+		   <td><select name="STATUS" class="easyui-combobox" data-options="editable:false">
+		   <assign name="STATUS" value="$stu.STATUS"/>
+		   <volist name="status" id="s">
+		   <option value="{$s.NAME}" <if condition="$s.NAME eq $STATUS">selected="selected"</if>>{$s.VALUE}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">联系方法：</th>
+		   <td><input  name="CONTACT" value="{$stu.CONTACT}" maxlength="60"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">来源：</th>
+		   <td><select name="CLASS" class="easyui-combobox" data-options="editable:false">
+		   <assign name="CLASS" value="$stu.CLASS"/>
+		   <volist name="classcode" id="c">
+		   <option value="{$c.CODE}" <if condition="$c.CODE eq $CLASS">selected="selected"</if>>{$c.NAME}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">所在学院：</th>
+		   <td><select name="SCHOOL" class="easyui-combobox" data-options="editable:false">
+		   <assign name="SCHOOL" value="$stu.SCHOOL"/>
+		   <volist name="school" id="s">
+		   <option value="{$s.SCHOOL}" <if condition="$s.SCHOOL eq $SCHOOL">selected="selected"</if>>{$s.NAME}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr style="height: 50px">
+		   <td align="center" colspan="5">
+		   <a href="javascript:void(0)" id="editbut">更&nbsp;新</a></td>
+		 </tr>
+	</table>
+</fieldset>
+
+<fieldset class="edit">
+	<legend>注册信息</legend>
+	<table align="center" border="0" cellpadding="4">
+		
+		<tr><th width="30%">学期</th><th>注册状态</th></tr>
+		
+		<assign name="year" value="$yearTerm.YEAR"/>
+		<assign name="term" value="$yearTerm.TERM"/>
+		
+		<volist name="regdata" id="r">
+		<tr><td align="right">{$r.year}学年第{$r.term}学期：</td>
+			<td align="left">
+				<span>{$r.value}</span>
+				<if condition="($r.year eq $year) and ($r.term eq $term)">
+				<span id="edit_reg" onclick="edit_reg($(this))">修改</span>
+				<assign name="code" value="$r.regcode"/>
+				<span style="display:none;">
+					<select name="REGCODE" class="easyui-combobox" data-options="editable:false">
+						<volist name="regcode" id="c">
+						<option value="{$c.NAME}" <if condition="$c.NAME eq $code">selected="selected"</if>>{$c.VALUE}</option>
+						</volist>
+				    </select>
+				</span>
+				</if>
+			</td>
+		</tr>
+		</volist>
+		
+		<if condition="$isNo">
+		<tr><td style="text-align:right;">{$year}学年第{$term}学期：</td>
+			<td style="text-align:left;">
+				<select name="REGCODE" class="easyui-combobox" data-options="editable:false">
+					<volist name="regcode" id="c">
+					<option value="{$c.NAME}">{$c.VALUE}</option>
+					</volist>
+				</select>
+			</td>
+		</tr>
+		</if>
+		
+		<tr height="50" id="add">
+			<td colspan="2" align="center"><a href="javascript:void(0)" id="save_reg">保&nbsp;存</a></td>
+		</tr>
+		
+	</table>
+</fieldset>
+
+
+
+</body>
+<script type="text/javascript">
+var is_school={$is_school};
+var studentno=$.trim($("[name='STUDENTNO']").html());
+$(function(){
+	$('#editbut').linkbutton({iconCls: 'icon-edit'});//提交按钮
+	$('#save_reg').linkbutton({iconCls: 'icon-save'});//新增按钮
+	
+	//更新教师基本信息
+	$('#editbut').click(function(){
+		if(!is_school){
+			$.messager.alert('提示','对不起，您只能修改自己学院学生信息！','info');
+			return;
+		}
+		//验证是否输入错误班号
+		if(!ajaxGetClassName($("[name='CLASSNO']"),false)) return;
+		
+		var ary={NAME:$("[name='NAME']").val(),
+				SEX:$("[name='SEX']:checked").val(),
+				ENTERDATE:$("[name='ENTERDATE']").val(),
+				YEARS:$("[name='YEARS']").val(),
+				MAJOR:$("[name='MAJOR']").val(),
+				CLASSNO:$("[name='CLASSNO']").val(),
+				WARN:$("[name='WARN']").val(),
+				STATUS:$("[name='STATUS']").val(),
+				CONTACT:$("[name='CONTACT']").val(),
+				CLASS:$("[name='CLASS']").val(),
+				SCHOOL:$("[name='SCHOOL']").val(),
+				STUDENTNO:studentno};
+		//Ajax方式提交数据
+		$.ajax({
+            url:"__URL__/edit/hasJson/1",
+            type:"POST",
+            data:ary,
+            success: function(data){
+                if(data){
+                	$.messager.alert("提示","更新数据成功！");
+                }else $.messager.alert("提示","数据更新失败！请检查您提交的数据是否合法");
+            }
+        });
+	});
+	//保存当前学年学期注册信息
+	$('#save_reg').click(function(){
+		if(!is_school){
+			$.messager.alert('提示','对不起，您只能修改自己学院学生信息！','info');
+			return;
+		}
+		
+		var isNo={$isNo?'true':'false'};//当前学年学期注册信息是否存在
+		var year="{$year}";//当前学年
+		var term="{$term}";//当前学期
+		var url = "__URL__/saveReg/hasJson/1";//修改保存访问路径
+		if(isNo) url = "__URL__/saveReg/";//新增访问路径
+		if(studentno!=""){
+			$.ajax({
+	            url:url,
+	            type:"POST",
+	            data:{YEAR:year,TERM:term,STUDENTNO:studentno,REGCODE:$.trim($("[name='REGCODE']").val())},
+	            success: function(data){
+	                if(data){
+	                	$.messager.alert("提示","数据保存成功！","info",function(){
+	                		window.location.reload();
+	                	});
+	                }else  $.messager.alert("提示","数据保存失败！请检查您提交的数据是否合法");
+	            }
+	        });
+		}
+	});
+	var b={$isNo?'true':'false'};
+	if(!b){
+		$("#add").hide();
+	}
+});
+
+function edit_reg(ele){
+	ele.prev("span").hide();
+	ele.hide();
+	ele.next("span").show();
+	$("#add").show();
+}
+
+//获取班级名称
+function ajaxGetClassName(ele,alt){
+	var bool=true;
+	if($.trim(ele.val())!=""){
+		$.ajax({
+            url:"__URL__/validation/",
+            async:false,
+            type:"POST",
+            data:{CLASSNO:$.trim(ele.val())},
+            success: function(data){
+                if(data!="" && data!=null){
+                	if(alt){
+                		ele.next().attr("color","green");
+                    	ele.next().html("√");
+                    	$("[name='CLASSNAME']").html(data);
+                	}else ele.next().html("");
+                	bool=true;
+                }else{
+                	ele.next().attr("color","red");
+                	ele.next().html("不存在×");
+                	bool=false;
+                }
+            }
+        });
+	}else ele.next().html("");
+	return bool;
+}
+//处理键盘事件 禁止后退键（Backspace）密码或单行、多行文本框除外
+function forbidBackSpace(e){
+	var ev = e || window.event; //获取event对象 
+    var obj = ev.target || ev.srcElement; //获取事件源 
+    var t = obj.type || obj.getAttribute('type'); //获取事件源类型 
+    //获取作为判断条件的事件类型 
+    var vReadOnly = obj.readOnly;
+    var vDisabled = obj.disabled;
+    //处理undefined值情况 
+    vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+    vDisabled = (vDisabled == undefined) ? true : vDisabled;
+    //当敲Backspace键时，事件源类型为密码或单行、多行文本的， 
+    //并且readOnly属性为true或disabled属性为true的，则退格键失效 
+    var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+    //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效 
+    var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+    //判断 
+    if (flag2 || flag1) return false;
+}
+//禁止后退键 作用于Firefox、Opera
+document.onkeypress = forbidBackSpace;
+//禁止后退键  作用于IE、Chrome
+document.onkeydown = forbidBackSpace;
+</script>
+</html>

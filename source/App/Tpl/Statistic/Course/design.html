@@ -1,0 +1,63 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="2">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检 索</a>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENO',align:'center',width:100" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:200">课程名称</th>
+                <th data-options="field:'CREDITS',align:'center',width:60">学分</th>
+                <th data-options="field:'HOURS',align:'center',width:60">总学时</th>
+                <th data-options="field:'EXPERIMENTS',align:'center',width:60">实验学时</th>
+                <th data-options="field:'COMPUTING',align:'center',width:60">上机学时</th>
+                <th data-options="field:'CLASSNO',align:'center',width:100">班号</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:150">班级名称</th>
+                <th data-options="field:'COUNT',align:'center',width:60">选课人数</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function(){
+	var datagrid = $('#datagrid').datagrid({toolbar:'#tdemo'});
+    
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({});//搜索按钮
+    $('#searcher').click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	var school=$.trim($("[name='SCHOOL']").val());
+    	if(year=="" || term==""){
+    		$.messager.alert("提示","检索时学年学期不能为空！");
+    		return;
+    	}
+    	datagrid.datagrid("options").url = "__URL__/design/hasJson/1";
+    	datagrid.datagrid('load',{YEAR:year,TERM:term,SCHOOL:school});
+    });
+});
+</script>
+</body>
+</html>

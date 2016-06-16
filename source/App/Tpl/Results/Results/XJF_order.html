@@ -1,0 +1,166 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='YEAR_TWO']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+        //todo:应用英语A级
+      //  var wd=$('#wd').window(new wind(500,300,false,false,false,false,false))
+
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+
+
+        //todo:查询
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    if($.trim($('[name=CLASSNO]').val())==''){
+                        $('#excel').attr('action','false')
+                        return $.messager.alert('提示','请填写班号')
+                    }
+                    $('#title_year').html($('[name=YEAR]').val())
+                    $('#title_term').html($('[name=TERM]').val())
+                    $('[name=e_year]').val($.trim($('[name=YEAR]').val()));
+                    $('[name=e_term]').val(0);
+                    $('[name=e_classno]').val($.trim($('[name=CLASSNO]').val()))
+
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_eleven_select.SQL','count':'Results/One_eleven_count.SQL'
+                    },'bind':{
+                        ':CLASSNO': $.trim($('[name=CLASSNO]').val()),':YEAR':$('[name=YEAR]').val(),':TERM':0}})
+                    wd_two.window({closed:false})
+        })
+
+
+
+        //todo:查询2
+        $('#search2').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                        if($.trim($('[name=CLASSNO_TWO]').val())==''){
+                            $('#excel').attr('action','false')
+                            return $.messager.alert('提示','请填写班号')
+                        }
+                    $('#title_year').html($('[name=YEAR]').val())
+                    $('#title_term').html($('[name=TERM]').val())
+                    $('[name=e_year]').val($.trim($('[name=YEAR_TWO]').val()));
+                    $('[name=e_term]').val($.trim($('[name=TERM]').val()));
+                    $('[name=e_classno]').val($.trim($('[name=CLASSNO_TWO]').val()))
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_eleven_select.SQL','count':'Results/One_eleven_count.SQL'
+                    },'bind':{
+                        ':CLASSNO': $.trim($('[name=CLASSNO_TWO]').val()),':YEAR':$('[name=YEAR_TWO]').val(),':TERM':$('[name=TERM]').val()}})
+                    wd_two.window({closed:false})
+                })
+
+
+        $('#dc').bind('click',function(){
+            if($('#yingyuA').datagrid('getRows')==''){
+                return $.messager.alert('提示','页面数据为空')
+            }
+            $('#excel').submit();
+        })
+
+
+    })
+</script>
+<body style="background-color: #ffffff">
+<!--<div id="wd" title=" "  data-options="closable:false,collapsible:false" style="background: none repeat scroll 0% 0% rgb(224, 236, 255)">
+
+        <fieldset>
+            <legend><b>年学绩排名：</b></legend>
+            <table align="center" cellspacing="10" style="margin-top: 30px">
+                <tr>
+                    <td>
+                        学年：<input type="text" name="YEAR" value="2007" size="4" >
+                    </td>
+                    <td>
+                        设定班号：<input type="text" name="CLASSNO" value="0730910" size="9">
+                    </td>
+                    <td  align="center">
+                        <a id="search">查询</a> &nbsp;
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    <br><br><br>
+    <fieldset>
+        <legend><b>学期学绩分排名:</b></legend>
+        <table align="center" cellspacing="10" style="margin-top: 10px">
+            <tr>
+                <td>
+                    学年：<input type="text" name="YEAR_TWO" value="2007" size="4" >
+                </td>
+                <td>
+                    学期：<input type="text" name="TERM" value="1" size="1" >
+                </td>
+                <td>
+                    设定班号：<input type="text" name="CLASSNO_TWO" value="0730910" size="9">
+                </td>
+                <td  align="center">
+                    <a id="search2">查询</a> &nbsp;
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+   <font color="red"> 注：短学期计入第二学期</font>
+
+
+
+</div>-->
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            <div>
+          <legend><b>年学绩排名：</b></legend>
+
+            &nbsp; &nbsp;  <label for="yyear">学年：</label><input type="text" name="YEAR" id='yyear' size="4" > &nbsp; &nbsp;
+
+                            <label for="cclassno">设定班号：</label><input type="text" name="CLASSNO" id='cclassno' value="%" size="9"> &nbsp; &nbsp;
+
+                            <a id="search">查询</a>
+            </div>
+            <div style="margin-top: 5px">
+             <legend><b>学期学绩分排名:</b></legend>
+            &nbsp; &nbsp;  <label for="yyear2">学年：</label><input type="text" name="YEAR_TWO" id='yyear2' size="4" > &nbsp; &nbsp;
+
+                <label for="tterm">学期：</label><input type="text" name="TERM" id="tterm"size="1" > &nbsp; &nbsp;
+
+                <label for="cclassno2">设定班号：</label><input type="text" name="CLASSNO_TWO" id='cclassno2' value="%" size="9"> &nbsp; &nbsp;
+
+                <a id="search2">查询</a> &nbsp;
+
+
+
+            <font color="red"> 注：短学期计入第二学期</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" plain='true' class="easyui-linkbutton" iconCls="icon-excel" id="dc">导出Excel</a>
+            </div>
+        </div>
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',toolbar:'#tdemo',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[20,50,100,200,500]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',width:100" align="center">序号</th>
+                        <th data-options="field:'xh',width:100" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'xjf',width:100,align:'right'" align="center">学绩分</th>
+                    </tr>
+                    </thead>
+                </table>
+
+
+    </div>
+</div>
+<form id='excel' action="__APP__/CourseManager/Excel/Excel_XJF_order" method="POST">
+    <input type="hidden" name="e_year">
+    <input type="hidden" name="e_term">
+    <input type="hidden" name="e_classno">
+</form>
+</body>
+</html>

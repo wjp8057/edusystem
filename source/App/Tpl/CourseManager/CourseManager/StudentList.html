@@ -1,0 +1,370 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var myschool='{$myschool.SCHOOL}'      //todo:我的学院
+    var school='{$shuju.SCHOOL}'            //todo:选择的课程的学院
+
+    var year='{$shuju.YEAR}'
+    var term='{$shuju.TERM}'
+    var courseno='{$shuju.COURSENO}'
+    var coursetype='{$shuju.COURSETYPE}'
+    var type=[]
+    var total_row=0;
+    var course_credit=0;
+    var COURSENO='{$shuju.COURSENO}'                     //todo:查看学生列表 所在的学院
+ //   alert(coursetype)
+    $(function(){
+        $('#student_dat').datagrid({
+            onClickCell:function(index,filed,value){
+                $('#student_dat').datagrid('unselectRow',index)
+
+            }
+        })
+
+        //todo:添加学生的window
+        var add_student_wd=$('#add_student_wd').window(new wind(300,230,false,false,true,true,false))
+
+        //todo:添加学生----》 学生列表的窗口
+        //var add_student_wd_List=$('#add_student_wd_List').window(new wind(0,0,false,false,true,true,true))
+
+
+
+        $('#add_student_wd').css('display','')
+        //$('#add_student_wd_List').css('display','')
+
+      //  $('#student_wd').css('display','')
+
+
+        //todo:添加学生触发的事件
+        $('#add_student').bind('click',function(){
+            $('#add_student_wd').window({closed:false})
+        })
+
+
+        //todo:添加学生窗口---》按学号添加
+        $('#add_bt_one').linkbutton({
+            text:'提交到数据库'
+        }).bind('click',function(){
+            if($('[name=add_Studentno]').val().trim()==''){
+                return $.messager.alert('提示','请填写学号,或用通配符%')
+            }
+            if($('[name=add_Studentno]').val()!='%'){
+                ajiakesi('__URL__/addStudent_add',{'bind':[{'xh':$('[name=add_Studentno]').val().trim()}],YEAR:parent.$('[NAME=YEAR]').val(),TERM:parent.$('[name=TERM]').val(),COURSENO:COURSENO},function(c){
+                    $.messager.alert('提示',c)
+                })
+                return;
+            }
+
+            openTabsWindows('学生列表','__URL__/liebiao/year/'+year+'/term/'+term+'/courseno/'+COURSENO+'/coursetype/'+coursetype,'',true)
+        })
+
+
+        //todo:添加学生窗口---》按班级添加
+        $('#add_bt_two').linkbutton({
+            text:'提交到数据库'
+        }).bind('click',function(){
+			 openTabsWindows('学生列表','__URL__/liebiao2/year/'+year+'/term/'+term+'/courseno/'+COURSENO+'/classno/'+$('[name=add_Classno]').val().replace('%','')+'/coursetype/'+coursetype,'',true)
+        })
+
+
+
+
+
+
+        var student_dat=$('#student_dat');
+        $('#student_dat').datagrid({
+            onLoadSuccess:function(data){
+                total_row=data.total;
+                $('#STUDENTNOS').html(data.total)
+                for(var i=0;i<type.length;i++){
+                    $('[name=tkfs'+i+']').val(type[i])
+                }
+            }
+
+        })
+
+
+
+        //$('#student_wd').window(new wind(0,0,false,false,false,true,true,true))
+
+        ajiakesi('__APP__/Status/Status/Squery',{'Sqlpath':{'select':'CourseManager/One_one_StudentList_select.SQL',
+            'count':'CourseManager/One_one_StudentList_count.SQL'
+        },bind:{':YONE':year,':TONE':term,':COURSENO':courseno,':YTWO':year,':TTWO':term
+        }},function(c){
+           /* $('#student_dat').datagrid('onBeforeLoad',function(){
+                $('#pageloading').css('display','none')
+
+            })*/
+            $('#student_dat').datagrid('loadData',c)
+
+
+            //
+
+        })
+
+
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'CourseManager/One_one_title_select.SQL','bind':{
+            ':YEAR':year,':TERM':term,':COURSENO':courseno
+        }},function(c){
+            eval('var one='+c)
+            $('#t_kh').html(one[0]['COURSENOGROUP']);
+            $('#t_km').html(one[0]['COURSENAME']);
+            $('#t_xf').html(one[0]['CREDITS'])
+            course_credit=one[0]['CREDITS'];
+            $('#t_xy').html(one[0]['SCHOOLNAME']);
+            $('#t_yjrs').html(one[0]['ESTIMATE'])
+            $('#numlimit').val(one[0]['ESTIMATE'])
+
+        })
+
+
+/*
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+        <label for="numlimit">设定人数上限:</label><INPUT type="text" id=numlimit name=numlimit size=3 value=""><label for="creditlimit">设定学分上限:</label><INPUT type="text" id=creditlimit name=creditlimit size=2 value="50">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_order" plain=true>按排序筛选</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_suiji" plain=true>随机筛选</a>*/
+
+        $('#e_save').bind('click',function(){
+            if(myschool!='A1'&&school!=myschool){
+                return $.messager.alert('提示','你不能更改别的学院的选课结果！')
+            }
+            var obj={}
+            var rowList=$('#student_dat').datagrid('getChecked')
+            for(var i=0;i<rowList.length;i++){
+                obj[rowList[i].row]=rowList[i]
+            }
+            ajiakesi('__URL__/one_one/hasJson/1',{':ID':'EXE','exe':'CourseManager/One_one_updateStatus.SQL',bind:{'obj':obj,
+                ':YEAR':year,':TERM':term,':COURSENO':courseno
+            }},function(c){
+                $.messager.alert('提示','提交成功')
+            })
+        })
+
+        function ddel(){
+            $.messager.confirm('提示','您确定要删除选中的学生吗',function(c){
+                if(c){
+                    var obj={}
+                    var rowList=$('#student_dat').datagrid('getSelections')
+                    for(var i=0;i<rowList.length;i++){
+                        obj[rowList[i].row]=rowList[i].xh
+                    }
+
+                    ajiakesi('__URL__/delete_student/hasJson/1',{':ID':'EXE','exe':'CourseManager/One_one_updateStatus.SQL',bind:{'obj':obj,
+                        ':YEAR':year,':TERM':term,':COURSENO':courseno
+                    }},function(c){
+                        $('#student_dat').datagrid('options').url='__APP__/Status/Status/Squery'
+                        $('#student_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_one_StudentList_select.SQL',
+                            'count':'CourseManager/One_one_StudentList_count.SQL'
+                        },bind:{':YONE':year,':TONE':term,':COURSENO':courseno,':YTWO':year,':TTWO':term
+                        }})
+                        $.messager.alert('提示',c)
+                    })
+                }
+            })
+        }
+
+        $('#admin_del').bind('click',ddel)
+        $('#e_del').bind('click',ddel)
+
+        $('#e_order').bind('click',function(){
+            var xuanke=total_row
+            var shangxian=$('#numlimit').val()
+            var rowList=$('#student_dat').datagrid('getRows')
+            var i=0;
+            while(xuanke>shangxian){
+                if(parseFloat(rowList[i].xqgxkms)>1){
+                    var index=$('#student_dat').datagrid('getRowIndex',rowList[i]);
+                    $('#student_dat').datagrid('selectRow',index)
+                    xuanke--;
+                }
+                i++
+            }
+        })
+
+        $('#e_suiji').bind('click',function(){
+
+            var shanchurenshu=0;                          //todo:删除了几个人
+            var jilu=total_row;                           //todo:一共有几条
+
+            var shangxian=$('#numlimit').val()            //todo;人数上限
+            var xuefeng_sx=$('#creditlimit').val()         //todo:学分上限
+            var rowList=$('#student_dat').datagrid('getRows')
+            var draw=new Array();
+            for(var i=0;i<rowList.length;i++){
+                if(parseFloat(rowList[i].zxf)>xuefeng_sx){
+
+                    shanchurenshu++;
+                    index=$('#student_dat').datagrid('getRowIndex',rowList[i]);
+                    $('#student_dat').datagrid('selectRow',index)
+                }else{
+                    draw[i]=$('#student_dat').datagrid('getRowIndex',rowList[i]);
+
+                }
+            }
+
+            var toDraw=total_row-shanchurenshu-shangxian;
+
+            var todelete=shanchurenshu;
+
+            if(toDraw>0){
+
+                var temp;
+                var count=draw.length;
+                var pos;
+                todelete+=toDraw;
+                for(var j=0;j<count;j++){
+                    pos=Math.round(Math.random()*(count-1))
+                    temp=draw[j];
+                    draw[j]=draw[pos];
+                    draw[pos]=temp;
+                }
+
+
+                for(var k=0;k<toDraw;k++){
+
+                    //index=$('#student_dat').datagrid('getRowIndex',draw[k]);
+                    $('#student_dat').datagrid('selectRow',draw[k])
+
+                }
+            }
+
+        })
+
+    })
+
+
+
+    //todo:修改 重修和 重修费的函数
+    function up_status(index,ziduan){
+
+        var row=$('#student_dat').datagrid('getRows')[index]            //todo:要改变的行
+        //todo:如果被选中的
+        if($('[name='+ziduan+index+']').is(":checked")){
+            row[ziduan]=1
+        }else{
+            row[ziduan]=0
+        }
+    }
+
+
+
+    //todo:修改 重修和 重修费的函数
+    function up_status2(index,ziduan){
+
+        var row=$('#student_dat').datagrid('getRows')[index]            //todo:要改变的行
+        //todo:如果被选中的
+        row['tkfs']=$('[name=tkfs'+index+']').find("option:selected").val()
+
+
+        //alert(row['tkfs'])
+    }
+
+
+</script>
+
+
+<!--todo:添加学生的窗口-->
+<div id="add_student_wd" title="学生添加" style="display: none">
+    <center>
+    <fieldset>
+        <legend><b>直接输入学号选课：</b></legend>
+        学号:<input type="text" name="add_Studentno" value="%"><br><br>
+        重修:<input type="checkbox" name="add_chongxiu" checked>
+        <a href="javascript:void(0)" id="add_bt_one">提交到数据库</a>
+    </fieldset>
+    <fieldset>
+        <legend><b>直接输入班号选课：</b></legend>
+        班号:<input type="text" name="add_Classno" value="%"><br><br>
+        <a href="javascript:void(0)" id="add_bt_two">提交到数据库</a>
+    </fieldset>
+    <a href="javascript:void(0)" onclick="javascript:$('#add_student_wd').window({closed:true})" class="easyui-linkbutton" iconCls="icon-cut">关闭</a>
+    </center>
+</div>
+
+
+<!--todo:学生列表的窗口-->
+<div id="student_wd" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:false,fit:true,closed:false,border:false,
+                collapsible:false,minimizable:false,maximizable:false">
+    <div id="ccc" class="easyui-layout" data-options="fit:true,split:false,border:false">
+        <div id="tdemo">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <label for="numlimit">设定人数上限:</label><INPUT type="text" id=numlimit name=numlimit size=3 value="%"><label for="creditlimit">设定学分上限:</label><INPUT type="text" id=creditlimit name=creditlimit size=2 value="50">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_order" plain=true>按排序筛选</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_suiji" plain=true>随机筛选</a>
+
+
+                <a href="javascript:void(0)" id="add_student" class="easyui-linkbutton" iconCls="icon-add">直接添加学生</a>
+
+
+        </div>
+        <div data-options="region:'center',split:false" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="student_dat" title='<center>课号:<LABEL id="t_kh"></LABEL>&nbsp&nbsp&nbsp&nbsp
+            课名:<LABEL id="t_km"></LABEL>&nbsp&nbsp&nbsp&nbsp学分:<LABEL id="t_xf"></LABEL>&nbsp&nbsp&nbsp&nbsp开课学院:<LABEL id="t_xy"></LABEL>&nbsp&nbsp&nbsp&nbsp
+            预计人数:<LABEL id="t_yjrs"></LABEL>&nbsp&nbsp&nbsp&nbsp已有人数:<LABEL id=STUDENTNOS>0</LABEL></center>'
+                   data-options="fit:true,toolbar:'#tdemo'">
+             <!--   <thead frozen="true">
+
+                </thead>-->
+
+                <thead>
+                <tr>
+                    <th data-options="filed:'row',checkbox:true">选中</th>
+                    <th data-options="field:'xh',width:80" align="center">学号</th>   <th data-options="field:'xm',width:70" align="center">姓名</th>
+                    <th data-options="field:'xb',width:50,align:'right'" align="center">性别</th>
+                    <th data-options="field:'xsbj',width:130,align:'right'" align="center">学生班级</th>
+                    <th data-options="field:'zxf',width:60,align:'right'" align="center">总学分</th>
+                    <th data-options="field:'xkms',width:60,align:'right'" align="center">选课门数</th>
+                    <th data-options="field:'xqgxkxf',width:60,align:'right'" align="center">学期学分</th>
+                    <th data-options="field:'xqgxkms',width:55,align:'right'" align="center">学期门数</th>
+                    <th data-options="field:'hdgxxf',width:80,align:'right'" align="center">获得公选学分</th>
+                    <th data-options="field:'cxxf',width:60,align:'right'" align="center">创新学分</th>
+                    <th data-options="field:'xkjh',width:60,align:'right'" align="center">修课计划</th>
+                    <th data-options="field:'ct',width:40,align:'right'" align="center">冲突</th>
+                    <th data-options="field:'cx',width:40,align:'right',formatter:function(a,b,c){
+                                       var aa
+
+                            if(a==0){
+                                    aa=''
+                            }else{
+                                    aa='checked=checked'
+                            }
+
+                                return &quot<input type='checkbox' name='cx&quot+c+&quot' value='a' &quot+aa+&quot onclick=up_status(&quot+c+&quot,'cx')>&quot
+
+                        }" align="center">重修</th>
+                    <th data-options="field:'cxf',width:50,align:'right',formatter:function(a,b,c){
+                                 var aa
+
+                            if(a==0){
+                                    aa=''
+                            }else{
+                                    aa='checked=checked'
+                            }
+
+                                return &quot<input type='checkbox' name='cxf&quot+c+&quot' value='a' &quot+aa+&quot onclick=up_status(&quot+c+&quot,'cxf')>&quot
+
+                        }" align="center">重修费</th>
+                    <th data-options="field:'xkfs',width:60,align:'right'" align="center">修课方式</th>
+                    <th data-options="field:'kh2',width:60,align:'right'" align="center">考核</th>
+                    <th data-options="field:'tkfs',width:100,align:'right',formatter:function(a,b,c){
+                                type[c]=a
+                                return &quot<select name='tkfs&quot+c+&quot' onchange=up_status2(&quot+c+&quot,'tkfs')><volist name='approachcode' id='a'><option value='{$a.CODE}'>{$a.NAME}</volist></select>&quot
+                        }" align="center">听课方式</th>
+
+
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+  <!--  <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;display:block">
+            <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" />
+        </div>-->
+
+</div>
+
+

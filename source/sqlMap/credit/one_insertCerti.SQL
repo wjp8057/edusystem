@@ -1,0 +1,1 @@
+insert into CreditCertficate(cert_name,credit,status) values(:cert_name,:credit,:status)

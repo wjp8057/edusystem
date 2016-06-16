@@ -1,0 +1,127 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var options={};
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        $("#dayin").bind('click',function(){
+           // alert('123')
+
+         //  alert('')
+            var row=$('#disgrid').datagrid('getRows')
+         if(row==''){
+                return $.messager.alert('提示','抱歉,页面没有数据,并不能打印')
+            }
+            if($.trim($('[name=CLASSNO]').val())==''){
+                return $.messager.alert('提示','请填写一个要打印的班号')
+            }else if($.trim($('[name=YEAR]').val())==''||$.trim($('[name=TERM]').val())==''){
+                return $.messager.alert('提示','请填写学年学期')
+            }
+            open('__URL__/huizongPrint/CLASSNO/'+$('[name=CLASSNO]').val()+'/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val())
+        })
+            $('#disgrid').datagrid({})
+   //    var demo_dat=$('#damo_dat');                            //todo:成绩列表的datagrid
+
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls: 'icon-search'
+        }).bind('click',function(){
+                    if($('[name=CLASSNO]').val()==""){
+                        return $.messager.alert('提示','您还没有设定任何班级')
+                    }
+
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_three_selectCourse.SQL',bind:{
+                        ':CLASSNO':$('[name=CLASSNO]').val(),
+                        ':YEAR':$('[name=YEAR]').val(),
+                        ':TERM':$('[name=TERM]').val()
+                    }},function(c){
+                        eval('var one='+c)
+                        if(!one || one.length==0) return;
+
+                        var myNj = 4+one.length;                    //todo:datagrid需要的长度
+
+                        var s = "";
+                        s = "[[";
+                        s = s + "{field:'TOTALCREDITS',title:'获取学分',align:'center',width:100},{field:'xkxf',title:'选课学分',align:'center',width:100}";
+                        for(var i=0;i<one.length;i++){
+                           s+=",{field:'a"+one[i]['COURSENOGROUP']+"',title:'"+one[i]['COURSENAME']+"',width:100,align:'center'}"
+                        }
+                        s = s + "]]";
+
+                        //初始化
+                        $("#disgrid").datagrid({
+                            fit:true,
+                            remoteSort: false,
+                            frozenColumns:[[{field:'xh',title:'学号',width:100,align:'center'},{field:'xm',title:'姓名',align:'center',width:100}]],
+                            rownumbers:true,
+                            singleSelect:true,
+                            url : '__URL__/summary/hasJson/1',
+                            columns : eval(s),
+                            queryParams:{YEAR:$('[name=YEAR]').val(), TERM:$('[name=TERM]').val(), CLASSNO:$('[name=CLASSNO]').val(), nj:myNj, unitType:1}
+                        });
+
+
+                        //setTimeout(function(){  $('#disgrid').datagrid('load',{'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val(),'CLASSNO':$('[name=CLASSNO]').val()});},500)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    })
+
+
+
+
+
+                })
+
+
+
+
+    })
+
+
+
+
+
+</script>
+<body>
+
+
+
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+
+                                <label for="yyear">学年：</label><input type="text" name="YEAR" id="yyear" size="4" > 学期：<input type="text" name="TERM" size="2">
+
+                                <label for="cclassno">设定班号:</label><input type="text" name="CLASSNO" id='cclassno' size="7" value="">
+
+                                <a id="search">查询</a> &nbsp;<a href="javascript:void(0)" id='dayin' class="easyui-linkbutton" iconCls="icon-print" plain="true">打印</a>
+
+
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#Fff;">
+
+                <div id="disgrid" toolbar="#tdemo"></div>
+
+        </div>
+
+    </div>
+</body>
+</html>

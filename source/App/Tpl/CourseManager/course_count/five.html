@@ -1,0 +1,90 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        $('#search_one').bind('click',function(){
+            $('#dat_fivewww').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+            $('#dat_fivewww').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_five_select.SQL',
+                'count':'CourseManager/Five_five_count.SQL'},bind:{':YONE':parent.$('[name=year]').val(),':TONE':parent.$('[name=term]').val(),
+                ':YTWO':parent.$('[name=year]').val(),':TTWO':parent.$('[name=term]').val()}})
+        })
+
+        $('#e_excel').bind('click',function(){
+
+            $('[name=e_YEAR]').val(parent.$('[name=YEAR]').val())
+            $('[name=e_TERM]').val(parent.$('[name=TERM]').val())
+            $('[name=e_CSCHOOL]').val($('[name=SCHOOL_ONE]').val())
+            $('[name=e_SSCHOOL]').val($('[name=SCHOOL_TWO]').val())
+            excel.submit();
+        })
+    })
+</script>
+<!--todo:重修班选课统计-->
+<div id="cccc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+
+            课号：<input name="five_courseno" type="text" size='10' value="%">
+            课程类型：<select name="kclx">
+                            <option  value="%" selected>全部</option>
+                            <option value="选修">选修</option>
+                            <option value="必修">必修</option>
+                            <option value="限修">限修</option>
+                            <option value="模块">模块</option>
+                        </select>
+            班号：<input type="text" name="five_classno" size="7" value="%">
+            开课学院：<select name="five_school">
+                            <volist name="schools" id="s">
+                                <option name="{$s.SCHOOL}">{$s.NAME}</option>
+                            </volist>
+                        </select>
+            课程类别：<select name="kclb">
+                            <option  value="%" selected>全部</option>
+                            <option value="公共基础课">公共基础课</option>
+                            <option value="公共体育课">公共体育课</option>
+                            <option value="公共外语课">公共外语课</option>
+                            <option value="公共选修课">公共选修课</option>
+                            <option value="公共实验课">公共实验课</option>
+                            <option value="公共计算机课">公共计算机课</option>
+                            <option value="普通课">普通课</option>
+                            <option value="实习或设计">实习或设计</option>
+                            <option value="创新学分">创新学分</option>
+                        </select>
+            考核方式： <select name="khfs">
+                            <option  value="%" selected>全部</option>
+                            <option value="考试">考试</option>
+                            <option value="考查">考查</option>
+                        </select>
+
+            <a href="javascript:void(0) " id="search_one" class="easyui-linkbutton">检索</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="dat_fivewww"
+               data-options="fit:true,pagination:true,toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'row',checkbox:true">选择</th>
+                <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                <th data-options="field:'km',width:300,align:'right'" align="center">课名</th>
+                <th data-options="field:'xf',width:50,align:'right'" align="center">学分</th>
+                <th data-options="field:'xk',width:50,align:'right'" align="center">修课</th>
+                <th data-options="field:'kh2',width:50,align:'right'" align="center">考核</th>
+                <th data-options="field:'yjrs',width:100,align:'right'" align="center">预计人数</th>
+                <th data-options="field:'yxrs',width:100,align:'right'" align="center">已选人数</th>
+                <th data-options="field:'zws',width:100,align:'right'" align="center">座位数</th>
+                <th data-options="field:'kclb',width:100,align:'right'" align="center">课程类别</th>
+                <th data-options="field:'kkxy',width:100,align:'right'" align="center">开课学院</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<form id="excel" action="__APP__/CourseManager/Excel/exportexcel" method="POST">
+    <input type="hidden" name="e_YEAR">
+    <input type="hidden" name="e_TERM">
+    <input type="hidden" name="e_CSHOOL">
+    <input type="hidden" name="e_SCHOOL">
+</form>

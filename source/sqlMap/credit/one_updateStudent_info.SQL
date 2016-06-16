@@ -1,0 +1,2 @@
+update CreditSinglefirm set projectname=:projectname,credittype=:credittype,credit=:credit,
+certficatetime=:certficatetime,description=:description,schoolview=:schoolview,deanview=:deanview where applydate_id=:id

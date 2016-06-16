@@ -1,0 +1,54 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        function dataobj(url,columns,toolbar){
+            this.striped=true;
+            this.url=url;
+            this.columns=columns
+            this.pagination=true;
+            this.pageList=[10,20,30,40,50]
+            this.pageSize=30;
+            this.toolbar=toolbar;
+            this.fit=true;
+        }
+        var datobj=new dataobj('__URL__/teacherList/hasJson/1',[[
+            {field:'js',title:'教师',width:100,sortable:true
+            },
+            {field:'jsh',title:'教师号',width:100,sortable:true
+            },
+            {field:'zc',title:'职称',width:100,sortable:true
+            },
+            {field:'xy',title:'学院',width:255,sortable:true}
+        ]],null)
+        var dat=$('#datagrid').datagrid(datobj)
+
+
+        $('[name=Search]').bind('click',function(){
+            var year=$('[name=YEAR]').val()
+            var term=$('[name=TERM]').val()
+            var teacherno=(function(){
+                var yi=yitiao(dat,'请选择一个要查看的数据,不能选多条','请选择一条要查看的数据')
+                if(yi){
+                    var row=dat.datagrid('getSelected');
+                    return row.jsh;
+                }
+                return null
+            })()
+            if(teacherno!=null)
+            openTabsWindows('课程','__URL__/teachercourse/year/'+year+'/term/' +term+'/teacherno/'+teacherno,'',true)
+        })
+
+    })
+</script>
+<body class="easyui-layout">
+<div data-options="region:'north',title:'',split:false,border:false" style="height:60px;">
+    <p><font size="2">以下是检索到的教师列表，点中一个教师后，设定学年：<input type="text" name="YEAR" value="{$yearterm.YEAR}" size="4">学期：<input type="text" name="TERM" value="{$yearterm.TERM}" size="1">
+        <input type="button" value="检索分派给该教师的课程" name="Search"></font></p>
+    <p>
+</div>
+<div data-options="region:'center',title:'',split:false,border:false" style="padding:0px;background:#eee;">
+    <div id="datagrid">
+    </div>
+</div>
+</body>

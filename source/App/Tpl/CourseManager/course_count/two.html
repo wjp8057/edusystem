@@ -1,0 +1,50 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        $('#search_one').bind('click',function(){
+            $('#dat_two').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_two').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_two_select.SQL',
+                'count':'CourseManager/Five_two_count.SQL'},'bind':{':year':parent.$('[name=YEAR]').val(),':term':parent.$('[name=TERM]').val(),':courseschool':$('[name=SCHOOL_ONE]').val(),
+                ':studentschool':$('[name=SCHOOL_TWO]').val()}});
+        })
+    })
+</script>
+<!--todo:重修班选课统计-->
+
+    <div id="ccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            开课学院:<select name="SCHOOL_ONE" class="easyui-combobox">
+            <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>&nbsp;&nbsp;&nbsp;
+            学生所在学院:<select name="SCHOOL_TWO" class="easyui-combobox">
+            <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0) " id="search_one" class="easyui-linkbutton">统计</a>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="dat_two"
+                   data-options="fit:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'kkxy',width:150,align:'right'" align="center">开课学院</th>
+                    <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                    <th data-options="field:'km',width:220,align:'right'" align="center">课名</th>
+                    <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                    <th data-options="field:'xh',width:100,align:'right'" align="center">学号</th>
+                    <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                    <th data-options="field:'xsszxy',width:100,align:'right'" align="center">学生所在学院</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>

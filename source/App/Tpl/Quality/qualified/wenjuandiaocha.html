@@ -1,0 +1,145 @@
+<style>
+#table p{text-indent:1em;margin-left:1;margin-top:0;margin-bottom:0;}
+#table td{background:white;line-height:150%;}
+#table td.first{text-indent:1em;background:white;line-height:150%;}
+#table select{width:100px;}
+#table{background:lightskyblue;border-width:0;spacing:0;padding:0;margin: 0px auto;}
+#UPDATE{margin-right:20px;}
+</style>
+<h1 align="center" style="font-family:'隶书';font-size: 14px;">宁波城市职业技术学院合格课程学生问卷调查表</h1>
+<p>&nbsp;&nbsp;请您根据任课教师的教学实际情况，针对本评估表的每个问题，实事求是地对其教学作出评价。对每个问题，请选一个最能代表您看法的答案，给出您的分数。</p>
+<p>&nbsp;&nbsp;谢谢您的支持与合作。</p>
+<p align="center"><b><span name="courseTeacher"></span></b>
+<form id=UPDATEFORM method="POST" action="/scripts/general.exe/write?">
+    <table  id="table" height="296"  width="98%" cellspacing="1" border="0" cellpadding="0" dataSrc=#dsoDETAIL>
+        <tr>
+            <td width="5%" align="center" height="21"><b>序号</b></td>
+            <td width="80%" align="left"  height="21">
+                <p align="center"><b>评&nbsp;&nbsp;&nbsp; 价&nbsp;&nbsp;&nbsp;
+                    内&nbsp;&nbsp;&nbsp; 容</b></td>
+            <td width="15%" align="center" height="21">
+                <p align="center"><b>评&nbsp;价&nbsp;分&nbsp;数</b></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">1</td>
+            <td class="first" align="left" height="40" width="80%">本课程对我的专业学习</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a1" name="selected" DATAFLD="分数1">
+                <option value="10">很有帮助</option>
+                <option value="8">较有帮助</option>
+                <option value="6">有点帮助</option>
+                <option value="4">没有帮助</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">2</td>
+            <td class="first" width="80%" align="left" height="40">本课程重视学生综合素质的培养，理论与实践相结合，课堂教学与工作岗位结合程度</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a2" name="selected" DATAFLD="分数2">
+                <option value="10">很紧密</option>
+                <option value="8">比较紧密</option>
+                <option value="6">有联系</option>
+                <option value="4">关系不大</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">3</td>
+            <td class="first" width="80%" align="left" height="40">本课程讲究教学方法，教师善于启发，做到师生互动</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a3" name="selected" DATAFLD="分数3" >
+                <option value="10">好</option>
+                <option value="8">较好</option>
+                <option value="6">一般</option>
+                <option value="4">差</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">4</td>
+            <td class="first" width="80%" align="left" height="40">
+                本课程能运用网络、多媒体等现代化教学手段的效果
+            </td>
+            <td width="15%" align="center" height="40"><select size="1" id="a4" name="selected" DATAFLD="分数4" >
+                <option value="10">好</option>
+                <option value="8">较好</option>
+                <option value="6">一般</option>
+                <option value="4">差</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">5</td>
+            <td class="first" width="80%" align="left" height="40">通过本课程学习，不但学到了理论知识，而且提高了分析问题、解决问题的能力，专业能力得到提高</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a5" name="selected" DATAFLD="分数5" >
+                <option value="10">有很大提高</option>
+                <option value="8">有较大提高</option>
+                <option value="6">有提高</option>
+                <option value="4">没提高</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">6</td>
+            <td class="first" width="80%" align="left" height="40">本课程的作业，考查核考试能真实反应学生学习现状</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a6" name="selected" DATAFLD="分数6" >
+                <option value="10">能反应</option>
+                <option value="8">基本能反应</option>
+                <option value="6">反应不全面</option>
+                <option value="4">不能反应</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">7</td>
+            <td class="first" width="80%" align="left" height="40">本课程网站对我的学习</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a7" name="selected" DATAFLD="分数7" >
+                <option value="10">很有帮助</option>
+                <option value="8">较有帮助</option>
+                <option value="6">有帮助</option>
+                <option value="4">无网站</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">8</td>
+            <td class="first" width="80%" align="left" height="40">本课程老师上课精神饱满，重点突出，语言准确，思路清晰</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a8" name="selected" DATAFLD="分数8" >
+                <option value="10">好</option>
+                <option value="8">较好</option>
+                <option value="6">一般</option>
+                <option value="4">差</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">9</td>
+            <td class="first" width="80%" align="left" height="40">本课程老师在教学中能严格管理学生，学生也愿意服从其管理</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a9" name="selected" DATAFLD="分数9" >
+                <option value="10">好</option>
+                <option value="8">较好</option>
+                <option value="6">一般</option>
+                <option value="4">差</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="5%" align="center" height="40">10</td>
+            <td class="first" width="80%" align="left" height="40">本课程激发了我的学习兴趣</td>
+            <td width="15%" align="center" height="40"><select size="1" id="a10" name="selected" DATAFLD="分数10" >
+                <option value="10">很有兴趣</option>
+                <option value="8">较有兴趣</option>
+                <option value="6">兴趣不大</option>
+                <option value="4">没兴趣</option>
+                <option value="0" selected>未选择    </option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="85%" align="center" height="40" colspan="2"><span style="letter-spacing:50px;font-weight: bold;">总分</span></td>
+            <td width="15%" align="center" height="40"><span id="zongfen"></span></td>
+        </tr>
+    </table>
+    <p align="center">
+	    <a href="javascript:void(0)" data-options="iconCls:'icon-save'" id="UPDATE" class="easyui-linkbutton">提交/更新我的评分</a>
+	    <a href="javascript:void(0)" data-options="iconCls:'icon-back'" id="backBut_2" class="easyui-linkbutton">返回</a>
+    </p>
+    <input type="hidden" name="MID" value="KP08"><input type="hidden" name="SQL" value=" "><input type="hidden" name="XML" value=" ">
+</form>

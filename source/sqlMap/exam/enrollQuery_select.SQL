@@ -1,0 +1,19 @@
+select * from(SELECT row_number() over(order by students.school,STUDENTS.STUDENTNO,scores.COURSENO+scores.[group]) as row,students.school xydh,STUDENTS.STUDENTNO xh ,
+      STUDENTS.NAME xm, SCHOOLS1.NAME xsszxy,
+      scores.COURSENO+scores.[group] kh, COURSES.COURSENAME kcmc,
+      SCHOOLS.NAME kkxy, EXAMREMOPTIONS.NAME hkyy
+FROM SCORES LEFT OUTER JOIN
+      COURSES ON
+      SCORES.COURSENO = COURSES.COURSENO LEFT OUTER JOIN
+      SCHOOLS ON COURSES.SCHOOL = SCHOOLS.SCHOOL LEFT OUTER JOIN
+      STUDENTS ON SCORES.STUDENTNO = STUDENTS.STUDENTNO LEFT OUTER JOIN
+      SCHOOLS SCHOOLS1 ON
+      STUDENTS.SCHOOL = SCHOOLS1.SCHOOL LEFT OUTER JOIN
+      EXAMREMOPTIONS ON SCORES.EXAMREM = EXAMREMOPTIONS.CODE
+WHERE (SCORES.EXAMREM = 'D' or SCORES.EXAMREM = 'Q') and year=:YEAR and term=:TERM and students.school like :CLASSSCHOOL and courses.school like :COURSESCHOOL
+and  SCORES.COURSENO + SCORES.[GROUP] like :COURSENO and scores.studentno like :STUDENTNO
+) as b where b.row between :start and :end
+
+
+
+

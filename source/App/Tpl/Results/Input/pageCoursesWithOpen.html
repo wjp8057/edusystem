@@ -1,0 +1,112 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var school='{$school}';
+    var teacherno='{$teacherno}';
+    function statusFormatter(value){
+        return parseInt(value) > 0?'锁定':'开放';
+    }
+
+    $(function(){
+        var school_input = $("#school");
+        var year_input = $("#year");
+        var term_input = $("#term");
+        var dgrid = $("#dgrid");
+
+        school_input.val(school);
+        year_input.val(GenKits.getParentYear());
+        term_input.val(GenKits.getParentTerm());
+
+        $('#search').bind('click',function(){
+            dgrid.datagrid('load',{
+                year:year_input.val(),
+                term:term_input.val(),
+                school:school_input.val()
+            });
+        });
+
+        $('#lookStudentsScores').bind('click',function(){
+            if(Datagrid.selectSingle(dgrid)){
+                var row = Datagrid.getSelected(dgrid);
+                open('__URL__/Three_three_daying/year/'+year_input.val()+
+                        '/term/'+term_input.val()+'/courseno/'+row.coursegroupno);
+            }
+        });
+
+        $('#openCourseSelection').bind('click',function(){
+            if(Datagrid.hasSelected(dgrid)){
+                var rows = Datagrid.getSelections(dgrid);
+                console.log(rows);
+                var tip = "";
+                for(var i = 0; i < rows.length; i++){
+                    if(i != (rows.length -1)){
+                        tip += rows[i].coursename+',';
+                    }else{
+                        tip += rows[i].coursename;
+                    }
+                }
+                $.messager.confirm('提示','请确认开放的课程为：<br />'+tip,function(c){
+                    if(c){
+                        $.post('__URL__/kf_cs/hasJson/1',{courses:rows,year:year_input.val(),term:term_input.val()},function(c){
+                            return Messager.showMessage(c, function () {
+                                dgrid.datagrid('reload');
+                            });
+                        });
+                    }
+                })
+            }
+        });
+
+
+        $('#exportexcel').bind('click',function(){
+            open("__URL__/Three_one/reqtag/exportexcel/year/"+year_input.val()+"/term/"+term_input.val()+"/school/"+school_input.val());
+        })
+
+
+    });
+    function coursenoFormater(value,row,index){
+        return "<a target='blank' href='__URL__/Three_CJSR_StudentList/YEAR/"+$('[name=YEAR]').val().trim()+"/TERM/"+$('[name=TERM]').val().trim()+"/COURSENO/"+value+"'>"+value+"</a>";
+    }
+</script>
+<body style="background: #fff">
+
+
+
+    <div class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            学年：<input type="text" name="YEAR" id="year" size="4">&nbsp;&nbsp;
+            学期：<input type="text" name="TERM" id="term" size="1">
+            所在学院：
+            <select name="SCHOOL" id="school">
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            <a href="javascript:void(0)" id="search"  class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+
+            <a href="javascript:void(0)" id="lookStudentsScores" class="easyui-linkbutton" data-options="iconCls:'icon-search'" plain="true">查看成绩登记表</a>
+            <a href="javascript:void(0)" id="openCourseSelection" class="easyui-linkbutton" data-options="iconCls:'icon-search'" plain="true">开放选中课程</a>
+            <a href="javascript:void(0)" id="exportexcel" class="easyui-linkbutton" data-options="iconCls:'icon-search'" plain="true">导出Excel</a>
+        </div>
+        <div data-options="region:'center',border:false,split:false" style="padding:0;background:#eee;">
+            <table class="easyui-datagrid" id="dgrid"
+                   data-options="url:'__URL__/Three_one',pageList:[20,50,100,200,500],title:'',fitColumns:true,pagination:true,fit:true,toolbar:'#tdemo',singleSelect:false">
+                <thead>
+                <tr>
+                    <th data-options="field:'coursegroupno',width:100,formatter: coursenoFormater" align="center">课号</th>
+                    <th data-options="field:'coursename',width:100" align="center">课程名称</th>
+                    <th data-options="field:'approach',width:100" align="center">修课方式</th>
+                    <th data-options="field:'examtype',width:100" align="center">考核方式</th>
+                    <th data-options="field:'lock',width:100,formatter:statusFormatter" align="center">状态</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+
+
+
+
+
+</body>

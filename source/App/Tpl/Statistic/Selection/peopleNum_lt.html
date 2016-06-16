@@ -1,0 +1,107 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			<div>
+			   <label>课号：</label><input name="COURSENOGROUP" size="14" maxlength="10" value="%">
+			   <label>课程类型：</label>
+			   <select class="easyui-combobox" name="COURSETYPE" data-options="editable:false">
+			     <option value="%">所有</option>
+				 <volist name="approaches" id="a">
+				 <option value="{$a.VALUE}">{$a.VALUE}</option>
+				 </volist>
+			   </select>
+			   <label>班号：</label><input name="CLASSNO" size="16" value="%">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+                </div>
+                <div style="margin-top: 2px">
+			   <label>课程类别：</label>
+			   <select class="easyui-combobox" name="COURSETYPENAME" data-options="editable:false">
+			     <option value="%">所有</option>
+				 <volist name="typeoptions" id="t">
+				 <option value="{$t.VALUE}">{$t.VALUE}</option>
+				 </volist>
+			   </select>
+			    <label>考核方式：</label>
+			   <select class="easyui-combobox" name="EXAMTYPE" data-options="editable:false">
+			     <option value="%">所有</option>
+				 <volist name="examoptions" id="e">
+				 <option value="{$e.VALUE}">{$e.VALUE}</option>
+				 </volist>
+			   </select>
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1">
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+			</div>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#content').datagrid({
+		fit:true,
+		striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"COURSENOGROUP",title:"课号",width:20,align:"center"},
+                  {field:"COURSENAME",title:"课名",width:50,align:"center"},
+                  {field:"CREDITS",title:"学分",width:10,align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"COURSETYPE",title:"修课",width:10,align:"center"},
+                  {field:"EXAMTYPE",title:"考核",width:10,align:"center"},
+                  {field:"ESTIMATE",title:"预计人数",width:15,align:"center"},
+                  {field:"AMOUNT",title:"已选人数",width:15,align:"center"},
+                  {field:"COURSETYPENAME",title:"课程类别",width:20,align:"center"},
+                  {field:"SCHOOLNAME",title:"开课学院",width:20,align:"center"},
+                  {field:"DAYNTIME",title:"上课时间",width:50,align:"center"},
+                  {field:"REM",title:"备注",width:40,align:"center"}
+                ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+        toolbar:'#tdemo'
+    });
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='YEAR']").val());
+     	var term=$.trim($("[name='TERM']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/peopleNum_lt/hasJson/1";
+     	datagrid.datagrid('load',{
+     		YEAR:year,TERM:term,
+     		COURSENOGROUP:$.trim($("[name='COURSENOGROUP']").val()),
+     		COURSETYPE:$.trim($("[name='COURSETYPE']").val()),
+     		CLASSNO:$.trim($("[name='CLASSNO']").val()),
+     		SCHOOL:$.trim($("[name='SCHOOL']").val()),
+     		COURSETYPENAME:$.trim($("[name='COURSETYPENAME']").val()),
+     		EXAMTYPE:$.trim($("[name='EXAMTYPE']").val())
+     	});
+     });
+});
+</script>
+</body>
+</html>

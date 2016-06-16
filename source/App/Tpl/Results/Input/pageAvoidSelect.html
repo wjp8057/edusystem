@@ -1,0 +1,142 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$user_info.SCHOOL}';
+    var teacherno='{$user_info.TEACHERNO}';
+
+    $(function(){
+
+        var year_input = $("#year_input");
+        var term_input = $("#term_input");
+        var name_input = $("#name_input");
+        var date_input = $("#date_input");
+        var dgrid = $('#dgrid');
+
+        var studentno_input = $("#studentno");
+        var studentname_input = $("#studentname");
+        var classname_input = $("#classname");
+        studentno_input.blur(function () {
+            var studentno = $.trim(studentno_input.val());
+            $.ajaxSetup({
+                async: false
+            });
+            $.post('__URL__/add_miance/reqtag/checkstudentno',{studentno:studentno}, function (data) {
+                if(Ajaxor.isMessage(data)){
+//                    return Messager.showMessage(data);
+                }else{
+                    studentname_input.val(data['NAME']);
+                    classname_input.val(data['CLASSNO']);
+                }
+            });
+            $.ajaxSetup({
+                async: true
+            });
+        });
+
+
+        year_input.val(GenKits.getParentYear());
+        term_input.val(GenKits.getParentTerm());
+        date_input.datebox("setValue", (new Date()).Format("yyyy-MM-dd"));
+
+        $('#openAddPane').bind('click',function(){
+            $('#year').val(GenKits.getParentYear());
+            $('#term').val(GenKits.getParentTerm());
+            $('#addwd').window({closed:false});
+        });
+
+
+        $('#search').bind('click',function(){
+            dgrid.datagrid('load',{
+                year:year_input.val(),
+                term:term_input.val(),
+                studentname:name_input.val()
+            });
+        });
+
+        $('#addStudent').bind('click',function(){
+            //主动删除焦点
+            studentno_input.blur();
+            var studentname = $.trim(studentname_input.val());
+            if(!studentname){
+                return Messager.showWarning("未获取学生信息!");
+            }
+            $.post('__URL__/add_miance',
+                    {
+                        'year':$('#year').val(),
+                        'term':$('#term').val(),
+                        'studentno':studentno_input.val(),
+                        'name':studentname,
+                        'classname':$('#classname').val(),
+                        'reason':$('#reson').val(),
+                        time:$('#date').val()
+                    },
+                function(c){
+                    return Messager.showMessage(c, function () {
+                        dgrid.datagrid('reload');
+                    });
+                });
+        });
+    });
+
+
+
+
+</script>
+<body style="background: #fff">
+
+<div id="addwd" class="easyui-window" title="新增" style="width:600px;height:230px"
+     data-options="modal:true,collapsible:false,
+     minimizable:false,maximizable:false,closabel:false,closed:true">
+    <br>
+    <div align="center">
+        学年：<input type="text" id="year" size="4">&nbsp;
+        学期：<input type="text" id="term" size="1">&nbsp;
+        学号：<input type="text" id="studentno" size="9">
+             <input type="text" id="studentname" size="9" style="border: 0" readOnly="true"><br /><br />
+             <input type="text" id="classname" size="9"  style="display: none" readOnly="true">
+        原因：<input type="text" id="reason" size="25">
+        批准时间：
+            <input id="date" type="text" class="easyui-datebox" required="required">
+        <br />
+        <br />
+        <a href="javascript:void(0)" id="addStudent" class="easyui-linkbutton">添加</a>
+    </div>
+</div>
+
+<div id="ccc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+        学年：<input type="text" name="syear" id="year_input" value="2012" size="4" />&nbsp;&nbsp;
+        学期：<input type="text" name="sterm" id="term_input" value="2" size="1" />
+        姓名：<input type="text" name="sname" id="name_input" value='%'  size="9"  />
+
+        <a href="javascript:void(0)" iconCls="icon-search" class="easyui-linkbutton" id="search">查询</a>&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" id="openAddPane" iconCls="icon-add">新增</a>
+    </div>
+    <div data-options="region:'center',border:false,split:false" style="padding:0;background:#eee;">
+
+        <table class="easyui-datagrid" id="dgrid"
+               data-options="url:'__URL__/Three_six',pageList:[20,50,100,200,500],fit:true,
+               singleSelect:true,pagination:true,toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'studentno',width:100" align="center">学号</th>
+                <th data-options="field:'studentname',width:100" align="center">姓名</th>
+                <th data-options="field:'reason',width:300" align="center">原因</th>
+                <th data-options="field:'applydate',width:150" align="center">批准时间</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+
+</body>
+
+
+
+
+
+
+

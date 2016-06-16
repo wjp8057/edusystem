@@ -1,0 +1,114 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+    <title>个人基本信息</title>
+    <script language="javascript">
+
+        String.prototype.isDate = function()
+        {
+            var r = this.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+            if(r==null)return false;
+            var d = new Date(r[1], r[3]-1, r[4]);
+            return(d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+        }
+        $(function(){
+            var teacherno='{$teacherno}'
+            //todo:添加一个学习经历的时候
+            $('[name=B1]').bind('click',function(){
+                var obj={}
+                var name=$('#name').val().trim()
+                var publish=$('#publish').val().trim();
+                var content=$('#content').val().trim();
+                var honor=$('#honor').val().trim();
+                if(name==""||publish==""||content==""||honor==""){
+                    return $.messager.alert('提示','请输入完整的信息 不能为空白');
+                }
+                obj['SQLPATH']="Four_insertThesis.SQL"
+                obj['arr']={':NAME':name,':PUBLISH':publish,':CONTENT':content,':HONOR':honor,':TEACHERNO':teacherno};
+                ajiakesi('__URL__/thesis',obj,function(c){
+                    if(c=='1'){
+                        $.messager.alert('提示','添加成功')
+                        setTimeout(function(){  window.location.href=window.location.href;},700)
+                    }
+                })
+            })
+
+
+            //todo:删除一个论文的时候
+            $('[name=deleteThsis]').bind('click',function(){
+                var obj1=this
+                $.messager.confirm('提示','您确定要删除吗',function(c){
+                    if(c){
+                        var obj={};
+                        obj['SQLPATH']='Four_deleteThesis.SQL'
+                        obj['arr']={':RECNO':obj1.parentNode.id}
+                        ajiakesi('__URL__/thesis',obj,function(c){
+                            if(c=='1'){
+                                $.messager.alert('提示','删除成功')
+                                setTimeout(function(){  window.location.href=window.location.href;},700)
+                            }
+                        })
+                    }})
+
+            })
+        })
+
+    </script>
+
+<body style="background-color: #ffffff" >
+<style>
+    td,th{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt,.cc{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<center><font face="隶书" ><span style="font-size: 17px">论文、编写教材、科研教研成果一览表</span></font></center>
+<br>
+    <input type="hidden" name="XML" value=" "><input type="hidden" name="SQL" value=" "><input type="hidden" name="MID" value=" ">
+    <input type="hidden" name=REDIRECT value="">
+    <div align="center">
+            <table border="0" cellspacing="1" width="75%" height="38"  DATASRC="#dsoPERSONAL">
+                <thead>
+                <th width="30%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>成 果 名 称</b></font></th>
+                <th width="25%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>何年何月在何刊物发表或何出版社出版或通过何级鉴定</b></font></th>
+                <th width="20%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>本人承担部分及字数（注明排名）</b></font></th>
+                <th width="15%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>获奖情况</b></font></th>
+                <th width="10%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>操作</b></font></th>
+                </thead>
+                <if condition="count($info) eq 0">
+                    <tr>
+                        <td colspan="6">暂无数据</td>
+                    </tr>
+                </if>
+                <volist name="info" id="v">
+                <tr>
+                    <td width="30%" height="25" align="center"><font size="2"><SPAN>{$v.NAME}</SPAN></font></td>
+                    <td width="25%" height="25" align="center"><font size="2"><SPAN>{$v.PUBLISH}</SPAN></font></td>
+                    <td width="20%" height="25" align="center"><font size="2"><SPAN>{$v.CONTENT}</SPAN></font></td>
+                    <td width="15%" height="25" align="center"><font size="2"><SPAN>{$v.HONOR}</SPAN></font></td>
+                    <td width="10%" height="25" align="center"><font size="2"><a href="javascript:void(0)" Id="{$v.RECNO}"><button name="deleteThsis">删除</button></a></font></td>
+                </tr>
+               </volist>
+            </table>
+    </div>
+    <p>
+    <div align="center">
+        <table border="0" cellspacing="1" width="75%">
+            <tr>
+                <td width="30%" height="25">
+                    <p align="left"><input type="text" name="Name" id="name" size="28"></td>
+                    <td width="25%" height="25">
+                        <p align="center"><input type="text" name="Publish" id="publish" size="23"></td>
+                <td width="20%" height="25">
+                    <p align="center"><input type="text" name="Content" id="content" size="18"></td>
+                    <td width="15%" height="25">
+                        <p align="center"><input type="text" name="Honor" id="honor" size="12"></td>
+                    <td width="10%" height="25"><p align="center"><input type="button" value="添加" name="B1"></td>
+            </tr>
+        </table>
+        </center>
+    </div>
+</body>
+

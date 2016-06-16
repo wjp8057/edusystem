@@ -1,0 +1,55 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    $(function(){
+        var wd=$('#wd').window(new wind(600,300,false,false,false,false,false));        //todo:默认的页面
+        var year='{$timearr.year}';
+        var term='{$timearr.term}';
+
+        //todo:点击认定归档的时候
+        $('#bt').bind('click',function(){
+            ajiakesi('__URL__/file',{'bind':{':year':year,':term':term}},function(c){
+                $.messager.alert('提示',c)
+            })
+        })
+
+    })
+</script>
+<style>
+    td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<!--todo: 进来的默认页面-->
+<body style="background-color: #ffffff">
+<div id="wd" title="认定归档">
+    <table border="0"  width="556" style="margin-top: 40px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学年：</b></td>
+            <td width="209" height="25"><span>{$timearr.year}</span></td>
+
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学期：</b></td>
+            <td width="209" height="25"><span>{$timearr.term}</span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>开始时间：</b></td>
+            <td width="209" height="25"><span>{$timearr.begintime}</span></td>
+
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>结束时间：</b></td>
+            <td width="209" height="25"><span>{$timearr.endtime}</span></td>
+        </tr>
+        <tr>
+            <td  height="25" align="center" colspan="4" style="border:0px">
+                <a href="javascript:void(0)" id="bt" class="easyui-linkbutton">认定归档提交</a></td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

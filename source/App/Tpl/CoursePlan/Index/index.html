@@ -1,0 +1,108 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-sys","menuname": "开课计划",
+                "menus": [
+                    {"menuid": "12","menuname": "自动生成开课计划","icon": "icon-evaluate","url": "__ROOT__/CoursePlan/Commencement/auto"},
+                    {"menuid": "10","menuname": "添加开课计划条目","icon": "icon-classTable","url": "__ROOT__/CoursePlan/Commencement/create"},
+                    {"menuid": "11","menuname": "浏览开课计划","icon": "icon-weekTable","url": "__ROOT__/CoursePlan/Commencement/qlist"},
+                    {"menuid": "13","menuname": "自动生成排课计划","icon": "icon-xupersonal","url": "__ROOT__/CoursePlan/Timetable/auto"},
+                    {"menuid": "14","menuname": "浏览排课计划表","icon": "icon-xuchaxun","url": "__ROOT__/CoursePlan/Timetable/qform"},
+                    {"menuid": "15","menuname": "调停课管理","icon": "icon-plan","url": "#",
+                        "child": [
+                            {"menuid": "51","menuname": "调停课申请","icon": "icon-role","url": "__ROOT__/CoursePlan/TranStopCourses/apply"},
+                            {"menuid": "52","menuname": "学院领导审批","icon": "icon-role","url": "__ROOT__/CoursePlan/TranStopCourses/schoolApproval"},
+                            {"menuid": "53","menuname": "审批进度查询","icon": "icon-role","url": "__ROOT__/CoursePlan/TranStopCourses/progress"},
+                            {"menuid": "54","menuname": "教务处领导审批","icon": "icon-role","url": "__ROOT__/CoursePlan/TranStopCourses/registryApproval"},
+                            {"menuid": "55","menuname": "补课查询与输入","icon": "icon-role","url": "__ROOT__/CoursePlan/TranStopCourses/makeup"}
+                        ]
+                    }]
+            }
+        ]
+    };
+    var menuTabs = null;
+
+    $(function() {
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Teacher/Login/logout';
+                }
+            });
+        });
+
+        //开课计划的学年学期保存
+        $("#handlerConfig").bind("click",function(){
+            $.post("__ROOT__/CoursePlan/Index/config/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()}, function(rsp) {
+                if(rsp){
+                    msgShow("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">开课计划功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">开课计划：实现学期课程开设、合分班，教师安排以及各种排课要求的设定，实现调停课管理。有自动生成开课计划、添加开课条目、浏览开课计划、自动生成排课计划、浏览排课计划，调停课管理等模块。各学院管理员的权限仅限本开课学院的开课信息，教学处管理员是管理全校的开课信息。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、自动生成开课计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">自动生成开课计划会清除指定学年学期的原先的开课记录，并自动将教学计划里的开课计划导入进来，自动生成指定学年学期的新的开课计划。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、添加开课计划条目:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以对指定学年、学期的某课程进行添加开课计划</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、浏览开课计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以检索所有学院的开课计划，并对开课计划进行修改、新增、删除操作，对开课计划的班级进行合班或分班，可将开课计划导出到排课计划。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、自动生成排课计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、可按学期自动生成排课计划，部分课程若教师暂时无法确定，可一键统一给这些课程添加未定教师。
+            <br>2、执行此操作会清除指定学年学期的排课计划、考试计划、任课教师和排课表记录。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">5、浏览排课计划表:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、按各种条件检索排课计划，并导出excel表，和导出
+            <br>2、可编辑或修改、删除排课计划，并可新增、修改或删除该门课程的上课老师，并将此教师传递到课程总表。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">6、调停课管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可提交调停课申请，可查看申请进度；学院领导可初步审批，教务处领导最终审批；可查询补课信息及补课时间的设置。
+            <br>1、调停课申请：教师可提出需要调停课程的申请，给出理由及补课时间，提交给学院领导审核。
+            <br>2、学院领导审批：院领导只可查看本学院老师提交的调停课申请，并对此进行审核。若审核通过则将提交给教务处领导审核，若不通过，则删除此条申请。
+            <br>3、审批进度查询：可以查询各个学院的调停课申请记录。
+            <br>4、教务处领导审批：教务处领导可以对各院系提交上来的调停课申请做最终的审批，通过则同意调课，若不通过，则删除该条申请。
+            <br>5、补课查询与输入：学院可以检索全校的补课记录，但只能对本学院的补课进行删除、修改管理操作。教务处可以检索管理全校的补课。
+
+        </p>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

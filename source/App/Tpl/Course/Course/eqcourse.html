@@ -1,0 +1,261 @@
+<include file=":Include:jqueryHeader" />
+<script>
+$(function(){
+    var tb=$('biaodan2').form({
+    })
+    var indexrow=undefined;             //保存索引键的变量
+    var  dat=$('#scinfo').datagrid({
+        columns:[[
+            {checkbox:true},{field:'programno',title:'教学计划号',width:50,sortable:true,align:'center',
+                editor:{type:'validatebox',options:{
+                    required:true
+                }}},
+            {field:'progname',title:'教学计划名',width:150,sortable:true,align:'center',
+                editor:{type:'validatebox',options:{required:true}}
+            },
+            {field:'belongschool',title:'所属学院',width:40,sortable:true,align:'center'
+            },
+            {field:'courseno',title:'课号',width:50,sortable:true,align:'center'
+            },
+            {field:'coursename',title:'课程名称',width:100,sortable:true,align:'center'
+            },
+            {field:'credits',title:'学分',width:40,sortable:true,align:'center'
+            },
+            {field:'createschool',title:'开课学院',width:50,sortable:true,align:'center'
+            },
+            {field:'eqno',title:'等价课号',width:50,sortable:true,align:'center'
+            },
+            {field:'eqname',title:'等价课名',width:50,sortable:true,align:'center'
+            },
+            {field:'eqcredits',title:'等价学分',width:50,sortable:true,align:'center'
+            },
+            {field:'eqschool',title:'等价学院',width:50,sortable:true,align:'center'
+            }
+        ]],
+        fitColumns:true,
+        pagination:true,
+        pageList:[30,50],
+        pageSize:30,
+        toolbar:'#tdemo'/*[{
+            text:'删除等价课程',
+            iconCls:'icon-cancel',
+            handler:function(){
+                var row2 = dat.datagrid('getSelections');
+                if (row2.length==1){
+                    $.messager.confirm('提示','您确定要删除吗',function(b){
+                        if(b){
+                            var infoarr={};                      //存储删除信息的数组
+                                infoarr.COURSENO=row2[0]['courseno'];
+                                infoarr.EQNO=row2[0]['eqno'];
+                                infoarr.PROGRAMNO=row2[0]['programno'];
+                            $.ajax({
+                                url:'__URL__/eqcoursede',
+                                data:infoarr,
+                                type:'POST',
+                                success:function(C){
+
+                                    if(C=='yes'){
+                                        $.messager.alert('提示','删除成功','?');
+                                    }else{
+                                        $.messager.alert('提示','删除失败,没权限操作','?');
+                                    }
+                                    dat.datagrid('load');
+                                }
+                            })
+                        }
+                    });
+                }else{
+                    $.messager.alert('提示','请选择一条数据删除')
+                }
+            }
+        },'-',{
+            text:'添加等价课程',
+            iconCls:'icon-add',
+            handler:function(){
+                $('#chuangkou').window({
+                    closed:false,
+                    modal:true,
+                    minimizable:false,
+                    maximizable:false
+                })
+
+            }
+
+        }
+        ]*/,onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#scinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },onDblClickRow:function(keyrow,dataRow){
+
+        },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+
+        }})
+    $('#dtnfo').layout({
+
+    })
+
+    //搜索方法
+    $('#searcher').bind("click",function(){
+        $('#scinfo').datagrid('options').url='__URL__/eqcourse/hasJson/1';
+
+        $('#scinfo').datagrid('load',{COURSENO:$('#COURSENO').val(),EQNO:$('#EQCOURSENO').val(),PROGRAMNO:$('#PROGRAMNO').val()})
+    })
+
+
+    var bt_add=$('#add').linkbutton({
+        text:'添加',                                          //添加按钮
+        iconCls:'icon-add'
+    })
+
+    var bt_clear=$('#clear').linkbutton({
+        text:'清空'                                          //清空按钮
+    })
+
+    bt_add.bind('click',function(){
+        $('#biaodan2').form('submit',{
+            url:'__URL__/eqcourseadd',                     //表单ajax添加用的
+            onSubmit:function(){
+                    var pd=true;
+                var one=$('#one').val().length;
+                var two=$('#two').val().length;
+                var three=$('#three').val().length;
+                $('#t_one').html('')
+                $('#t_two').html('')
+                $('#t_three').html('')
+                if(one!=7){
+                    $('#t_one').html('<font color="red">课号的长度需要7位</font>');
+                    pd=false;
+                }
+                if(two!=7){
+                    $('#t_two').html('<font color="red">等价课号的长度需要7位</font>');
+                    pd=false;
+                }
+                if(three!=7){
+                    $('#t_three').html('<font color="red">教学计划号的需要7位</font>');
+                    pd=false
+                }
+                return pd;
+            },
+            success:function(data){
+
+                   if(data=='yes'){
+                       $.messager.alert('提示','添加成功')
+                   }else if(data=='1'){
+                       $.messager.alert('提示','课号不存在')
+                   }else if(data=='2'){
+                       $.messager.alert('提示','等价课号不存在')
+                   }else if(data=='3'){
+                       $.messager.alert('提示','教学计划号不存在')
+                   }else if(data=='no'){
+                       $.messager.alert('提示','添加失败,已存在相同的等价计划')
+                   }else{
+                       $.messager.alert('提示','CS11 您没有权限添加')
+                   }
+                $('#chuangkou').window({
+                    closed:true
+                })
+                dat.datagrid('reload');
+            }
+        })
+    })
+
+
+    bt_clear.bind('click',function(){
+        $('#biaodan2').form('clear')
+
+    })
+
+
+
+    function aadd(){
+
+        $('#chuangkou').window({
+            closed:false,
+            modal:true,
+            minimizable:false,
+            maximizable:false
+        })
+    }
+    $('#e_add').bind('click',aadd)
+
+
+
+    function ddel(){
+        var row2 = dat.datagrid('getSelections');
+        if (row2.length==1){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr={};                      //存储删除信息的数组
+                    infoarr.COURSENO=row2[0]['courseno'];
+                    infoarr.EQNO=row2[0]['eqno'];
+                    infoarr.PROGRAMNO=row2[0]['programno'];
+                    $.ajax({
+                        url:'__URL__/eqcoursede/hasJson/1',
+                        data:infoarr,
+                        type:'POST',
+                        success:function(C){
+
+                            if(C=='yes'){
+                                $.messager.alert('提示','删除成功','?');
+                            }else{
+                                $.messager.alert('提示',C);
+                            }
+                            dat.datagrid('load');
+                        }
+                    })
+                }
+            });
+        }else{
+            $.messager.alert('提示','请选择一条数据删除')
+        }
+    }
+
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+})
+</script>
+
+<body>
+<div class="easyui-window" id='chuangkou' title="新建等价课程" data-options="width:500,height:300,closed:true">
+    <form action="__URL__/courseyz" method="POST" id="biaodan2">
+        <table style="margin-left:50px;margin-top:20px" align="left" border="0" cellspacing="8">
+            <tr><td align="right" width="120"><b>课程号:</b></td><td><input name="COURSENO"   id="one" size="25" maxlength="7" ><span id="t_one"></span></td></tr>
+            <tr><td align="right" width="120"><b>等价课程号:</b></td><td ><input  name="EQNO"   id="two" size="25" maxlength="7"><span id="t_two"></span></td></tr>
+            <tr><td align="right" width="120"><b>教学计划号:</b></td><td ><input name="PROGRAMNO"   id="three" size="25" maxlength="7"><span id="t_three"></span></td></tr>
+            <tr><td colspan="2" align="center" height="100">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon add"  id="add">添加</a>
+               &nbsp&nbsp&nbsp&nbsp <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"  id="clear">清空</a>
+            </td></tr>
+        </table>
+    </form>
+</div>
+
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+        <form action="__URL__/scjson" method="POST" id="biaodan">
+           课程号:<input type="text" id="COURSENO" size="10" maxlength="8" value="%">&nbsp&nbsp&nbsp
+           等价课程号:<input type="text" id="EQCOURSENO" size="10" maxlength="8" value="%">&nbsp&nbsp&nbsp
+           教学计划号:<input type="text" id="PROGRAMNO" size="10" maxlength="20" value="%">&nbsp&nbsp
+           <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+            &nbsp&nbsp&nbsp&nbsp
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true"></div>
+    </div>
+
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+*{font-size:12px; font:"Tahoma,Verdana,微软雅黑,新宋体";margin:0;padding:0}
+a{ color:Black; text-decoration:none;}
+a:hover{ color:Red; text-decoration:none;}
+
+.navlist{list-style-type:none;padding:0;}
+.navlist li a{line-height:40px;display: block}
+.navlist li div{margin:2px ;padding-left:0;padding-top:2px; border:1px dashed #ffffff;text-align:center; }
+.navlist li div.hover{border:1px solid #99BBE8; background:#E0ECFF;cursor:pointer;}
+.navlist li div.hover a{color:#416AA3;}
+.navlist li div.selected{border:1px solid #99BBE8; background:#E0ECFF;cursor:default;}
+.navlist li div.selected a{color:#416AA3; font-weight:bold;}
+
+.third_ul{list-style-type:none;padding:0;}
+.third_ul li a{line-height:30px;display: block}
+.third_ul li div{margin:2px ;padding-left:10px;padding-top:2px; border:1px dashed #ffffff;text-align:center; }
+.third_ul li div.hover{border:1px solid #99BBE8; background:#E0ECFF;cursor:pointer;}
+.third_ul li div.hover a{color:#416AA3;}
+.third_ul li div.selected{border:1px solid #99BBE8; background:#E0ECFF;cursor:default;}
+.third_ul li div.selected a{color:#416AA3; font-weight:bold;}
+
+#top{overflow: hidden; height: 30px; background: url('../img/bg2.jpg');line-height: 30px;color: #fff;}
+#loading-mask{position:absolute;top:0; left:0; width:100%; height:100%; background:#D2E0F2; z-index:20000}
+#pageloading{position:absolute; top:50%; left:50%;}
+#footer{text-align: center;}
+.icon{background:url(../img/icon.png) no-repeat;line-height:16px;text-align: left;padding:0 1px;display:inline-block;height:16px;width:16px;}
+
+.icon-redo{background-position:0 0;}
+.icon-reload{background-position:0 -16px;}
+.icon-print{background-position:0 -32px;}
+.icon-prize{background-position:0 -48px;}
+.icon-remove{background-position:0 -64px;}
+.icon-role{background-position:0 -80px;}
+.icon-room{background-position:0 -96px;}
+.icon-rescue{background-position:0 -112px;}
+.icon-right{background-position:0 -128px;}
+.icon-plan{background-position:0 -144px;}
+.icon-note{background-position:0 -160px;}
+.icon-ok{background-position:0 -176px;}
+.icon-manage{background-position:0 -192px;}
+.icon-no{background-position:0 -208px;}
+.icon-patent{background-position:0 -224px;}
+.icon-people{background-position:0 -240px;}
+.icon-person{background-position:0 -256px;}
+.icon-pen{background-position:0 -272px;}
+.icon-pencil{background-position:0 -288px;}
+.icon-save{background-position:0 -304px;}
+.icon-tool{background-position:0 -320px;}
+.icon-two{background-position:0 -336px;}
+.icon-time{background-position:0 -352px;}
+.icon-tip{background-position:0 -368px;}
+.icon-undo{background-position:0 -384px;}
+.icon-work{background-position:0 -400px;}
+.icon-write{background-position:0 -416px;}
+.icon-warn{background-position:0 -432px;}
+.icon-water{background-position:0 -448px;}
+.icon-thesis{background-position:0 -464px;}
+.icon-search{background-position:0 -480px;}
+.icon-shield{background-position:0 -496px;}
+.icon-schedule{background-position:0 -512px;}
+.icon-school{background-position:0 -528px;}
+.icon-student{background-position:0 -544px;}
+.icon-system{background-position:0 -560px;}
+.icon-ten{background-position:0 -576px;}
+.icon-subject{background-position:0 -592px;}
+.icon-sum{background-position:0 -608px;}
+.icon-major{background-position:0 -624px;}
+.icon-clear{background-position:0 -640px;}
+.icon-clock{background-position:0 -656px;}
+.icon-circle{background-position:0 -672px;}
+.icon-class{background-position:0 -688px;}
+.icon-college{background-position:0 -704px;}
+.icon-cut{background-position:0 -720px;}
+.icon-degree{background-position:0 -736px;}
+.icon-column{background-position:0 -752px;}
+.icon-course{background-position:0 -768px;}
+.icon-change{background-position:0 -784px;}
+.icon-back{background-position:0 -800px;}
+.icon-base{background-position:0 -816px;}
+.icon-add{background-position:0 -832px;}
+.icon-audit{background-position:0 -848px;}
+.icon-blank{background-position:0 -864px;}
+.icon-caluate{background-position:0 -880px;}
+.icon-cancel{background-position:0 -896px;}
+.icon-book{background-position:0 -912px;}
+.icon-build{background-position:0 -928px;}
+.icon-dict{background-position:0 -944px;}
+.icon-info{background-position:0 -960px;}
+.icon-law{background-position:0 -976px;}
+.icon-home{background-position:0 -992px;}
+.icon-house{background-position:0 -1008px;}
+.icon-loadin{background-position:0 -1024px;}
+.icon-log{background-position:0 -1040px;}
+.icon-mail{background-position:0 -1056px;}
+.icon-loadout{background-position:0 -1072px;}
+.icon-lock{background-position:0 -1088px;}
+.icon-help{background-position:0 -1104px;}
+.icon-exit{background-position:0 -1120px;}
+.icon-factory{background-position:0 -1136px;}
+.icon-equal{background-position:0 -1152px;}
+.icon-excel{background-position:0 -1168px;}
+.icon-filter{background-position:0 -1184px;}
+.icon-free{background-position:0 -1200px;}
+.icon-guider{background-position:0 -1216px;}
+.icon-find{background-position:0 -1232px;}
+.icon-five{background-position:0 -1248px;}
+
+
+.container{padding: 5px;}
+
+.information ol li,.information ol{line-height: 20px;font-size:10pt;margin-left: 15px;}
+
+.space{margin:5px;}
+.warn{color:red;font-weight: bold;font-size:110%}
+.welcome{text-align:center;font-size: 30pt;padding: 300px 0;font-family: "Microsoft YaHei", sans-serif;color: #0000ff}
+.pagetitle{text-align: center;font-size: 14px;font-weight: bold;color:blue;height:40px;line-height: 40px}
+/*自定义表格样式*/
+.mytable{border:1px  solid #CDC9C9;font:"宋体" 11pt #000;width:900px;margin:0 auto;}
+.mytable td,.mytable th{border:1px solid #CDC9C9;height:35px;line-height:35px;width:180px;}
+.mytable th{text-align:right;font-weight:normal;padding-right:10px;background-color:#E3E3E3}
+.mytable td{padding-left:10px;}
+
+.blue_link {text-decoration:underline; color: blue;  }
+.print_title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}

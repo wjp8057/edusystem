@@ -1,0 +1,61 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val())
+        $("#TERM").val(parent.$("#TERM").val())
+
+        //生志数据
+        $("#btAuto").bind("click",function(){
+            $.messager.confirm("系统提示：","自动生成排课计划将首先清除指定学年学期的排课计划、考试计划、任课教师和排课表记录，继续吗？",function(data){
+                if(data){
+                    $.post("__ROOT__/CoursePlan/Timetable/auto/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()}, function(rsp) {
+                        if(rsp){
+                            msgShow("系统消息：", rsp.message, rsp.type);
+
+
+                        }
+                    },"JSON");
+                }
+            });
+        });
+
+        //给课程添加未定教师
+        $("#btTheach").bind("click",function(){
+            $.post("__ROOT__/CoursePlan/Timetable/addUnknow/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()}, function(rsp) {
+                if(rsp){
+                    msgShow("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+
+
+        $('#csgxk').bind('click',function(){
+            ajiakesi('__URL__/gongxuanke',{'YEAR':parent.$("#YEAR").val(),'TERM':parent.$('#TERM').val()},function(c){
+                $.messager.alert('提示',c)
+            })
+        })
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#FFFFFF;">
+        <table border="0" align="left" cellpadding="10" cellspacing="0" width="100%">
+        <tr><td height="20"></td></tr>
+        <tr><td style="font-size: 12pt;">您要产生哪个学期的排课计划（只有当开课计划整理完毕后才能运行此方法）：</td> </tr>
+        <tr><td width="80">开课学年： <input type="text" id="YEAR" name="YEAR" /></td></tr>
+        <tr><td >开课学期：<input type="text" id="TERM" name="TERM" /></td></tr>
+        <tr><td>
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="csgxk">生成公选课</a>&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="btAuto">自动创建排课计划</a>&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" id="btTheach">给课程添加未定教师</a></td></tr>
+        <tr><td style="font-size: 12pt">说明：部分课程可能教师暂时无法设定，原则上应该添加一名“未定”的特殊教师。为了简便，可以使用“给课程添加未定教师”替代手工操作。
+        </td> </tr>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
+

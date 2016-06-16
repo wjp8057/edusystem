@@ -1,0 +1,81 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-sys","menuname": "教室管理",
+            "menus": [
+                {"menuid": "11","menuname": "添加教室","icon": "icon-addroom","url": "__ROOT__/index.php?g=Room&m=Room&a=addroom"},
+                {"menuid": "12","menuname": "浏览教室","icon": "icon-lookroom","url":" __ROOT__/index.php?g=Room&m=Room&a=selectroom"},
+                {"menuid": "13","menuname": "教室借用情况管理","icon": "icon-room","url": "__ROOT__/index.php?g=Room&m=Room&a=selectjieyong"},
+                {"menuid": "13","menuname": "查看教室使用情况","icon": "icon-room2","url": "__ROOT__/index.php?g=Room&m=Room&a=shiyong"}]
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" id="xtb" border="false" >
+        <div style="padding:20px;overflow:hidden; color:#000000; " >
+            <span style="font-size: 20px">一、教室管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">实现教室管理，查看当前教室使用情况、教室借用与审批功能。包含添加教室、浏览教室、查看教室使用情况、借用教室登记、查看教室借用情况等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、添加教室:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">授权用户可以添加所有学院的教室，该教室属于哪个学院由优先学院决定。教室代号唯一，必须是9位有效数字或英文；座位数必须大于等于考位数，且3位以内的数字。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、浏览教室:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、各学院管理员可以查看、检索所有的教室信息，但只能对本开课学院的教室做新增、修改、删除等操作。教务处管理员可以检索并管理所有的教室信息。
+            <br>2、各学院管理员可以通过设定学期，查看该学期某教室的周课表。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、教室借用情况管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、各学院管理员可以填写教室借用登记表申请借用教室，由教务处审批或者由该教室的优先学院进行审核。
+            <br>2、各学院管理员可以检索、查看所有的教室借用登记信息，但只能对该教室的优先学院为本开课学院的教室借用登记表进行删除、修改、审核操作。教务处可以查看、管理操作所有的登记表。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、查看教室使用情况:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教务处排课人员或者教务管理人员可以设定各种检索条件查看到对应的某学期教室的使用情况</p>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

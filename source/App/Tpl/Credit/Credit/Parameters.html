@@ -1,0 +1,226 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+    #wd td,#wd3 td{border:1px #95B8E7 solid;
+    }
+    input{height:15px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+
+</style>
+<script>
+    $(function(){
+
+
+        var wd=$('#wd').window(new wind(500,300,false,false,false,false,false));        //todo:添加的窗口
+        var wd2=$('#wd2').window(new wind(0,0,false,false,true,true,true));             //todo:证书列表页的窗口
+        var wd3=$('#wd3').window(new wind(500,300,false,false,true,true,false));        //todo:修改的窗口
+
+        //todo:添加证书 提交操作
+        $('#bt').bind('click',function(){
+            var zname=$('[name=zname]').val()
+            var zcredit=$('[name=zcredit]').val();
+            if(zname==""||zcredit==""){
+                return $.messager.alert('提示','请填写完整信息 不能为空白')
+            }
+            if(isNaN(zcredit)){
+                return $.messager.alert('提示','学分请填写数字')
+            }
+            $.post('__URL__/Parameters/tag/insertcerti',
+                {'cert_name':zname,'credit':zcredit,'status':$('[name=status]:checked').val()},
+                function(data){
+                    //console.log(data);
+                    if(data=='1'){
+                        $.messager.alert('提示','添加成功')
+                    }
+                });
+        })
+
+        //todo:切换到点击查看证书列表
+        $('#querycerti').bind('click',function(){
+            wd2.window({closed:false})
+        })
+
+        //todo:搜索
+        $('#ss').bind('click',function(){
+            var sname=$('[name=search_name]').val().trim()
+            var sstatus=$('[name=sstatus]').val()
+            var yes;
+            var no;
+            if(sstatus=='所有'){
+                yes=1; no=0;
+            }else{
+                yes=sstatus; no=sstatus
+            }
+            $('#certi_dat').datagrid('load',{'cert_name':sname,'yes':yes,'no':no});
+        })
+
+
+        //todo:编辑页面的修改按钮
+        $('#sub_edit').linkbutton({
+            text:'修改'
+        }).bind('click',function(){
+            var zname=$('[name=edit_name]').val()
+            var zcredit=$('[name=edit_credit]').val();
+            if(zname==""||zcredit==""){
+                return $.messager.alert('提示','请填写完整信息 不能为空白')
+            }
+            if(isNaN($('[name=edit_credit]').val())){
+                return $.messager.alert('提示','学分请填写数字')
+            }
+            $.post('__URL__/Parameters/tag/updatecenti',{'cert_name':$('[name=edit_name]').val(),
+                'credit':$('[name=edit_credit]').val(),
+                'status':$('[name=edit_status]:checked').val(),
+                'cert_id':$('#hiddener').val()},
+                function(data){
+                    if(data=='1'){
+                        $.messager.alert('提示','修改成功');
+                        wd3.window({closed:true})
+                        $('#certi_dat').datagrid('reload');
+                    }
+                });
+        })
+        //todo:编辑页面的关闭按钮
+        $('#sub_closed').linkbutton({
+            text:'关闭'
+        }).bind('click',function(){
+            wd3.window({closed:true})
+        })
+
+
+
+    })
+
+    //todo:修改
+    function run_edit(num){
+        $.post('__URL__/Parameters/tag/centidetail',{'cert_id':num},function(data){
+            $('[name=edit_name]').val(data[0]['cert_name']);
+            $('[name=edit_credit]').val(data[0]['credit']);
+            $('#hiddener').val(num)
+            var a=$('[name=edit_status][value='+data[0]['status']+']').attr('checked','checked')
+            $('#wd3').window({closed:false})
+        });
+    }
+
+    //todo:删除
+    function run_del(num){
+        $.messager.confirm('提示','您真的要删除吗？',function(a){
+            if(a){
+                $.post('__URL__/Parameters/tag/deletecenti',{'id':num},function(data){
+                    if(data=='1'){
+                        $.messager.alert('提示','删除成功')
+                        $('#certi_dat').datagrid('reload')
+                    }
+                });
+            }
+        })
+
+    }
+
+
+</script>
+<body style="background-color: #fff">
+<div id="wd" title="常用证书设置">
+    <table border="0"  width="456" style="margin-top: 30px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>证书名称：</b></td>
+            <td width="209" height="25"><input type="text" name="zname" size="30" value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>认定学分：</b></td>
+            <td width="209" height="25"><input type="text" name="zcredit" size="5" value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>证书状态：</b></td>
+            <td width="209" height="25"><span><input type="radio"  style="position: relative; bottom:2px;" checked name="status" value="1">正常</span>&nbsp<span><input type="radio" style="position: relative; bottom:2px;" name="status" value="0">作废</span></td>
+        </tr>
+        <tr><td style="border:0px;" height="5" align="center" colspan="2"></td></tr>
+        <tr>
+            <td style="border:0px;" height="25" align="center" colspan="2">
+                <button id="bt">提交</button> </td>
+        </tr>
+        <tr>
+            <td style="border:0px;" height="25" align="right" colspan="2">
+                <a href="javascript:void(0)" id="querycerti">查看已设证书信息</a>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!--todo:点击修改 所弹出的窗口-->
+<div id="wd3" title="修改证书设置">
+    <table border="0"  width="456" style="margin-top: 30px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>证书名称：</b></td>
+            <td width="209" height="25"><input type="text" name="edit_name" size="30" value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>认定学分：</b></td>
+            <td width="209" height="25"><input type="text" name="edit_credit" size="5" value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>证书状态：</b></td>
+            <td width="209" height="25"><span><input type="radio"  style="position: relative; bottom:2px;"  name="edit_status" value="1">正常</span>&nbsp<span><input type="radio"  style="position: relative; bottom:2px;" name="edit_status" value="0">作废</span></td>
+        </tr>
+        <tr><td style="border:0px;" height="5" align="center" colspan="2"></td></tr>
+        <tr>
+            <td style="border:0px;" height="25" align="center" colspan="2">
+                <input type="hidden" id="hiddener" value="">
+                <a href="javascript:void(0)" id="sub_edit">修改</a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id='sub_closed'>关闭</a> </td>
+
+        </tr>
+
+    </table>
+</div>
+
+<!--todo:查找的证书列表 -->
+<div id="wd2" title="">
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',title:'',split:false" style="height:80px;">
+            <table border="0" width="530" style="margin-top: 15px" align="left">
+                <tr>
+                    <td width="457"  height="28" align="left">
+                       <b>证书名称：</b>
+                    <input type="text" name="search_name" size="30" value="%">
+                        &nbsp&nbsp
+                        <b>证书状态：</b>
+                         <select name="sstatus">
+                             <option value="所有">所有</option>
+                             <option value="1">正常</option>
+                             <option value="0">作废</option>
+                         </select>
+                    </td>
+                    <td  height="25" align="center">
+                        <a href="javascript:void(0)" id="ss" class="easyui-linkbutton"  >搜索</a> </td>
+                </tr>
+            </table>
+        </div>
+        <div data-options="region:'center',split:false,title:''" style="padding:0px;background:white">
+            <table id="certi_dat"  class="easyui-datagrid"
+                   data-options="url:'__URL__/Parameters/tag/searchcerti' ,pageList:[800],fit:true,pagination:true,singleSelect:true,toolbar:[{text:'返回添加证书',iconCls:'icon-goleft',handler:function(){
+                        $('#wd2').window({closed:true})
+                        $('[name=zname]').val('')
+                        $('[name=zcredit]').val('')
+                   }}]">
+                <thead>
+                <tr>
+                    <th align="center" data-options="checkbox:true">选中</th>
+                    <th align="center" data-options="field:'cert_name',width:100">证书名称</th>
+                    <th align="center" data-options="field:'credit',width:100">认定学分</th>
+                    <th align="center" data-options="field:'status',width:100,align:'right',formatter:function(a,b,c){if(a=='1'){return '正常'}else{ return '作废'}}">证书状态</th>
+                    <th align="center" data-options="field:'cert_id',width:100,formatter:function(a,b,c){return '<span onclick='+'run_edit('+a+')'+'><a href='+'javascript:void(0)'+'><b>修改</b></a></span> | <span onclick='+'run_del('+a+')'+'><a href='+'javascript:void(0)'+'><b>删除</b></a></span>'}">操作</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+</div>
+</body>
+ </html>

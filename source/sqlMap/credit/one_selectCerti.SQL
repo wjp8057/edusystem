@@ -1,0 +1,1 @@
+select * from (select row_number() over(order by createdate)as row,cert_id,cert_name,credit,status from CreditCertficate where cert_name like :cert_name and (status=:yes or status=:no))as b where b.row between :start and :end

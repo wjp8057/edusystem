@@ -1,0 +1,180 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var key=[];
+
+    var teacherSCHOOL='{$teacherSCHOOL}'
+
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+
+        $('#lici_student_wd').window(new wind(370,280,false,false,true,false,false))   //todo:检索考位安排的页面
+
+        var dat=$('#listDat').datagrid({
+            toolbar:'#tdemo'
+        });
+
+$('#e_add').bind('click',function(){
+    var rowList=$('#listDat').datagrid('getRows');
+    if(rowList==''){
+        return $.messager.alert('提示','页面没有可操作数据')
+    }
+    for(var i=0;i<rowList.length;i++){
+        if(rowList[i].school!==teacherSCHOOL&&teacherSCHOOL!='A1'){
+            return $.messager.alert('提示',rowList[i].xm+'不是您这个学院的您无法操作')
+        }
+    }
+
+
+    ajiakesi('__URL__/DeferredEnroll/hasJson/1',{'bind':rowList},function(c){
+        $.messager.alert('提示',c)
+    })
+
+})
+        $('#listDat').datagrid({onLoadSuccess:function(){
+
+            $('#listDat').datagrid('unselectAll')
+
+            for(var i=0;i<key.length;i++){
+
+                if(typeof key[i]=='undefined'){
+
+                    continue;
+                }
+                $('#listDat').datagrid('selectRow',key[i])
+                $('#listDat').datagrid('getRows')[key[i]].rowr=1
+
+            }
+
+            key=[];
+        },
+            onSelect:function(index,row){
+
+                $('#listDat').datagrid('getRows')[index].rowr=1
+            },onUnselect:function(index,row){
+                $('#listDat').datagrid('getRows')[index].rowr=0;
+            },
+            onSelectAll:function(rows){                            //todo:全选
+
+                for(var i=0;i<rows.length;i++){
+                    rows[i].rowr=1;
+                }
+            },onUnselectAll:function(rows){
+
+                for(var i=0;i<rows.length;i++){
+                    rows[i].rowr=0;
+                }
+            }
+        })
+        
+        
+        
+        
+        
+        
+        
+        
+        var daaa=$('#daaa')
+        $('#bt').linkbutton({
+            'text':'提交检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    dat.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                    dat.datagrid('load',{'Sqlpath':{'select':'exam/Deferredenroll_select.SQL','count':'exam/Deferredenroll_count.SQL'},
+                        bind:{':YONE':$('[name=year]').val().trim(),':TONE':$('[name=term]').val().trim(),
+                            ':YTWO':$('[name=year]').val().trim(),':TTWO':$('[name=term]').val().trim(),
+                            ':CLASSSCHOOL':$('[name=school_one]').val().trim(),
+                            ':COURSESCHOOL':$('[name=school_two]').val().trim(),
+                            ':STUDENTNO':$('[name=studentno]').val().trim()}})
+                })
+
+
+
+    })
+</script>
+
+
+<style>
+
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+             <b>学年:</b>
+            <input name="year" type="text" size='4' value="2011">
+            &nbsp &nbsp
+            <b>学期:</b>
+            <input type="text" name="term" size="1" value="1">
+
+            &nbsp &nbsp
+            <b>学生所在学院:</b>
+            <select name="school_one" class="easyui-combobox">
+                <option value="%">全部</option>
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            &nbsp &nbsp
+
+            &nbsp &nbsp
+            <b>开课学院:</b>
+            <select name="school_two" class="easyui-combobox">
+                <option value="%">全部</option>
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+
+            <b>学号:</b>
+            <input type="text" name="studentno" value="%">
+            &nbsp &nbsp
+            <a href='javascript:void(0)' id="bt">提交检索</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>将结果提交到数据库</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid"
+               data-options="fit:true,fitColumns:true,pagination:true" id="listDat">
+            <thead>
+            <tr>
+                <th data-options="field:'xz',width:100,checkbox:true,align:'center'">选中</th>
+                <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                <th data-options="field:'kh',width:100,align:'center',formatter:function(a,b,c){
+                    if(b.examrem=='D'){
+                        key[c]=c
+                    }
+                        return a;
+
+                }">课号</th>
+                <th data-options="field:'kcmc',width:300,align:'center'">课程名称</th>
+                <th data-options="field:'cc',width:100,align:'center'">场次</th>
+                <th data-options="field:'kssj',width:100,align:'center'">考试时间</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+<style>
+    #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+<form id="examexcel" action="__APP__/CourseManager/Excel/baomingExcel" method="POST">
+    <input type="hidden" name="e_YEAR" VALUE="">
+    <input type="hidden" name="e_TERM" VALUE="">
+
+    <input type="hidden" name="e_STUDENTNO" VALUE="">
+    <input type="hidden" name="e_COURSENO" VALUE="">
+    <input type="hidden" name="e_SCHOOL" VALUE="">
+    <input type="hidden" name="e_SCHOOLTWO" VALUE="">
+</form>
+</body>
+</html>

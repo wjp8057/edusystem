@@ -1,0 +1,203 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    function dakai(recno){
+
+        var url='__ROOT__ /CoursePlan/Timetable/teacher/RECNO/'+recno
+        openTabsWindows("查看编辑教师", url,'',true);
+    }
+    $(function() {
+
+
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            view: detailview,
+            toolbar: '#toobar',
+            url:"__ROOT__ /CoursePlan/Timetable/qlist/hasJson/true",
+            queryParams:{$queryParams},
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges');
+                datagrid.datagrid('unselectAll')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            detailFormatter:function(index,row){
+                return '<div style="padding:2px;width:100%"><table width="100%">' +
+                        '<tr><td height="18">'+row.SCHOOLNAME+'</td><td>时段要求：'+row.TIME+'</td>' +
+                        '<td>教室要求：'+row.EMPROOM+'</td><td>统一排考：'+row.FINALEXAM+'</td>' +
+                        '<td>排课天数：'+row.DAYS+'</td><td>指定实验室：'+row.EMPROOM+'</td>' +
+                        '<td>预计人数：'+row.ESTIMATE+'</td><td>实际人数：'+row.ATTENDENTS+'</td>' +
+                        '<td>备注：'+row.REM+'</td></tr>' +
+                        '<tr><td height="18" colspan="9">上课班级：'+row.CLASS+'</td></tr>' +
+                        '<tr><td height="18" colspan="9"><a href="javascript:void(0)" onclick="dakai('+row.RECNO+')" style="color:blue;text-decoration:underline">教师</a>：'+row.TEACHERTASK+'</td></tr>' +
+                        '<tr><td height="18" colspan="9">课程安排：'+row.CLASSTIME+'</td></tr></table></div>';
+            },
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },
+            rowStyler: function(index,row){
+                return 'background-color:#6293BB;color:#fff;';
+            },
+            onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                });
+            }
+        });
+
+
+        function onee(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一行数据进行编辑！","error");
+                return;
+            }
+            var url = "__ROOT__ /CoursePlan/Timetable/update/YEAR/"+rows[0].YEAR+"/TERM/"+rows[0].TERM+"/COURSENO/"+rows[0].COURSENO+"/GROUP/"+rows[0].GROUP;
+            openTabsWindows("查看编辑排课计划", url,'',true);
+        }
+        //编辑排课计划
+        $("#handlerEdit").bind("click",onee);
+        $('#admin_one').bind('click',onee);
+
+
+
+        function threee(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            if(rows!=null && rows.length>0){
+                $.each(rows, function(index,row){
+                    if("{$theacher.SCHOOL}"=="A1") {
+                        arr.push(row.YEAR+','+row.TERM+','+row.COURSENO+','+row.GROUP);
+                    }
+                });
+            }
+            if(arr.length==0){
+                msgShow("系统提示：","<br />只有教务处人员才可以删除开课记录！","error");
+                return;
+            }
+
+            $.messager.confirm('系统消息：','你真的确定要删除选中的项？',function(r){
+                if (r){
+                    $.post("__ROOT__ /CoursePlan/Timetable/delete/hasJson/true", {ITEM:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+        //删除排课计划
+        $("#handlerDelete").bind("click",threee);
+        $('#admin_three').bind('click',threee)
+
+
+        function twoo(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一行数据进行编辑！","error");
+                return;
+            }
+            var url = "__ROOT__ /CoursePlan/Timetable/teacher/RECNO/"+rows[0].RECNO;
+            openTabsWindows("查看编辑教师", url,'',true);
+        }
+        //查看编辑教师
+        $("#teacherEdit").bind("click",twoo)
+        $('#admin_two').bind('click',twoo)
+
+
+        //Excel报表
+        $("#handlerExcel1").bind("click",function(){
+            msgShow("系统提示：","<br />数据较多请耐心等待，请不要重复点击！","info");
+            $("#hiddenForm").attr("action","__ROOT__ /CoursePlan/Export/Excel1/hasJson/true?"+ getParamData());
+            $('#ct').val({$queryParams})
+            $("#hiddenForm").submit();
+        });
+
+        //Excel报表(横排)
+        $("#handlerExcel2").bind("click",function(){
+            msgShow("系统提示：","<br />数据较多请耐心等待，请不要重复点击！","info");
+            $("#hiddenForm").attr("action","__ROOT__ /CoursePlan/Export/Excel2/hasJson/true?"+ getParamData());
+            $("#hiddenForm").submit();
+        });
+
+        //Excel报表(工作量)
+        $("#handlerExcel3").bind("click",function(){
+            msgShow("系统提示：","<br />数据较多请耐心等待，请不要重复点击！","info");
+            $("#hiddenForm").attr("action","__ROOT__ /CoursePlan/Export/Excel3/hasJson/true?"+ getParamData());
+            $("#hiddenForm").submit();
+        });
+
+        function getParamData(){
+            return $.param({$queryParams});
+        }
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+ <!--   <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 16pt;"></font></p>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" title="<center>第{$Think.request.YEAR}学年，第{$Think.request.TERM}学期的排课计划列表</center>"  fitColumns="false"
+               width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="20" pageList="[20,50,100]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENO',align:'center',width:100" >课号</th>
+                <th data-options="field:'GROUP',align:'center',width:60">组号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:300">课名</th>
+                <th data-options="field:'COURSETYPEVALUE',align:'center',width:80">修课</th>
+                <th data-options="field:'EXAMTYPEVALUE',align:'center',width:80">考核</th>
+                <th data-options="field:'CREDITS',align:'center',width:80">学分</th>
+                <th data-options="field:'LHOURS',align:'center',width:80">周讲课</th>
+                <th data-options="field:'EHOURS',align:'center',width:80">周实验</th>
+                <th data-options="field:'WEEKS',align:'center',width:150">周次</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+<div id="toobar">
+    <a href="#" id="handlerEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" style="float: left;">查看编辑排课计划</a>
+    <a href="#" id="teacherEdit" class="easyui-linkbutton" data-options="iconCls:'icon-studentList',plain:true" style="float: left;">查看编辑教师</a>
+    <a href="#" id="handlerDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" style="float: left;">删除排课计划</a>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="handlerExcel1" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">Excel报表</a>
+    <a href="#" id="handlerExcel2" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true" >Excel报表(横排)</a>
+    <a href="#" id="handlerExcel3" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true" >Excel报表(工作量)</a>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_one'>查看编辑排课计划</div>
+    <div id='admin_two'>查看编辑教师</div>
+    <div id='admin_three'>删除排课计划</div>
+</div>
+<form id="hiddenForm" method="post" name="hiddenForm" target="hiddenFrame" />
+    <input type="hidden" id="ct" value="">
+
+</form>
+<iframe name="hiddenFrame" id="hiddenFrame" style="display:none;width:0;height:0"></iframe>
+</body>
+
+</html>
+

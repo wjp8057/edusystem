@@ -1,0 +1,1 @@
+update standard_class set numbers=:numbers,code=:code where course_id=:course_id

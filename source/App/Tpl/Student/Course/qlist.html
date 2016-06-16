@@ -1,0 +1,83 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var editRow = undefined;
+        var datagrid = $('#datagrid').datagrid({
+            view: detailview,
+            toolbar: '#toobar',
+            url : "__ROOT__/index.php?g=Student&m=Course&a=qlist&hasJson=true",
+            queryParams: {$queryParams},
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            detailFormatter:function(index,row){
+                return '<div style="padding:2px;width:100%"><table width="100%">' +
+                        '<tr><td width="116" height="18">班级</td><td>'+row.CLASSNONAME+'</td></tr>' +
+                        '<tr><td height="18">教师</td><td>'+row.TEACHERNONAME+'</td></tr>' +
+                        '<tr><td height="18">备注</td><td>'+row.REM+'</td></tr>' +
+                        '<tr><td height="18">课程安排</td><td>'+row.CURRICULUM+'</td></tr></table></div>';
+            },
+            onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                });
+            },
+            onBeforeLoad : function(){
+                $(this).datagrid("uncheckAll");
+                return true;
+            },
+            rowStyler: function(index,row){
+                return 'background-color:#6293BB;color:#fff;';
+            }
+        });
+        $('#handlerSave').bind("click",function(){
+            //保存时结束当前编辑的行，自动触发onAfterEdit事件如果要与后台交互可将数据通过Ajax提交后台
+            var checkedItems = datagrid.datagrid("getChecked");
+            var ids = [], examType = [], year='{$Think.request.YEAR}', term ='{$Think.request.TERM}';
+            $.each(checkedItems, function(index, item){
+                ids.push(item.COURSENOGROUP);
+                examType.push(item.EXAM);
+            });
+            $.post("__ROOT__/index.php?g=Student&m=Course&a=selected&hasJson=true", {ids:ids,examType:examType,YEAR:year,TERM:term}, function(rsp) {
+                if(rsp){
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                    //alert(rsp.dbError);
+                }
+            },"JSON");
+        });
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="学生自主选课" iconCls="icon icon-elective" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="COURSENOGROUP"
+           pagination="true" pageSize="5" pageList="[5]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENOGROUP',width:120" >课号</th>
+            <th data-options="field:'COURSENAME'">课名</th>
+            <th data-options="field:'CREDITS',width:40,align:'center'">学分</th>
+            <th data-options="field:'WEEKHOURS',width:50,align:'center'">周学时</th>
+            <th data-options="field:'WEEKEXPEHOURS',width:50,align:'center'">周实验</th>
+            <th data-options="field:'COURSETYPE',width:40,align:'center'">修课</th>
+            <th data-options="field:'EXAMTYPE',width:40,align:'center'">考核</th>
+            <th data-options="field:'ATTENDENTS',width:70,align:'center'">已选人数</th>
+            <th data-options="field:'COURSETYPENAME',align:'center'">课程类别</th>
+            <th data-options="field:'SCHOOLNAME'">开课学院</th>
+            <th data-options="field:'CLASSNONAME',hidden:true">班级</th>
+            <th data-options="field:'TEACHERNONAME',hidden:true">教师</th>
+            <th data-options="field:'REM',hidden:true">备注</th>
+            <th data-options="field:'CURRICULUM',hidden:true">课程安排</th>
+            <th data-options="field:'EXAM',hidden:true">修课代码</th></tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar">
+    <a href="__ROOT__/Student/Course/query" id="handlerAdd" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true" >返回筛选</a>
+    <a href="#" id="handlerSave" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">确认选课</a>
+    <a href="#" id="handlerYearTerm" class="easyui-linkbutton" data-options="plain:true" style="color: #ff0000">{$Think.request.YEAR}学年第{$Think.request.TERM}学期可选课程</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,271 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/datagrid-bufferview.js'> </script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/common.js"></script>
+<!--<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>-->
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/modules/results.js"></script>
+<div id="modal2" class="easyui-window" style="width:500px" data-options="modal:true,closed:true" >
+</div>
+<script>
+
+
+var datime = new Date().getTime(); //todo:
+var thistime=0;
+
+//拓展定义datagrid的editors控件
+
+var kyear='{$yearterm.YEAR}'        //todo:只能在这个学年才能输入  (year_tear  type=j)
+var kterm='{$yearterm.TERM}'        //todo:只能在这个学年才能输入  (year_tear  type=j)
+
+var year='{$shuju.YEAR}'
+var term='{$shuju.TERM}'
+var courseno='{$shuju.COURSENO}'
+var kaoshiriqi=''                       //todo:考试日期
+var R1='{$shuju.R1}'
+var lock=0;             //todo:锁
+var isdate=false       //todo:判断日期有输入吗
+var indexList=[]        //todo:保存页面的索引;
+var current_datagrid=null;
+var current_datagrid_obj=null;
+var workbook_projecttype_obj=new Object();
+workbook_projecttype_obj.editIndex=undefined; //用于存储填写时的index
+
+
+$(function(){
+    //设置全部合格
+    $('#RiQi').datebox('setValue','{$sj}')
+    function setQualified(){
+        if(R1 != 'two'){
+            $.messager.alert('提示:','该操作只对二级制有效!');
+            return;
+        }
+        var rowList=$('#demo').datagrid('getRows');
+        //console.log(rowList);
+        for(var i=0;i<rowList.length;i++){
+            rowList[i].qmcj = '合格';
+            $('#demo').datagrid('refreshRow', i);
+        }
+    }
+    $('#setQualified1').click(setQualified);
+    $('#setQualified2').click(setQualified);
+
+
+    $(document).keydown(function(event) {
+        if (current_datagrid_obj.index!=null){    //如果正在编辑
+            if(event.which==9 || event.which==13){  //如果是tab键或回车键
+                if(lock==1) return; //如果锁定课程
+                event.preventDefault();
+                if($('#demo').datagrid('getRows').length > current_datagrid_obj.index+1){     //如果编辑下一个的下标小于列表长度
+                    current_datagrid_obj.index++; //下标+1
+                    $('#demo').datagrid('endEdit',current_datagrid_obj.index-1);   //结束上一行的编辑
+
+                    $('#demo').datagrid('startEditing',current_datagrid_obj);  //开始编辑下一行
+                    $('#demo').datagrid('selectRow',current_datagrid_obj.index);  //设置选中下一行
+                }else if($('#demo').datagrid('getRows').length-1 == current_datagrid_obj.index){  //如果编辑下标处于最后一条位置
+                    $('#demo').datagrid('endEdit',current_datagrid_obj.index);    //结束编辑
+                    current_datagrid_obj.index=null;  //设置下标为空
+                }
+            }
+        }
+    });
+
+
+    function ssave(){
+        if(year!=kyear||term!=kterm){
+            $('#modal').window({modal:true,minimizable:false,maximizable:false,closable:false,collapsible:false})
+            return $.messager.alert('提示','您只能输入'+kyear+'学年'+kterm+'学期的成绩!')
+        }
+        if($('#RiQi').datebox('getValues')==''){
+            return $.messager.alert('提示','请填写考试日期');
+        }
+//        if(current_datagrid_obj != null){
+//            $('#demo').datagrid('endEdit',current_datagrid_obj.index);
+//        }
+
+        var rowList=$('#demo').datagrid('getRows');
+        var sub1={};
+        //检查非空
+        for(var i=0;i<rowList.length;i++){
+            var result = {};
+            $('#demo').datagrid('endEdit',i);
+            var cj = $.trim(rowList[i].qmcj);
+//            console.log(rowList[i]);
+            if(cj==''){
+                //console.log(cj);
+                //console.log(rowList[i]);
+                return $.messager.alert('提示','还有成绩没有填完！不能提交');
+            }
+            var visualval = edit2visual(cj,R1);
+            if(!doWithVitualVal(visualval)){
+               return;
+            }
+
+            if(R1 == 'ten'){
+                if(isNaN(cj) /* || inObj(cj)*/){/* 中文 (或者 qhw中的值 )可缺少 */
+                    result.examscore = 0;
+                    result.testscore = visualval;
+                }else{
+                    result.examscore = parseInt(visualval);
+                    result.testscore = '';
+                }
+            }else{
+                result.examscore = 0;
+                result.testscore = visualval;
+            }
+            sub1[rowList[i]['RECNO']]=result;
+        }
+
+        var sp = (R1=='ten')?0:'无';
+        $.post('__URL__/Three_two_sub/tag/qmcjsr',{
+                    'bind':{ 'rows':sub1 },
+                    'year':year,
+                    'term':term,
+                    'sp':sp,
+                    'ksrq':$('#RiQi').datebox('getValues'),
+                    'courseno':courseno
+                },
+                function(c){
+                    workbook_projecttype_obj.editIndex=undefined
+                    $.messager.confirm('提示',c,function(){
+                        location.reload();
+                    })
+                });
+    }
+    //todo:保存数据
+    $('#save').bind('click',ssave);
+    $('#save2').bind('click',ssave);
+
+    $('#demo').datagrid({
+        onBeforeEdit:function(rowIndex, rowData){
+            rowData.qmcj = visual2edit(rowData.qmcj);
+        },
+        onClickCell:function(index, field,value){
+            if(lock){
+                return;
+            }
+            if($.trim(field)!='qmcj'){
+                $('#demo').datagrid('endEdit',current_datagrid_obj.index);
+                return;// $.messager.alert('提示','请鼠标点成绩一栏.')
+            }
+            workbook_projecttype_obj.index=index;
+            workbook_projecttype_obj.field=field;
+            $(this).datagrid('startEditing',workbook_projecttype_obj);//workbook_projecttype_obj
+            current_datagrid=$('#demo');
+            current_datagrid_obj=workbook_projecttype_obj;
+        },
+        onLoadSuccess:function(data){
+            $('#xuanke').html(data.total)
+            if(lock){
+                $('#save').unbind('click',ssave)
+                $('#save2').unbind('click',ssave)
+                $('#save').bind('click',function(){
+                    $.messager.alert('提示','已经被锁定不能修改')
+                })
+                $('#save2').bind('click',function(){
+                    $.messager.alert('提示','已经被锁定不能修改')
+                })
+                $.messager.alert('提示',"课程已被锁定，请先联系开课学院开放。\n开放后请务必刷新本页面，否则无法提交。")
+            }
+        },onAfterEdit:function(index,dataRow,changes){
+            var visualval = edit2visual(dataRow.qmcj,R1);
+            dataRow.qmcj = doWithVitualVal(visualval)?visualval:'';
+            $(this).datagrid('refreshRow', index);
+        }
+
+    })
+
+
+    setTimeout(function(){
+        $.post('__URL__/Three_two_sub/tag/qmcjhq',{'year':year,'term':term,'courseno':courseno},function(c){
+            //console.log(c);
+            for(var x in c['rows']){
+                c['rows'][x]['qmcj'] = $.trim(c['rows'][x]['qmcj']);
+            }
+            $('#demo').datagrid('loadData',c);
+        });
+    },200);
+
+    //todo:打印成绩单
+    $('#daying').bind('click',function(){
+        window.open('__URL__/Three_three_daying/YEAR/'+year+'/TERM/'+term+'/COURSENO/'+courseno)
+    })
+
+
+})
+
+</script>
+<body style="background-color: #fff">
+
+<div id="modal" inline="true" title="">
+</div>
+<div id="tdemo">
+    &nbsp;&nbsp;按TAB或回车键可进行切换到下一行
+    <a href="javascript:void(0)" class="easyui-linkbutton" id="setQualified1"   iconCls="icon-edit">全部设为合格</a>
+ <!--   <a href="javascript:void(0)" id="save" class="easyui-linkbutton" iconCls="icon-save" plain="true">保存</a>-->
+    <!--    <b><font color="red">输完一页成绩，请点保存再进入下一页，全部输入完，保存后再点最终提交</font></b>-->
+</div>
+<div id="cc" class="easyui-layout" data-options="" style="height:1220px">
+    <div data-options="region:'north',split:false,border:false" style="height:210px;">
+        <b><p align="center" style="font-size:14px">宁波城市学院{$TT.year}--{$TT.year2}学年第{$TT.term}学期期末成绩输入单(<script>if (R1=="ten") document.write("百分制"); else if (R1=="five") document.write("五级制"); else if (R1=="two") document.write("二级制"); else document.write("记分制不明确")</script>)</p></b>
+        <p align="center" style="line-height: 5%"><font face="宋体" color="#0000FF" size="2">
+            课号：<SPAN STYLE="font-size:10pt"  datasrc="#dsoCOURSE" datafld="课号">{$TT.kh}</SPAN>
+            &nbsp;课名:<SPAN STYLE="font-size:10pt" datasrc="#dsoCOURSE" datafld="课程名称">{$TT.km}</SPAN>
+            &nbsp;教师名称:<SPAN STYLE="font-size:10pt" datasrc="#dsoCOURSE" datafld="开课学院">{$TT2.TEACHERNAME}</SPAN>
+            &nbsp;选课人数:<span id="xuanke"></span></font>
+        </p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">1、百分制输入时成绩应为0-100之间或者使用字母（q、h、w)；</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">2、五级制输入时成绩1-5之间或者使用字母（q、h、w)，数字对应成绩如下：</font><font face="宋体" color="#FF0000" size="2">1-优秀，2-良好，3-中等，4-及格，5-不及格</font><font face="宋体" color="#0000ff" size="2">；</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">3、二级制输入时成绩为数值0-1或者使用字母（q、h、w)，</font><font face="宋体" color="#FF0000" size="2">1-合格，0-不合格</font><font face="宋体" color="#0000ff" size="2">；</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font color="#0000ff" size="2">4、</font><font face="宋体" color="#0000ff" size="2">字母对应字符如下:
+        </font><font color="#FF0000"><font face="宋体" size="2"> q-</font><font face="宋体" size="2">缺考，</font><font face="宋体" size="2">h-缓考，w-违纪</font></font><font face="宋体" color="#ff0000" size="2">
+        </font><font face="宋体" color="#0000ff" size="2">；</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">5、如期末考核缺考，则总评成绩应记为缺考，缓考者在成绩单课程状态中注明。</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">6、按Tab键移动光标到下一个输入框.</font></p>
+        <p style="line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0" align="left"><font face="宋体" color="#0000ff" size="2">7、本课程考试日期为：</font><font face="宋体" color="#0000ff" size="2"><!--webbot bot="Validation" s-data-type="Number" s-number-separators=",." -->
+            <input id="RiQi" name="RiQi" type="text" class="easyui-datebox" ></input>
+        </font></p>
+
+    </div>
+    <div data-options="region:'center',split:false,border:false" style="padding:0;background:#FFF;overflow: visible;height:1000">
+        <div align="center">
+            <table id="demo" title="" style="width:500px;height:1000px" data-options="toolbar:'#tdemo',view:bufferview,rownumbers:true,singleSelect:true,
+            pageList:[500,1000],autoRowHeight:false,pageSize:800,pagination:false">
+                <thead>
+                <tr>
+                    <th data-options="field:'xh',width:100,align:'center',formatter:function(a,b,c){
+                             kaoshiriqi=b.ksrq
+                             return a;
+                        }">学号</th>
+                    <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                    <th data-options="field:'qmcj',width:100,align:'center',editor:{type:'text'}">成绩</th>
+                    <th data-options="field:'zt',width:100,align:'center',formatter:function(a,b,c){
+                            if(a=='H')return '缓考'
+                            else if(a=='N')return '正常'
+                        }">状态</th>
+                    <th data-options="field:'lock',width:100,align:'center',hidden:true,formatter:function(a,b,c){
+                        if(a){
+                            $('#sub').val('课程已被锁定')
+                            $('#sub').attr('disabled',true)
+                            lock=1
+                        }
+                        }">锁</th>
+                    <th data-options="field:'RECNO',hidden:true,width:100,align:'center'">recno</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>
+<div id="tdemo2" style="margin-top: 30px;margin-bottom: 30px;">
+    <center>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="save2" iconCls="icon-save">提交数据</a>&nbsp&nbsp&nbsp&nbsp&nbsp
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="daying" iconCls="icon-print">打印成绩单</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="setQualified2"  iconCls="icon-edit">全部设为合格</a>
+    </center>
+</div>
+
+</body>
+</html>

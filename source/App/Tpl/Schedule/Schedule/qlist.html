@@ -1,0 +1,110 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url:"__ROOT__ /Schedule/Schedule/qlist/hasJson/true",
+            queryParams:{$queryParams},
+            frozenColumns:[[{field:'ck',checkbox:true},{field:'COURSENO',align:'center',width:100,title:'课号'}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },
+            onSelect : function(rowIndex, rowData){
+                $('#datagrid').datagrid("selectRecordByKey",{currIndex:rowIndex,keyField:"COURSENO"});
+            },
+            onUnselect : function(rowIndex, rowData){
+                $('#datagrid').datagrid("unSelectRecordByKey",{currIndex:rowIndex,keyField:"COURSENO"});
+            }
+        });
+
+        //选定课程后进入手工排课
+        $("#btManual").bind("click",function(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push($.trim(row.COURSENO)+ $.trim(row.GROUP));
+            });
+            var url = "__ROOT__ /Schedule/Schedule/manual/YEAR/{$Think.request.YEAR}/TERM/{$Think.request.TERM}?COURSENOS="+arr.join(",");
+            openTabsWindows("排课工作表", url,'',true);
+        });
+
+        //选定课程后进入自动排课
+        $("#btAuto").bind("click",function(){
+            msgShow("系统提示：","<br />暂无此功能！","info");
+        });
+        //导出excel
+        $("#excel").bind("click",function(){
+            var list=datagrid.datagrid('getRows');
+            if(list.length){
+                $("#expForm").submit();
+            }else{
+                msgShow("系统提示：","目前没有可导出数据","info");
+            }
+        });
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+<!--    <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 16pt;">第{$Think.request.YEAR}学年，第{$Think.request.TERM}学期课程总表</font></p>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="false" title='<center>第{$Think.request.YEAR}学年，第{$Think.request.TERM}学期课程总表</center>' width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENAME',align:'center',width:360">课名</th>
+                <th data-options="field:'DAY',align:'center',width:60">星期</th>
+                <th data-options="field:'TIME',align:'center',width:100">时段</th>
+                <th data-options="field:'TEACHERNAME',align:'center',width:80">教师</th>
+                <th data-options="field:'ROOMNAME',align:'center',width:80">教室</th>
+                <th data-options="field:'TASKNAME',align:'center',width:80">教学任务</th>
+                <th data-options="field:'HOURS',align:'center',width:80">周总学时</th>
+                <th data-options="field:'OEWNAME',align:'center',width:80">单双周</th>
+                <th data-options="field:'WEEKS',align:'center',width:150">周次</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:150">班级</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:150">开课学院</th>
+                <th data-options="field:'ATTENDENTS',align:'center',width:80">选课人数</th>
+                <th data-options="field:'COURSETYPE2',align:'center',width:80">类型</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <a href="#" id="btManual" class="easyui-linkbutton" data-options="iconCls:'icon-tanchu',plain:true" >选定课程后进入手工排课</a>
+    <a href="#" id="btAuto" class="easyui-linkbutton" data-options="iconCls:'icon-mingxi',plain:true">选定课程后进入自动排课</a>
+    <a href="#" id="excel" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出Excel</a>
+</div>
+<form style="display:none;" action="__APP__/CourseManager/Excel/scheduleExcel" method="POST" id="expForm">
+    <input type="hidden" name="YEAR" value="{$expParams.YEAR}">
+    <input type="hidden" name="TERM" value="{$expParams.TERM}">
+    <input type="hidden" name="COURSENO" value="{$expParams.COURSENO}">
+    <input type="hidden" name="COURSENAME" value="{$expParams.COURSENAME}">
+    <input type="hidden" name="GROUP" value="{$expParams.GROUP}">
+    <input type="hidden" name="SCHOOL" value="{$expParams.SCHOOL}">
+    <input type="hidden" name="COURSETYPE" value="{$expParams.COURSETYPE}">
+    <input type="hidden" name="CLASSNO" value="{$expParams.CLASSNO}">
+    <input type="hidden" name="CLASSNAME" value="{$expParams.CLASSNAME}">
+    <input type="hidden" name="APPROACHES" value="{$expParams.APPROACHES}">
+    <input type="hidden" name="EXAMTYPE" value="{$expParams.EXAMTYPE}">
+    <input type="hidden" name="TEACHERNO" value="{$expParams.TEACHERNO}">
+    <input type="hidden" name="TEACHERNAME" value="{$expParams.TEACHERNAME}">
+    <input type="hidden" name="ROOMR" value="{$expParams.ROOMR}">
+    <input type="hidden" name="ROOMTYPE" value="{$expParams.ROOMTYPE}">
+    <input type="hidden" name="DAY" value="{$expParams.DAY}">
+    <input type="hidden" name="TIME" value="{$expParams.TIME}">
+    <input type="hidden" name="ROOMNO" value="{$expParams.ROOMNO}">
+    <input type="hidden" name="UNIT" value="{$expParams.UNIT}">
+    <input type="hidden" name="ORDER" value="{$expParams.ORDER}">
+</form>
+</body>
+</html>
+

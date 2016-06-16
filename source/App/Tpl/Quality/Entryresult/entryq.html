@@ -1,0 +1,487 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+    .query{}
+    legend{margin-left: 20px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    #searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+        <form action="__URL__" method="POST" id="biaodan">
+            <label>学年：</label><input type="text" name="year" size="4" class="easyui-validatebox" value="{$yearTerm.YEAR}">
+            <label>学期:</label><input type="text" name="term" size="5" class="easyui-validatebox" value="{$yearTerm.TERM}">
+            <label>课号:</label><input type="text" name="courseno" size="8" value='%'  class="easyui-validatebox">（9位）
+            <label>课程名称：</label><input type="text" name="coursename" size="8" value='%'  class="easyui-validatebox">
+            <label>教师姓名：</label><input type="text" name="teachername" size="6" value='%'  class="easyui-validatebox">
+            <label>课程类型：</label>
+            <select name="task">
+                <option value="%">全部</option>
+                <volist name="coursetypeoptions2" id="t">
+                    <option value="{$t.TYPE}">{$t.NAME}</option>
+                </volist>
+            </select>
+            <a href="javascript:void(0)" id="searcher" onclick="sousuo()">搜索</a>
+            &nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"  id="e_look" plain=true>查看学生名单</a>
+        </form></div>
+
+<div data-options="region:'center',border:false" style=";background:#eee;">
+    <div id="clinfo"></div>
+</div>
+</div>
+
+<!--todo:教师教学质量评估学生列表-->
+<div id="wd" title="参加教师教学质量评估学生列表">
+    <div id="StudentList"></div>
+</div>
+<!--todo:添加学生-->
+<div id="wd2" title="添加学生">
+    <form id="addquerystud">
+        <table border="0" align="center" style="border-collapse: collapse; font-size: 10pt">
+            <tr height="10"><td colspan="3"></td></tr>
+            <tr height="45">
+                <td align="right" width="20%">学号：</td>
+                <td align="left" width="55%"><input name="STUDENTNUM" size="10" value=""> <font color="green">按学号添加</font></td>
+                <td><a href="javascript:void(0)" id="addbtn">添加</a></td>
+            </tr>
+            <tr height="45">
+                <td align="right" width="20%">班号：</td>
+                <td align="left" width="55%"><input name="CLASSNUM" size="10" value=""> <font color="green">按班号检索</font></td>
+                <td><a href="javascript:void(0)" id="search">检索</a></td>
+            </tr>
+            <tr height="45">
+                <td align="right" width="20%">课程：</td>
+                <td align="left" width="55%"><input name="ccourseno" size="10" value=""> <font color="green">按课程检索</font></td>
+                <td><a href="javascript:void(0)" id="search2" class="easyui-linkbutton" iconCls="icon-search">检索</a></td>
+            </tr>
+            </td>
+        </table>
+    </form>
+</div>
+<!--todo:添加学生——学生列表-->
+<div id="wd3" title="添加学生 —— 学生列表">
+    <div id="addStudentList"></div>
+</div>
+</body>
+<script>
+$(function(){
+    var map="";
+    var RECNO='';		//todo:存放 添加考评名单时候 要用到的RECNO
+    var TEACHERNO='';	//todo:存放 教师NO
+    Rpanduan=false;
+    //判断学生号的变量
+    //window弹窗之    学生列表信息弹窗
+    var wd=$('#wd').window({
+        fit:true,minimizable:false,
+        maximizable:false,collapsible:false,
+        draggable:false,resizable:false,closable:false,
+        modal:false,closed:true});
+    //window弹窗之    添加学生的窗口
+    var wd2=$('#wd2').window({
+        modal:true,height:220,
+        width:450,minimizable:false,
+        maximizable:false,collapsible:false,
+        draggable:false,resizable:false,
+        closed:true});
+    //window弹窗之    班级学生列表的窗口
+    var wd3=$('#wd3').window({
+        fit:true,minimizable:false,
+        maximizable:false,collapsible:false,
+        draggable:false,resizable:false,closable:false,
+        modal:false,closed:true});
+    //考评名单
+    var dat=$('#clinfo').datagrid({
+        fit:true,
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#clinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:'RECNO',title:'记录号',align:'center', width:60,sortable:true},
+            {field:'TEACHERNAME',title:'教师姓名',align:'center', width:60,sortable:true},
+            {field:'TEACHERNO',title:'教师号',align:'center', width:60,sortable:true},
+            {field:'COURSENAME',title:'课名',align:'center', width:200,sortable:true},
+            {field:'COURSENO',title:'课号',align:'center',width:60,sortable:true},
+            {field:'TASK',title:'类型',align:'center',width:60,sortable:true},
+            {field:'STUDENTCOUNT',title:'参加人数',align:'center',width:50,sortable:true} ]],
+        sortName:'RECNO',
+        sortOrder:'ASC',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:'#tdemo'
+    });
+
+    $('#dtnfo').layout({});
+    var searcher=$('#searcher').linkbutton({});                 //搜索按钮
+    //todo:判断用户是不是选了一条的函数
+    function yitiao(obj){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            $.messager.alert("提示","请选择一条数据进行查看,不能选多条");
+        }else if(rowList.length<1) $.messager.alert("提示","请选择一条要查看的数据","info");
+        else return true;
+        return false;
+    }
+    /******************************************添加学生 开始************************************/
+    $('#addbtn').linkbutton({iconCls: 'icon-add'});//按学号添加-- 按钮
+    $('#search').linkbutton({iconCls: 'icon-search'});//按班号检索 -- 按钮
+    //添加学生文本框焦点离开事件
+    $("#addquerystud input").blur(function(){
+        if($.trim($(this).val())==""){
+            $(this).next().attr("color","green");
+            if($(this).attr("name")=="STUDENTNUM"){
+                $(this).next().html("按学号添加");
+            }else{
+                $(this).next().html("按班号检索");
+            }
+        }
+    });
+
+    //todo:按课号检索
+    $('#search2').bind('click',function(){
+
+        var courseno=$('[name=ccourseno]').val()
+
+        if(courseno==''){
+            return $.messager.alert('提示','请填写一个课号')
+        }
+       ajiakesi('__URL__/CourseStudent',{'courseno':courseno,year:$('[name=year]').val(),term:$('[name=term]').val()},function(c){
+           if(c=='没有找到该课号')return $.messager.alert('提示',c)
+
+           wd3.window({closed:false});
+           $('#addStudentList').datagrid('options').url='__URL__/CourseStudent'
+           setTimeout(function(){
+               $('#addStudentList').datagrid('load',{'courseno':courseno,year:$('[name=year]').val(),term:$('[name=term]').val()});
+           },500)
+
+       })
+
+    })
+
+
+    //添加学生
+    $("#addbtn").click(function(){
+        var ele=$("[name='STUDENTNUM']");
+        var value=$.trim(ele.val());
+        if(value!=""){
+            $.ajax({
+                url:"__URL__/checkstudentid/hasJson/1",
+                type:"POST",
+                data:{VALUE:value,MAP:map},
+                success: function(data){
+                    if(data==1){
+                        $.ajax({url:'__URL__/addquerystudent/hasJson/1',
+                            type:'POST',
+                            data:{MAP:map,STUDENTNO:value},
+                            success: function(d){
+                                if(d){
+                                    StudetDatGrid.datagrid('reload');
+                                    ele.next().html("添加成功√");
+                                    ele.next().attr("color","green");
+                                    ele.select();
+                                }else{
+                                    ele.next().html("添加失败×");
+                                    ele.next().attr("color","red");
+                                }
+                            }
+                        });
+                    }else if(data==-0){
+                        ele.next().html("学号不存在×");
+                        ele.next().attr("color","red");
+                    }else{
+                        ele.next().html("学号已在列表中×");
+                        ele.next().attr("color","red");
+                    }
+                }
+            });
+        }else{
+            ele.next().html("请输入学号");
+            ele.next().attr("color","red");
+        }
+    });
+    //班号检索学生信息
+    $("#search").click(function(){
+        var ele=$("[name='CLASSNUM']");
+        var value=$.trim(ele.val());
+        if(value!=""){
+            $.ajax({url:"__URL__/checkstudentid/",
+                type:"POST",
+                data:{VALUE:value},
+                success: function(data){
+                    if(data==1){
+                        ele.next().attr("color","green");
+                        ele.next().html("可以使用√");
+                        wd3.window({closed:false});
+                        //加载学生信息
+                        $('#addStudentList').datagrid("options").url = "__URL__/queryStudentByNo/";
+                        $('#addStudentList').datagrid('load',{CLASSNO:value});
+                    }else{
+                        ele.next().html("班号不存在×");
+                        ele.next().attr("color","red");
+                    }
+                }
+            });
+        }else{
+            ele.next().html("请输入班号");
+            ele.next().attr("color","red");
+        }
+    });
+    var addStudetDatGrid=$('#addStudentList').datagrid({
+        fit:true,
+        striped:true,
+        onRowContextMenu:function(e,rowindex,row){
+            addStudetDatGrid.datagrid('rejectChanges')
+            var tt=$('#addStudentList');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu3').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        fitColumns:true,
+        columns:[[{field:'STUDENTNO',checkbox:true},
+            {field:'NO',title:'学号',width:80,align:"center",formatter:function(value,row,index){
+                return row.STUDENTNO;}},
+            {field:'NAME',title:'姓名',width:80,align:"center"},
+            {field:'CLASSNAME',title:'班级名称',width:80,align:"center"},
+            {field:'SCHOOLNAME',title:'所在学院',width:80,align:"center"},
+            {field:'VALUE',title:'学籍状态',width:80,align:"center"}]],
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:[{text:'添加学生',
+            iconCls: 'icon-edit',
+            handler:function(){
+                var row = addStudetDatGrid.datagrid('getSelections');
+                if (row.length){
+                    $.messager.confirm('提示','您确定要将选中学生加入到该名单当中？名单列表中已存在的学生将跳过添加操作！',function(b){
+                        if(b){
+                            var data=[];
+                            for(var i=0;i<row.length;i++){
+                                data[i]=row[i].STUDENTNO;
+                            }
+                            $.ajax({url:'__URL__/addquerystudent/',
+                                data:{STUDENTNO:data,MAP:map},
+                                type:'POST',
+                                success:function(data){
+                                    if(data > 0){
+                                        $.messager.confirm("提示","成功添加"+data+"个学生到名单列表,是否继续添加？",function(bool){
+                                            if(!bool){
+                                                StudetDatGrid.datagrid('reload');
+                                                ziback(wd3);ziback(wd2);
+                                            }
+                                        });
+                                    }else{
+                                        $.messager.alert('提示','该学生已在列表中，添加失败！','?');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }else $.messager.alert('提示','请选择要添加的学生！','?');
+            }
+        },'-',{text:'返回',
+            iconCls:'icon-back',
+            handler:function(){
+                ziback(wd3);
+            }
+        }]
+    });
+
+    $('#admin_add').bind('click',function(){
+
+        var row = addStudetDatGrid.datagrid('getSelections');
+        if (row.length){
+            $.messager.confirm('提示','您确定要将选中学生加入到该名单当中？名单列表中已存在的学生将跳过添加操作！',function(b){
+                if(b){
+                    var data=[];
+                    for(var i=0;i<row.length;i++){
+                        data[i]=row[i].STUDENTNO;
+                    }
+                    $.ajax({url:'__URL__/addquerystudent/',
+                        data:{STUDENTNO:data,MAP:map},
+                        type:'POST',
+                        success:function(data){
+                            if(data > 0){
+                                $.messager.confirm("提示","成功添加"+data+"个学生到名单列表,是否继续添加？",function(bool){
+                                    if(!bool){
+                                        StudetDatGrid.datagrid('reload');
+                                        ziback(wd3);ziback(wd2);
+                                    }
+                                });
+                            }else{
+                                $.messager.alert('提示','该学生已在列表中，添加失败！','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }else $.messager.alert('提示','请选择要添加的学生！','?');
+    })
+    //重置添加窗口
+    function addstu_reset(){
+        $("#addquerystud input").val("");
+        $("#addquerystud input").next().attr("color","green");
+        $("[name='STUDENTNUM']").next().html("按学号添加");
+        $("[name='CLASSNUM']").next().html("按班号检索");
+    }
+    //*************************************添加学生 结束*****************************************
+
+    //todo:参加教师教学质量评估学生列表  datagrid≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+    var StudetDatGrid=$('#StudentList').datagrid({
+        fit:true,
+        striped:true,
+        fitColumns:true,
+        columns:[[{checkbox:true},{field:'RECNOA',title:'记录号', width:50,align:"center"},
+            {field:'STUDENTNO',title:'学号', width:100,align:"center"},
+            {field:'NAME',title:'姓名', width:50,align:"center"},
+            {field:'CLASSNAME',title:'班级名称', width:200,align:"center"},
+            {field:'COMPELETE',title:'完成情况', width:70,align:"center"},
+            {field:'TOTAL',title:'总分', width:70,align:"center"},
+            {field:'USED',title:'是否采用', width:60,align:"center"} ]],
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        onRowContextMenu:function(e,rowindex,row){
+            StudetDatGrid.datagrid('rejectChanges')
+            var tt=$('#StudentList');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu2').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        toolbar:[{text:'添加学生',
+            iconCls: 'icon-edit',
+            handler:function(){
+                addstu_reset();
+                wd2.window({closed:false});
+            }
+        },'-',{text:'删除',
+            iconCls:'icon-cancel',
+            handler:function(){
+                var row2 = StudetDatGrid.datagrid('getSelections');
+                if (row2.length){
+                    $.messager.confirm('提示','您确定要删除吗',function(b){
+                        if(b){
+                            var infoarr=[];
+                            for(var i=0;i<row2.length;i++){
+                                infoarr[i]=row2[i].RECNOA;
+                            }
+                            $.ajax({
+                                url:'__URL__/deletequerystudent',
+                                data:{'in':infoarr},
+                                type:'POST',
+                                success:function(C){
+                                    if(C){
+                                        $.messager.alert('提示','删除成功！','?');
+                                        StudetDatGrid.datagrid('reload');
+                                    }else{
+                                        $.messager.alert('提示','删除失败,没权限操作','?');
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }else $.messager.alert('提示','请选择需要删除的数据！','?');
+            }
+        },'-',{text:'返回',
+            iconCls:'icon-back',
+            handler:function(){ziback(wd)}
+        }]
+    });
+
+    $('#admin_del').bind('click',function(){
+        var row2 = StudetDatGrid.datagrid('getSelections');
+        if (row2.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr=[];
+                    for(var i=0;i<row2.length;i++){
+                        infoarr[i]=row2[i].RECNOA;
+                    }
+                    $.ajax({
+                        url:'__URL__/deletequerystudent',
+                        data:{'in':infoarr},
+                        type:'POST',
+                        success:function(C){
+                            if(C){
+                                $.messager.alert('提示','删除成功！','?');
+                                StudetDatGrid.datagrid('reload');
+                            }else{
+                                $.messager.alert('提示','删除失败,没权限操作','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }else $.messager.alert('提示','请选择需要删除的数据！','?');
+    })
+
+
+    function llook(){
+        var obj={};
+        var row3 = dat.datagrid('getSelected');                 // 获得被选中的索引
+        map=row3.RECNO;
+
+        //加载信息
+        obj['Map']=row3.RECNO;		// 记录号
+        StudetDatGrid.datagrid("options").url = "__URL__/querystudent/hasJson/1";
+        StudetDatGrid.datagrid('load',obj);
+
+        TEACHERNAME=row3.TEACHERNAME;                           // 教师姓名
+        COURSENAME=row3.COURSENAME;                             // 课程名称
+        COURSENO=row3.COURSENO;                                 // 课号
+        TASK=row3.TASK;                                         // 类型
+        wd.window({title:'参加教师教学质量评估学生列表——教师姓名：'+row3.TEACHERNAME+' &nbsp;课程名称：'+
+                row3.COURSENAME+' &nbsp;课号：'+row3.COURSENO+' &nbsp;类型：'+row3.TASK,
+            closed:false});}
+
+    $('#e_look').bind('click',llook);
+    $('#admin_look').bind('click',llook);
+
+});
+//点击搜索时候触发的事件
+function sousuo(){
+    $('#clinfo').datagrid("options").url = "__URL__/entryq/hasJson/1";
+    $('#clinfo').datagrid('load',{
+        'YEAR':$('#biaodan').find('[name=year]').val(),
+        'TEACHERNAME':$('#biaodan').find('[name=teachername]').val(),
+        'TERM':$('#biaodan').find('[name=term]').val(),
+        'TASK':$('#biaodan').find('[name=task]').val(),
+        'COURSENO':$('#biaodan').find('[name=courseno]').val(),
+        'COURSENAME':$('#biaodan').find('[name=coursename]').val()
+    });
+}
+function ziback(name){
+    name.window({closed:true});
+}
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_look'>查看学生名单</div>
+</div>
+
+<div id="admin_access_menu2" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除</div>
+</div>
+
+<div id="admin_access_menu3" class="easyui-menu" style="width:100px;">
+    <div id='admin_add'>添加学生</div>
+</div>
+</html>

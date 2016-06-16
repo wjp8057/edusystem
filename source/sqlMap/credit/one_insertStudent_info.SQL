@@ -1,0 +1,3 @@
+insert into CreditSinglefirm (year,term,firmno,Studentno,projectname,credittype,certficatetime,credit,description,submitter,schoolname,recordmark,schoolview,deanview)
+values(:year,:term,:firmno,:Studentno,:projectname,:credittype,:certficatetime,:credit,:description,:submitter,:schoolname,:recordmark,:schoolview,:deanview);
+insert into Creditxuliehao([year],[term],xuliehao) values(:y2,:t2,:xuliehao)

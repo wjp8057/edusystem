@@ -1,0 +1,89 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+        $("#btSearch").bind("click",function(){
+            <eq name="isKaopingLock" value="true">
+            msgShow("系统提示","你还有课程考评没有做！<a href='#' onclick='openTopTabs(\"21\")' style='color: #ff0000'>现在就去考评</a>","error");
+            return false;
+            </eq>
+
+            <eq name="isFee" value="0">
+            msgShow("系统提示","你还没有缴费，不能进行选课！","error");
+            return false;
+            </eq>
+            if(checkAllItemByDocumentId("COURSENOGROUP,SCHOOL,COURSENAME,COURSETYPE,TEACHERNAME,CLASSNO,DAY,TIME","%")==false){
+                msgShow("系统提示","不能把所有条件设置为全部(%)","error");
+                return false;
+            }
+        });
+
+        $('#queryReload').bind("click", function(){
+            window.location='__ROOT__/Student/Course/query/YEAR/'+parent.$("#YEAR").val()+'/TERM/'+parent.$("#TERM").val();
+        })
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="0" split="false" style="padding:5px;overflow-y:hidden" >
+    <p align="center"><font color="#000080" size="2">请先设定条件检索指定学期开设的课程：</font></p>
+    <div align="center">
+        <form id="jvform" name="jvform" action="__ROOT__/index.php?g=Student&m=Course&a=qlist" method="post">
+            <table border="1" cellpadding="0" cellspacing="0" width="100%" style="font-size:10pt">
+                <tr>
+                    <td width="25%" align="right">学年：</td>
+                    <td width="25%" align="left"><input type="text" id="YEAR" name="YEAR" size="4" value="" tabindex="0">例：2001，四位</td>
+                    <td width="25%" align="right">学期：</td>
+                    <td width="25%" align="left"><input type="text" id="TERM" name="TERM" size="2" value="" tabindex="1">例：1，2，3（短学期）</td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">课号：</td>
+                    <td width="25%" align="left"><input type="text" id="COURSENOGROUP" name="COURSENOGROUP" size="9" value="%" tabindex="2">9位</td>
+                    <td width="25%" align="right">开课学院：</td>
+                    <td width="25%" align="left"><Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" /></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">课名：</td>
+                    <td width="25%" align="left"><input type="text" id="COURSENAME" name="COURSENAME" size="20" value="%" tabindex="4"></td>
+                    <td width="25%" align="right">课程类别：</td>
+                    <td width="25%" align="left"><Cwebs:sqlselect id="COURSETYPE" name="COURSETYPE" value="CODE" title="NAME" headerKey="%" headerTitle="全部类别" file="course/courseTypeOptions.sql" /></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">教师姓名：</td>
+                    <td width="25%" align="left"><input type="text" id="TEACHERNAME" name="TEACHERNAME" size="10" value="%" tabindex="6"></td>
+                    <td width="25%" align="right">班号：</td>
+                    <td width="25%" align="left"><input type="text" id="CLASSNO" name="CLASSNO" size="10" value="%"></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">日期：</td>
+                    <td width="25%" align="left"><select size="1" name="DAY" id="DAY">
+                        <option value="1">星期一</option>
+                        <option value="2">星期二</option>
+                        <option value="3">星期三</option>
+                        <option value="4">星期四</option>
+                        <option value="5">星期五</option>
+                        <option value="6">星期六</option>
+                        <option value="7">星期天</option>
+                        <option value="0">日期未定</option>
+                        <option selected value="%">全部</option>
+                    </select></td>
+                    <td width="25%" align="right">时段：</td>
+                    <td width="25%" align="left"><Cwebs:sqlselect id="TIME" name="TIME" value="CODE" title="NAME" headerKey="%" headerTitle="全部时段" file="course/timeSections.sql" /></td>
+                </tr>
+            </table>
+            <input type="submit" name="B1" id="btSearch" value="提交" tabindex="7">&nbsp; <input type="reset" value="重写" name="RESET" tabindex="8">
+            <input type="hidden" name="STUDENTNO" value="{$Think.session.S_USER_NAME}">
+        </form>
+        </center>
+    </div>
+    <p><font color="#800000" size="2">使用说明：对于不清楚的字段，请使用通配符：%</font></p>
+    <p><font color="#800000" size="2">例如，需要找某位姓张的老师开设的课程，可在教师姓名栏中输入：张%</font></p>
+    <p><font color="#800000" size="2">如果要增加检索的速度，你应该缩小检索的范围，如果每一个条件都是“%”，则网页的响应速度将会很慢！</font></p>
+    <p><a href="#" id="queryReload">如果考评完成，缴费完成，请刷新此页再查询</a></p>
+
+</div>
+
+</body>
+</html>

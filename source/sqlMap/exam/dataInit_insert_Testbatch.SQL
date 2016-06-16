@@ -1,0 +1,1 @@
+insert into TestBatch (FLAG,YEAR ,TERM) VALUES(:FLAG,:YEAR,:TERM)

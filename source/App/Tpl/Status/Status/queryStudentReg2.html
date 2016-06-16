@@ -1,0 +1,608 @@
+<include file=":Include:jqueryHeader" />
+        <script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+        $(function(){
+
+
+
+
+
+
+
+
+            function chuangkou(){
+                this.closed=true;
+                this.modal=true;
+                this.maximizable=false;
+                this.minimizable=false;
+            }
+            var ck=new chuangkou();
+            ck.width=500;
+            ck.height=200;
+            ck.modal=false;
+            var small=$('#small').window(ck);
+            ck.height=300;
+            var small2=$('#small2').window(ck);
+            var wd1=$('#wd1').window(ck);   //todo: 点击 ‘查询全校新生报到注册情况’ 出现的窗口
+            ck.closed=false;
+            ck.height=250
+            ck.width=400
+            ck.modal=false
+            var wd=$('#wd').window(ck)     //todo:一开始进来的窗口
+            ck.modal=true
+            var ck2=new chuangkou();
+            ck2.fit=true
+            var big=$('#Big').window(ck2);   //todo:(datagrid) 提交查询所显示的datagrid
+            var big2=$('#Big2').window(ck2);    //todo:查看 该班级报到注册情况的  大窗口
+            var big3=$('#Big3').window(ck2);    //todo:综合查询后所显示的窗口
+
+            var Studenthz=$('#Studenthz').window(ck2);//todo:点击 按新生报到情况汇总 的大窗口
+            var Major_hz=$('#Major_hz').window(ck2);  //todo:点击 按专业 汇总后 弹出的大窗口
+            var sheng_hz=$('#sheng_hz').window(ck2);  //todo:点击 按省汇总后  弹出的大窗口
+          //  var schoolStudenthz=$('#schoolStudenthz').window(ck2);      //todo:点击 按报到汇总-----查看某学院学生报到汇总的窗口
+
+
+            $('#layout').layout()       //todo:layout
+       //     $('#LINK').linkbutton({
+        //        text:'查询全校新生报到注册情况',
+         //       iconCls:'icon-search'
+          //  })
+
+
+
+
+
+            function diaoyong(num1){           //todo:搜索按钮 绑定事件
+                var obj=quzhi();
+
+                if(typeof num1!="string"){
+                    var key=$('#SCHOOL').val();
+                }else{
+                    obj.SCHOOL=num1;
+                    var key=num1;
+                }
+                obj.year=$('#year').val()
+                obj.term=$('#term').val();
+                obj.str='<p align=center><font face="楷体_GB2312">'+$("#a"+key).text()+'学生报到情况总览(第xyearx学年第xtermx学期)：</font></p><p align=center><font face="楷体_GB2312">全院应报到新生：xyingbaodaox名；现在已报到：xyibaodaoNewx名;全院应报到在册生：xzaiceAllx;现已报到:xyiceAllx。</font></p><p align=center><font face="楷体_GB2312"></font></p>'
+                ajiakesi('__URL__/queryStudentReg',obj,function(c){
+                    $('#title1').html(c)
+                    dat.datagrid('load',obj)
+
+                    big.window({
+                        closed:false
+                    })
+                })
+
+            }
+
+            $('#searcher').bind('click',diaoyong)
+
+            //todo:             datagrid
+            var dat=$('#datgrid').datagrid({
+                striped:true,
+                url:'__URL__/queryStudentReg/hasJson/1',
+                columns:[[
+                {field:'RECNO',checkbox:true},
+                    {field:'CLASSNAME',title:'班名',width:100,sortable:true
+                    },
+                    {field:'CLASSNO',title:'班号',width:100,sortable:true
+                    },
+
+                    {field:'EXPECTED',title:'应报到人数',width:115,sortable:true
+                    },
+                    {field:'ARRIVED',title:'实报到人数',width:115,sortable:true
+                    }
+                ]],
+
+                pagination:true,
+                pageList:[10,20,30,40,50],
+                pageSize:30,
+                toolbar:[{
+                    text:'查看该班级报到情况',
+                    iconCls:'icon-search',
+                    handler:function(){
+                        var yi=yitiao(dat,'不能选择多条查看','请选择一条要查看的信息')
+                        if(yi){
+                            var row=dat.datagrid('getSelected');
+                            var obj={}
+                            obj['CLASSNO']=row.CLASSNO
+                            obj['YEAR']=$('#YEAR').val();
+                            obj['TERM']=$('#TERM').val();
+                            obj['str']='<p ALIGN=CENTER><font size="7">'+row.CLASSNAME+'学生报到情况总览(第xyearx学年第xtermx学期)：</font></p><p ALIGN=CENTER><font face="楷体_GB2312">全班应报到学生xyingbaodaox名；现在已报到：xyibaodaox名。</font></p><p ALIGN=CENTER><font face="楷体_GB2312">全班共有学生xyingbaodaox名;学生情况总览</font></p>'
+                            ajiakesi('__URL__/classbaodao',obj,function(c){
+                                $('#class_title').html(c)
+                                class_dat.datagrid('load',obj)
+                                big2.window({closed:false})
+                            })
+                        }
+                    }},'-',{
+                    text:'返回',
+                    iconCls:'icon-back',
+                    handler:function(){
+                        big.window({
+                            closed:true
+                        })
+
+                    }
+
+                }
+                ],onUnselect:function(rowIndex,rowData){
+                    dat.datagrid('cancelEdit',rowIndex);
+                }})
+
+            //todo:查看某个班级 报到注册情况的 datagrid======================================================================================
+            var class_dat=$('#class_datgrid').datagrid({
+                striped:true,
+                url:'__URL__/classbaodao/hasJson/1',
+                columns:[[
+                    {checkbox:true},
+                    {field:'EXAMNO',title:'准考证号',width:100,sortable:true,
+                        formatter:function(value,row,index){
+                            if(value=='null')return '';
+                            return value
+                    }
+                    },
+                    {field:'STUDENTNO',title:'学号',width:80,sortable:true
+                    },
+                    {field:'STUDENTNAME',title:'学生姓名',width:60,sortable:true
+                    },
+                    {field:'SEX',title:'性别',width:35,sortable:true
+                    },
+                    {field:'SCORE',title:'高考总分',width:75,sortable:true
+                    },
+                    {field:'PROVINCE',title:'省份',width:115,sortable:true
+                    },
+                    {field:'ARRIVED',title:'记录时间',width:115,sortable:true
+                    },
+                    {field:'YEARS',title:'学制',width:35,sortable:true
+                    },
+                    {field:'STATUS',title:'学籍状态',width:75,sortable:true
+                    },
+                    {field:'ENTERDATE',title:'入学时间',width:115,sortable:true
+                    },
+                    {field:'REGCODE',title:'注册状态',width:65,sortable:true
+                    }
+                ]],
+                pagination:true,
+                pageList:[10,20,30,40,50],
+                pageSize:30,
+                toolbar:[{
+                    text:'查看学生个人情况',
+                    iconCls:'icon-search',
+                    handler:function(){
+                        var yi=yitiao(class_dat,'请选择一条不能选择多条','请您选择一条查看');
+                        if(yi){
+                            var row=class_dat.datagrid('getSelected');
+                            var yiyi=document.getElementById('a123')
+                            openTabsWindows('学生个人情况','__URL__/Window_studentinfo/EXAMNO/'+row.EXAMNO+'/STUDENTNO/'+row.STUDENTNO,'',true)
+                            //yiyi.href=
+                           // yiyi.click();
+                        }
+                    }},'-',{
+                    text:'查看学生注册情况',
+                    iconCls:'icon-personal',
+                    handler:function(){
+                        var yi=yitiao(class_dat,'请选择一条不能选择多条','请您选择一条查看');
+                        if(yi){
+                            var row=class_dat.datagrid('getSelected');
+                            var yiyi=document.getElementById('a123')
+                            openTabsWindows('学生注册情况','__URL__/Window_studentregis/STUDENTNO/'+row.STUDENTNO,'',true)
+
+                            //yiyi.click();
+                        }
+                    }},{
+                    text:'返回',
+                    iconCls:'icon-goleft',
+                    handler:function(){
+                        big2.window({closed:true})
+                    }}
+                ],onUnselect:function(rowIndex,rowData){
+                    dat.datagrid('cancelEdit',rowIndex);
+                }})
+       //todo:=========================================================================================end============================================
+
+
+            function datobj(url,columns){
+                this.striped=true;
+                this.url=url;
+                this.columns=columns;
+                this.pagination=true;
+                this.pageList=[10,20,30,40,50];
+                this.pageSize=30;
+            }
+
+            //todo:点击按新生报到注册汇总 datagrid========================================================start==============================
+            var Studentobj=new datobj('__URL__/Studenthz/hasJson/1',[[
+                {checkbox:true},
+                {field:'NAME',title:'学院',width:100,sortable:true
+                },
+                {field:'TOTAL',title:'应报到人数',width:100,sortable:true
+                },
+                {field:'STOTAL',title:'实报到人数',width:100,sortable:true
+                }
+            ]])
+            Studentobj.toolbar=[{
+                text:'查看学院学生报到总览',
+                iconCls:'icon-search',
+                handler:function(){
+                    var row=$('#Studenthz_datgrid').datagrid('getSelected');
+                    diaoyong(row.SCHOOL);
+                    schoolStudenthz.window({closed:false})
+                }
+            },{text:'返回上一页','iconCls':'icon-goleft',handler:function(){
+                $('#Studenthz').window({closed:true})
+            }}]
+
+            var Studenthz_dat=$('#Studenthz_datgrid').datagrid(Studentobj)
+            //todo:==================================================================================================end=================================
+            //todo:点击学科专业查看情况汇总 datagrid========================================================start==============================
+            var Majorobj=new datobj('__URL__/Studenthz/hasJson/1',[[
+                {checkbox:true},
+                {field:'SCHOOLNAME',title:'学院',width:100,sortable:true
+                },
+                {field:'BRANCHNAME',title:'学科类别',width:100,sortable:true
+                },
+                {field:'MAJORNAME',title:'专业',width:100,sortable:true
+                },
+                {field:'TOTAL',title:'应报到新生数',width:100,sortable:true
+                },
+                {field:'STOTAL',title:'实报到新生数',width:100,sortable:true
+                }
+            ]])
+            Majorobj.toolbar=[{text:'返回上一页',iconCls:'icon-goleft',handler:function(){
+                $('#Major_hz').window({closed:true})
+            }}]
+            var Major_dat=$('#Major_datgrid').datagrid(Majorobj)
+            //todo:==================================================================================================end=================================
+
+
+
+
+            //todo:点击按省查看情况汇总 datagrid========================================================start==============================
+           var shengobj=new datobj('__URL__/Studenthz/hasJson/1',[[
+                {checkbox:true},
+                {field:'PROVINCENAME',title:'省份',width:100,sortable:true
+                },
+                {field:'TOTAL',title:'应报到新生数',width:100,sortable:true
+                },
+                {field:'STOTAL',title:'实报到新生数',width:100,sortable:true
+                }
+            ]])
+            shengobj.toolbar=[{text:'返回上一页',iconCls:'icon-goleft',handler:function(){
+                $('#sheng_hz').window({closed:true})
+            }}]
+
+            var sheng_dat=$('#sheng_datgrid').datagrid(shengobj)
+            //todo:==================================================================================================end=================================
+
+
+
+
+            //todo:=================================================================================start=================================================
+                var zonghe_dat=$('#zonghe_datgrid').datagrid({
+                    striped:true,
+                    url:'__URL__/Squery/hasJson/1',
+                    columns:[[
+                        {checkbox:true},
+                        {field:'xh',title:'学号',width:60,sortable:true
+                        },
+                        {field:'xm',title:'姓名',width:50,sortable:true
+                        },
+                        {field:'xb',title:'性别',width:50,sortable:true,formatter:function(c){
+                            if(c=='M'){
+                                return '男'
+                            }else if(c=='F'){
+                                return '女'
+                            }
+                        }
+                        },
+                        {field:'rxrq',title:'入学日期',width:90,sortable:true
+                        },
+                        {field:'xz',title:'学制',width:50,sortable:true
+                        },
+                        {field:'tkzxf',title:'逃课总学分',width:70,sortable:true
+                        },
+                        {field:'hdxf',title:'获得学分',width:60,sortable:true
+                        },
+                        {field:'jdfh',title:'积点分和',width:60,sortable:true
+                        },
+                        {field:'txjg',title:'退学警告',width:60,sortable:true
+                        },
+                        {field:'zcrq',title:'注册日期',width:90,sortable:true
+                        },
+                        {field:'zczt',title:'注册状态',width:60,sortable:true
+                        },
+                        {field:'xjzt',title:'学籍状态',width:50,sortable:true
+                        },
+                        {field:'bm',title:'班名',width:50,sortable:true
+                        },
+                        {field:'xy',title:'学院',width:70,sortable:true
+                        }
+                    ]],
+                    pagination:true,
+                    pageList:[10,20,30,40,50],
+                    pageSize:30
+                })
+            //todo:===============================================================================================end=======================================
+
+
+
+
+
+            function quzhi(){
+                    var obj={}
+                    obj['SCHOOL']=$('#SCHOOL').val();
+                    obj['YEAR']=$('#YEAR').val();
+                    obj['TERM']=$('#TERM').val();
+                    return obj;
+            }
+
+
+
+
+            //todo:查询全校新生报到注册情况。
+            link('#queryAll','查询全校新生报到注册情况','').bind('click',function(){
+                small.window({
+                    closed:false
+                })
+            })
+            //todo:综合查询
+            link('#queryzonghe','综合查询').bind('click',function(){
+               openTabsWindows('综合查询','__URL__/zonghechaxun','',true)
+            })
+
+
+           //todo:3个汇总+2个查询-----------------------------------------------------start----------------------------------------
+            link('#xinshenghz','按学院新生报到汇总').bind('click',function(){
+                var obj={}
+                obj['sqlpath']={'yingbaodao':'queryAllNew','yibaodao':'yibaodaoNew','benke':'4yearNew','benke2':'4yearNewyibaodao','3year':'3yearNew','3year2':'3yearNewyibaodao','other':'otherNew','other2':'otherNewyibaodao'}
+                obj['str']='<p align="center"><font face="楷体_GB2312" size="4"><b>新生报到情况总览</b></font></p><p align="center"><font face="楷体_GB2312">(第xyearx学年第xtermx学期)：</font></p><p align="center"><font face="楷体_GB2312">全校应报到新生：xyingbaodaox名；现在已报到：xyibaodaox名；其中本科应报到：xbenkex名，实报到：xbenke2x名；</font></p><p align="center"><font face="楷体_GB2312">三年制应报到：x3yearx名；实报到:x3year2x 其它应报到：xotherx 实报到：xother2x。</font></p><p align="center"><font face="楷体_GB2312">各学院新生报到情况:</font></p>'
+                obj['YEAR']=$('#YEAR').val();
+                obj['TERM']=$('#TERM').val();
+                ajiakesi('__URL__/Studenthz',obj,function(c){
+                    $('#Studenthz_title').html(c);
+                    Studenthz_dat.datagrid('load',{'sqlpath':{'count':'status/Three_hz_count.SQL','select':'status/Three_hz_select.SQL'}})
+                })
+                Studenthz.window({
+                        closed:false
+                    })
+            })
+            link('#majorhz','按学科、专业汇总').bind('click',function(){
+                    Major_dat.datagrid('load',{'sqlpath':{'count':'status/Three_hz_major_Count.SQL','select':'status/Three_hz_major_Select.SQL'}})
+                    Major_hz.window({
+                        closed:false
+                    })
+            })
+
+
+
+            link('#shenghz','按省份报到汇总').bind('click',function(){
+                sheng_dat.datagrid('load',{'sqlpath':{'count':'status/Three_hz_sheng_Count.SQL','select':'status/Three_hz_sheng_Select.SQL'}})
+                sheng_hz.window({
+                    closed:false
+            })})
+
+            $('#regis').bind('click',function(){                //todo:看学生注册信息的
+                var ha=haha();
+                if(!ha)
+                    return;
+                var yiyi=document.getElementById('a123')
+                openTabsWindows('注册信息','__URL__/Window_studentregis/EXAMNO/'+ha,'',true)
+                 //yiyi.href='
+                //yiyi.click();
+
+            })
+
+            $('#studentinfo').bind('click',function(){          //todo:看学生个人情况的
+                var ha=haha();
+                if(!ha)
+                    return;
+                var yiyi=document.getElementById('a123')
+                openTabsWindows('学生个人情况','__URL__/Window_studentinfo/EXAMNO/'+ha,'',true)
+               // yiyi.click();
+            })
+            //todo:===========================================================================end====================================================
+
+
+            //todo:综合查询触发的事件
+            $('#zonghesearch').bind('click',function(){
+                    var obj={}
+                    obj['SCHOOL']=$('#sc').val();
+                    obj['CLASSNO']=$('#class').val();
+                    obj['REGIS']=$('#regiszt').val()
+                    obj['STATUS']=$('#statuszt').val();
+                    obj['YEAR']=$('#zhYEAR').val();
+                    obj['TERM']=$('#zhTERM').val();
+                    obj['str']='<p>按照学院、班级和学籍状态的查询条件共找到xAllx名学生；</p><p>其中有xAll2x名学生有该学年、学期的注册记录，其中符合注册状态检索条件的名单如下。</p>'
+                ajiakesi('__URL__/zonghe',obj,function(c){
+                    obj['Sqlpath']={'count':'status/Three_zonghecount.SQL','select':'status/Three_zonghe.SQL'}
+                    obj['bind']={':REGCODE':obj['REGIS'],':YEAR':obj['YEAR'],':TERM':obj['TERM'],':CLASSNO':obj['CLASSNO'],':SCHOOL':obj['SCHOOL'],':STATUS':obj['STATUS']};
+                    zonghe_dat.datagrid('load',obj);
+                    $('#zonghe_title').html(c);
+                    $('#Big3').window({
+                        closed:false
+                    })
+                })
+            })
+
+
+
+        })
+
+        //todo:判断准考证号是否为空
+        function haha(){
+            var value=$('#EXAMNO1').val();
+            if(value==""){
+                 $.messager.alert('提示','请填写准考证号,不能为空')
+                return false
+            }
+            return value;
+        }
+
+        function link(id,text,icon){
+            var obj=$(id).linkbutton({
+                text:text,
+                iconCls:icon
+            })
+
+            return obj;
+        }
+</script>
+
+        <!--todo:新生报到总汇的窗口-->
+        <div id="wd1" title="新生报到汇总： ">
+            <p><button id="anxueyuan">按学院新生报到汇总</button></p>
+            <p><button id="anxueke">按学科、专业汇总&nbsp&nbsp</button></p>
+            <p><button id="anshengfen">按省份报到汇总&nbsp&nbsp&nbsp&nbsp</button></p>
+            按准考证号查询报到情况，准考证号：<input type="text" name="EXAMNO" size="10"><input type="button" value="提交" name="submit" ><input type="button" value="查询考生情况" name="B1" LANGUAGE=javascript onclick="return B1_onclick()">
+        </div>
+
+
+            <br><br>
+                    <center>
+                    <a href="javascript:void(0)" id="queryAll">查询全校新生报到注册情况</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+
+                    <a href="javascript:void(0)" id="queryzonghe">综合查询</a>
+                    </center>
+
+                <fieldset>
+                    <legend><b>查询各学院学生报到注册情况：</b></legend>
+                    <table align="center" cellspacing="10" style="margin-top: 10px">
+                        <tr>
+                            <td>
+                                <select name="SCHOOL" id="SCHOOL" size="1">
+                                    <volist name="schools" id="v">
+                                        <option id="a{$v.SCHOOL}" value="{$v.SCHOOL}">{$v.NAME}</option>
+                                    </volist>
+                                </select>
+                            </td>
+                            <td>
+                                设定学年:<input type="TEXT" name="YEAR" id="YEAR" value="2013" SIZE=4>学期:  <input type="TEXT" id="TERM" name="TERM" value="1" SIZE=2>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" align="center">
+                                <a href="javascript:void(0)" name="bschool"  id="searcher" value="提交查询"/>
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+
+
+
+                    <input type="hidden" name="CLASSNO" id="ClassNo" value="">
+                    <!--<input type="hidden" name="SCHOOL"  id="School" value="">-->
+                    <input type="hidden" name="page" id="page" value="1">
+                    <input type="hidden" name="pagename" value="">
+
+
+
+<body style="background-color: #ffffff">
+<!--todo:点击 查询全校新生报到注册情况 弹出的窗口-->
+<div id="small" title="新生报到汇总：" data-options="closable:true,collapsible:false">
+    <p><a href="javascript:void(0)" id="xinshenghz">按学院新生报到汇总</a></p>
+    <p><a href="javascript:void(0)" id="majorhz">按学科、专业汇总</a></p>
+    <p><a href="javascript:void(0)" id="shenghz">按省份报到汇总</a></p>
+    <form name="MyForm" method="GET" action="/scripts/status.exe/QueryStudentReg?" >
+    按准考证号查询报到情况，准考证号：<input type="text" name="EXAMNO" id="EXAMNO1" isize="10"><input type="button" value="提交" id="regis"><input type="button" value="查询考生情况" id="studentinfo">
+    </form>
+</div>
+<style>
+    #small2 td{border:1px #95B8E7 solid;
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+
+<!--todo:一开始搜索后 所显示的内容-->
+<div id="Big" title="">
+    <div id="cc" class="easyui-layout" data-options="fit:true" >
+    <div data-options="region:'north',title:'',split:true,border:false" style="height:80px;">
+            <span id="title1"></span>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="datgrid" data-options="fit:true,border:false">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--todo:点击 查看该班级报到情况  所显示的内容-->
+<div id="Big2" title=" " data-options="closable:false,collapsible:false">
+    <div id="cc2" class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',title:'',split:true,border:false" style="height:130px;">
+            <span id="class_title"></span>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="class_datgrid" data-options="fit:true,border:false">
+            </div>
+        </div>
+    </div>
+    <a href="__URL__/" id="a123" target="_blank">123123</a>
+    <!--todo:跳转链接用的-->
+</div>
+
+<!--todo:综合查询-->
+<div id="Big3" title=" ">
+    <div id="cc4" class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',title:'',split:true,border:false" style="height:80px;">
+            <span id="zonghe_title"></span>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="zonghe_datgrid" data-options="fit:true,border:false,toolbar:[{text:'返回',iconCls:'icon-goleft',handler:function(){
+                $('#Big3').window({closed:true})
+            }}]">
+            </div>
+        </div>
+    </div>
+    <!--todo:跳转链接用的-->
+</div>
+
+
+<!--todo:新生报到汇总-->
+<div id="Studenthz" title=" ">
+    <div id="cc3" class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',title:'',split:true,border:false" style="height:170px;">
+            <span id="Studenthz_title"></span>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="Studenthz_datgrid" data-options="fit:true,border:false">
+            </div>
+        </div>
+    </div>
+    <!--todo:跳转链接用的-->
+</div>
+
+<!--todo:按学科、专业汇总-->
+<div id="Major_hz" title=" ">
+    <div id="cc5" class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',title:'',split:true,border:false" style="height:50px;">
+            <p align=center><span style="font-size:40">第2013学年第1学期新生报到情况汇总：</span></p>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="Major_datgrid" data-options="fit:true,border:false">
+            </div>
+        </div>
+    </div>
+    <!--todo:跳转链接用的-->
+</div>
+
+<!--todo:按省份报到汇总-->
+<div id="sheng_hz" title=" ">
+    <div  class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',title:'',split:true,border:false" style="height:50px;">
+            <p align=center><span style="font-size:40">第2013学年第1学期新生报到情况汇总：</span></p>
+        </div>
+        <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+            <div id="sheng_datgrid" data-options="fit:true,border:false">
+            </div>
+        </div>
+    </div>
+    <!--todo:跳转链接用的-->
+</div>
+
+</body>
+</html>
+

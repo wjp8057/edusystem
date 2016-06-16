@@ -1,0 +1,96 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-system","menuname": "当量分配",
+            "menus": [
+                {"menuid": "2","menuname": "课程设置","icon": "icon-file3","url": "__ROOT__/Workload/Index/course"},
+                {"menuid": "3","menuname": "总量核定","icon": "icon-file2","url": "__ROOT__/Workload/Index/check"},
+                {"menuid": "4","menuname": "分配到人","icon": "icon-personal2","url": "__ROOT__/Workload/Index/work"}
+                    ]
+        },
+        {"menuid": "1","icon": "icon-system","menuname": "统计汇总",
+            "menus": [
+                {"menuid": "2","menuname": "课时标准","icon": "icon-file3","url": "__ROOT__/Workload/Index/stand"},
+                {"menuid": "3","menuname": "教学要求","icon": "icon-file2","url": "__ROOT__/Workload/Index/teacher"},
+                {"menuid": "4","menuname": "外聘汇总","icon": "icon-file2","url": "__ROOT__/Workload/Index/external"}
+            ]
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="year" id="year" value="{$yearterm.year}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="term" id="term" value="{$yearterm.term}" style="width:14px" maxlength="1" />
+        <input type="hidden" name="school" id="school" value="{$school.school}" />
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a></span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="工作当量" style="width:130px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:hidden;text-indent: 2em;line-height: 30px " >
+            <h1 style="font-size:15pt;">工作量计算说明:</h1>
+            <div >工作量分为普通课程、集中实训教学、分散实训及毕业实习指导、毕业论文指导、形势与政策、职业素养等，基本计算公式如下：</div>
+            <div >普通课程=总课时*人数系数，人数系数=1+（授课人数-标准班）/授课人数，如果人数系数小于0.9，按0.9计，如果大于1.6，按1.6计</div>
+            <div  >集中实训=总课时*0.5</div>
+            <div  >分散实训、毕业实习等指导=周数*人数*0.15</div>
+            <div >毕业论文指导=人数*2，其中本科=人数*4</div>
+            <div >指导试讲=人数*2</div>
+            <div >形势与政策=人数/标准班*总课时</div>
+            <div >职业素养=人数/标准班*总课时*2</div>
+            <div >更多计算方法请参照最新工作量计算办法。</div>
+            <h1 style="font-size:15pt;">工作量计算流程:</h1>
+            <div >1、整理课程库，确定标准班、课程的工作量类型、周数、总课时</div>
+            <div >2、系统生成工作总量</div>
+            <div >3、确定工作总量，有异议向教务处反馈并更新</div>
+            <div >4、工作量分配到老师个人</div>
+            <div >5、计算普通课程重复课系数，并生成最终工作量</div>
+            <div >6、各学院最终确认</div>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

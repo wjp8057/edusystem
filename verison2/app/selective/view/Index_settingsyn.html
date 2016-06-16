@@ -1,0 +1,41 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        $("#syn").click(function() {
+            $.post('{$ROOT}/selective/setting/synscheduletable',{year: $('#year').val(),term: $('#term').val()},function(result){
+                if (result.status==1){
+                    $.messager.alert('成功',result.info,'info');
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+    });
+</script>
+<style type="text/css">
+    #toolbar{height: 80px;line-height: 80px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">同步课程总表</div>
+    <form id="myForm">
+        <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+            <tr>
+                <th><label for="year">学年：</label></th>
+                <td><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/></td>
+            </tr>
+            <tr>
+                <th><label for="term">学期：</label></th>
+                <td><input id="term" class="easyui-validatebox" size="2" value="{$NEXTYEARTERM.term}"/></td>
+            </tr>
+        </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" style="height:40px;width:120px" id="syn">开始同步</a>
+    </div>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>课程总表是为提高选课时的访问速度，将视图存储为实际表，因此在课程调整后，务必运行同步，保证学生选课时看到最新信息</li>
+        </ol>
+    </div>
+</div>

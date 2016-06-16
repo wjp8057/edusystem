@@ -1,0 +1,140 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,true,true,true))
+       $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+                    var yingyuAA=$('#yingyuAA');
+                    var datag_block=$('#yingyu_block');
+
+                    ajiakesi('__URL__/Two_Tuixue/hasJson/1',{'Sqlpath':{'select':'Results/Two_Three_select.SQL','count':'Results/Two_Three_count.SQL'
+                    },'COURSENO':$('[name=CLASSNO]').val(),'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val()
+                    },function(c){
+                        yingyuAA.datagrid('loadData',eval(c))
+
+                    })
+                  //  datag_block.datagrid('options').url='__URL__/Two_Tuixue/hasJson/1'
+           datag_block.datagrid('options').url='__URL__/Two_Course_CJFX/hasJson/1'
+                    datag_block.datagrid('load',{'Sqlpath':{'select':'Results/Two_Three_select_block.SQL','count':'Results/Two_Three_count.SQL'
+                    },'COURSENO':$('[name=CLASSNO]').val(),'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val()
+                    });
+
+
+
+
+
+
+                })
+
+
+
+
+
+
+
+
+
+    })
+    function formatFloat(src, pos){
+        return Math.round(src*Math.pow(10, pos))/Math.pow(10, pos);
+
+    }
+
+
+</script>
+<body style="background: #fff">
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            &nbsp;&nbsp;&nbsp;
+                        学年：<input type="text" name="YEAR" size="4" >&nbsp;&nbsp;&nbsp;
+
+                        学期：<input type="text" name="TERM" size="1">&nbsp;&nbsp;&nbsp;
+
+                        班号:<input type="text" name="CLASSNO" value="%" size=9>&nbsp;&nbsp;&nbsp;
+
+                        <a id="search">查询</a> &nbsp;
+
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+                <table class="easyui-datagrid" id="yingyu_block"
+                       data-options="fit:true,singleSelect:true,pagination:true,toolbar:'#tdemo'">
+                    <thead frozen="true">
+                    <tr>
+                        <th data-options="field:'kh',width:130" align="center">课号</th>
+                        <th data-options="field:'km',width:200" align="center">课名</th>
+
+                    </tr>
+                    </thead>
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xkrs',width:80" align="center">选课人数</th>
+                        <th data-options="field:'yxrs',width:80" align="center">优秀人数</th>
+                        <th data-options="field:'lhrs',width:80" align="center">良好人数</th>
+                        <th data-options="field:'zdrs',width:80" align="center">中等人数</th>
+                        <th data-options="field:'jgrs',width:80" align="center">及格人数</th>
+                        <th data-options="field:'bjg',width:80" align="center">不及格人数</th>
+                        <th data-options="field:'qkrs',width:80" align="center">缺考人数</th>
+                        <th data-options="field:'yxbl',width:80" align="center">优秀比例</th>
+                        <th data-options="field:'lhbl',width:80" align="center">良好比例</th>
+                        <th data-options="field:'zdbl',width:80" align="center">中等比例</th>
+                        <th data-options="field:'jgbl',width:80" align="center">及格比例</th>
+                        <th data-options="field:'bjgbl',width:80" align="center">不及格比例</th>
+                        <th data-options="field:'qkbl',width:80" align="center">缺考比例</th>
+                        <th data-options="field:'tgbl',width:80" align="center">通过比例</th>
+                    </tr>
+                    </thead>
+                </table>
+
+
+
+
+
+
+
+
+        </div>
+
+        <div data-options="region:'south',title:'',split:false,border:false" style="height:100px;">
+            <table class="easyui-datagrid" id="yingyuAA"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,singleSelect:true">
+                <thead >
+                <tr>
+                    <th data-options="field:'kh',width:130" align="center"></th>
+                    <th data-options="field:'km',width:200" align="center"></th>
+
+
+
+
+                    <th data-options="field:'xkrs',width:80" align="center">选课人数</th>
+                    <th data-options="field:'yxrs',width:80" align="center">优秀人数</th>
+                    <th data-options="field:'lhrs',width:80" align="center">良好人数</th>
+                    <th data-options="field:'zdrs',width:80" align="center">中等人数</th>
+                    <th data-options="field:'jgrs',width:80" align="center">及格人数</th>
+                    <th data-options="field:'bjg',width:80" align="center">不及格人数</th>
+                    <th data-options="field:'qkrs',width:80" align="center">缺考人数</th>
+                    <th data-options="field:'yxbl',width:80" align="center">优秀比例</th>
+                    <th data-options="field:'lhbl',width:80" align="center">良好比例</th>
+                    <th data-options="field:'zdbl',width:80" align="center">中等比例</th>
+                    <th data-options="field:'jgbl',width:80" align="center">及格比例</th>
+                    <th data-options="field:'bjgbl',width:80" align="center">不及格比例</th>
+                    <th data-options="field:'qkbl',width:80" align="center">缺考比例</th>
+                    <th data-options="field:'tgbl',width:80" align="center">通过比例</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

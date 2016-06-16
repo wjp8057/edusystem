@@ -1,0 +1,81 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var y='{$year}'
+    var t='{$term}'
+    var CC='{$courseno}'
+    var coursetype='{$coursetype}'
+
+
+    $(function(){
+        var dat=$('#add_student_dat_List').datagrid({
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#add_student_dat_List');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        })
+          var st='{$studentno}';
+        $('#add_student_dat_List').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_one_addStudent_StudentList2.SQL',
+            'count':'CourseManager/One_one_addStudent_StudentList2_count.SQL'},'bind':{':STUDENTNO':'%'}})
+
+
+      $('#admin_add').bind('click',function(){
+          var rowList=$('#add_student_dat_List').datagrid('getChecked')
+          if(rowList==''){
+              return $.messager.alert('提示','您还没有选中数据')
+          }
+
+          ajiakesi('__URL__/addStudent_add',{'bind':rowList,YEAR:y,TERM:t,COURSENO:CC,coursetype:coursetype},function(c){
+          $.messager.alert('提示',c)
+      })
+
+      })
+    })
+</script>
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'center',split:false" title='<center>课号：<span id="t_courseno">{$info.COURSENOGROUP}</span>；
+                课名：<span id="t_coursename">{$info.COURSENAME}</span>；
+                学分：<span id="t_credit">{$info.CREDITS}</span>；
+                开课学院:<span id="t_school">{$info.SCHOOLNAME}</span>；
+                预计人数：<span id="t_yujirenshu">{$info.ESTIMATE}</span></font></center>' style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="add_student_dat_List"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,toolbar:[{
+                     'text':'提交',
+                     iconCls:'icon-add',
+                     handler:function(a,b,c){
+                        var rowList=$('#add_student_dat_List').datagrid('getChecked')
+                        if(rowList==''){
+                            return $.messager.alert('提示','您还没有选中数据')
+                        }
+                        ajiakesi('__URL__/addStudent_add',{'bind':rowList,YEAR:y,TERM:t,COURSENO:CC,coursetype:coursetype},function(c){
+                            $.messager.alert('提示',c)
+
+                        })
+                     }
+                   }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <!--<th data-options="field:'cx',width:50,align:'right'" align="center">重修</th>-->
+                    <th data-options="field:'xh',width:100,align:'right'" align="center">学号</th>
+                    <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                    <th data-options="field:'bj',width:100,align:'right'" align="center">班级</th>
+                    <th data-options="field:'xy',width:100,align:'right'" align="center">学院</th>
+                    <th data-options="field:'jdf',width:100,align:'right'" align="center">积点分</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_add'>提交</div>
+
+</div>

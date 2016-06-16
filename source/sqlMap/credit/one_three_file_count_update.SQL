@@ -1,0 +1,1 @@
+update CREDITCOUNT set recordmark=1 where  year=:year and term=:term

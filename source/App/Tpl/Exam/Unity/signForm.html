@@ -1,0 +1,102 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    var _RECNO = "{$Think.request.RECNO}";
+    //数据初始化
+    var datagrid = $('#datagrid').datagrid({
+        toolbar: '#toobar',
+        frozenColumns:[[{field:'ck',checkbox:true}]],
+        onBeforeLoad:function(){
+            $(this).datagrid("unselectAll");
+            return true;
+        }
+
+    });
+
+    //查找学生
+    $("#btStudentNo").bind("click",function(){
+        var studentNo = $.trim($("#STUDENTNO").val());
+        if(studentNo=="") studentNo = "%";
+        getList({STUDENTNO:studentNo});
+    });
+    $("#btClassNo").bind("click",function(){
+        var classNo = $.trim($("#CLASSNO").val());
+        if(classNo=="") classNo = "%";
+        getList({CLASSNO:classNo});
+    });
+    function getList(p){
+        datagrid.datagrid("options").url = "__ROOT__/Exam/Unity/signForm/hasJson/true";
+        datagrid.datagrid("load", p);
+    }
+
+
+    function bmm(){
+        var rows = datagrid.datagrid("getSelections");
+        if(rows == null || rows.length==0){
+            msgShow("系统提示：","<br />没有选择任一条记录进行报名！","error");
+            return;
+        }
+
+        var arr = new Array();
+        $.each(rows, function(index,row){
+            arr.push(row.STUDENTNO);
+        });
+
+
+        $.post("__ROOT__ /Exam/Unity/signAdd/hasJson/true", {STUDENTNO:arr,RECNO:_RECNO}, function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+            }
+        },"JSON");
+    }
+    //报名
+    $("#btAdd").bind("click",bmm);
+    $('#admin_add').bind('click',bmm)
+
+    $("#btHelp").bind("click",function(){
+       msgShow("系统提示：","　　你可以使用“%”作为通配符，得到一个学生列表，或者输入班号得到该班的学生列表。无通配符的单个学号报名将直接进入报名数据库。使用回车符提交。<br /><br />在此输入报名之前，你应确认学生已交所需考试费用。","info");
+    });
+
+});
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'north',split:false,border:false" style="height:70px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 17pt;">统 考 报 名</font></p>
+        <p align=center>
+            <b>考试名称：</b>{$note.EXAMNAME} <b>考试代码：</b>{$note.TESTCODE} <b>考试日期：</b>{$note.DATEOFEXAM}
+            <b>报名截止日期：</b>{$note.DEADLINE} <b>考试说明：</b>{$note.EXAMREM} <b>本次考试说明：</b>{$note.NOTIFICATIONNOTE}</p>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="false" fit="true" idField="STUDENTNO"
+               pagination="true" pageSize="20" pageList="[20,100,200,500]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:100">学号</th>
+                <th data-options="field:'STUDENTNAME',align:'center',width:100">姓名</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:150">班级</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:150">学院</th>
+                <th data-options="field:'ENTERDATE',align:'center',width:80">入学日期</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <span style="float: left;">&nbsp;&nbsp;学号：<input type="text" size="12" id="STUDENTNO"  /><a href="#" id="btStudentNo" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" ></a></span>
+    <a class="datagrid-btn-separator"></a>
+    <span style="float: left;">&nbsp;&nbsp;班号：<input type="text" size="12" id="CLASSNO"   /><a href="#" id="btClassNo" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true" ></a></span>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="btAdd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">报名</a>
+    <a href="#" id="btHelp" class="easyui-linkbutton" data-options="iconCls:'icon-help',plain:true">帮助</a>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_add'>报名</div>
+
+</div>
+</body>
+
+</html>
+

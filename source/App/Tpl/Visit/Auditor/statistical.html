@@ -1,0 +1,52 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{border: solid 1px #ccc;margin:5px;padding: 5px 5px 7px 5px;}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+
+        &nbsp&nbsp <label>学年：</label><input value="{$yearTerm.YEAR}" name="year" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="term" size="4" maxlength="1">
+			   <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton">查&nbsp;询</a>
+	</div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENO',align:'center',width:40" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:100">课名</th>
+                <th data-options="field:'Z_HOUR',align:'center',width:30">周学时</th>
+                <th data-options="field:'SCORE',align:'center',width:20">学分</th>
+                <th data-options="field:'COUNT',align:'center',width:30">选课人数</th>
+                <th data-options="field:'SUM',align:'center',width:30" >课时酬金</th>
+                <th data-options="field:'TEACHERNAME',align:'center',width:110">教师姓名</th></tr>
+            </thead>
+         </table>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	//教材发放信息
+	var datagrid = $('#datagrid').datagrid({toolbar:'#tdemo'});
+	//搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	//验证学年学期是否输入
+    	var year=$.trim($("[name='year']").val());
+    	var term=$.trim($("[name='term']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要查询的学年与学期！","error");
+    		return;
+    	}
+        datagrid.datagrid("options").url = "__URL__/statistical/hasJson/1";
+        datagrid.datagrid("load",{"year":year,"term":term});
+    });
+});
+</script>
+</body>
+</html>

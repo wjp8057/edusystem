@@ -1,0 +1,83 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+        <form id="queryForm" action="" target="download" method="post">
+            <div>
+                <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4">
+                <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1">
+                <label>学院：</label>
+                <td align="left">
+                    <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+                        <option value="%">全校</option>
+                        <volist name="school" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL报表</a>
+            </div>
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENOGROUP',align:'center',width:30">课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:90">课程名称</th>
+                <th data-options="field:'COURSETYPE',align:'center',width:30">课程类型</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:30">开课学院</th>
+                <th data-options="field:'CLASSNONAME',align:'center',width:40">班级名称</th>
+                <th data-options="field:'ATTENDENTS',align:'center',width:30">预计人数</th>
+                <th data-options="field:'TEACHER',align:'center',width:60">主讲教师</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid = $('#datagrid').datagrid({toolbar:'#tdemo'});
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+     	var term=$.trim($("[name='TERM']").val());
+     	var school=$.trim($("[name='SCHOOL']").val());
+     	if(year=="" || term==""){
+     		$.messager.alert("提示","检索时学年学期不能为空！");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/course/hasJson/1";
+     	datagrid.datagrid('load',{YEAR:year,TERM:term,SCHOOL:school});
+     });
+     //导出EXCEL
+   	 $("#ExportBut").click(function(){
+   		var list=datagrid.datagrid('getRows');
+       	if(list.length){
+       		var total = datagrid.datagrid('getPager').data("pagination").options.total;
+   			if(total > 2000){
+   				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+       			return;
+   			}
+   			$("#queryForm").attr("action","__URL__/courseExp/");
+       		$("#queryForm").submit();
+       	}else{
+       		msgShow("系统提示：","请先检索出您要导出的数据","info");
+       	}
+     });
+});
+</script>
+</body>
+</html>

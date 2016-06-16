@@ -1,0 +1,1 @@
+insert into TESTROOM(ROOMNO,KW,louNO,menpaiNO,ROOMNAME,status) values(:ROOMNO,:KW,:louNO,:menpaiNO,:ROOMNAME,:status)

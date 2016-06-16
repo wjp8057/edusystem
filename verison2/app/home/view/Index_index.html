@@ -1,0 +1,158 @@
+<layout name="layout" />
+<body >
+<script type="text/javascript">
+    $(function() {
+        //绑定退出事件
+        $('#loginout').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '/web/home/login/logout';
+                }
+            });
+        });
+    });
+</script>
+<style>
+    *{ padding:0px; margin:0px; }
+    img{ border:none;}
+    .head{ background:url("{$ROOT}/img/top.jpg") no-repeat; width:1002px; height:115px; margin:0 auto;}
+    body{ background:url("{$ROOT}/img/bg.jpg") repeat-x; font-size:12px; color:#6f6f6f; }
+    .teach{ height:auto;width:1002px; margin-left:0 ; margin:0 auto;}
+    a.red{ font-size:14px;  font-weight:bold; color:#ff0000; text-decoration:underline;}
+    .style_blue14{font-family:"宋体";font-size:14px; font-weight:bold; color:#3e65af}
+    #border-top{height:11px;background:url("{$ROOT}/img/j-bg2.jpg")}
+    #border-bottom{height:11px;background:url("{$ROOT}/img/j-bg3.jpg")}
+    #footer{font-family:"宋体";font-size:14px;}
+</style>
+<div class="head"></div>
+<div class="teach">
+    <table width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+            <td id="border-top"></td>
+        </tr>
+        <tr>
+            <td align="center" valign="top" background="{$ROOT}/img/j-bg.jpg">
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="{$ROOT}/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" ><a class="style_blue14" href="{$ROOT}/base/index/index"> 基础数据</a></td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center">
+                        <td><a href="{$ROOT}/admin/" ><img src="{$ROOT}/img/j1.jpg" /></a></td>
+                        <td><a href="{$ROOT}/base/?248" ><img src="{$ROOT}/img/j14.jpg" /></a></td>
+                        <td><a href="{$ROOT}/base/index/index?249"><img src="{$ROOT}/img/j9.jpg" /></a></td>
+                        <td><a href="{$ROOT}/base/index/index?254"><img src="{$ROOT}/img/j4.jpg" /></a></td>
+                        <td><a href="{$ROOT}/base/index/index?257"><img src="{$ROOT}/img/j6.jpg" /></a></td>
+                        <td><a href="{$ROOT}/course"><img src="{$ROOT}/img/j22.jpg" /></a></td>
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="{$ROOT}/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">教务过程</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" border="0" cellpadding="0" cellspacing="0">
+                    <tr height="55" align="center">
+                        <td><a href="/programs" ><img src="{$ROOT}/img/j24.jpg" /></a></td>
+                        <td><a href="/courseplan" ><img src="{$ROOT}/img/j3.jpg" /></a></td>
+                        <td><a href="/schedule" ><img src="{$ROOT}/img/j8.jpg" /></a></td>
+                        <td><a href="{$ROOT}/selective/index/index"><img src="{$ROOT}/img/j13.jpg" /></a></td>
+                        <td><a href="/book"><img src="{$ROOT}/img/j20.jpg" /></a></td>
+                        <td><a href="/exam"><img src="{$ROOT}/img/j11.jpg" /></a></td>
+                    </tr>
+                    <tr height="55" align="center">
+                        <td><a href="{$ROOT}/score"><img src="{$ROOT}/img/j12.jpg" /></a></td>
+                        <td><a href="/major"><img src="{$ROOT}/img/j25.jpg" /></a></td>
+                        <td><a href="/workload" ><img src="{$ROOT}/img/j16.jpg" /></a></td>
+                        <td><a href="/quality" ><img src="{$ROOT}/img/j19.jpg" /></a></td>
+                        <td><a href="/credit"><img src="{$ROOT}/img/j23.jpg" /></a></td>
+                        <td><a href="/attendance" ><img src="{$ROOT}/img/j21.jpg" /></a></td>
+                        <!--  旁听管理                 <td height="55" align="center"><a href="{$ROOT}/visit"><img src="{$ROOT}/img/j17.jpg" /></a></td>-->
+
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="{$ROOT}/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">查询分析</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center" height="55">
+                        <td><a href="/teacherschedules" ><img src="{$ROOT}/img/j7.jpg" /></a></td>
+                        <td><a href="/semestertimetable" ><img src="{$ROOT}/img/j10.jpg" /></a></td>
+                        <td><a href="/statistic/index/kctj" ><img src="{$ROOT}/img/j31.jpg" /></a></td>
+                        <td><a href="/statistic/index/jssktj" ><img src="{$ROOT}/img/j32.jpg" /></a></td>
+                        <td><a href="/statistic/index/xjqktj" ><img src="{$ROOT}/img/j33.jpg" /></a></td>
+                        <td><a href="/statistic/index/jstj" ><img src="{$ROOT}/img/j34.jpg" /></a></td>
+
+                    </tr>
+                    <tr  align="center" height="55">
+                        <td><a href="/statistic/index/xktj" ><img src="{$ROOT}/img/j35.jpg" /></a></td>
+                        <td><a href="/statistic/index/jczxsjxz" ><img src="{$ROOT}/img/j36.jpg" /></a></td>
+                        <td><a href="/results/index/cjfx" ><img src="{$ROOT}/img/j37.jpg" /></a></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <!--数据统计 <td align="right"><a href="{$ROOT}/statistic" ><img src="{$ROOT}/img/j15.jpg" /></a></td>-->
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="{$ROOT}/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" ><a  class="style_blue14" href="{$ROOT}/teacher/index/index">个人信息</a></td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td align="left"></td>
+                    </tr>
+                </table>
+                <table  width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center">
+                        <td><a href="{$ROOT}/teacher/?232"><img src="{$ROOT}/img/j38.jpg" /></a></td>
+                        <td><a href="{$ROOT}/teacher/?233"><img src="{$ROOT}/img/j40.jpg" /></a></td>
+                        <td><a href="{$ROOT}/teacher/?234"><img src="{$ROOT}/img/j39.jpg" /></a></td>
+                        <td><a href="{$ROOT}/teacher/?270"><img src="{$ROOT}/img/j41.jpg" /></a></td>
+                        <td><a href="#" style="visibility:hidden"><img src="{$ROOT}/img/j2.jpg" /></a></td>
+                        <td><a href="#" style="visibility:hidden"><img src="{$ROOT}/img/j41.jpg" /></a></td>
+                    </tr>
+                </table>
+                <table width="30%" border="0" cellspacing="0" cellpadding="0" style="margin:10px auto;">
+                    <tbody><tr>
+                        <td align="center" valign="middle"><a href="#"  id="loginout" ><img src="{$ROOT}/img/but3.jpg"></a></td>
+                        <td align="left" valign="middle"><a href="{$ROOT}/teacher/index/index?267" class="red">修改密码</a></td>
+                        <td align="left" valign="middle"><a href="/"class="red">进入易科开发版</a></td>
+                    </tr>
+                    </tbody></table>
+            </td>
+        </tr>
+        <tr>
+            <td id="border-bottom"></td>
+        </tr>
+        </tbody></table>
+
+</div>
+<div id="footer">
+    {$COPYRIGHT}
+</div>
+</body>
+</html>

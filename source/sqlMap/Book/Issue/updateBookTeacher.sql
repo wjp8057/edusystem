@@ -1,0 +1,1 @@
+update bookteacher set status = '1' where status=0 and book_id=:book_id and teacherno=:teacherno and courseno=:courseno and [year]=:year and term=:term

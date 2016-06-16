@@ -1,0 +1,241 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+
+
+   // console.log(eval("("+"{$data}"+")"));
+    function loadData(data){
+    	if(data){
+            for(var x in data){
+                //console.log(x+"  "+obj[x]);
+                //console.log($("span#"+x));
+                if($.trim(x) == "SYLLABUS"){
+                	$("span#"+x).html("<a href='"+$.trim(data[x])+"'>"+$.trim(data[x])+"</a>");
+                }else{
+                	$("span#"+x).html($.trim(data[x]));	
+                }
+            }
+        }
+    }
+    
+    //data  : kehao
+
+    
+    $(function(){
+        var obj =eval("("+"{$data}"+")");
+        loadData(obj);
+        
+        $("#tedit").click( function(){                    //做查看详情时候触发
+        	$.post('__ROOT__/Course/Course/infoaa',{id:obj.COURSENO},function(c){
+	        		var object  = eval("("+c+")");
+	        		/* console.log(object);
+	        		console.log(typeof(object['COURSENO'])); */
+	                var inputs=$("#biaodan2 input");
+	                var selects=$('#biaodan2 select');
+	                var textareas=$('#textarea');               //课程介绍
+	                var nm='';
+	                var vl = '';
+	                for(var i=0;i<inputs.length;i++){
+	                    nm=inputs[i].name;
+	                    vl = object[nm];
+	                    if(typeof(vl) != undefined){
+	                    	inputs[i].value = vl;
+	                    }
+	                }
+	                for(var i=0;i<selects.length;i++){
+	                    nm=selects[i].id;
+	                    vl = ""+object[nm];
+	
+	                    if(vl.length < 2 && name == "SCHOOL"){
+	                    	vl = "0"+vl;
+	                    }
+	                   /*  console.log('____2___');
+	                    //console.log(nm);
+	                    //console.log(vl); */
+	            		var option = $("#"+nm+"  option[value='"+vl+"']");
+	            		//console.log(option);
+	            		option.attr("selected","selected");
+	                }
+	                //console.log(textareas);
+	                //console.log(object['INTRODUCE']);
+	                textareas.val( object['INTRODUCE'] );
+	
+	                $('#chuangkou').window({
+	                    closed:false,
+	                    modal:true,
+	                    top:10,
+	                    draggable:false,
+	                    minimizable:false,
+	                    maximizable:false
+	                })
+	        	});
+	        });
+        
+        
+	        $("#sub").bind('click',function(){
+	            $('#biaodan2').form('submit',{
+	                url:'__ROOT__/Course/Course/courseup',
+	                onSubmit:function(){
+	                    $('#chuangkou').window({
+	                        closed:true
+	                    })
+	                },
+	                success:function(data){
+	                     if(data=='true'){
+	                         $.messager.alert('提示','修改成功');
+	
+	                     }else{
+	                         $.messager.alert('提示','修改失败,您没有权限');
+	                     }
+	                     $.post("__ROOT__/Programs/TeachingPlan/courselistTemplate/godetail/1/refleshData/1/courseno/"+obj.COURSENO,{},function(refleshData){
+	                    	 loadData(refleshData);
+	                     });
+	                }
+	            })
+	        })
+          
+        });
+
+
+</script>
+
+<body style="background-color: #ffffff">
+<div style="width: 100%;" align="center"  class="easyui-panel" title="" data-options="fit:true,closable:false">
+    <form action="" method="POST"  id="biaodan">
+        <table style="margin:auto;margin-top:20px;width:80%;BORDER-RIGHT: 1px solid; BORDER-TOP: 1px solid; BORDER-LEFT: 1px solid; BORDER-BOTTOM: 1px solid;border-collapse: collapse;border-color: #666" cellSpacing="1" cellpadding="12px" align="center" border="1">
+            <tr><td align="right" width="120">课号：</td><td width="240">
+                <span class="viewfield" id="COURSENO"></span>
+            </td>
+                <td align="right" width="120">课名：</td><td width="240">
+                <span class="viewfield"  id="COURSENAME"></span>
+            </td></tr>
+
+            <tr><td align="right" width="120">开课学院：</td><td>
+                <span class="viewfield"  id="SCHOOL"></span>
+            </td>
+                <td align="right" width="120">学分：</td><td>
+                <span class="viewfield"  id="CREDITS"></span>
+            </td>
+
+            <tr><td align="right" width="120">总学时：</td><td>
+                <span class="viewfield"  id="TOTAL"></span>
+            </td>
+            <td align="right" width="120">每周总学时：</td><td>
+                <span class="viewfield"  id="HOURS"></span>
+            </td></tr>
+
+            <tr><td align="right" width="120">每周理论学时：</td><td>
+                <span class="viewfield"  id="Lhours"></span>
+            </td>
+                <td align="right" width="120">每周实验学时：</td><td>
+                <span class="viewfield"  id="EXPERIMENTS"></span>
+            </td></tr>
+
+            <tr><td align="right" width="120">每周上机学时：</td><td>
+                <span class="viewfield"  id="COMPUTING"></span>
+            </td>
+                <td align="right" width="120">每周实训学时：</td><td>
+                <span  class="viewfield" id="SHOURS"></span>
+            </td></tr>
+
+            <tr><td align="right" width="120">每周课堂讨论学时：</td><td>
+                <span  class="viewfield" id="KHOURS"></span>
+            </td>
+                <td align="right" width="120">每周自主学习学时：</td><td>
+                <span class="viewfield"  id="ZHOURS"></span>
+            </td></tr>
+
+            <tr><td align="right" width="120">限制人数：</td><td>
+                <span  class="viewfield" id="Limit"></span>
+            </td>
+                <td align="right" width="120">开课学期：</td><td>
+                <span  class="viewfield" id="QUARTER"></span>
+            </td></tr>
+
+            <tr><td width="120" align="right">课程类别：</td><td>
+                <span class="viewfield"  id="TYPE"></span>
+            </td>
+                <td width="120" align="right">课程类型：</td><td>
+                <span  class="viewfield" id="TYPE2"></span>
+            </td>
+
+            <tr><td align="right">教学大纲网址：</td><td>
+                <span class="viewfield"  id="SYLLABUS"></span>
+            </td>
+            <td align="right">备注：</td><td>
+                <span class="viewfield"  id="REM"></span>
+            </td></tr>
+
+            <tr><td align="right">课程介绍：</td><td colspan="3">
+                <span class="viewfield"  id="INTRODUCE"></span>
+            </td></tr>
+
+        </table>
+        
+        <a style="margin-top:20px;"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="tedit">编辑课程</a>
+    </form>
+</div>
+
+<div class="easyui-window" id='chuangkou' title="编辑课程" data-options="width:650,height:400,closed:true">
+            <form action="__URL__/courseyz" method="POST" id="biaodan2">
+                <table style="margin-left:0px;margin-top:10px" align="left" border="0" cellspacing="8">
+                    <tr><td align="right" width="120">课号:</td><td><input type="text" readonly    style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none" name="COURSENO" size="7" maxlength="7" id="COURSENO"></b></td></tr>
+                    <tr><td align="right" width="120">课名:</td><td ><input type="text" name="COURSENAME" size="40" maxlength="120"></td></tr>
+                    <tr>
+                        <td align="right" width="120">开课学院：</td>
+                        <td>
+                            <select id="SCHOOL" name="SCHOOL">
+                                <volist name="school" id="v">
+                                    <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right" width="120">学分：</td><td><input type="text" name="CREDITS" size="4" maxlength="4" value="0" />
+
+                    </td></tr>
+                    <tr><td align="right" width="120">总学时:</td><td><input type="text" name="TOTAL" size="4" maxlength="4" value="0" /></td></tr>
+
+                    <tr><td align="right" width="120">每周总学时:</td><td><input type="text" name="HOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周理论学时:</td><td><input type="text" name="LHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周实验学时:</td><td><input type="text" name="EXPERIMENTS" size="4" maxlength="4" value="0"></td></tr>
+
+                    <tr><td align="right" width="120">每周上机学时:</td><td><input type="text" name="COMPUTING" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周实训学时:</td><td><input type="text" name="SHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周课堂讨论学时:</td><td><input type="text" name="KHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">每周自主学习学时：</td><td><input type="text" name="ZHOURS" size="4" maxlength="4" value="0"></td></tr>
+                    <tr><td align="right" width="120">限制人数：</td><td><input type="text" name="Limit" size="4" maxlength="4" value="0"><b>&nbsp&nbsp只对公选课有意义</b></td></tr>
+                    <tr><td align="right" width="120">开课学期：</td><td><input type="text" name="QUARTER" id="QUARTER" size="4" maxlength="4" value=""><b>&nbsp&nbsp只对公选课有意义,1为第一学期（秋季），2为第二学期（春季）</b></td></tr>
+                    <tr>
+                        <td width="120" align="right" height="23">课程类别：</td>
+                        <td>
+                            <select id="TYPE" name="TYPE">
+                                <volist name="coursetype" id="v">
+                                    <option value="{$v.NAME}">{$v.VALUE}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="120" align="right" height="23">课程类型：</td>
+                        <td>
+                            <select id="TYPE2" name="TYPE2">
+                                <volist name="coursetype2" id="v2">
+                                    <option value="{$v2.NAME}">{$v2.VALUE}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr><td align="right">教学大纲网址：</td><td><input type="text" name="SYLLABUS" maxlength="99" size="40" value=""></td></tr>
+                    <tr><td align="right">备注：</td><td><input type="text" name="REM" maxlength="99" size="40" value=""> </td></tr>
+                    <tr><td align="right" height="20">课程介绍:</td><td  rowspan="2"><textarea rows="5" name="INTRODUCE" id="textarea" cols="75" style="resize:none;overflow: hidden" maxlength="790"> </textarea></td></tr>
+                    <tr><td></td></tr>
+                    <tr><td colspan="2" align="center" height="80"><a style="margin-top:20px;"  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="sub">提交修改</a></td></tr>
+                </table>
+            </form>
+</div>
+
+
+</body>
+</html>
+

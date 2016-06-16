@@ -1,0 +1,253 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<div id="datagrid"></div>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm" action="" target="download" method="post">
+	    <div>
+		    <label>学年：</label><input value="{$yearTerm.YEAR}" name="year" size="4" maxlength="4">
+		    <label>学期：</label><input value="{$yearTerm.TERM}" name="term" size="1" maxlength="1">
+		    <label>ISBN：</label><input name="isbn" size="14" value='%'  maxlength="18">
+		    <label>教材名：</label><input name="bookname" value='%'  size="20">
+		    <label>学院：</label>
+		    <select class="easyui-combobox" name="school" data-options="editable:false">
+			    <option value="%">全部</option>
+			    <volist name="school" id="s">
+			    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+			    </volist>
+		    </select>
+		    <label>班号：</label><input name="classno" size="14" value='%'  maxlength="10">
+		    <a href="javascript:void(0)" id="searcher">检索</a>
+	    </div>
+    </form>
+	<a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">不发放</a>
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增发放</a>
+    <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">导出发放表</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var year="";
+var term="";
+$(function(){
+	//学生发放信息
+	var datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        fit:true,
+        striped:true,
+        columns:[[{field:'payment_id',checkbox:true},
+                  {field:'isbn',title:'ISBN',align:'center',width:40},
+                  {field:'bookname',title:'教材名称',align:'center',width:120},
+                  {field:'no',title:'学号',align:'center',width:40},
+                  {field:'name',title:'姓名',align:'center',width:20},
+                  {field:'classname',title:'班级名称',align:'center'},
+                  {field:'classno',title:'班号',align:'center',width:40},
+                  {field:'value',title:'学籍状态',align:'center',width:20} ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar'});
+	//搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	//验证学年学期是否输入
+    	year=$.trim($("#toobar [name='year']").val());
+    	term=$.trim($("#toobar [name='term']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+
+        datagrid.datagrid("options").url = "__URL__/bookNoIssue/hasJson/1";
+        datagrid.datagrid("load",getData());
+    });
+    //不发放
+    $("#delBut").click(function(){
+    	list=datagrid.datagrid('getSelections');
+    	if (list.length){
+             $.messager.confirm('提示','您确定不发放选中学员教材吗？',function(b){
+                 if(b){
+                 	var ary=[];                      //存储删除信息的数组
+                     for(var i=0;i<list.length;i++){
+                    	 ary[i]=list[i].payment_id;
+                     }
+                     $.ajax({
+                         url:'__URL__/delPayment/',
+                         data:{'ids':ary},
+                         type:'POST',
+                         success:function(del){
+                             if(del){
+                                 msgShow("系统提示：","操作成功！","info");
+                                 datagrid.datagrid("load",getData());
+                             }else{
+                                 msgShow("系统提示：","操作失败,您没有权限！","info");
+                             }
+                         }
+                     });
+                 }
+             });
+         }
+    });
+    //新增发放
+	var wd=$('#wd').window({
+        modal:true,
+        height:220,
+        width:650,
+        minimizable:false,
+        maximizable:false,
+        collapsible:false,
+        draggable:false,
+        resizable:false,
+        closed:true
+    });
+	$(".savebut").linkbutton({iconCls: 'icon-add'});
+	$("#addBut").click(function(){
+		year=$.trim($("#toobar [name='year']").val());
+		term=$.trim($("#toobar [name='term']").val());
+    	if(year==""||term==""){
+    		msgShow("系统提示：","学年学期不可为空","error");
+    		return;
+    	}
+    	$("#addForm")[0].reset();
+    	font_reset();
+    	wd.window({closed:false,title:"新增发放"});
+    });
+	//保存新增
+	$(".savebut").click(function(){
+		var ele=$(this).parent().prev();
+		var isbn=$.trim($("#queryIsbn").val());
+		var type=$(this).attr("type");
+		var typeName=type=="0"?"班号":"学号";
+		var value=$.trim(ele.find("input").val());
+		
+		if(value==""){
+			ele.find("font").attr("color","red");
+			ele.find("font").html("请输入"+typeName);
+		}else{
+			if(type=="0" && value.length < 2){
+				msgShow("系统提示：","输入班号不能少于两个字符","info");
+				return;
+			}
+			ele.find("font").attr("color","green");
+			ele.find("font").html("按"+typeName+"发放");
+			if($("[name='isIsbn']").val()=="1"){
+				$.ajax({
+	                 url:'__URL__/bookIssue/',
+	                 data:{'value':value,'type':type,'isbn':isbn,"year":year,"term":term},
+	                 type:'POST',
+	                 success:function(data){
+	                     if(data=="1"){
+	                         ele.find("font").attr("color","green");
+		             		 ele.find("font").html("新增发放成功！");
+		             		 ele.find("input").val("");
+	                         datagrid.datagrid('reload');
+	                     }else if(data=="-2"){
+	                    	 msgShow("系统提示：","您要新增发放的教材对象检索到已存在发放记录，不能重复发放","error");
+	                     }else if(data=="-3"){
+	                    	 msgShow("系统提示：","您要新增发放的教材价格未定义，请您先定义教材价格","error");
+	                     }else{
+	                        ele.find("font").attr("color","red");
+	             			ele.find("font").html(typeName+"不存在");
+	                     }
+	                 }
+	             });
+			}else{
+				msgShow("系统提示：","请输入教材库中已添加的ISBN","error");
+			}
+		}
+	});
+	//检索教材名称
+	$("#queryIsbn").blur(function(){
+		var isbn=$.trim($(this).val());
+		if(isbn!=""){
+			$.ajax({
+                url:'__URL__/getBook/',
+                data:{'isbn':isbn},
+                type:'POST',
+                dataType:"JSON",
+                success:function(data){
+                    if(data!=null && data!=""){
+                    	if(data.price!=null && data.price!="null"){
+                    		$("[name='isIsbn']").val("1");
+                            $("#queryBookname").html(data.bookname);
+                            $("#queryBookname").attr("color","#000");
+                    	}else{
+                    		$("[name='isIsbn']").val("0");
+                        	$("#queryBookname").html("该教材价格未定义，暂不支持发放");
+                        	$("#queryBookname").attr("color","green");
+                    	}
+                    }else{
+                    	$("[name='isIsbn']").val("0");
+                    	$("#queryBookname").html("无法检索，该教材不存在或未启用");
+                    	$("#queryBookname").attr("color","green");
+                    }
+                }
+            });
+		}
+	});
+	//导出
+	$("#ExportBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		$("#queryForm").attr("action","__URL__/bookNoExport/");
+    		$("#queryForm").submit();
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的数据","info");
+    	}
+	});
+});
+//获取检索条件信息
+function getData(){
+	var data={
+        	year:$.trim($("#toobar [name='year']").val()),
+        	term:$.trim($("#toobar [name='term']").val()),
+        	isbn:$.trim($("#toobar [name='isbn']").val()),
+        	bookname:$.trim($("#toobar [name='bookname']").val()),
+        	school:$.trim($("#toobar [name='school']").val()),
+        	classno:$.trim($("#toobar [name='classno']").val())
+        };
+	return data;
+}
+//重置新增页面
+function font_reset(){
+	$("#addForm font").attr("color","green");
+	$("#queryBookname").html("输入ISBN之后自动检索");
+	$(".addClassNo font").html("按班号发放");
+	$(".addStudentNo font").html("按学号发放");
+}
+</script>
+
+<!-- 新增发放 -->
+<div id="wd" title=" ">
+<div style="padding:10px">
+<form action="#" id="addForm">
+	<table border="0" align="center" width="90%" style="border-collapse: collapse;">
+		<tr>
+			<th align="right" width="12%">ISBN：</th>
+			<td align="left" width="38%">
+				<input id="queryIsbn" name="isbn" maxlength="20" size="20"> <font color="red">*</font>
+				<input type="hidden" name="isIsbn" value="0">
+			</td>
+			<th align="right" width="12%">教材名：</th>
+			<td align="left"><font color="green" id="queryBookname">输入ISBN之后自动检索</font></td>
+		</tr>
+		<tr>
+			<th align="right">班号：</th>
+			<td align="left" colspan="2" class="addClassNo"><input name="classno" maxlength="10" size="20">  <font color="green">按班号发放</font></td>
+			<td align="left"><a href="javascript:void(0)" type="0" class="savebut">新增发放</a></td>
+		</tr>
+		<tr>
+			<th align="right">学号：</th>
+			<td align="left" colspan="2" class="addStudentNo"><input name="studentno" maxlength="10" size="20">  <font color="green">按学号发放</font></td>
+			<td align="left"><a href="javascript:void(0)" type="1" class="savebut">新增发放</a></td>
+		</tr>
+	</table>
+</form>
+ </div>
+</div>
+</body>
+</html>

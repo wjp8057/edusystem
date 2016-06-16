@@ -1,0 +1,1 @@
+  delete from COURSES where COURSENO in :jihe

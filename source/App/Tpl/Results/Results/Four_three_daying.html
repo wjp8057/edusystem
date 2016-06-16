@@ -1,0 +1,97 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/taskMonitor.js'> </script>
+<script>
+
+    var options={};
+    $(function(){
+        $('#search').bind('click',function(){
+            demo.submit();
+            $.taskMonitor('{$Think.session.S_USER_NAME}',"Excel导出！",{
+                //对话框板面属性
+                dialogOptions : { modal:true, closable:false, width:300,height:140 },
+                //前置回调函数
+                prepareCallback : function (jqObj) { },
+                //成功执行后的回调函数
+                successCallback : function () { },
+                //执行失败时回调函数
+                failCallback : function (responseHtml, error) { },
+                //回调间隔时间
+                checkInterval : 1000,
+                //获得运行结果的url
+                url : "/taskInfo.php",
+                //是否显示详细信息
+                showMessage : false
+            });
+        });
+
+
+
+});
+
+</script>
+<style>
+    td{border:1px solid #ccc}
+</style>
+<body style="background-color: #ffffff">
+    <form action="__URL__/excel22" method="GET" id="demo">
+    <center><b><span style="font-size: 15px">成绩总表打印（含休学、停学、退学、转学 学生。）</span></b></center>
+    <table align="center" cellspacing="1" border=0 style="margin-top: 30px;border:1px solid #ccc">
+        <tr>
+            <td colspan="2" align="center">
+                请输入学号的前几位：<input type="text" name="STUDENTNO" value="%" size="9" >
+
+             <!--   或者班号：<input type="text" name="CLASSNO" value="1031913" size="9">-->
+                或者班号：<input type="text" name="CLASSNO" value="%" size="9">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                请选择类型：
+            </td>
+            <td>
+                <input type="radio" value="1" name="tabletype" id="tabletype1" >毕业生成绩总表&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="tabletype" value="2" id="tabletype2" checked>平时学生成绩总表
+            </td>
+        </tr>
+        <tr>
+            <td>
+                请选择标题：
+            </td>
+            <td>
+                <input type="radio"  name="title" value='0' id="title1" checked>宁波城市学院毕业生成绩总表
+                <input type="radio" name="title" value="1" id="title2">宁波大学学生成绩总表</p>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                请选择字体大小：
+            </td>
+            <td>
+                <input type="radio" name="fontsize" value="big" id="fontsize1">大字体&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="fontsize" value="normal" checked id="fontsize2">标准字体&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="fontsize" value="small" id="fontsize3">小字体</p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="center">
+                <button id="search" style="width:100px;height:40px">导出到Excel</button> &nbsp;
+            </td>
+        </tr>
+    </table>
+    </form>
+    <p align="left">说明：</p>
+    <p align="left">1、毕业生资料存档使用毕业生成绩总表，成绩证明使用平时学生成绩总表。</p>
+    <p align="left">2、本科生使用宁波大学标题，专科使用宁波城市学院标题。</p>
+    <p align="left">3、关于字体</p>
+    <p align="left">标准字体——适用于3年制或4年制学生</p>
+    <p align="left">小字体——如有学生使用标准字体打印不下，请使用小字体打印</p>
+    <p align="left">大字体——适合两年制学生</p>
+    <p align="center">
+        　</p>
+
+
+
+</body>
+</html>

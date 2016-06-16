@@ -1,0 +1,173 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<meta charset="utf-8">
+<script language="javascript">
+    //todo:权限判断函数
+    function qxpanduan(id,url){
+        var quanxianpd=false;
+        //todo:false代表     按学号注册      ⑵
+        ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+            eval('var o='+c)
+            for(var i=0;i<o[0]['rl'].length;i++){
+                var zz=new RegExp(o[0]['rl'][i])
+                var bool=zz.test(quanxian)
+
+                if(bool){
+                    quanxianpd=true
+                    return;
+                }
+            }
+        })
+
+        return quanxianpd;
+    }
+    //todo:权限判断函数
+    var quanxian='{$quanxian}'
+
+    String.prototype.isDate = function()
+    {
+        var r = this.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+        if(r==null)return false;
+        var d = new Date(r[1], r[3]-1, r[4]);
+        return(d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+    }
+
+    $(function(){
+        var teacherno='{$teacherno}'
+
+        //todo:添加一个奖项的时候
+        $('#button_add').bind('click',function(){
+            var boo=qxpanduan('US03','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限')
+            }
+            var obj={}
+            var name=$('#Name').val()
+            var date=$('#Date').val();
+            if(!date.isDate()){
+              return  $.messager.alert('提示','对不起，您输入的日期格式不合要求！\n必须采用 年/月/日 格式!');
+            };
+            var bumen=$('#bumen').val().trim();
+            var jibie=$('#Level').val().trim();
+            var order=$('#order').val().trim();
+            if(name==""||bumen==""||jibie==""||order==""){
+                return $.messager.alert('提示','请输入完整的信息 不能为空白');
+            }
+                obj['SQLPATH']="Three_insertHonor.SQL"
+               obj['arr']={':NAME':name,':DATE':date,':DEPARTMENT':bumen,':LEVEL':jibie,':MYORDER':order,':TEACHERNO':teacherno}
+               ajiakesi('__URL__/Honor',obj,function(c){
+                   if(c=='1'){
+                       $.messager.alert('提示','添加成功')
+                       setTimeout(function(){  window.location.href=window.location.href;},700)
+                    }
+               })
+        })
+
+        //todo:删除一个奖项的时候
+        $('[name=deleteHonor]').bind('click',function(){
+            var boo=qxpanduan('US03','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限')
+            }
+                var obj1=this
+            $.messager.confirm('提示','您确定要删除吗',function(c){
+                if(c){
+                        var obj={}
+                        obj['SQLPATH']='Three_deleteHonor.SQL'
+                        obj['arr']={':RECNO':obj1.parentNode.id}
+                        ajiakesi('__URL__/Honor',obj,function(c){
+                            if(c=='1'){
+                                $.messager.alert('提示','删除成功')
+                                setTimeout(function(){  window.location.href=window.location.href;},700)
+                            }
+                        })
+
+                }})
+
+        })
+    })
+
+
+</script>
+
+
+<body style="background-color: #ffffff" >
+<style>
+    td,th{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt,.cc{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<p align="center" ><b><span style="font-size: 22px;font-color:'#0000FF'">各 类 获 奖
+    情 况</span></b></p>
+<form method="POST" action="/scripts/general.exe/write?" ID="UPDATEFORM">
+    <input type="hidden" name="XML" value=" "><input type="hidden" name="SQL" value=" "><input type="hidden" name="MID" value=" ">
+    <input type="hidden" name=REDIRECT value="">
+    <div align="center">
+
+            <table border="0" cellspacing="1" width="75%" height="38" align="center">
+                <thead>
+                <th width="35%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>荣誉称号、表彰奖励名单</b></font></th>
+                <th width="12%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>获奖时间</b></font></th>
+                <th width="20%" align="center" bgcolor="#E0ECFF" height="25"><b><font size="2">奖励部门</font></b></th>
+                <th width="13%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>获奖级别</b></font></th>
+                <th width="10%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>排名/人数</b></font></th>
+                <th width="10%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>操作</b></font></th>
+                </thead>
+                <if condition="count($info) eq 0">
+                    <tr>
+                       <td colspan="6">暂无数据</td>
+                    </tr>
+                </if>
+                <tbody id="honorcontent">
+                <volist name="info" id="v">
+                    <tr>
+                        <td width="35%" height="25" align="center"><font size="2"><SPAN>{$v.NAME}</SPAN></font></td>
+                        <td width="12%" height="25" align="center"><font size="2"><SPAN>{$v.DATE}</SPAN></font></td>
+                        <td width="20%" height="25" align="center"><font size="2"><SPAN>{$v.DEPARTMENT}</span></font></td>
+                        <td width="13%" height="25" align="center"><font size="2"><SPAN>{$v.LEVEL}</SPAN></font></td>
+                        <td width="10%" height="25" align="center"><font size="2"><SPAN>{$v.MYORDER}</span></font></td>
+                        <td width="10%" height="25">
+                            <p align="center"><font size="2"><a href="javascript:void(0)" onclick="return false" id="{$v.RECNO}" ><button name="deleteHonor" >删除</button></a></font></td>
+                    </tr>
+                </volist>
+                </tbody>
+            </table>
+        </center>
+    </div>
+    <p>
+    <div align="center">
+
+        <table border="0" cellspacing="1" width="75%">
+            <tr>
+                <td width="35%" height="25">
+                    <p align="center"><input type="text" name="Name" id="Name" size="32" value=""></td>
+                <center>
+                    <td width="12%" height="25">
+                        <p align="center"><input type="text" name="Date" id="Date" size="10" value=""></td>
+                </center>
+                <td width="20%" height="25">
+                    <p align="center"><input type="text" name="Department" id="bumen" size="18" value=""></td>
+                <center>
+                    <td width="13%" height="25">
+                        <p align="center">
+                            <select size="1" name="Level" id="Level">
+                                <volist name="honorlevelcode" id="v">
+                                    <option value="{$v.Code}">{$v.Name}</option>
+                                </volist>
+                            </select>
+                    </td>
+                    <td width="10%" height="25">
+                        <p align="center"><input type="text" name="MyOrder" id="order" size="6"></td>
+                    <td width="10%" height="25"><p align="center"><input type="button" value="添加" name="B1" id="button_add"></td>
+            </tr>
+        </table>
+
+    </div>
+</form>
+
+</body>
+

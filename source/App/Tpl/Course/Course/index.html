@@ -1,0 +1,75 @@
+<include file=":Include:jqueryHeader" />
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-group","menuname": "课程管理",
+         "menus": [
+            {"menuid": "AD01","menuname": "新建课程","icon": "icon-add","url": "__ROOT__/index.php?g=Course&m=Course&a=newcourse"},
+            {"menuid": "12","menuname": "检索课程","icon": "icon-search","url": "__ROOT__/index.php?g=Course&m=Course&a=scourse"},
+             {"menuid": "13","menuname": "等价课程","icon": "icon-lock","url": "__ROOT__/index.php?g=Course&m=Course&a=eqcourse"}]
+        },
+
+
+
+    ]
+};
+
+$(function() {
+    $("#west").cwebsFrame(_menus, "宁波职业学院");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/index.php?m=Login&a=logout';
+            }
+        });
+    })
+});
+
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 61px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 61px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head"><a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a></span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="课程管理" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:hidden; color:red; " >
+            <h1 style="font-size:24px;">注意事项：</h1>
+            <h1 style="font-size:24px;">* 仅对教师和管理人员创建用户，所创建的用户会自动加到教师表中。</h1>
+            <h1 style="font-size:24px;">* 对学生不必创建用户。学生表中的记录会自动成为用户。</h1>
+            <h1 style="font-size:24px;">* 用户名和学号都必须是满足唯一性。</h1>
+            <h1 style="font-size:24px;">* 学号和用户名不可重复。</h1>
+        </div>
+    </div>
+</div>
+
+<!-- 尾部 -->
+<div region="south" split="true" style="height: 30px; background: #D2E0F2; ">
+    <div class="footer">__COPYRIGHT__</div>
+</div>
+
+</body>
+</html>

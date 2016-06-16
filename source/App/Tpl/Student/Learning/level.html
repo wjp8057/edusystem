@@ -1,0 +1,27 @@
+<include file=":Include:jqueryHeader" />
+
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="{$Think.session.S_USER_INFO.NAME|trim}的等级考试成绩" iconCls="icon icon-level" fitColumns="true"
+           width="100%" singleSelect="true" fit="true"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'TYPE',align:'center',width:100" >等级考试类别</th>
+                <th data-options="field:'YEAR',align:'center',width:50">年份</th>
+                <th data-options="field:'MONTH',align:'center',width:50">月份</th>
+                <th data-options="field:'SCHOOL',align:'center',width:80">学院</th>
+                <th data-options="field:'STUDENTNO',align:'center',width:100">学号</th>
+                <th data-options="field:'NAME',align:'center',width:50">姓名</th>
+                <th data-options="field:'RESULTS',align:'center',width:50">成绩</th>
+                <th data-options="field:'LEVEL',align:'center',width:50">等级</th></tr>
+        </thead>
+    </table>
+</div>
+</body>
+<script type="text/javascript">
+$(function(){
+	var datagrid = $('#datagrid').datagrid({url:"__URL__/level/hasJson/1"});
+});
+</script>
+</html>

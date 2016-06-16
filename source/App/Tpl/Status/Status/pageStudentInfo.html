@@ -1,0 +1,254 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno= $.trim("{$studentno}");
+    var year = parseInt("{$yearterm.YEAR}");
+    var term = parseInt("{$yearterm.TERM}");
+
+    $(function(){
+
+        (function (studentno) {
+            $.post('__URL__/studentNO/reqtag/selectStudentInfo',{studentno:studentno}, function (data) {
+                Formor.autoTableFill('info_table',data);
+                var status_regdata_templaye = $("#status_regdata_templaye");
+                var status_regdata_list = $("#status_regdata_list");
+                $.post('__URL__/studentNO/reqtag/listStudentRegHistory',{studentno:studentno}, function (list) {
+                    for(var x in list){
+                        if((year == list[x]['YEAR']) && (term == list[x]['TERM'])){
+                            $('#newregcode').val(list[x]['REGCODE']);
+                            $("#reg_tip").html("已保存");
+                        }else{
+                            var clone = status_regdata_templaye.clone();
+                            clone.find(".yearterm").html(list[x]['YEAR']+"学年第"+list[x]['TERM']+"学期:");
+                            clone.find(".statusvalue").html(list[x]['REGVALUE']);
+                            clone.attr('id',null);
+                            status_regdata_list.append(clone);
+                        }
+                    }
+                });
+            });
+        })(studentno);
+        //修改注册信息
+        $('#updateRegData').click(function(){
+            $.post('__URL__/insertregcode/hasJson/1',{
+                studentno:studentno,
+                year:year,
+                term:term,
+                regcode:$('#newregcode').val()
+            },function(c){
+                return Messager.showMessage(c, function () {
+                    location.reload();
+                });
+            });
+        });
+        //修改学籍信息
+        $('#updateStatusInfo').click(function(){
+            var values = $("#student_info_form").serialize();
+            $.post("__URL__/studentUpdate",{values:values},function (data) {
+                return Messager.showMessage(data, function () {
+                    location.reload();
+                });
+            });
+        });
+    });
+</script>
+
+<style>
+    input {border: 0}
+    #status_regdata_templaye {display: none}
+</style>
+<body style="background-color: #fff">
+    <p align="center" ><span style="font-size: 15px">学生注册信息</span></p>
+    <form method="POST" id="student_info_form">
+        <table id="info_table" align="center" border="1" width="722" cellspacing="0" style="font-size: 10pt; color: #000000; border-collapse: collapse;" bordercolor="#111111" cellpadding="0" height="243" >
+            <tr>
+                <td width="181" align="right" height="22" >学号：</td>
+                <td height="22" colspan="4" width="169">
+                    <input type="text" readonly="readonly" id="studentno" name="studentno" />
+                </td>
+                <td width="153" height="198" rowspan="9"></td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">姓名：</td>
+                <td height="22" colspan="4" width="380">
+                    <input type="text" name="studentname" id="studentname" />
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">性别：</td>
+                <td height="22" colspan="4" width="380">
+                    <select name="sexcode" id="sexcode" size="1">
+                        <option value="M">男</option>
+                        <option value="F">女</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">入学日期：</td>
+                <td height="22" colspan="4" width="380">
+                    <input type="text" name="enterdate" id="enterdate" />
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">学制：</td>
+                <td height="22" colspan="2" width="190">
+                    <input type="text" name="years" id="years" size="1" />
+                    年</td>
+                <td height="22" width="125" style="text-align: right">专业：</td>
+                <td height="22" width="95">
+                    <SELECT name="major" id="major" size="1">
+                        <volist name="majorcode" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">主修班级编号：</td>
+                <td height="22" width="46">
+                    <input type="text" id="classno" name=" classno" />
+                </td>
+                <td height="22" width="125" colspan="2"  style="text-align: right">班级名称：
+                </td>
+                <td height="22" width="205">
+                    <input type="text" readonly  id="classname" >
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">选课总学分</td>
+                <td height="22" colspan="4" width="380">
+                    <input type="text"   id="token" name="token">
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">完成学分：</td>
+                <td height="22" colspan="4" width="380">
+                    <input type="text"   id="passed" name="passed">
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">积点分和：</td>
+                <td height="22" colspan="4" width="380">
+                    <input type="text"   id="points" name="points">
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22"><span style="color: red" >退学警告次数：</span></td>
+                <td height="22" colspan="5" width="535">
+                    <input type="text" name="warn" id="warn" />
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22"><span style="color: red" >学籍状态：</span></td>
+                <td height="22" colspan="5" width="535">
+                    <select name="status" id="status">
+                        <volist name="statusoptions" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">联系方法：</td>
+                <td height="22" colspan="5" width="535">
+                    <input type="text" name="contact" id="contact" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="181" align="right" height="22">出生年月：</td>
+                <td height="22" colspan="5" width="535">
+                    <input type="text" name="birthday" id="birthday" />
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">身份证号：</td>
+                <td height="22" colspan="5" width="535">
+                    <input type="text" name="id" id="id" />
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">政治面貌：</td>
+                <td height="22" colspan="5" width="535">
+                    <select name="party" id="party">
+                        <volist name="party" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right" height="22">民族：</td>
+                <td height="22" colspan="5" width="535">
+                    <select name="nationality" id="nationality">
+                        <volist name="nationality" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right">来源：</td>
+                <td height="22" colspan="5" width="535">
+                    <select name="class" id="class">
+                        <volist name="classcode" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right">学生所在学院：</td>
+                <td height="22" colspan="5" width="535">
+                    <select name="school" id="school" size="1">
+                        <volist name="schools" id="v">
+                            <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="181" align="right">学生班级所在学院：</td>
+                <td height="22" colspan="5" width="535">
+                    <input type="text" readonly name="classschool" id="classschool"  />
+                </td>
+            </tr>
+        </table>
+    </form>
+
+
+    <p align="center" ><span style="font-size: 15px">学期注册情况</span></p>
+    <div >
+        <table id="status_regdata_list" datasrc=#dsoReg border="1" cellspacing="0" width="709" bordercolor="#000000" cellpadding="0" height="44" align="center">
+            <thead>
+                <th width="189" align="right" height="22" bgcolor="#0000FF" style="text-align: center"><span style="color: white" size="2" >学期</span></th>
+                <th width="514" height="22" bgcolor="#0000FF" style="text-align: center"><span style="color: white" size="2" >注册状态</span></th>
+            </thead>
+            <tr>
+                <td style="width: 189px;text-align: right;height: 22px;">
+                    <span style="font-size: 2px;" >{$yearterm.YEAR}学年第{$yearterm.TERM}学期:</span>
+                </td>
+                <td style="width: 514px;height: 22px;">
+                    <select name="newregcode" id='newregcode' size="1">
+                        <volist name="statusoptions" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                    <span style="font-size: 2px;" id="reg_tip"><span style="color: red">未保存</span></span>
+                </td>
+            </tr>
+            <tr id="status_regdata_templaye">
+                <td style="width: 189px;text-align: right;height: 22px;">
+                    <span style="font-size: 2px;" class="yearterm"></span>
+                </td>
+                <td style="width: 514px;height: 22px;" class="statusvalue"></td>
+            </tr>
+        </table>
+    </div>
+
+
+    <p align="center">
+        <input type="button" value="提交注册信息" name="Register"  id="updateRegData" />
+        <input type="button" value="提交学生信息" id="updateStatusInfo" />
+    </p>
+</body>

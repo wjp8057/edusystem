@@ -1,0 +1,162 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<!--<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>-->
+<script>
+
+    $.extend($.fn.datagrid.methods, {
+        //editCell方法
+        editCell: function(jq,param){
+            return jq.each(function(){
+                var opts = $(this).datagrid('options');
+                //获取所有冻结的与非冻结的字段
+                var fields = $(this).datagrid('getColumnFields',true).concat($(this).datagrid('getColumnFields'));
+
+                for(var i=0; i<fields.length; i++){
+                    var col = $(this).datagrid('getColumnOption', fields[i]);
+                    col.editor1 = col.editor;
+                    if (fields[i] != param.field){
+
+                        col.editor = null;
+                    }
+                }
+                $(this).datagrid('endEdit',param.index)
+                $(this).datagrid('beginEdit', param.index);
+                for(var i=0; i<fields.length; i++){
+                    var col = $(this).datagrid('getColumnOption', fields[i]);
+                   // alert(col.editor);
+                    col.editor = col.editor1;
+                }
+            });
+        },
+        //startEditing方法，进入编辑状态
+        startEditing:function(jq,obj){
+            return jq.each(function(){
+                if (endEditing($(this),obj)){
+                    $(this).datagrid('selectRow', obj.index)
+                            .datagrid('editCell',{index:obj.index,field:obj.field});
+                    obj.editIndex = obj.index;
+                    var ed = $(this).datagrid('getEditor', {index:obj.index,field:obj.field});
+                    $(ed.target).select(); //要使用target才能获得对象
+                    $(ed.target).focus();
+                }
+            });
+        },
+        //endEditing方法，结束编辑状态
+        /*  这个拓展定义有点问题，返回值无法正常获取，比如tt.datagrid('endEditing',admin_user_obj)，返回的不是true或者false，而是对象
+         endEditing:function(jq,obj){
+         return jq.each(function(){ //自定义的时候必须将jq.each用上，其实我也不知道为什么
+         if (obj.editIndex == undefined){return true}
+         if ($(this).datagrid('validateRow',obj.editIndex)){
+         $(this).datagrid('endEdit', obj.editIndex);
+         obj.editIndex = undefined;
+         return true;
+         } else {
+         return false;
+         }
+         });
+         },
+         */
+        //创建表头菜单，使用对象的cmenu
+        createColumnMenu:function(jq,cmenu_obj){
+            return jq.each(function(){ //自定义的时候必须将jq.each用上，其实我也不知道为什么
+                cmenu_obj.cmenu = $('<div/>').appendTo('body');
+                tt=$(this);//定义一个，在onclick事件中用
+                cmenu_obj.cmenu.menu({
+                    onClick: function(item){
+                        if (item.iconCls == 'icon-ok'){
+                            tt.datagrid('hideColumn', item.name);
+                            cmenu_obj.cmenu.menu('setIcon', {
+                                target: item.target,
+                                iconCls: 'icon-empty'
+                            });
+                        } else {
+                            tt.datagrid('showColumn', item.name);
+                            cmenu_obj.cmenu.menu('setIcon', {
+                                target: item.target,
+                                iconCls: 'icon-ok'
+                            });
+                        }
+                    }
+                });
+                var fields = $(this).datagrid('getColumnFields');
+                for(var i=0; i<fields.length; i++){
+                    var field = fields[i];
+                    var col = $(this).datagrid('getColumnOption', field);
+                    cmenu_obj.cmenu.menu('appendItem', {
+                        text: col.title,
+                        name: field,
+                        iconCls: 'icon-ok'
+                    });
+                }
+            });
+        }
+    });
+
+$(function(){
+            var editindex=undefined
+            $('#dd').datagrid({
+                'url':'__URL__/yearterm/hasJson/true',
+                onClickCell:function(index,field,value){
+
+                    $('#dd').datagrid('editCell',{index:index,field:field})
+                },
+                onSelect:function(index,row){
+              //      alert(editindex==undefined)
+                        if(index!=editindex&&editindex!=undefined){
+                            $('#dd').datagrid('endEdit',editindex);
+                        }
+                        editindex=index
+
+                }
+            })
+
+            $('#save').bind('click',function(){
+                        var len=$('#dd').datagrid('getRows')
+                        for(var i=0;i<len.length;i++){
+                            $('#dd').datagrid('endEdit',i)
+                        }
+                        var rowList=$('#dd').datagrid('getChanges')
+                        ajiakesi('__URL__/updateyearterm/hasJson/1',{'bind':rowList},function(c){
+                            $.messager.alert('提示',c)
+                            $('#dd').datagrid('load',{'rem':$('#model').val()})
+                        })
+                    }
+            )
+
+
+            $('#searcher').bind('click',function(){
+                $('#dd').datagrid('load',{'rem':$('#model').val()})
+            })
+        }
+)
+</script>
+
+<body>
+
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+
+
+
+    <div id="tdemo">
+        &nbsp;&nbsp;&nbsp;<label for="model">模块:</label>
+        <input type="text" id="model" size="10" placeholder='模块' value="%">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-save"  id="save" plain="true">保存</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table class="easyui-datagrid"
+               id='dd' data-options="fit:true,singleSelect:true,'toolbar':'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'rem',width:100,align:'center'">模块</th>
+                <th data-options="field:'year',width:100,align:'center',editor:{'type':'text'}">学年</th>
+                <th data-options="field:'term',width:100,align:'center',editor:{'type':'text'}">学期</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

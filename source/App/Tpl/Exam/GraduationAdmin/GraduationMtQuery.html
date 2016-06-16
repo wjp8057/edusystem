@@ -1,0 +1,168 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function openwd(){
+        openTabsWindows('座位安排','__URL__/zuoweianpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/COURSENO/'+arguments[0]+'/KC/'+arguments[1],'',true);
+    }
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var options = $('select#school_two option[value={$userschool}]').eq(0);
+        options.attr('selected','selected');
+        //console.log(options);
+        $('#school_two').combobox("select","{$userschool}");
+
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+
+        $('#lici_student_wd').window(new wind(370,280,false,false,true,false,false))   //todo:检索考位安排的页面
+
+        var dat=$('#listDat').datagrid({
+            toolbar:'#tdemo'/*[{
+                'text':'导出Excel',
+                'iconCls':'icon-excel',
+                'handler':function(){
+
+                    $('[name=e_YEAR]').val($('[name=year]').val());
+                    $('[name=e_TERM]').val($('[name=term]').val());
+                    $('[name=e_SCHOOL]').val($('[name=school_two]').val());
+                    $('[name=e_SCHOOLTWO]').val($('[name=school_one]').val())
+                    $('[name=e_COURSENO]').val($('[name=courseno]').val());
+                    $('[name=e_STUDENTNO]').val($('[name=studentno]').val());
+
+                    $('#examexcel').submit();
+                }
+            }
+            ]*/
+        });
+
+
+        $('#excell').bind('click',function(){
+
+            $('[name=e_YEAR]').val($('[name=year]').val());
+            $('[name=e_TERM]').val($('[name=term]').val());
+            $('[name=e_SCHOOL]').val($('[name=school_two]').val());
+            $('[name=e_SCHOOLTWO]').val($('[name=school_one]').val())
+            $('[name=e_COURSENO]').val($('[name=courseno]').val());
+            $('[name=e_STUDENTNO]').val($('[name=studentno]').val());
+
+            $('#examexcel').submit();
+        })
+        var daaa=$('#daaa')
+
+
+
+
+
+
+        $('#bt').linkbutton({
+            'text':'申请毕业免听考名单统计(以开课学院排序)',
+            'iconCls':''
+        }).bind('click',function(){
+                    $('#listDat').datagrid('options').url='__APP__/Status/Status/Squery'
+                    $('#listDat').datagrid('load',{'Sqlpath':{'select':'exam/GraduationMtQuery_One_select.SQL','count':'exam/GraduationMtQuery_One_count.SQL'},'bind':{
+                        ':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val(),':SSCHOOLNO':$('[name=school_one]').val(),':CSCHOOLNO':$('[name=school_two]').val(),':STUDENTNO':$('[name=studentno]').val(),':COURSENO':$('[name=courseno]').val()
+                    }})})
+
+
+
+        $('#bt2').linkbutton({
+            'text':'申请毕业免听考名单统计(以学生所在学院排序)',
+            'iconCls':''
+        }).bind('click',function(){
+                    $('#listDat').datagrid('options').url='__APP__/Status/Status/Squery'
+                    $('#listDat').datagrid('load',{'Sqlpath':{'select':'exam/GraduationMtQuery_Two_select.SQL','count':'exam/GraduationMtQuery_Two_count.SQL'},'bind':{
+                        ':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val(),':SSCHOOLNO':$('[name=school_one]').val(),':CSCHOOLNO':$('[name=school_two]').val(),':STUDENTNO':$('[name=studentno]').val(),':COURSENO':$('[name=courseno]').val()
+                    }})
+        })
+    })
+
+
+
+
+
+</script>
+
+
+<style>
+
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+            <b>学年:</b>
+            <input name="year" type="text" size='4' value="2011"></td>
+            &nbsp &nbsp
+            <b>学期:</b>
+            <input type="text" name="term" size="1" value="1"></td>
+
+            &nbsp &nbsp
+            <b>开课学院:</b>
+            <select name="school_one" class="easyui-combobox">
+                <option value="%">全部</option>
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            &nbsp &nbsp
+            <b>学生所在学院:</b>
+            <select name="school_two" id="school_two" class="easyui-combobox">
+                <option value="%">全部</option>
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            &nbsp &nbsp<br>
+            <b>学号:</b>
+            <input type="text" name="studentno" value="%">
+            &nbsp &nbsp
+            <b>课号:</b>
+            <input type="text" name="courseno" value="%">
+            &nbsp &nbsp
+            <a href='javascript:void(0)' id="bt">提交检索(以开课学院排序)</a>&nbsp &nbsp
+            <a href='javascript:void(0)' id="bt2">提交检索(以开课学院排序)</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel" id="excell" plain=true>导出Excel</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid"
+               data-options="fit:true,fitColumns:true,singleSelect:true,pagination:true" id="listDat">
+            <thead>
+            <tr>
+                <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                <th data-options="field:'szxy',width:120,align:'center'">所在学院</th>
+                <th data-options="field:'szbj',width:130,align:'center'">所在班级</th>
+                <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                <th data-options="field:'kcmc',width:300,align:'center'">课程名称</th>
+                <th data-options="field:'xf',width:100,align:'center'">学分</th>
+                <th data-options="field:'kkxy',width:100,align:'center'">开课学院</th>
+                <th data-options="field:'xklx',width:100,align:'center'">修课类型</th>
+                <th data-options="field:'ksfs',width:100,align:'center'">考试分数</th>
+                <th data-options="field:'kcfs',width:100,align:'center'">考查分数</th>
+                <th data-options="field:'xkfs',width:100,align:'center'">修课方式</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+<style>
+    #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+<form id="examexcel" action="__APP__/CourseManager/Excel/GraduationMtQuery_Excel" method="POST">
+    <input type="hidden" name="e_YEAR" VALUE="">
+    <input type="hidden" name="e_TERM" VALUE="">
+    <input type="hidden" name="e_STUDENTNO" VALUE="">
+    <input type="hidden" name="e_COURSENO" VALUE="">
+    <input type="hidden" name="e_SCHOOL" VALUE="">
+    <input type="hidden" name="e_SCHOOLTWO" VALUE="">
+</form>
+</body>
+</html>

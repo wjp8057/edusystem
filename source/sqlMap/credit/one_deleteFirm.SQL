@@ -1,0 +1,1 @@
+delete from CreditSinglefirm where applydate_id=:id

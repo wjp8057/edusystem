@@ -1,0 +1,1 @@
+select * from YEAR_TERM where type=:TYPE

@@ -1,0 +1,2 @@
+select count(*) AS ROWS from Creditbatchproject where  projectstatus=1 AND
+(credittype=:cone or credittype=:ctwo) and projectname like :projectname   and (p_status=:pone or p_status=:ptwo) and zhongshen=:zhongshen

@@ -1,0 +1,80 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:  window窗口
+        var wd=$('#wd').window(new wind(600,300,false,false,false,false,false));
+        var wd_one=$('#add_student_wd_List').window(new wind(0,0,false,false,true,true,true))
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+        $('#bt').bind('click',function(){
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'CourseManager/Two_one_updateLock.SQL','bind':{
+                ':YEAR':$('[name=YEAR]').val(),
+                ':TERM':$('[name=TERM]').val(),
+                ':COURSENO':$('[name=COURSENO]').val()
+            }},function(c){
+                if(c){
+                    $.messager.alert('提示','终止成功')
+                }else{
+                    $.messager.alert('提示','课程未找到')
+                }
+            })
+
+        })
+    })
+
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #ffffff">
+<!--todo;刚进去的窗口-->
+<div id="wd" data-options="collapsible:false,closable:false" title="选课终止">
+    <br><br>
+    <table border="0"  width="73%" style="margin-top: 10px" align="center">
+        <tr>
+            <td width="137"  align='right' bgcolor="#E0ECFF" height="25">
+                学年:
+            </td>
+            <td>
+                <input type="text" name="YEAR" value="2011">
+            </td>
+        </tr>
+        <tr>
+            <td width="137" align='right' bgcolor="#E0ECFF" height="25">
+                学期:
+            </td>
+            <td>
+                <input type="text" name="TERM" value="1">
+            </td>
+        </tr>
+        <tr>
+            <td width="137" align='right' bgcolor="#E0ECFF" height="25">
+                课程:
+            </td>
+            <td>
+                <input type="text" name="COURSENO" value="">&nbsp课号加组号
+            </td>
+        </tr>
+
+        <tr>
+            <td  align="center" style="border:0px" height="25" colspan="4">
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="bt">提交终止</a> </td>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" align="center" style="border:0px">
+                如果要特别终止某项课程的选课，请输入完整课号组号。否则系统将进行匹配！
+            </td>
+        </tr>
+    </table>
+</div>
+
+</div>
+</body>
+</html>

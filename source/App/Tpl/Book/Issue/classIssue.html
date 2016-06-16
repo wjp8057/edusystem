@@ -1,0 +1,117 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<div id="datagrid"></div>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm"  method="post">
+		<label>学年：</label><input name="year" size="4" maxlength="4">
+		<label>学期：</label><input name="term" size="1" maxlength="1">
+		<label>班级：</label><input name="classname" value='%' size="14" maxlength="20">
+		<label>班号：</label><input name="classno" value='%' size="14" maxlength="20">
+		<a href="javascript:void(0)" id="searcher">检索</a>
+        <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">撤销教材发放</a>
+    </form>
+</div>
+<script type="text/javascript">
+var list=null;
+var year="";
+var term="";
+$(function(){
+    $("[name='year']").val(parent.$("#YEAR").val());
+    $("[name='term']").val(parent.$("#TERM").val());
+	//班级发放信息
+	var datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        fit:true,
+        striped:true,
+        columns:[[{field:'classno',title:'班号',align:'center',width:20},
+            {field:'classname',title:'班级',align:'center',width:20},
+            {field:'schoolname',title:'学院',align:'center',width:20},
+            {field:'price',title:'原价（总价）',align:'center',width:10},
+            {field:'dis_price',title:'折扣价（总价）',align:'center',width:10},
+            {field:'操作',title:'操作',align:'center',width:10,formatter:function(value,row,index){
+                return "<a href=\"javascript:void(0)\" onclick=\"issue('"+row.classno+"')\">查看发放</a>";
+            }} ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar'});
+	//搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	//验证学年学期是否输入
+    	year=$.trim($("#toobar [name='year']").val());
+    	term=$.trim($("#toobar [name='term']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+        datagrid.datagrid("options").url = "__URL__/classIssue/hasJson/1";
+        datagrid.datagrid("load",getData());
+    });
+    //不发放
+    $("#delBut").click(function(){
+        //验证学年学期是否输入
+        year=$.trim($("#toobar [name='year']").val());
+        term=$.trim($("#toobar [name='term']").val());
+        if(year=="" || term==""){
+            msgShow("系统提示：","请输入要检索的学年与学期！","error");
+            return;
+        }
+        list=datagrid.datagrid('getSelections');
+        if (list.length){
+            $.messager.confirm('提示',"撤销教材发放将删除当前班级"+year+"学年"+term+"学期所有教材的发放信息，您确定要撤销发放么？",function(b){
+                if(b){
+                    var ary=[];                      //存储删除信息的数组
+                    for(var i=0;i<list.length;i++){
+                        ary[i]=list[i].classno;
+                    }
+                    $.ajax({
+                        url:'__URL__/delPayment/hasJson/1',
+                        data:{"year":year,"term":term,"cids":ary},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","操作成功！","info");
+                                datagrid.datagrid("load",getData());
+                            }else{
+                                msgShow("系统提示：","操作失败,您没有权限！","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }else{
+            msgShow("系统提示：","请选择要撤销发放的教材！","error");
+        }
+    });
+});
+//获取检索条件信息
+function getData(){
+	var data={
+        year:$.trim($("#toobar [name='year']").val()),
+        term:$.trim($("#toobar [name='term']").val()),
+        classname:$.trim($("#toobar [name='classname']").val()),
+        classno:$.trim($("#toobar [name='classno']").val())
+    };
+	return data;
+}
+//发放查看
+function issue(classno){
+    year=$.trim($("#toobar [name='year']").val());
+    term=$.trim($("#toobar [name='term']").val());
+    if(year=="" || term==""){
+        msgShow("系统提示：","请输入要检索的学年与学期！","error");
+        return;
+    }
+    var url="__ROOT__/Book/Issue/issueByClass/year/"+year+"/term/"+term+"/classno/"+classno;
+    openTabsWindows("班级发放清单",url);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{border: solid 1px #ccc;margin:5px;padding: 5px 5px 7px 5px;}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+.query font{margin-right:8px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+
+
+
+
+    <div data-options="region:'center',border:false" style=";background:#FFF;">
+        <table id="datagrid" width="100%" fit="true" toolbar='#tdemo'
+               pagination="false" striped="true" >
+            <thead>
+            <tr><th data-options="field:'RECNO',checkbox:true"></th>
+            	<th data-options="field:'USERNAME',align:'center',width:60">用户名</th>
+                <th data-options="field:'REMOTEIP',align:'center',width:90">Ip地址</th>
+                <th data-options="field:'COOKIEROLES',align:'center',width:140">角色权限</th>
+                <th data-options="field:'SCRIPTNAME',align:'center',width:180">访问路径</th>
+                <th data-options="field:'PATHINFO',align:'center',width:120">访问程序</th>
+                <th data-options="field:'METHOD',align:'center',width:60">递交方法</th>
+                <th data-options="field:'REQUESTTIME',align:'center',width:120">访问时间</th>
+                <th data-options="field:'SUCCESS',align:'center',width:60">验证结果</th>
+                <th data-options="field:'QUERY'">提交信息</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <div style="margin-top:10px;margin-bottom: 0px;margin-left:10px">
+        <label>用户名：</label><input name="USERNAME" size="10" value='%' >
+        <label>访问的应用程序：</label><input name="PATHINFO" size="12" value='%' >
+        <label>访问的方法路径：</label><input name="SCRIPTNAME" size="20" value='%' >
+        <label>提交方法：</label><input name="METHOD" size="12" value='POST' >
+        <span>POST或GET</span><br><br>
+    </div>
+    <div style="margin-top:0px;margin-left: 10px">
+        <label>客户IP地址：</label><input name="REMOTEIP" size="12" value='%' >
+        <label>访问时间：</label>
+        <input name="REQUESTTIME" value="1" type="radio" checked="checked" style="vertical-align:middle;"><font>今天</font>
+        <input name="REQUESTTIME" value="2" type="radio" style="vertical-align:middle;"><font>昨天以来</font>
+        <input name="REQUESTTIME" value="8" type="radio" style="vertical-align:middle;"><font>本周</font>
+        <input name="REQUESTTIME" value="366" type="radio" style="vertical-align:middle;"><font>一年内</font>
+        <label>身份验证结果：</label>
+        <input name="SUCCESS" value="1" type="checkbox" checked="checked" style="vertical-align:middle;"><font>成功</font>
+        <input name="FAIL" value="0" type="checkbox" checked="checked" style="vertical-align:middle;"><span>失败</span>
+        <label>日志浏览数量：</label>
+        <input name="COUNT" value="50" size="4">条
+        <a href="javascript:void(0)" id="searcher">统  计</a>
+        <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除日志</a>
+    </div>
+
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid = $('#datagrid').datagrid({toolbar:'#toobar',onRowContextMenu:function(e,rowindex,row){
+        $('#datagrid').datagrid('rejectChanges')
+        var tt=$('#datagrid');
+
+        e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+        tt.datagrid('selectRow',rowindex);
+        $('#admin_access_menu').menu('show',{
+            left: e.pageX,
+            top: e.pageY
+        });
+    }});
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({});//搜索按钮
+    //查询
+    $('#searcher').click(function(){
+    	var name=$.trim($("[name='USERNAME']").val());
+    	var path=$.trim($("[name='PATHINFO']").val());
+    	var s_name=$.trim($("[name='SCRIPTNAME']").val());
+    	var method=$.trim($("[name='METHOD']").val());
+    	var ip=$.trim($("[name='REMOTEIP']").val());
+    	var time=$.trim($("[name='REQUESTTIME']:checked").val());
+    	var success=$.trim($("[name='SUCCESS']:checked").val());
+    	var fail=$.trim($("[name='FAIL']:checked").val());
+    	var count=$.trim($("[name='COUNT']").val());
+    	count=count==""?50:count;
+    	if(success=="" && fail==""){
+    		success="1";fail="0";
+    	}else if(success!="" && fail==""){
+    		fail=success;
+    	}else if(success=="" && fail!=""){
+    		success=fail;
+    	}
+    	datagrid.datagrid("options").url = "__URL__/logs/hasJson/1";
+    	datagrid.datagrid('load',{USERNAME:name,PATHINFO:path,SCRIPTNAME:s_name,METHOD:method,REMOTEIP:ip,
+    		REQUESTTIME:time,SUCCESS:success,FAIL:fail,COUNT:count});
+    });
+    function dell(){
+        var row = datagrid.datagrid('getSelections');
+        if (row.length){
+            $.messager.confirm('提示','您确定要删除吗？',function(b){
+                if(b){
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row.length;i++){
+                        infoarr[i]=row[i].RECNO;
+                    }
+                    $.ajax({
+                        url:'__URL__/delLogs/',
+                        data:{'ids':infoarr},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                $.messager.alert('提示','删除成功！','?',function(){
+                                    datagrid.datagrid('reload');
+                                });
+                            }else{
+                                $.messager.alert('提示','删除失败,没权限操作','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }else $.messager.alert('提示','请选择要删除的数据！','?');
+    }
+    //删除
+    $("#delBut").click('click',dell);
+    $('#admin_del').click('click',dell)
+});
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+</div>
+</body>
+</html>

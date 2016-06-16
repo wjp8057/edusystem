@@ -1,0 +1,31 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            url : "__ROOT__/index.php?g=Student&m=Learning&a=mybooks_new&hasJson=true"
+        });
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="我的教材" iconCls="icon icon-book" fitColumns="true"
+           width="100%" singleSelect="true" fit="true" 
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'year',align:'center',width:20">学年</th>
+            <th data-options="field:'term',align:'center',width:20">学期</th>
+            <th data-options="field:'bookname',align:'center',width:130">教材名称</th>
+            <th data-options="field:'author',align:'center',width:130">编者</th>
+            <th data-options="field:'press',align:'center',width:80">出版社</th>
+            <th data-options="field:'price',align:'center',width:20">原价</th>
+            <th data-options="field:'dis_price',align:'center',width:20">折扣价</th>
+            <th data-options="field:'count',align:'center',width:20">数量</th>
+            <th data-options="field:'sum',align:'center',width:20">总价格</th></tr>
+        </thead>
+    </table>
+</div>
+
+</body>
+</html>

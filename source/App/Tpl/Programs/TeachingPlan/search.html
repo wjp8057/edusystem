@@ -1,0 +1,305 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__/Programs/TeachingPlan/search/hasJson/true";
+            datagrid.datagrid("load", {PROGRAMNO:$("#ProgramNo").val(), PROGRAMNAME:$("#ProgramName").val(), SCHOOL:$("#School").val()})
+        });
+
+        //todo:删除本条目
+        function ddel(){
+            var row = checkGrant("删除");
+            if(row==false) return;
+
+            $.messager.confirm('系统消息：','你真的确定要删除选中的顶？',function(r){
+                if (r){
+                    $.post("__ROOT__/Programs/TeachingPlan/delete/hasJson/true", {PROGRAMNO:row.PROGRAMNO}, function(rsp) {
+                        if(rsp){$.messager.alert("系统消息：", rsp.message, rsp.type);}
+                    },"JSON");
+                    datagrid.datagrid("reload");
+                }
+            });
+        }
+
+        $("#handlerDelete").bind("click",ddel);
+        $('#admin_del').bind('click',ddel)
+
+
+        //todo:编辑本条目
+        function eedit(){
+            var row = checkGrant("编辑");
+            if(row==false) return;
+            bindForms(row);
+            $('#winForms').window({title:"编辑教学计划",iconCls:'icon-edit'});
+            $('#winForms').window('open');
+            bindEdit(row);
+
+        }
+        $("#handlerEdit").bind("click",eedit);
+        $('#admin_edit').bind('click',eedit)
+
+        //todo:复制本条目
+        function ccopy(){
+            var row = checkGrant("复制");
+            if(row==false) return;
+            bindForms(row);
+            $('#winForms').window({title:"复制教学计划",iconCls:'icon-save'});
+            $('#winForms').window('open');
+            bindCopy(row);
+            $("#wProgramNo").html("<input type='text' name='newProgramNo' id='newProgramNo' /> 原教学计划号："+row.PROGRAMNO);
+            $("#wProgramName").val("");
+        }
+        $("#handlerCopy").bind("click",ccopy);
+        $('#admin_copy').bind('click',ccopy)
+
+
+        //todo:查看修改修读班级
+        function llookone(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['PROGRAMNO'] + "修读班级","__ROOT__/Programs/TeachingPlan/classListTemplate/programno/"+row['PROGRAMNO']);
+        }
+
+        $("#classListTemplate").bind("click",llookone);
+        $('#admin_lookone').bind('click',llookone)
+
+
+
+        //todo:查看修改修读辅修班
+        function llooktwo(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['PROGRAMNO'] + "修读辅修班","__ROOT__/Programs/TeachingPlan/subsidListTemplate/programno/"+row['PROGRAMNO']);
+        }
+        $("#subsidListTemplate").bind("click",llooktwo);
+        $('#admin_looktwo').bind('click',llooktwo);
+
+        //todo:查看修改修读学生
+        function llookstudent(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['PROGRAMNO'] + "修读学生","__ROOT__/Programs/TeachingPlan/studentsListTemplate/programno/"+row['PROGRAMNO']);
+        }
+        $("#studentsListTemplate").bind("click",llookstudent);
+        $('#admin_lookstudent').bind('click',llookstudent);
+
+
+        //todo:查看、修改并添加删除课程
+        function sseven(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['PROGRAMNO'] + "修读课程","__ROOT__/Programs/TeachingPlan/courselistTemplate/programno/"+row['PROGRAMNO']);
+
+        }
+        $("#handlerCourses").bind("click",sseven);
+        $('#admin_xiugai').bind('click',sseven)
+
+        //验证是否可操作
+        function checkGrant(opt){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return false;
+            }
+            if(row.SCHOOL!="{$theacher.SCHOOL}"){
+                msgShow("系统提示：","<br />你不可以"+opt+"非本学院的教学计划！","error");
+                return false;
+            }
+            return row;
+        }
+        //清除form的数据绑定
+        function clearForms(){
+            $("#wProgramNo").html("");
+            $("#wProgramName").val("");
+            $("#wDate").val("");
+            $("#wRem").val("");
+            $("#wUrl").val("");
+            $("#wValid").get(0).selectedIndex=0;
+            $("#wSchoolName").html("");
+            $("#wMajor").get(0).selectedIndex=0;
+            $("#wType").get(0).selectedIndex=0;
+        }
+        //把数据绑定到form
+        function bindForms(row){
+            $("#wProgramNo").html(row.PROGRAMNO);
+            $("#wProgramName").val($.trim(row.PROGNAME));
+            $("#wDate").val($.trim(row.DATE));
+            $("#wRem").val($.trim(row.REM));
+            $("#wUrl").val($.trim(row.URL));
+            $("#wValid").val(row.VALID);
+            $("#wSchoolName").html(row.SchoolName);
+            $("#wMajor").val(row.major);
+            $("#wType").val(row.TYPE);
+        }
+        //获得数据
+        function getValueForms(row){
+            return {
+                PROGNAME : $("#wProgramName").val(),
+                DATE : $("#wDate").val(),
+                REMS : $("#wRem").val(),
+                URL : $("#wUrl").val(),
+                VALID : $("#wValid").val(),
+                TYPE : $("#wType").val(),
+                MAJOR : $("#wMajor").val(),
+                PROGRAMNO : row.PROGRAMNO,
+                NEWPROGRAMNO : $("#newProgramNo").val()
+            }
+        }
+
+        $("#wfCancel").bind("click",function(){
+            clearForms();
+            $('#winForms').window('close');
+        })
+        function bindEdit(row){
+            $("#wfOK").unbind("click");
+            $("#wfOK").bind("click",function(){
+                $.post("__ROOT__/Programs/TeachingPlan/update/hasJson/true/", getValueForms(row), function(rsp) {
+                    if(rsp){
+                        $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        if(rsp.type=="info"){
+                            datagrid.datagrid("reload");
+                            $("#winForms").window("close");
+                        }
+                    }
+                },"JSON");
+            });
+        }
+        function bindCopy(row){
+            $("#wfOK").unbind("click");
+            $("#wfOK").bind("click",function(){
+                if($.trim($("#newProgramNo").val())=="" || $.trim($("#wProgramName").val())==""){
+                    $.messager.alert("系统消息：", "教学计划编号和教学计划名称不能空！", "error");
+                    return;
+                }
+                $.post("__ROOT__/Programs/TeachingPlan/copy/hasJson/true/", getValueForms(row), function(rsp) {
+                    if(rsp){
+                        $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        if(rsp.type=="info"){
+                            datagrid.datagrid("reload");
+                            $("#winForms").window("close");
+                        }
+                    }
+                },"JSON");
+            });
+        }
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true" idField="PROGRAMNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" sortName="PROGRAMNO" >
+            <thead>
+            <tr><th data-options="field:'PROGRAMNO',align:'center',sortable:true,width:100" >教学计划编号</th>
+                <th data-options="field:'PROGNAME',align:'center',sortable:true,width:300">教学计划名称</th>
+                <th data-options="field:'DATE',align:'center',sortable:true,width:50">制定日期</th>
+                <th data-options="field:'REM',align:'center',width:100">备注</th>
+                <th data-options="field:'URL',align:'center',width:80">教学计划网址</th>
+                <th data-options="field:'VALID',align:'center',width:50">有效</th>
+                <th data-options="field:'TYPENAME',align:'center',width:50">类型</th>
+                <th data-options="field:'SchoolName',align:'center',sortable:true,width:100">学院</th></tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+<div id="toobar">
+
+                <label for="ProgramNo">教学计划编号:</label>
+                <input type="text" id="ProgramNo" size="10"  value="%">
+                <label for="ProgramName">教学计划名称:</label>
+                <input type="text" id="ProgramName" size="10"  value="%">
+                <label for="School">学院:</label>
+                <Cwebs:sqlselect id="School" name="School" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" />
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+    <br>
+    <a href="#" id="handlerData" class="easyui-menubutton" data-options="menu:'#mmData',iconCls:'icon-tanchu',plain:true" >本条目</a>
+    <a href="#" id="handlerObject" class="easyui-menubutton" data-options="menu:'#mmObject',iconCls:'icon-StudentBind',plain:true">修读对象管理</a>
+    <a href="#" id="handlerCourses" class="easyui-linkbutton" data-options="iconCls:'icon-programList',plain:true">查看、修改并添加删除课程</a>
+</div>
+
+<div id="mmData" class="easyui-menu" style="width:120px;">
+    <div data-options="iconCls:'icon-edit'" id="handlerEdit">修改本条目</div>
+    <div data-options="iconCls:'icon-save'" id="handlerCopy">复制本条目</div>
+    <div data-options="iconCls:'icon-cut'" id="handlerDelete">删除本条目</div>
+</div>
+<div id="mmObject" class="easyui-menu" style="width:120px;">
+    <div data-options="iconCls:'icon-room'" id="classListTemplate">查看修改修读班级</div>
+    <div data-options="iconCls:'icon-room2'" id="subsidListTemplate">查看修改修读辅修班</div>
+    <div data-options="iconCls:'icon-personal'" id="studentsListTemplate">查看修改修读学生</div>
+</div>
+
+<!-- 编辑界面 -->
+<div id="winForms" class="easyui-window" title="" style="width:480px;height:360px" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3>
+            <tr><th align="right">教学计划编号：</th><td><div id="wProgramNo"/></td></tr>
+            <tr><th align="right">教学计划名称：</th><td><input id="wProgramName" type="text" name="ProgramName" style="width:320px" /></td></tr>
+            <tr><th align="right">制定日期：</th><td><input id="wDate" type="text" name="Date" /></td></tr>
+            <tr><th align="right">备注：</th><td><input id="wRem" type="text" name="Rem" style="width:320px" /></td></tr>
+                <tr><th align="right">教学计划网址：</th><td><input id="wUrl" type="text" name="Url" style="width:320px" /></td></tr>
+                <tr><th align="right">有效：</th><td>
+                    <select name="Valid" id="wValid">
+                        <OPTION VALUE=1>有效</OPTION>
+                        <OPTION VALUE=0>无效</OPTION>
+                    </select></td></tr>
+                <tr><th align="right">制定计划学院：</th><td><div id="wSchoolName" /></td></tr>
+                <tr><th align="right">所属专业：</th><td><Cwebs:sqlselect id="wMajor" name="Major" value="CODE" title="NAME" headerKey="" headerTitle="请选择" file="major/majorOption.sql" /></td></tr>
+                <tr><th align="right">计划类型：</th><td><Cwebs:sqlselect id="wType" name="Type" value="CODE" title="NAME" file="programs/programTypeOptions.sql" /></td></tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="wfOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="wfCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>修改本条目</div>
+    <div id='admin_copy'>复制本条目</div>
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_lookone'>查看修改修读班级</div>
+    <div id='admin_looktwo'>查看修改修读辅修班</div>
+    <div id='admin_lookstudent'>查看修改修读学生</div>
+    <div id="admin_xiugai">查看、修改并添加删除课程</div>
+</div>
+
+
+</body>
+
+</html>
+

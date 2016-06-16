@@ -1,0 +1,91 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+
+            {"menuid": "2","icon": "icon-fenxi","menuname": "成绩分析",
+                "menus": [
+                    {"menuid": "21","menuname": "必修课不及格人数列表","icon": "icon-personalList","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Fail"},
+                    {"menuid": "22","menuname": "课程成绩分析","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Course_CJFX"},
+                    {"menuid": "23","menuname": "班级成绩分析","icon": "icon-room","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Class_CJFX"},
+                    {"menuid": "24","menuname": "学生必修课不及格列表","icon": "icon-personal","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_bujige"},
+                    {"menuid": "25","menuname": "退学警告名单(仅供参考)","icon": "icon-personal2","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_tuixue"},
+                    {"menuid": "26","menuname": "各类统考成绩分析(按每次考试统计)","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_analyse_ci"},
+                    {"menuid": "27","menuname": "各类统考成绩分析(分专业累计通过率)","icon": "icon-classTable","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_analyse_major"},
+                    {"menuid": "28","menuname": "毕业生CET-4考试成绩统计","icon": "icon-classTable","url": "__ROOT__/Results/Results/cetFourAnalyse"}
+                ]
+            }
+        ]
+    };
+
+    var menuTabs = null;
+
+    $(function() {
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="成绩分析" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">成绩分析简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">成绩管理：统考成绩导入、校内成绩输入以及成绩查询与分析，成绩表打印等功能。包含成绩查询、成绩分析、成绩输入、成绩单打印等模块。</p></b>
+
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">成绩分析:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、必修课不及格人数列表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、人数查看该学期各门课程不及格的人数</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、课程成绩分析</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、课号查询该门课程的选课、成绩情况的统计人数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、班级成绩分析</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、班号查询该班级所有课程的选课、成绩情况的统计人数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、学生必修课不及格列表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学院、学号进行查询学生各门不及格的课程成绩情况和门次统计。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、退学警告名单（仅供参考）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院查询该学院在该学期里退学和受警告的学生名单。（仅供参考）</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、各类统考成绩分析（按每次考试统计）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看各学年的计算机一级、应用能力A级、应用能力B级、三级、四级、六级的成绩统计人数、比例情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、各类统考成绩分析（分专业累计通过率）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看各年级计算机一级、应用能力B级的参加人数、通过人数、通过率。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>8、毕业生CET-4考试成绩统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;"></p>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+
+			   <label>学号：</label><input name="STUDENTNO" size="10" value="%">
+			   <label>学生姓名：</label><input name="NAME" size="10" value="%">
+			   <label>班号：</label><input name="CLASSNO" size="10" value="%">
+			   <label>学籍状态：</label>
+			   <select class="easyui-combobox" name="STATUS" data-options="editable:false">
+			     <option value="%">所有情况</option>
+				 <volist name="status" id="s">
+				 <option value="{$s.NAME}">{$s.VALUE}</option>
+				 </volist>
+			   </select>
+			   <label>所在学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">全校</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL学生名册</a>
+			</form>
+
+
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar">
+
+</div>
+<script type="text/javascript">
+var list=null;
+var datagrid = null;
+$(function(){
+	var datagrid=$('#content').datagrid({
+        fit:true,
+        striped:true,
+        fitColumns:true,
+        columns:[[{field:'STUDENT',checkbox:true},
+                  {field:"STUDENTNO",title:"学号",align:"center",formatter:function(value,row,index){
+                	  return "<a href=\"javascript:edit('"+value+"')\">"+value+"</a>";
+  		          }},
+                  {field:"NAME",title:"姓名",align:"center"},
+                  {field:"SEX",title:"性别",align:"center"},
+                  {field:"ENTERDATE",title:"入学日期",align:"center"},
+                  {field:"YEARS",title:"年级",align:"center"},
+                  {field:"CLASSNO",title:"班号",align:"center"},
+                  {field:"CLASSNAME",title:"班级",align:"center"},
+                  {field:"WARN",title:"退学警告次数",align:"center"},
+                  {field:"STATUS",title:"学籍状态",align:"center"},
+                  {field:"BIRTHDAY",title:"出生日期",align:"center"},
+                  {field:"NATIONALITY",title:"民族",align:"center"},
+                  {field:"PARTY",title:"政治面貌",align:"center"},
+                  {field:"POSTCODE",title:"邮编",align:"center"},
+                  {field:"ADDRESS",title:"地址",align:"center"},
+                  {field:"TEL",title:"联系电话",align:"center"},
+                  {field:"SCORE",title:"高考总分",align:"center"},
+                  {field:"MIDSCHOOL",title:"毕业中学",align:"center"},
+                  {field:"ID",title:"身份证号",align:"center"}
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#tdemo'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	datagrid.datagrid("options").url = "__URL__/queryStudent/hasJson/1";
+    	datagrid.datagrid('load',{
+    		STUDENTNO:$.trim($("[name='STUDENTNO']").val()),
+    		NAME:$.trim($("[name='NAME']").val()),
+    		CLASSNO:$.trim($("[name='CLASSNO']").val()),
+    		STATUS:$.trim($("[name='STATUS']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val())
+    	});
+    });
+    //EXCEL学生名册
+	$("#ExportBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		var stuno=$.trim($("[name='STUDENTNO']").val());
+    		var name=$.trim($("[name='NAME']").val());
+    		var classno=$.trim($("[name='CLASSNO']").val());
+    		var status=$.trim($("[name='STATUS']").val());
+    		var school=$.trim($("[name='SCHOOL']").val());
+    		if(stuno=="" && name=="" && classno=="" && status=="" && school==""){
+    			msgShow("系统提示：","请输入检索条件，由于数据量过大，暂不支持导出全校学生学籍情况","info");
+    			return;
+    		}else{
+    			var total = datagrid.datagrid('getPager').data("pagination").options.total;
+    			if(total > 2000){
+    				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+        			return;
+    			}
+    			$("#queryForm").attr("action","__URL__/export/");
+	    		$("#queryForm").submit();
+    		}
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的数据","info");
+    	}
+    });
+});
+//跳转到学生信息编辑窗口
+function edit(studentno){
+	var url="__URL__/edit/STUDENTNO/"+studentno;
+	openTabsWindows("学号「"+studentno+"」注册信息",url);
+}
+</script>
+</body>
+</html>

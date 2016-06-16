@@ -1,0 +1,410 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+/*var quanxian='{$quanxian}'
+
+
+function qxpanduan(id,url){
+    var quanxianpd=false;
+    ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+
+        eval('var o='+c)
+        for(var i=0;i<o[0]['rl'].length;i++){
+
+            var zz=new RegExp(o[0]['rl'].charAt(i))
+            var bool=zz.test(quanxian)
+
+            if(bool){
+                quanxianpd=true
+                return;
+            }
+        }
+    })
+
+    return quanxianpd;
+}*/
+
+    $(function(){
+         //todo:datagrid
+        var chuangkou={closed:true,
+            fit:true,
+            modal:true,
+            minimizable:false,
+            maximizable:false}
+   /*     var wd2=$('#wd2').window(chuangkou)
+        var wd3=$('#wd3').window(chuangkou)
+        var wd4=$('#wd4').window(chuangkou)
+        var wd5=$('#wd5').window(chuangkou)
+
+        $('#wd2').css('display','')
+        $('#wd3').css('display','')
+        $('#wd4').css('display','')
+        $('#wd5').css('display','')*/
+        $("#cc").css('display','block')
+        var  dat=$('#datagrid').datagrid({
+            striped:true,
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            url:'__URL__/xuejiyidong/hasJson/1',
+            columns:[[{field:'RECNO',checkbox:true},
+                {field:'STUDENTNO',title:'学号',width:100,sortable:true
+            },
+                {field:'STUDENTNAME',title:'姓名',width:60,sortable:true
+                },
+                {field:'CLASSNO',title:'班号',width:60,sortable:true
+                },
+                {field:'CLASSNAME',title:'班级',width:100,sortable:true
+                },
+                {field:'SCHOOLNAME',title:'学院',width:100,sortable:true
+                },
+                {field:'INFOTYPEVALUE',title:'异动代码',width:80,sortable:true
+                },
+                {field:'FILENO',title:'文件号',width:130,sortable:true
+                },
+                {field:'FILEDATE',title:'发文日期',width:100,sortable:true
+                }
+
+            ]],
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+                    toolbar:'#tdemo'
+            ,onDblClickRow:function(keyrow,dataRow){                                       //双击时候也能触发弹窗
+                $.ajax({
+                    type:'POST',
+                    url:'__URL__/editroom',                                        //做ajax请求获取数据
+                    data:{
+                        ROOMNO:dataRow.ROOMNO
+                    },
+                    success:function(content2){
+                        fuzhi(content2);
+                    }
+                })
+            }})
+        //todo:layout
+        //$('#layout').layout({})
+        //todo:点击提交按钮的时候 触发的方法
+        $('#B1').bind('click',function(){
+           var obj={}
+            obj['STUDENTNO']=$('#STUDENTNO').val().Trim()
+            obj['FILENO']=$('#FILENO').val().Trim();
+            obj['INFOTYPE']=$('#INFOTYPE').val().Trim();
+            dat.datagrid('load',obj);
+        })
+
+        //todo:ajax请求方法
+        function ajia(url,data,str1,list,wd,str){                                    //todo:赋值
+            $.ajax({
+                type:'POST',
+                url:'__URL__/'+url,
+                data:data,
+                success:function(content2){
+                    //todo:如果学生号不存在 不往下执行
+                    if(content2=='false'){
+                        return  $.messager.alert('提示',str1);
+                    };
+                    eval('var one='+content2);
+                    if(str=='File'){               //todo:查看学生学籍异动的时候
+                            var textList=$('#wd4 :text')
+                            var num='';
+                            for(var i=0;i<textList.length;i++){
+                                  nm=textList[i].id;
+                                  textList[i].value=one[nm.substring(0,nm.indexOf('e'))]
+                            }
+                            //学籍异动的学号（保存在hidden的 ， 因为学号可被更改）
+                            $('#OLDSTUDENTNO').val(one['STUDENTNO'])
+                    }else if(str<2){
+                        if(one['regcode']){                                                 //todo:false代表     按学号注册      ⑵
+                            var str2=''          //todo:  #yearterm的内容
+                            for(var i=0;i<one['regcode'].length;i++){
+                                str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                            }
+                            $('#yearterm').html(str2)
+                            for(var i=0;i<list.length;i++){
+                                var nm=list[i].id;
+                                $('#'+nm).html(one[nm.substring(0,nm.indexOf(str))]);
+                            }
+                        }else{
+                            for(var i=0;i<list.length;i++){                                 //todo:true代表    新生报到   ①
+                                var nm=list[i].id;
+                                $('#'+nm).html(one[nm]);
+                            }
+                        }
+                    }else{
+
+                        var str2=''          //todo:  #yearterm的内容
+                        for(var i=0;i<one['regcode'].length;i++){
+                            str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                        }
+                        $('#yearterm2').html(str2)
+                        for(var i=0;i<list.length;i++){
+                            var nm=list[i].id;
+                            $('#'+nm).val(one[nm.substring(0,nm.indexOf(str))]);                     //todo: 按学号注册 编辑注册信息的  ⑵。⑵
+                        }
+                        var selectlist=$('#wd3 select')
+                        for(var i=0;i<selectlist.length;i++){
+                            $('#'+selectlist[i].id).val(one[selectlist[i].id.substring(0,selectlist[i].id.indexOf(str))])
+                        }
+                    }
+                    wd.window({                                                             //todo:关闭指定窗口
+                        closed:false
+                    })
+                }
+            })
+        }
+
+
+
+        //todo:该页面修改学生注册信息时候的方法
+        var xg=$('#edit').linkbutton({                          //点击修改按钮的时候(提交修改完的信息)
+            text:'修改',
+            iconCls:'icon-edit'
+        }).bind('click',function(){                              //点击添加按钮时候触发的事件
+                    var two=$('#wd3 :text');
+                    var one=$('#wd3 :checkbox');
+                   // xquzhi('#wd3',two,one,'updatejieyong')
+                    dat.datagrid('reload')
+                    wd3.window({
+                        closed:true
+                    })
+         })
+
+      /*  //todo:点击编辑学生情况的时候 触发的事件
+        $('#editstudent').bind('click',function(){           //点击编辑学生情况时候 触发的事件
+            var boo=qxpanduan('BA12','__APP__/Book/Book/Bexecute')
+
+            if(!boo){
+
+                return $.messager.alert('提示','BA12 您没有足够的权限')
+            }
+            var obj={}
+            obj.studentno=$('#STUDENTNO1').html();
+            var spanList=$('#wd3 :text')
+            ajia('studentNO',obj,'学生号不存在,非法操作！',spanList,wd3,2);
+            wd2.window({closed:true})
+            wd3.window({closed:false})
+            obj=null;
+        })*/
+
+        //todo:ajax取编辑后的值的方法
+        function ajiaqu(url,wd,list,str,num){                                                      //取值
+            var obj={};
+            var nm='';
+            for(var i=0;i<list.length;i++){
+                nm=list[i].id.substring(0,list[i].id.indexOf(num));
+                obj[nm]=list[i].value;
+            }
+            var select=$('#'+wd+' select')
+
+            for(var i=0;i<select.length;i++){
+                nm=select[i].id.substring(0,select[i].id.indexOf(num));
+                obj[nm]=select[i].value;
+            }
+            $.ajax({
+                type:'post',
+                url:'__URL__/'+url,
+                data:obj,
+                success:function(c){
+                    $.messager.alert('提示',c)
+                }
+            })
+        }
+
+        //todo:提交修改信息的时候
+        $('#tijiaoinfo').bind('click',function(){
+            var list=$('#wd3 :text');
+            ajiaqu('studentUpdate','wd3',list,'修改成功',2);
+        })
+
+ /*       //todo:注册信息的返回
+        $('#register_back').bind('click',function(){
+            wd2.window({closed:true})
+        })*/
+
+     /*   //todo:查看概要的返回
+        $('#gaiyao_back').bind('click',function(){
+            wd4.window({closed:true})
+        })*/
+
+   /*     //todo:编辑注册信息的 返回
+        $('#edit_back').bind('click',function(){
+            wd2.window({closed:false})
+            wd3.window({closed:true})
+        })
+*/
+        //todo:提交学生注册信息的方法
+        $('#tijiaoreg').bind('click',function(){
+            var boo=qxpanduan('BA12','__APP__/Book/Book/Bexecute')
+
+            if(!boo){
+
+                return $.messager.alert('提示','BA12 您没有足够的权限')
+            }
+            var obj={}
+            obj.studentno=$('#STUDENTNO1').html();
+            obj.YEAR=$('input[name="Year"]').val();
+            obj.TERM=$('input[name="Term"]').val();
+            obj.REGCODE=$('#regselect').val();
+            ajiakesi('__URL__/insertregcode',obj,function(c){
+                $.messager.alert('提示',c)
+            })
+        })
+
+
+        //todo:查看学生注册信息
+        function xueshengzhuce(){
+            var yi=yitiao(dat,'请选择一条查看不能选择多条','请选择一条要查看的数据');
+            if(yi){
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                openTabsWindows('学生注册信息','__URL__/xueshengzhuce/studentno/'+row3.STUDENTNO,'',true)
+            }
+        }
+            //todo:查看学生注册信息
+        $('#e_add').bind('click',xueshengzhuce)
+        $('#admin_add').bind('click',xueshengzhuce)
+
+
+        //todo:查看概要
+        function ddel(){
+            var yi=yitiao(dat,'请选择一条查看不能选择多条','请选择一条要查看的数据');
+            if(yi){
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                var obj={};
+                openTabsWindows('查看概要','__URL__/studentFileEdit/recno/'+row3.RECNO,'',true)
+              //  obj['recno']=row3.RECNO
+                //var spanList=$('#wd2 span')
+                //ajia('selectStudentFile',obj,'查看学籍异动，系统错误',null,wd4,'File');
+            }
+        }
+
+        $('#e_del').bind('click',ddel)
+        $('#admin_del').bind('click',ddel)
+
+
+        //todo:删除记录
+        function eedit(){
+            var yi=yitiao(dat,'请选择一条删除不能选择多条','请选择一条要删除的数据');
+            if(yi){
+                $.messager.confirm('提示','您确定要删除吗',function(c){
+                    if(c){
+                        var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                        var obj={};
+                        obj['bind']={':recno':row3.RECNO}
+                        obj['sqlpath']='status/Four_DeleteRegistries.SQL'
+                        ajiakesi('__URL__/statusexecute/hasJson/1',obj,function(c){
+                            if(c=='true'){
+                                $.messager.alert('提示','删除成功')
+                            }
+                            dat.datagrid('load')
+                        })
+                    }
+                })
+
+            }
+        }
+
+        $('#e_edit').bind('click',eedit)
+        $('#admin_edit').bind('click',eedit);
+
+
+        function zhuxiao(){
+            var yi=yitiao(dat,'请选择一条要注销的记录不能选择多条','请选择一条要注销的记录')
+            if(yi){
+                $.messager.confirm('来自网页的消息','你确实要注销选中学生的学籍吗？学籍注销将首先将学生移动到毕业生库中，然后删除相关的学生记录、个人情况记录、选课记录、修课计划列表、辅修班学生记录，删除后记录不能恢复！但学生的学籍异动记录，成绩记录不会删除。如果是毕业正常注销学籍，则毕业生库中的毕业代码为“正常毕业”，如果为开除学籍，则该字段为“除名”。',function(c){
+                if(c){
+                    var row=dat.datagrid('getSelected')
+                    ajiakesi('__URL__/zhuxiaoxj/hasJson/1',{':studentno':row.STUDENTNO,'code':0},function(c){
+                        $.messager.alert('提示',c)
+                        dat.datagrid('load')
+                    })
+                }
+            })
+        }
+        }
+        $('#e_back').bind('click',zhuxiao)
+        $('#admin_back').bind('click',zhuxiao)
+
+
+        function kaichu(){
+            var yi=yitiao(dat,'请选择一条要注销的记录不能选择多条','请选择一条要注销的记录')
+            if(yi){
+                $.messager.confirm('来自网页的消息',"你确实要注销选中学生的学籍吗？学籍注销将首先将学生移动到毕业生库中，然后删除相关的学生记录、个人情况记录、选课记录、修课计划列表、辅修班学生记录，删除后记录不能恢复！但学生的学籍异动记录，成绩记录不会删除。如果是毕业正常注销学籍，则毕业生库中的毕业代码为“正常毕业”，如果为开除学籍，则该字段为“除名”。",function(c){
+                if(c){
+                    var row=dat.datagrid('getSelected')
+                    ajiakesi('__URL__/zhuxiaoxj/hasJson/1',{':studentno':row.STUDENTNO,'code':5},function(c){
+                        $.messager.alert('提示',c)
+                        dat.datagrid('load')
+                    })
+                }
+            })
+        }
+
+        }
+        $('#e_save').bind('click',kaichu)
+        $('#admin_save').bind('click',kaichu)
+
+
+
+
+
+
+    })
+
+    //todo:去掉空格函数
+    String.prototype.Trim = function()
+    {
+        return this.replace(/(^\s*)|(\s*$)/g, "");
+    }
+</script>
+
+
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true" >
+<div id="tdemo">
+    <div style="margin-bottom:0px ">
+      学号：<input type="text" name="STUDENTNO" id='STUDENTNO' size="9" value="%">&nbsp&nbsp&nbsp&nbsp
+      公文号：<input type="text" name="FILENO"  id="FILENO" size="20" value="%">&nbsp&nbsp&nbsp&nbsp
+      记录性质：<select size="1" name="INFOTYPE" id="INFOTYPE">
+                        <OPTION value="%">所有</OPTION>
+                        <volist name="infotype" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                    </select>&nbsp&nbsp&nbsp&nbsp
+      <a href="javascript:void(0)" iconCls='icon-search' class="easyui-linkbutton" id="B1">提交查询</a>
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="pagename" value="STUDENTFILELIST.htm">
+    </div>
+    <div style="margin-top:2px">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>查看学生注册信息</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>查看概要</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>删除记录</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>正常注销选中学生的学籍</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>开除选中学生学籍</a>
+    </div>
+    </div>
+
+<div data-options="region:'center',split:false,border:true,title:''" style="padding:0px;background:#eee;">
+    <div id="datagrid" data-options="fit:true,border:false">
+    </div>
+</div>
+
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_add'>查看生注册信息</div>
+    <div id='admin_del'>查看概要</div>
+    <div id="admin_edit">删除记录</div>
+    <div id="admin_back">正常注销选中学生的学籍</div>
+    <div id="admin_save">开除选中学生学籍</div>
+</div>
+</body>
+</html>

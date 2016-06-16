@@ -1,0 +1,198 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script src="__ROOT__/thirdparty/jquery/js/modules/results.js"></script>
+
+<script>
+    var page = parseInt('{$page}');
+    var year = parseInt('{$year_a}');
+    var term = parseInt('{$term}');
+    var courseno = '{$courseno}';
+
+   // alert(page);
+    function uud(str){
+        if(typeof str=='undefined'){
+            return ''
+        }
+        return str
+    }
+    var examdate;                  //考试时间
+    var filldate;                   //填表日期
+
+
+    $(function(){
+        var examdate_show = $('#edate');
+        var filldate_show = $('#tdate');//填表日期
+        var summary = $("#SUMMARY");
+
+        $.post('__URL__/Three_three_daying',
+                {year:year,term:term,courseno:courseno,page:page},
+                function (data) {
+                    var emptyvalue = {
+                        studentname:'&nbsp;',
+                        studentno:'&nbsp;',
+                        finalscore:'&nbsp;'
+                    };
+                    if(data.total){
+                        examdate = data.rows[0].examdate;
+                        filldate = data.rows[0].filldate;
+                        for(var i=0; i<40; i++){
+                            if(!data.rows[i]){
+                                data.rows[i] = emptyvalue;
+                            }
+                            if(!data.rows[i+40]){
+                                data.rows[i+40] = emptyvalue;
+                            }
+                            if(!data.rows[i+80]){
+                                data.rows[i+80] = emptyvalue;
+                            }
+
+
+                            scoreCount(data.rows[i].finalscore);
+                            scoreCount(data.rows[i+40].finalscore);
+                            scoreCount(data.rows[i+80].finalscore);
+                            summary.append(
+                                    '<tr>'+
+                                    '<td  nowrap >'+transOnUndefined(data.rows[i].studentno)+'</td>'+
+                                    '<td  nowrap >'+transOnUndefined(data.rows[i].studentname)+'</td>' +
+                                    '<td >'+transOnUndefined(data.rows[i].finalscore)+'</td>' +
+                                    '<td  nowrap>'+transOnUndefined(data.rows[i+40].studentno)+'</td>' +
+                                    '<td  nowrap>'+transOnUndefined(data.rows[i+40].studentname)+'</td>' +
+                                    '<td  >'+transOnUndefined(data.rows[i+40].finalscore)+'</td>' +
+                                    '<td  nowrap >'+transOnUndefined(data.rows[i+80].studentno)+'</td>' +
+                                    '<td  nowrap>'+transOnUndefined(data.rows[i+80].studentname)+'</td>' +
+                                    '<td  >'+transOnUndefined(data.rows[i+80].finalscore)+'</td>'+
+                                    '</tr>'
+                            );
+                        }
+
+                        $('#title_total').html(data.total);
+                        var scores = scoreCount();
+                        console.log(scores);
+                        $('#bot').append(
+                                '<tr>' +
+                                '<td  >百分率</td>'+
+                                '<td >'+count2Percent(scores.youxiu,data.total)+'</td>' +
+                                '<td >'+count2Percent(scores.lianghao,data.total)+'</td>' +
+                                '<td >'+count2Percent(scores.zhongdeng,data.total)+'</td>' +
+                                '<td >'+count2Percent(scores.jige,data.total)+'</td>' +
+                                '<td >'+count2Percent(scores.bujige,data.total)+'</td>'+
+                                '</tr>');
+
+                        examdate_show.html(examdate);
+                        filldate_show.html(filldate);
+                    }
+                });
+
+        $('#next').bind('click',function(){
+            open(window.location+'/page/'+(parseInt(page)+1))
+        });
+
+        $('#prev').bind('click',function(){
+            open(window.location+'/page/'+(parseInt(page)-1))
+        });
+    });
+
+
+
+
+</script>
+<style>
+    *{font-family: '宋体';font-size: 14px;}
+    body {
+        background-color:#ffffff;
+    }
+    p.statement {
+        line-height: 10px;
+        text-align: left;
+    }
+    span.statement {
+        font-size: 10pt;
+        color: #0000ff;
+    }
+    span.tbl {
+        font-size: 10pt;
+    }
+    td {
+        text-align: center;
+    }
+    #bot {
+        height: 1px;
+        width: 100%;
+        text-align: center;
+        border-collapse:collapse;
+        border-spacing:0;
+        border: 1px solid #0000ff;
+    }
+    #bot td {
+        height: 1px;
+    }
+</style>
+<body >
+
+<div align="center">
+    <span style="font-size:22px;">宁波城市学院{$year_a}--{$year_b} 学年第 {$term} 学期 期末成绩登记表</span>
+    <div style="margin-top:8px;text-align: center">
+        课号：{$courseno}&nbsp;&nbsp;
+        课名：{$courseinfo.coursename}&nbsp;&nbsp;
+        开课学院：{$courseinfo.schoolname}&nbsp;&nbsp;
+        选课人数:<span id="title_total">0</span>
+        <br />
+        教师：{$teachers}&nbsp;&nbsp;
+        班级：{$classes}&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" id="prev" style="color:blue" title="下一页"> &lt;&lt;</a>
+        <span class="statement">{$page}</span>
+        <a href="javascript:void(0);" id="next" style="color:blue" title="下一页"> &gt;&gt;</a>
+    </div>
+    <br />
+</div>
+
+<span class="tbl" >
+    <table id='SUMMARY' style="font-size: 14px; border-collapse: collapse"
+           cellspacing="0" cellpadding="0" border="1" width="100%"
+            >
+        <tr>
+            <td nowrap  width="11%">学号</td>
+            <td nowrap  width="11%">姓名</td>
+            <td nowrap  width="11%">成绩</td>
+            <td nowrap  width="11%">学号</td>
+            <td nowrap  width="11%">姓名</td>
+            <td nowrap  width="11%">成绩</td>
+            <td nowrap  width="11%">学号</td>
+            <td nowrap  width="11%">姓名</td>
+            <td nowrap  width="11%">成绩</td>
+        </tr>
+    </table>
+</span>
+<br />
+
+<table  id="bot" cellspacing="0" cellpadding="0" border="1">
+    <tr>
+        <td  width="10%"><span class="statement">成绩</span></td>
+        <td  width="17%"><span class="statement">优秀（&gt;90分）</span></td>
+        <td  width="17%"><span class="statement">良好（80-89分)</span></td>
+        <td  width="18%"><span class="statement">中等（70-79分）</span></td>
+        <td  width="18%"><span class="statement">及格（60-69分）</span></td>
+        <td  width="18%"><span class="statement">不及格（&lt;60分）</span></td>
+    </tr>
+</table>
+
+<p class="statement">
+    <span class="statement">说明:</span>
+</p>
+<p class="statement">
+    <span class="statement">1、请一律使用打印件，手写件、成绩涂改或教师未签名则无效。</span>
+</p>
+<p class="statement">
+    <span class="statement">2、本表一式两份应于本课程考后三天内分别交开课学院存档。</span>
+</p>
+<p style="line-height: 200%" align=center>
+    <span class="statement">&nbsp;&nbsp;</span>
+    <span class="statement">
+        考试日期：<label id=edate></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        填表日期：<label id=tdate></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        教师签名：
+    </span>
+</p>
+
+</body>
+

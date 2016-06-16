@@ -1,0 +1,71 @@
+#guider a{
+    line-height:40px;
+    height: 40px;
+    width:93%;
+    text-align: center;
+}
+
+#guider>div>div {
+    text-align: center;
+}
+.welcome{
+    font-size:40pt;
+    font-weight: bold;
+    height:400px;
+    line-height:400px;
+    text-align:center;
+    color:#0052A3;
+}
+#top
+{
+    overflow: hidden;
+    height: 31px;
+    background: url("/res/img/bg2.jpg");
+    line-height: 31px;
+    color: #000;
+    font-family: Verdana, 微软雅黑,黑体
+}
+body{
+}
+/*切换样式部分*/
+#theme{
+    position:fixed;
+    right:30px;top: 5px;;
+}
+#footer{
+    text-align: center;
+}
+#head{
+    margin:50px;
+    height:130px
+}
+#content{
+    text-align:center;
+    width:500px;
+}
+#content table td{
+    height:60px;
+    vertical-align:middle;
+    width:50%
+}
+#content table img{
+    width:134px;
+    height:44px;
+    border:0;
+}
+/*pannel页面容器*/
+.container{
+    padding: 5px;
+}
+/*说明部分格式*/
+.information>ol>li,.information>ol{
+    line-height: 20px;
+    font-size:9pt;
+}
+/*内容间隔*/
+.space{
+    margin:5px;
+}
+.warn{
+    color:red;
+}

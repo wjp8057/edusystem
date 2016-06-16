@@ -1,0 +1,174 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno='{$username}'
+    var username='{$name}';
+    var schoolname='{$schoolname}'
+    //alert(schoolname)
+//alert("{$is_time}");
+    panduan=0;
+    function getFormatedDate(date){
+        var year = date.getFullYear();
+        var mon = date.getMonth()+1;
+        mon = mon < 10? "0"+mon:mon;
+        var day = date.getDate();
+        day = day < 10? "0"+day:day;
+        return year+"/"+mon+"/"+day;
+    }
+
+    $(function(){
+        $.post('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/one_selectStudent_info.SQL','bind':{':studentno':studentno}},function(c){
+            eval('var one='+c)
+            $('[name=Project_NAME]').val('');
+            $('[name=info_credit]').val('');
+            $('[name=info_NAME]').html(one[0]['NAME']);
+            $('[name=info_CLASSNAME]').html(one[0]['CLASSNAME']);
+            $('[name=info_STUDENTNO]').html(one[0]['STUDENTNO']);
+        })
+
+
+
+        function sub_info(){
+            var certidate = $.trim($('#certime').datebox('getValue'));
+            var centinum = $.trim($('#info_credit').val());
+            if(isNaN(centinum)){
+                return $.messager.alert('提示','请填写正确的学分');
+            }
+            var schoolview=this.name;
+            var zz=/((^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(10|12|0?[13578])([-\/\._])(3[01]|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(11|0?[469])([-\/\._])(30|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(0?2)([-\/\._])(2[0-8]|1[0-9]|0?[1-9])$)|(^([2468][048]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([3579][26]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][13579][26])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][13579][26])([-\/\._])(0?2)([-\/\._])(29)$))/ig
+            if(!zz.test($.trim(certidate))){
+                return $.messager.alert('提示','证书认定时间格式不正确')
+            }
+            var year=$('#_CreditYear').val()
+            var term=$('#_CreditTerm').val()
+            var kaka=0;
+            //todo:查找序列号
+            $.post('__URL__/skill/tag/xuliehao',{'year':year,'term':term},function(c){
+                var one = c instanceof Object?c:eval('('+c+')');
+                var kaka=0;
+                if(one!=undefined && one.xuliehao)
+                    kaka=parseInt(one.xuliehao)
+                var two='000'+(kaka+1);
+                two=two.substring(two.length-4);
+                if(panduan==0){ //todo:还未提交过的申请 (在这边判断是否有认定通过过)
+                    $.post('__URL__/skill/tag/checkrepeat',{
+                        'studentno':studentno,'certficatetime': certidate,'projectname':$('[name=Project_NAME]').val()
+                        ,'credittype':$('[name=credit_type]:checked').val()
+                    },function(c){
+                        var one = c instanceof  Object?c:eval('('+c+')');
+                        //console.log(one);
+                        if(one.ROWS!='0'){
+                            return $.messager.alert('提示','该学生的证书已经有记录了，请检查是否重复认定。')
+                        }
+                        $.post('__URL__/skill/tag/add',{'year':year,'term':term,'firmno':year+String(term)+two,'Studentno':studentno,
+                                    'projectname':$('[name=Project_NAME]').val(),'credittype':$('[name=credit_type]:checked').val(),'certficatetime':certidate,
+                                    'credit':centinum,
+                                    'description':'','submitter':username,'schoolname':schoolname,'recordmark':'0','schoolview':3,'deanview':3,'y2':year,'t2':term,'xuliehao':two},
+                                function(c){
+                                    //console.log(c);
+                                    if(c == 'success'){
+                                        $.messager.alert('提示','操作成功');
+                                    }else{
+                                        $.messager.alert('提示','提交失败,请检查输入！');
+                                    }
+                                });
+                    });
+                }else if(panduan==1){       //todo:已经提交过的做修改
+                    $.post('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'Credit/one_updateStudent_info.SQL','bind':{':projectname':$('[name=Project_NAME]').val(),
+                        ':credittype':$('[name=credit_type]').val(),':credit':centinum,':certficatetime':certidate,':description':'',':schoolview':3,':deanview':3,':id':$('[name="apply_id"]').val()}},function(c){
+                        $.messager.alert('提示','修改成功');
+                    })
+                }
+            })
+        }
+
+        $('#add').bind('click',sub_info);
+        $('#no_add').click(function(){
+            alert('现在不是提交时间！');
+        });
+    })
+</script>
+<style>
+    #apply_info td{border:1px #95B8E7 solid;}
+    .state li{ list-style:none;margin:0px;}
+    #apply_info input{height:23px;vertical-align:middle;}
+</style>
+<body style="background-color: #fff">
+<div id="apply_info" data-options="inline:true" title="">
+    <br><br>
+    <pre>
+        <b>{$creditYearTerm.year}学年第{$creditYearTerm.term}学期申请认定时间：</b>   开始时间：{$begintime}  结束时间：{$endtime}
+     </pre>
+    <input type="hidden" id="_CreditYear" value="{$creditYearTerm.year}">
+    <input type="hidden" id="_CreditTerm" value="{$creditYearTerm.term}">
+    <table border="0"  width="90%" style="" align="center" >
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>姓名：</b></td>
+            <td width="180" align="center" height="25" bgcolor="#fcfcfc"><span name="info_NAME"></span></td>
+            <td bgcolor="#E0ECFF" width="107">
+                <p align="right"><b>学号：</b></td>
+            </td>
+            <td width="180" align="center" height="25" bgcolor="#fcfcfc"><span name="info_STUDENTNO"></span></td>
+            <td bgcolor="#E0ECFF" width="107">
+                <p align="right"><b>班级：</b></td>
+            </td>
+            <td width="180" align="center" height="25" bgcolor="#fcfcfc"><span name="info_CLASSNAME"></span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学分类别：</b></td>
+            <td colspan="5" bgcolor="#fcfcfc">
+                <input type="radio" name="credit_type" checked style="position: relative; bottom:3px;" value=1>创新学分
+                <input type="radio" name="credit_type" checked style="position: relative; bottom:3px;" value=3>素质学分
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>申请学分：</b></td>
+            <td colspan="2" width="360px" bgcolor="#fcfcfc">
+                <input type="text" name="info_credit" id="info_credit" size="10" value="">&nbsp;分
+            </td>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b> 证书或活动时间：</b>
+            </td>
+            <td colspan="2" width="360px" bgcolor="#fcfcfc">
+                <input type="text" size="25" name="cert_time" id="certime"  class="easyui-datebox" data-options=" formatter: function(date){ return  getFormatedDate(date); }">
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="175">
+                <p align="right"><b>项目名称：</b>
+            </td>
+            <td colspan="2" bgcolor="#fcfcfc" style="border-right: none;">
+                <input type="text" size="50" name="Project_NAME"><br /><br /><br />
+
+            </td>
+            <td colspan="3" bgcolor="#fcfcfc" class="state" style="border-left: none;">
+    <pre>
+    项目名称规范：
+        1.证书需要与证书名称完全一致
+        2.活动需要注明年度、活动名称
+        3.活动需要写明年度和奖项级别
+
+    例如：
+        机动车驾驶证C1
+        2015年浙江省创新大赛一等奖
+        2014年3月1日义务献血一次
+    </pre>
+            </td>
+        </tr>
+        <tr>
+            <td  colspan="6" align="center" style="border:0px">
+                <if condition="$is_time eq 'true'">
+                    <a href="javascript:void(0)" id="add" name='3' class="easyui-linkbutton">提交审核</a>&nbsp&nbsp
+                    <else />
+                    <a href="javascript:void(0)" id="no_add" class="easyui-linkbutton"><font color="#d3d3d3">提交审核</font></a>&nbsp&nbsp
+                </if>
+
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

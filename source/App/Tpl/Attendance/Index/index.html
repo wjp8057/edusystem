@@ -1,0 +1,89 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-config","menuname": "学生考勤管理",
+            "menus": [
+                {"menuid": "11","menuname": "输入考勤周报表","icon": "icon-exam","url": "__ROOT__/index.php?g=Attendance&m=Attendance&a=report"},
+                {"menuid": "12","menuname": "考勤情况查询","icon": "icon-search","url":" __ROOT__/index.php?g=Attendance&m=Attendance&a=query"},
+                {"menuid": "13","menuname": "考勤统计","icon": "icon-classTable","url": "__ROOT__/index.php?g=Attendance&m=Attendance&a=statis"}]
+        },
+        {"menuid": "2","icon": "icon-nav","menuname": "刷卡考勤查询",
+            "menus": [
+                {"menuid": "21","menuname": "考勤详单查询","icon": "icon-search","url": "__ROOT__/index.php?g=Attendance&m=CardQuery&a=query"},
+                {"menuid": "22","menuname": "课程考勤查询","icon": "icon-xuchaxun","url":" __ROOT__/index.php?g=Attendance&m=CardQuery&a=course"},
+                {"menuid": "23","menuname": "考勤汇总查询","icon": "icon-weekTable","url": "__ROOT__/index.php?g=Attendance&m=CardQuery&a=summary"}]
+        }
+    ]
+};
+
+$(function()
+{
+    $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    $('#loginOut').click(function()
+    {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if(r)
+            {
+                location.href = '__ROOT__/index.php?m=Login&a=logout';
+            }
+        });
+    })
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height:31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="学生考勤" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">学生考勤功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">学生考勤：实现与校园一卡通考勤刷卡记录对接，根据学生选课及上课情况，实现考勤管理，并提供各类考勤报表，与学工系统信息同步。主要有考勤详单查询、课程考勤查询、考勤汇总查询等模块</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、学生考勤周报表:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、输入考勤周报表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可输入全校所有学生每周的考勤情况，并对该学生的违纪进行记录。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、考勤情况查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可检索已录入的全校所有学生的考勤情况，并删除、查看或修改考勤信息。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、考勤统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年学期、学院、或者总旷课时数、学期周数进行查看全部符合条件的缺勤的学生名单和缺勤超过1/3课程的学生名单。迟到、早退每3节折合一节旷课，其中的课程总时数=课程属性“每周总时数”*该学期周数。</p>
+
+
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、刷卡考勤查询:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、考勤详单查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据设定学年学期、学院、时间、课号、节次、学号、刷卡情况进行查询符合条件的学生考勤记录，也可以查看全校所有学生的考勤。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、课程考勤查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据设定学年学期，课程号进行查看某课程所有学生每周的考勤情况，可以查看全校所有学生课程的考勤情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、考勤汇总查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据设定的学年学期，缺课总数，进行查看统计全校所有缺勤学生名单，和缺勤次数。</p>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

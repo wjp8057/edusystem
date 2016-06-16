@@ -1,0 +1,297 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno;
+    $(function(){
+        var p = $('#zongbiao_dat').datagrid('getPager');
+        $(p).pagination({
+            pageList: [50,100]
+        });
+        var wd=$('#wd').window(new wind(400,200,false,false,false,false,false))      //todo:默认的窗口
+        wd.window({collapsible:false,closable:false})
+
+
+        var studentnoinput = $('#STUDENTNO');
+
+        //查询
+        $('#search').bind('click',function(){
+            var studentno = $.trim(studentnoinput.val());
+            if(!studentno){
+                return Messager.showWarning("学生号不能为空!");
+            }
+
+            $.post("__URL__/Results_personal",{studentno:studentno}, function (data) {
+                
+            });
+
+
+
+            //todo:title学院
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_one_title_school_name.SQL','bind':{':STUDENTNO':studentno}},function(c){
+                eval('var one='+c)
+                $('#school_name').html(one[0]['SCHOOLNAME'])
+            })
+
+            //todo:title班级
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_one_title_class_name.SQL','bind':{':STUDENTNO':studentno}},function(c){
+                eval('var one='+c)
+                $('#class_name').html(one[0]['classname'])
+            })
+
+            //todo:学号
+            $('#student_no').html(studentno)
+
+            //todo:姓名
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_one_title_student_name.SQL','bind':{':STUDENTNO':studentno}},function(c){
+                eval('var one='+c)
+                $('#student_name').html(one[0]['STUDENTNAME'])
+            })
+
+            //todo:积点和
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_one_title_jidianhe.SQL','bind':{':STUDENTNO':studentno}},function(c){
+                eval('var one='+c)
+
+                $('#jidian_he').html(one[0]['SUMPOINT'])
+            })
+
+            //todo:学分
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_one_title_xuefen.SQL','bind':{':STUDENTNO':studentno}},function(c){
+                eval('var one='+c)
+                $('#credit').html(one[0]['XF'])
+            })
+
+
+
+
+
+            $('#zongbiao_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+            $('#zongbiao_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_selectZongbiao.SQL','count':'Results/One_one_countZongbiao.SQL'},'bind':{
+                ':STUDENTNO':studentno
+            },'rows':50})
+
+            wd.window({closed:true})
+            $('#wd3').panel({closed:false})
+        })
+
+
+            $('#haha').accordion({'onSelect':function(a,b){
+                var studentno=$('#STUDENTNO').val();
+               if(b==0){                    //todo:成绩总表
+                   $('#zongbiao_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#zongbiao_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_selectZongbiao.SQL','count':'Results/One_one_countZongbiao.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }else if(b==1){              //todo:各学年学期学绩分
+                   $('#year_term_chengji').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#year_term_chengji').datagrid('load',{'Sqlpath':{'select':'Results/One_one_select_year_term.SQL','count':'Results/One_one_count_year_term.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }else if(b==2){              //todo:素质类学分
+                   $('#suzhi_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#suzhi_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_select_suzhi.SQL','count':'Results/One_one_count_suzhi.SQL'},'bind':{':STUDENTNO':studentno}})
+
+               }else if(b==3){              //todo:创新、技能学分
+                   $('#chuangxin_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#chuangxin_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_select_chuangxin.SQL','count':'Results/One_one_count_chuangxin.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }else if(b==4){              //todo:体质健康 测试成绩
+                   $('#tizhi_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#tizhi_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_select_tizhijiankang.SQL','count':'Results/One_one_count_tizhijiankang.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }else if(b==5){               //todo:未通过课程的列表
+                   $('#weitongguo_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#weitongguo_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_selectweitongguo.SQL','count':'Results/One_one_countweitongguo.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }else if(b==6){              //todo:职业素养与职业发展
+                   $('#zhiye_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                   $('#zhiye_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_one_selectZhiye.SQL','count':'Results/One_one_countZhiye.SQL'},'bind':{
+                       ':STUDENTNO':studentno
+                   }})
+               }
+            }})
+    })
+</script>
+<body style="background-color: #fff">
+<div id="wd" title="学生个人成绩查询" style="font-size:20px;color: #800000">
+    <br><br><br>
+    <p style="text-align: center">
+        <span style="font-size: 20px">请输入学号：</span>
+        <input type=text  name="STUDENTNO" id="STUDENTNO" value="" size="8" >
+        &nbsp&nbsp&nbsp&nbsp
+        <a href="javascript:void(0)" id="search" class="easyui-linkbutton" data-options="iconCls:'icon-search'">
+            查询
+        </a>
+    </p>
+</div>
+
+
+
+
+<div id="wd3" class="easyui-panel"
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'center',title:'',iconCls:'icon-ok'">
+            <div class="easyui-accordion" data-options="fit:true,border:false" id="haha">
+                <div title="成绩总表" style="padding:0px;">
+                    <div id="ccccc" class="easyui-layout"  data-options="fit:true">        <!--todo:成绩总表内部的layout-->
+                        <div data-options="region:'north',split:false,border:false" style="height:30px;">
+                                <p style="text-align: center">
+                                <b>
+                                    学院:<span id="school_name"></span>&nbsp;
+                                    班级:<span id="class_name"></span>&nbsp;
+                                    学号:<span id="student_no"></span>&nbsp;
+                                    姓名:<span id="student_name"></span>&nbsp;
+                                    积点和:<span id="jidian_he"></span>&nbsp;
+                                    获得学分:<span id="credit"></span>&nbsp;
+                                </b>
+                        </div>
+
+                        <div data-options="region:'center',title:'',pageList:[50,100]" style="padding:0px;background:#eee;">
+                            <table class="easyui-datagrid" id="zongbiao_dat" data-options="
+                            fitColumns:true,fit:true,pageSize:50,pageList:[50,100],pagination:true,border:false,singleSelect:true,toolbar:[{
+                                      text:'返回',
+                                      iconCls:'icon-goleft',
+                                      handler:function(){
+                                        $('#wd3').panel({closed:true})
+
+                                        $('#wd').window({closed:false})
+                                      }
+                                   }]">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                                    <th data-options="field:'xq',width:30,align:'center'">学期</th>
+                                    <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                                    <th data-options="field:'km',width:380,align:'center'">课名</th>
+                                    <th data-options="field:'xf',width:40,align:'center'">学分</th>
+                                    <th data-options="field:'kclx',width:60,align:'center'">课程类型</th>
+                                    <th data-options="field:'ksfs',width:60,align:'center'">考试方式</th>
+                                    <th data-options="field:'zp',width:60,align:'center'">总评</th>
+                                    <th data-options="field:'bk',width:100,align:'center'">补考</th>
+                                    <th data-options="field:'jdf',width:100,align:'center'">积点分</th>
+                                    <th data-options="field:'tkfs',width:100,align:'center'">听课方式</th>
+                                    <th data-options="field:'ksbz',width:100,align:'center'">考试备注</th>
+                                </tr>
+                                </thead>
+                            </table>
+
+                        </div>
+                    </div>
+
+
+                </div>
+                <div title="各学年学期学绩分" data-options="" style="padding:0px;">
+                    <table class="easyui-datagrid"  id="year_term_chengji"
+                           data-options="fitColumns:true,pageSize:50,pageList:[50,100],singleSelect:true,pagination:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                            <th data-options="field:'xq',width:100,align:'center'">学期</th>
+                            <th data-options="field:'xjf',width:100,align:'center'">学绩分</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div title="素质类学分" style="padding:0px">
+                    <table class="easyui-datagrid"  id="suzhi_dat"
+                           data-options="fitColumns:true,pageSize:50,pageList:[50,100],singleSelect:true,pagination:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                            <th data-options="field:'xq',width:30,align:'center'">学期</th>
+                            <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                            <th data-options="field:'km',width:380,align:'center'">课名</th>
+                            <th data-options="field:'xf',width:40,align:'center'">学分</th>
+                            <th data-options="field:'kclx',width:60,align:'center'">课程类型</th>
+                            <th data-options="field:'ksfs',width:60,align:'center'">考试方式</th>
+                            <th data-options="field:'zp',width:40,align:'center'">总评</th>
+                            <th data-options="field:'bk',width:100,align:'center'">补考</th>
+                            <th data-options="field:'cx',width:30,align:'center'">重修</th>
+                            <th data-options="field:'jdf',width:40,align:'center'">积点分</th>
+                            <th data-options="field:'tkfs',width:60,align:'center'">听课方式</th>
+                            <th data-options="field:'ksbz',width:60,align:'center'">考试备注</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div title="创新、技能学分" style="padding:0px">
+                    <table class="easyui-datagrid" id="chuangxin_dat"
+                           data-options="fitColumns:true,pageSize:50,pageList:[50,100],singleSelect:true,pagination:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'hdyy',width:100,align:'center'">获得原因</th>
+                            <th data-options="field:'xf',width:100,align:'center',formatter:function(a,b,c){
+                               // alert(a.substr(0,1));
+
+                                if(a.substr(0,1)=='.'){
+                                    return '0'+a
+                                }
+                                return a;
+
+                            }">学分</th>
+                            <th data-options="field:'rdsj',width:100,align:'center'">认定时间</th>
+                            <th data-options="field:'sqxn',width:100,align:'center'">申请学年</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div title="体质健康测试成绩" style="padding:0px">
+                    <table class="easyui-datagrid"  id="tizhi_dat"
+                           data-options="fitColumns:true,pageSize:50,pageList:[50,100],singleSelect:true,pagination:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                            <th data-options="field:'cj',width:100,align:'center'">成绩</th>
+                            <th data-options="field:'fs',width:100,align:'center'">分数</th>
+                            <th data-options="field:'csrq',width:100,align:'center'">测试日期</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div title="未通过课程列表" style="padding:0px">
+                    <table class="easyui-datagrid" id="weitongguo_dat"
+                           data-options="pagination:true,pageSize:50,pageList:[50,100],fitColumns:true,singleSelect:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'xn',width:100,align:'center'">学年</th>
+                            <th data-options="field:'xq',width:100,align:'center'">学期</th>
+                            <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                            <th data-options="field:'xf',width:100,align:'center'">学分</th>
+                            <th data-options="field:'xkfs',width:100,align:'center'">修课方式</th>
+                            <th data-options="field:'jxjhm',width:100,align:'center'">教学计划名</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div title="职业素养与职业发展" style="padding:0px">
+                    <table class="easyui-datagrid"  id="zhiye_dat"
+                           data-options="singleSelect:true,pageSize:50,pageList:[50,100],pagination:true,fit:true,border:false">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                            <th data-options="field:'jz',width:100,align:'center'">讲座</th>
+                            <th data-options="field:'sp',width:100,align:'center'">视频</th>
+                            <th data-options="field:'xlcp',width:100,align:'center'">心理测评</th>
+                            <th data-options="field:'zycp',width:100,align:'center'">职业测评</th>
+                            <th data-options="field:'sygh',width:100,align:'center'">生涯规划</th>
+                            <th data-options="field:'xxxd',width:100,align:'center'">学习心得</th>
+                            <th data-options="field:'snjx',width:100,align:'center'">室内集训</th>
+                            <th data-options="field:'swjx',width:100,align:'center'">室外集训</th>
+                            <th data-options="field:'ycxl',width:100,align:'center'">养成训练</th>
+                            <th data-options="field:'shsj',width:100,align:'center'">社会实践</th>
+                            <th data-options="field:'jfx',width:100,align:'center'">加分项</th>
+                            <th data-options="field:'jfx',width:100,align:'center'">减分项</th>
+                            <th data-options="field:'zf',width:100,align:'center'">总分</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>

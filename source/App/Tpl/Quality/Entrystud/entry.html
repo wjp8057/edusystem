@@ -1,0 +1,78 @@
+<include file=":Include:jqueryHeader" />
+<style>
+body{background:#FFF;}
+#title{font-size: 16pt;font-family:"隶书";padding-top:20px;}
+table{margin:150px auto 0px;border-collapse:collapse;}
+td,th{border-bottom:dotted 1px #CCC;height:40px;}
+#btnDelete{margin-right:50px;}
+</style>
+<body>
+<div>
+	<form method="POST" id="init" action="__URL__">
+        <p align="center" id="title">生成学期参评学生列表</p>
+        <table width="40%" align="center">
+            <tr>
+                <td width="15%" align="right">学年：</td>
+                <td width="15%"><input type="text" name="YEAR" size="4" value="{$yearTerm.YEAR}"></td>
+                <td width="15%" align="right">学期：</td>
+                <td width="15%"><input  type="text" name="TERM" size="1" value="{$yearTerm.TERM}"></td>
+            </tr>
+        </table>
+        <p align="center">
+            <input  type="hidden" name="FLAG" value="">
+            <a id="btnDelete" class="easyui-linkbutton" icon="icon-cancel">删除学期记录</a>
+            <a id="btnCreate" class="easyui-linkbutton" icon="icon-add">开始创建</a><br><br><br>
+            <span>注：开始创建之前请先删除相应学期的纪录。</span><br><br>
+            <font color="#FF0000">请在整理完毕考评条目总表以后运行创建过程</font>
+        </p>
+	</form>
+</div>
+</body>
+<script>
+$(function(){
+	//点击创建
+	$('#btnCreate').bind('click',function(){
+		if($('#init [name=YEAR]').val()==""){
+			$.messager.alert('提示','请输入学年!');return;
+		}
+        if($('#init [name=TERM]').val()==""){
+            $.messager.alert('提示','请输入学期!');return;
+        }
+        var ct={YEAR:$('#init [name=YEAR]').val(),
+                TERM:$('#init [name=TERM]').val(),
+                FLAG:1};
+        $.ajax({
+            url:'__URL__/entry/hasJson/1',
+            type:'POST',
+            data:ct,
+            success: function(C){
+                $.messager.alert('提示','数据已成功完成更新！');
+            }
+        });
+	});
+	//点击删除
+    $('#btnDelete').bind('click',function(){
+        if($('#init [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');return;
+        }
+        if($('#init [name=TERM]').val()==""){
+            $.messager.alert('提示','请输入学期!');return;
+        }
+        var ct={
+            YEAR:$('#init [name=YEAR]').val(),
+            TERM:$('#init [name=TERM]').val(),
+            FLAG:2};
+        $.ajax({
+            url:'__URL__/entry/hasJson/1',
+            type:'POST',
+            data:ct,
+            success: function(C){
+                if(C) $.messager.alert('提示','数据已成功完成更新！');
+                else  $.messager.alert('提示','信息操作失败！');
+            }
+        });
+    });
+	
+});
+</script>
+</html>

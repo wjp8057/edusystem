@@ -1,0 +1,62 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'SCHOOL',align:'center',width:60" >学院代号</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:60">学院名称</th>
+                <th data-options="field:'TEACHERNO',align:'center',width:60">教师号</th>
+                <th data-options="field:'TEACHERNAME',align:'center',width:60">教师姓名</th>
+                <th data-options="field:'SEX',align:'center',width:30">性别</th>
+                <th data-options="field:'VALUE',align:'center',width:60">职称</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	 var datagrid = $('#datagrid').datagrid({toolbar:'#tdemo'});
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='YEAR']").val());
+     	if(year==""){
+     		msgShow("系统提示：","请输入要检索的学年！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/professor/hasJson/1";
+     	datagrid.datagrid('load',{
+     		YEAR:$.trim($("[name='YEAR']").val()),
+     		TERM:$.trim($("[name='TERM']").val()),
+     		SCHOOL:$.trim($("[name='SCHOOL']").val())
+     	});
+     });
+});
+</script>
+</body>
+</html>

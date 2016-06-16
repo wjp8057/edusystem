@@ -1,0 +1,231 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:应用英语A级
+
+        $('#summarytable1').linkbutton({
+            text:'应用英语A级'
+        }).bind('click',function(){
+             $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_yingyuA.SQL','count':'Results/One_Five_yingyuA_count.SQL'},'bind':{
+                ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                 ':school':$('[name=school]').val()
+             }
+             })
+                    $('#wd_one').panel({closed:false})
+                    $('#wd_two').panel({closed:true})
+
+        })
+
+        $('#summarytable2').linkbutton({
+            text:'应用英语B级'
+        }).bind('click',function(){
+            $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_yingyuB.SQL','count':'Results/One_Five_yingyuB_count.SQL'},'bind':{
+                ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                ':school':$('[name=school]').val()
+            }
+            })
+                    $('#wd_one').panel({closed:false})
+                    $('#wd_two').panel({closed:true})
+                })
+
+        $('#summarytable3').linkbutton({
+            text:'大学英语三级'
+        }).bind('click',function(){
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_yingyu3.SQL','count':'Results/One_Five_yingyu3_count.SQL'},'bind':{
+                        ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                        ':school':$('[name=school]').val()
+                    }
+                    })
+                    $('#wd_one').panel({closed:false})
+                    $('#wd_two').panel({closed:true})
+        })
+
+        $('#summarytable4').linkbutton({
+            text:'大学英语四级'
+        }).bind('click',function(){
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_yingyu4.SQL','count':'Results/One_Five_yingyu4_count.SQL'},'bind':{
+                        ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                        ':school':$('[name=school]').val()
+                    }
+                    })
+                    $('#wd_one').panel({closed:false})
+                    $('#wd_two').panel({closed:true})
+                })
+
+        $('#summarytable5').linkbutton({
+            text:'大学英语六级'
+        }).bind('click',function(){
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_yingyu6.SQL','count':'Results/One_Five_yingyu6_count.SQL'},'bind':{
+                        ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                        ':school':$('[name=school]').val()
+                    }
+                    })
+                    $('#wd_one').panel({closed:false})
+                    $('#wd_two').panel({closed:true})
+                })
+
+        $('#summarytable6').linkbutton({
+            text:'&nbsp 计算机 &nbsp'
+        }).bind('click',function(){
+                    $('#jisuanji').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_jisuanji.SQL','count':'Results/One_Five_jisuanji_count.SQL'},'bind':{
+                        ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim()
+                    }
+                    })
+                    $('#wd_two').panel({closed:false})
+                    $('#wd_one').panel({closed:true})
+                })
+
+        $('#summarytable7').linkbutton({
+            text:'&nbsp 普通话 &nbsp'
+        }).bind('click',function(){
+                    $('#jisuanji').datagrid('load',{'Sqlpath':{'select':'Results/One_Five_putonghua.SQL','count':'Results/One_Five_putonghua_count.SQL'},'bind':{
+                        ':STUDENTNO':$('[name=studentno]').val().trim(),':CLASSNO':$('[name=classno]').val().trim(),
+                        ':school':$('[name=school]').val()
+                    }
+                    })
+                    $('#wd_two').panel({closed:false})
+                    $('#wd_one').panel({closed:true})
+                })
+
+
+        $('#e_one').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('A');
+            $('#e_excel').submit();
+        })
+        $('#e_two').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('3');
+            $('#e_excel').submit();
+        })
+
+
+
+        $('#e_B').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('B');
+            $('#e_excel').submit();
+        })
+        $('#e_Si').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('Si');
+            $('#e_excel').submit();
+        })
+        $('#e_Liu').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('Liu');
+            $('#e_excel').submit();
+        })
+        $('#e_Jisuanji').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('Jisuanji');
+            $('#e_excel').submit();
+        })
+        $('#e_Putonghua').bind('click',function(){
+            $('[name=e_studentno]').val($('[name=studentno]').val())
+            $('[name=e_classno]').val($('[name=classno]').val())
+            $('[name=e_school]').val($('[name=school]').val())
+            $('[name=e_type]').val('Putonghua');
+            $('#e_excel').submit();
+        })
+
+    })
+</script>
+<body>
+
+    <div id="cc" class="easyui-layout" data-options="fit:true" >
+        <div data-options="region:'north',split:false,border:false" style="height:80px;background:#E0ECFF;">
+           <center><b>请输入学号:</b><input type="text" name="studentno" value="%"> &nbsp&nbsp&nbsp&nbsp
+               <b>班号:</b><input type="text" value='%'  name="classno">&nbsp&nbsp&nbsp&nbsp
+               <b>学院</b><select name="school">
+                   <option value="%">全部</option>
+                   <volist name="schools" id="s">
+                       <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                   </volist>
+               </select>
+           </center>
+          <center>
+                    <a id="summarytable1">应用英语A级</a>&nbsp
+                    <a id="summarytable2">应用英语B级</a>&nbsp
+                    <a id="summarytable3">大学英语三级</a>&nbsp
+                    <a id="summarytable4">大学英语四级</a>&nbsp
+                    <a id="summarytable5">大学英语六级</a>&nbsp
+                    <a id="summarytable6"> 计算机 </a>&nbsp
+                    <a id="summarytable7"> 普通话 </a>&nbsp
+
+                    </center>
+            <center>
+
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_one" iconCls="icon-excel" plain="true">导出A级</a>&nbsp
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_B" iconCls="icon-excel" plain="true">导出B级</a>&nbsp
+
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_two" iconCls="icon-excel" plain="true">导出三级</a>&nbsp
+
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_Si" iconCls="icon-excel" plain="true">导出四级</a>&nbsp
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_Liu" iconCls="icon-excel" plain="true">导出六级</a>&nbsp
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_Jisuanji" iconCls="icon-excel" plain="true">导出计算机</a>&nbsp
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="e_Putonghua" iconCls="icon-excel" plain="true">导出普通话</a>&nbsp
+            </center>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#FFF;">
+            <div id="wd_one" class="easyui-panel" title=""
+                 data-options="iconCls:'icon-save',closable:false,fit:true,closed:true,
+                collapsible:false,minimizable:false,maximizable:false">
+            <table class="easyui-datagrid" id="yingyuA"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[20,50,100,200,500]">
+                <thead>
+                <tr>
+                    <th data-options="field:'n',width:100,align:'center'">年</th>
+                    <th data-options="field:'yf',width:100,align:'center'">月份</th>
+                    <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                    <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                    <th data-options="field:'bj',width:100,align:'center'">班级</th>
+                    <th data-options="field:'xy',width:100,align:'center'">学院</th>
+                    <th data-options="field:'cj',width:100,align:'center'">成绩</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+            <div id="wd_two" class="easyui-panel" title=""
+                 data-options="iconCls:'icon-save',closable:false,fit:true,closed:true,
+                collapsible:false,minimizable:false,maximizable:false">
+                <table class="easyui-datagrid" id="jisuanji"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[20,50,100,200,500]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'n',width:100,align:'center'">年</th>
+                        <th data-options="field:'yf',width:100,align:'center'">月份</th>
+                        <th data-options="field:'bj',width:100,align:'center'">班级</th>
+                        <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                        <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                        <th data-options="field:'cj',width:100,align:'center'">成绩</th>
+                        <th data-options="field:'dj',width:100,align:'center'">等级</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+<form method="POST" action="__APP__/CourseManager/Excel/cet4Excel" id="e_excel">
+    <input type="hidden" name="e_studentno">
+    <input type="hidden" name="e_classno">
+    <input type="hidden" name="e_school">
+    <input type="hidden" name="e_type">
+</form>
+
+</body>
+</html>

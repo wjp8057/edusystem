@@ -1,0 +1,65 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    .query{}
+    legend{margin-left: 20px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    #searcher{margin-left: 20px;}
+</style>
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+        <div>
+            <form action="__URL__" method="POST" id="biaodan">
+            <label>学年：</label><input type="text" name="year" size="4" class="easyui-validatebox" value="{$yearTerm.YEAR}">
+            <label>学期:</label><input type="text" name="term" size="5" class="easyui-validatebox" value="{$yearTerm.TERM}">
+            <label>课号:</label><input type="text" name="courseno" size="8" value='%'  class="easyui-validatebox">（9位）
+            <label>课程名称：</label><input type="text" name="coursename" size="8" value='%'  class="easyui-validatebox">
+            <label>教师姓名：</label><input type="text" name="teachername" size="6" value='%'  class="easyui-validatebox">
+            <a href="javascript:void(0)" id="searcher" onclick="sousuo()">搜索</a>
+            </form>
+        </div>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="clinfo"></div>
+    </div>
+</div>
+</body>
+<script>
+
+    $(function(){
+        var dat=$('#clinfo').datagrid({
+            fit:true,
+            striped:true,
+            toolbar:'#tdemo',
+            fitColumns:true,
+            singleSelect:true,
+            columns:[[{field:'teacherno',title:'教师号', width:50,align:"center"},
+                {field:'teachername',title:'姓名', width:50,align:"center"},
+                {field:'courseno',title:'课号', width:50,align:"center"},
+                {field:'coursename',title:'课名', width:250,align:"center"},
+                {field:'total',title:'总人数', width:50,align:"center"},
+                {field:'compelete',title:'已评人数', width:60,align:"center"},
+                {field:'typename',title:'类型名称', width:60,align:"center"}]],
+            sortName:'COURSENO',                      //排序用的
+            sortOrder:'asc',
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20
+        });
+        var searcher=$('#searcher').linkbutton({});                 //搜索按钮
+    });
+    //点击搜索时候触发的事件
+    function sousuo(){
+        $('#clinfo').datagrid("options").url = "__APP__/Status/Status/Squery/hasJson/1";
+        $('#clinfo').datagrid('load',{
+           'Sqlpath':{'select':'Quality/jdquery_select.SQL','count':'Quality/jdquery_count.SQL',
+              },bind:{
+                ':year':$('[name=year]').val(),
+                ':term':$('[name=term]').val(),
+            ':courseno':$('[name=courseno]').val(),
+            ':coursename':$('[name=coursename]').val(),
+            ':name':$('[name=teachername]').val()}
+        });
+    }
+</script>
+</html>

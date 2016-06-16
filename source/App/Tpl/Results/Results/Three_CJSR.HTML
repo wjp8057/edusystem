@@ -1,0 +1,486 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+var school='{$school.SCHOOL}'
+
+var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+$('[name=SCHOOL]').val(school)
+var arr=[];
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+        // var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#search').linkbutton({
+            text:'开放与查看课程',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','您只能对自己学院开设的课程进行开锁！')
+                    }
+                    var datag=$('#yingyuA');
+                    $('#title').html($('[name=SCHOOL] :selected').text()+$('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'学期课程列表');
+                   $('#title').css('font-size','15px')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Three_one_select.SQL','count':'Results/Three_one_count.SQL'
+                    },'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+                    $('#wd2').panel({closed:false})
+                    $('#wd').panel({closed:true})
+                })
+
+
+        $('#search_one').linkbutton({
+            text:'补考成绩输入',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','你只能输入自己学院的成绩')
+                    }
+                   var datag=$('#yingyuA2');
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Three_one_Two_select.SQL','count':'Results/Three_one_Two_count.SQL'
+                    },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+                    $('#three_year').html($('[name=YEAR]').val());
+                    $('#three_term').html($('[name=TERM]').val());
+                    $('#wd3').panel({closed:false})
+                    $('#wd').panel({closed:true})
+                })
+
+
+
+
+
+
+        $('#search_two').linkbutton({
+            'text':'任课教师期末成绩输入',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    $('#yingyu_teacher').datagrid('load',{'Sqlpath':{'select':'Results/Three_three_select.SQL','count':'Results/Three_three_count.SQL'},
+                        'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':TEACHERNO':teacherno}})
+                    $('#wd_teacher2').panel({closed:false})
+                    $('#wd').panel({closed:true})
+
+         })
+
+        $('#search_three').linkbutton({
+            text:'没有输入的课程',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    var datag=$('#yingyuA4');
+
+                    $('#four_year').html($('[name=YEAR]').val())
+                    $('#four_term').html($('[name=TERM]').val())
+                  datag.datagrid('load',{'Sqlpath':{'select':'Results/Three_four_select.SQL','count':'Results/Three_four_count.SQL'
+                    },'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+                    $('#wd').panel({closed:true})
+                    $('#wd4').panel({closed:false})
+                })
+
+
+        $('#search_four').linkbutton({
+            text:'毕业前补考成绩输入',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+
+                    var datagA=$('#dat_Five');
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','您只能输入自己学院的！')
+                    }
+
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/Three_five_title.SQL',bind:{':school':$('[name=SCHOOL]').val()}},function(c){
+
+                        eval("var one="+c)
+                        $('#five_title').html(one[0]['name']+$('[name=YEAR]').val()+'学年第'+$('[name=TERM]').val()+'学期毕业前补考课程列表' )
+
+                    })
+                    $('#wd5').panel({closed:false}) ;$('#wd').panel({closed:true})
+                    setTimeout(function(){
+                        datagA.datagrid('reload',{'Sqlpath':{'select':'Results/Three_one_Five_select.SQL','count':'Results/Three_one_Five_count.SQL'
+                        },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+
+                    },1000)
+
+                })
+
+
+
+                $('#yingyu_teacher').datagrid({
+                    view: detailview,
+                    detailFormatter: function(rowIndex, rowData){
+                        arr[rowData.row]=rowData;
+                        return "<div id=a"+rowData.row+" style='width:500px;height:91px'>"+rowData.row+"</div>"
+                    },
+                    onExpandRow:function(index,row){
+                        $('#a'+row.row).html('<table width="500" border="0"><tr><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">班级</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['bj']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">教师</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['js']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">备注</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['bz']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">课程安排</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['kcap']+'</font></td></tr></table>')
+                    }
+                })
+
+    })
+
+
+
+
+</script>
+<body style="background: #fff">
+<style>
+    .query{border: solid 1px #ccc;margin:50px 20px 20px 20px;padding:10px;}
+    legend{margin-left: 20px;margin-bottom: 10px;}
+    .query span{line-height: 25px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    .query a{margin-left: 20px;}
+</style>
+<div id="wd" class="easyui-panel"
+
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+<fieldset class="query">
+    <legend>成绩输入</legend>
+    <table align="center" border='0' cellspacing="10" style="margin-top: 30px">
+        <tr>
+            <td align="center" colspan="3">
+                学年：<input type="text" name="YEAR" size="4">&nbsp&nbsp
+
+                学期：<input type="text" name="TERM" size="1">
+
+                所在学院：<select name="SCHOOL">
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            </td>
+
+
+        </tr>
+        <tr>
+            <td  align="center"><a id="search">查询</a></td>
+            <td  align="center"><a id="search_one">查询</a></td>
+            <td align="center"><a id="search_two">查询</a></td>
+        </tr>
+        <tr>
+            <td  align="center" colspan="3"><a id="search_three">查询</a>&nbsp&nbsp&nbsp
+                <a id="search_four">查询</a></td>
+
+
+        </tr>
+
+
+    </table><br><br>&nbsp&nbsp<p align="left">
+    <p align="left">注：1、普通教师输入成绩使用“任课教师期末成绩输入”按钮。</p>
+
+    <p align="left">&nbsp;&nbsp;&nbsp;
+        2、成绩输入完成以后，可以立即打印成绩单，或者在成绩单打印中统一打印。</p>
+
+    </p>
+</fieldset>
+</div>
+
+
+<!--:todo:开放与查看课程-->
+<div id="wd2" class="easyui-panel"
+
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:30px;">
+
+                <center><span id="title"></span></center>
+
+        </div>
+        <div data-options="region:'center',border:false,split:false" style="padding:0px;background:#eee;">
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',title:'',fitColumns:true,pagination:true,fit:true,toolbar:[{
+                     text:'查看成绩登记表',
+                     iconCls:'icon-search',
+                     handler:function(){
+                       var row=$('#yingyuA').datagrid('getSelected')
+                       open('__URL__/Three_CJSR_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh)
+                     }},{
+                        text:'开放选中课程',
+                        iconCls:'icon-edit',
+                        handler:function(){
+                            $.messager.confirm('提示','您确定要开放选中课程吗？',function(c){
+                                if(c){
+                                    var rowList=$('#yingyuA').datagrid('getSelections')
+                                    ajiakesi('__URL__/kf_cs',{bind:rowList,year:$('[name=YEAR]').val(),term:$('[name=TERM]').val()},function(c){
+                                        $.messager.alert('提示',c)
+                                                $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Three_one_select.SQL','count':'Results/Three_one_count.SQL'
+                    },'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+                                    });
+                                }
+                            })
+
+                        }
+                     },{text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                          $('#wd2').panel({closed:true})
+                          $('#wd').panel({closed:false})
+                     }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                        <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                        <th data-options="field:'khfs',width:100" align="center">考核方式</th>
+                        <th data-options="field:'zt',width:100" align="center">状态</th>
+                    </tr>
+                    </thead>
+                </table>
+
+            </div>
+
+    </div>
+</div>
+
+
+<!--todo:补考成绩输入-->
+<div id="wd3" class="easyui-panel"
+
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div id="ccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false" style="height:130px;">
+            <p align="center"><font face="隶书" size="5"><span id="three_year"></span>学年第<span id="three_term"></span>学期
+                补考课程列表</font></p>
+            <p align="left"><font face="楷体_GB2312" size="4">&nbsp;&nbsp;</font><font face="宋体" color="#FF0000" size="2">&nbsp;
+                说明：1、选择计分制后，点击课号链接即可进入成绩输入界面，</font></p>
+           <p align="left">&nbsp;&nbsp;&nbsp;<font face="宋体" color="#FF0000" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                2、如需再次开放成绩，只需在相应的课程前打勾，然后按“开放选中的课程按钮”。</font></p>
+            <p align="left">&nbsp;&nbsp;&nbsp;<font face="宋体" color="#FF0000" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                3、成绩采用2</font><font size="2"><input type="radio" value="five" ID="five" name="R12">五级制&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="ten" ID="ten" name="R12" checked=checked>百分制</font></p>
+        </div>
+        <div data-options="region:'center',border:false,split:false" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="yingyuA2"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,fit:true,singleSelect:true,pagination:true,toolbar:[{
+                     text:'补考成绩单输入',
+                     iconCls:'icon-search',
+                     handler:function(){
+
+                        var R12=$('[name=R12]:checked').val()
+
+                       var row=$('#yingyuA2').datagrid('getSelected')
+                       open('__URL__/Three_BKCJSR_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh+'/R1/'+R12)
+                     }
+                   },{text:'开放选中的课程',
+                     iconCls:'icon-edit',
+                     handler:function(){
+                                $.messager.confirm('提示','您真的要开放课程吗',function(c1){
+                                        if(c1){
+                                                                                   var str=''
+                                                        if(($('[name=YEAR]').val()==2012&&$('[name=TERM]').val()==2)||school=='A1'){
+
+                                                            var rowList=$('#yingyuA2').datagrid('getSelections')
+                                                            for(var i=0;i<rowList.length;i++){
+                                                                str+=rowList[i].kh+','
+                                                            }
+                                                            ajiakesi('__URL__/kf_course/hasJson/1',{'courseno':str,year:$('[name=YEAR]').val(),'term':$('[name=TERM]').val()},function(c){
+                                                                $.messager.alert('提示',c)
+                                                            })
+                                                        }else{
+                                                            return $.messager.alert('提示','你只能改变当前学期的状态！')
+                                                        }
+
+                                        }
+
+                                        })
+
+                         }
+
+                     },{
+                     text:'刷新',
+                     iconCls:'icon-reload',
+                     handler:function(){
+                        $('#yingyuA2').datagrid('reload')
+                     }},{text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                          $('#wd3').panel({closed:true})
+                          $('#wd').panel({closed:false})
+                     }}]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                        <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                        <th data-options="field:'rs',width:100" align="center">人数</th>
+                        <th data-options="field:'zt',width:100" align="center">状态</th>
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+    </div>
+</div>
+
+
+<!--todo:任课教师期末成绩输入-->
+<div id="wd_teacher2" class="easyui-panel" data-options="fit:true,closable:false,collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false">
+    <div id="cccccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:130px"><br>
+            <center><b><p>请选择成绩输入类型后，点击课号输入成绩界面！</p>
+
+                    <p>计 分 制:<input type="radio" value="two" name="R13"  >二级制（合格与不合格）
+                        <input type="radio" value="five" name="R13" >五级制（优、良、中、及、不及）
+                        <input type="radio" value="ten" name="R13" checked >百分制（总分为100分）
+            </b></center>
+            <p style="line-height: 150%; margin: 0"><font size="3" color="#0000FF"><span>注：纯实践课程中集中实训环节、毕业论文、毕业实习采用五级制；自主实践训练、形势与政策、军训、社会实践与其他分散进行的实践环节采用二级制；纯理论课程与理实一体化课程可以采用百分制或者五级制，但是不能采用二级制，本科学位课程必须采用百分制。</span></font></p>
+
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="yingyu_teacher"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pagination:true,singleSelect:true,fit:true,toolbar:[
+                   {text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                          $('#wd_teacher2').panel({closed:true})
+                          $('#wd').panel({closed:false})
+                     }},{
+                     text:'进行成绩输入',
+                     iconCls:'icon-edit',
+                     handler:function(){
+                        var row=$('#yingyu_teacher').datagrid('getSelected')
+                        if(!row==''){
+                            window.open('__URL__/Three_three_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh+'/R1/'+$('[name=R13]:checked').val())
+                        }else{
+                            $.messager.alert('提示','您还没有选择数据')
+                        }
+                     }
+                     }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'km',width:100" align="center">课名</th>
+                    <th data-options="field:'xf',width:100" align="center">学分</th>
+                    <th data-options="field:'zxs',width:100" align="center">周学时</th>
+                    <th data-options="field:'zsy',width:100" align="center">周实验</th>
+                    <th data-options="field:'xk',width:100" align="center">修课</th>
+                    <th data-options="field:'kh2',width:100" align="center">考核</th>
+                    <th data-options="field:'kkxy',width:100" align="center">开课学院</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--todo:没有输入的课程-->
+<div id="wd4" class="easyui-panel"
+
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div id="cccc" class="easyui-layout" data-options="fit:true,border:false">
+        <div data-options="region:'north',split:false,border:false" style="height:30px"><br>
+            <b> <center><span id="four_year" style="font-size: 14px;></span>学年第<span id="four_term"></span>学期还未输入成绩的课程
+            </center></b>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="yingyuA4"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,pagination:true,singleSelect:true,fit:true,toolbar:[{text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                     $('#wd').panel({closed:false})
+                          $('#wd4').panel({closed:true})
+                     }}]">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                    <th data-options="field:'hwsrdcjjls',width:100" align="center">还未输入的成绩记录数</th>
+                    <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                    <th data-options="field:'khfs',width:100" align="center">考核方式</th>
+                    <th data-options="field:'bj',width:100" align="center">班级</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!--todo:毕业前补考成绩输入-->
+<div id="wd5" class="easyui-panel"
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:140px">
+                     <center><span id="five_title" style="font-size: 20px"></span></center>
+            <p align="left"><font face="楷体_GB2312" size="4">&nbsp;&nbsp;</font><font face="宋体" color="#FF0000" size="2">&nbsp;
+                说明：1、选择计分制后，点击课号链接即可进入成绩输入界面，</font></p>
+
+
+            <p align="left">&nbsp;&nbsp;&nbsp;<font face="宋体" color="#FF0000" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                2、如需再次开放成绩，只需在相应的课程前打勾，然后按“开放选中的课程按钮”。</font></p>
+
+
+            <p align="left">&nbsp;&nbsp;&nbsp;<font face="宋体" color="#FF0000" size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                3、成绩采用2</font><font size="2"><input type="radio" value="five" ID="five2" name="R1" >五级制&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="ten" ID="ten2" name="R1" checked="checked" >百分制</font></p>
+            <b>
+            </b></center>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="dat_Five"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,pagination:true,fit:true,toolbar:[{
+                     text:'成绩输入',
+                     iconCls:'icon-edit',
+                     handler:function(){
+                       var len=$('#dat_Five').datagrid('getSelections')
+                       if(len.length>1){
+                          return $.messager.alert('提示','请选择一条数据进行操作不能选择多条')
+                       }else if(len.length<1){
+                          return $.messager.alert('提示','请选择一条数据进行操作')
+                       }
+                       var row=$('#dat_Five').datagrid('getSelected');
+                       open('__URL__/Three_BYQBK_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh)
+                     }
+                   },{
+                     text:'开放选中课程',
+                     iconCls:'icon-lookfile',
+                     handler:function(){
+                          $.messager.confirm('提示','您确定要开放选中课程吗？',function(c){
+                                if(c){
+                                    var rowList=$('#dat_Five').datagrid('getSelections')
+                                    ajiakesi('__URL__/kf_cs',{bind:rowList,year:$('[name=YEAR]').val(),term:$('[name=TERM]').val()},function(c){
+                                        $.messager.alert('提示',c)
+                                        $('#dat_Five').datagrid('reload',{'Sqlpath':{'select':'Results/Three_one_Five_select.SQL','count':'Results/Three_one_Five_count.SQL'
+                        },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+                                    });
+                                }
+                            })
+
+
+                     }
+                   },{text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                          $('#wd5').panel({closed:true})
+                          $('#wd').panel({closed:false})
+                     }}]">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                    <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                    <th data-options="field:'rs',width:100" align="center">人数</th>
+                    <th data-options="field:'zt',width:100" align="center">状态</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+

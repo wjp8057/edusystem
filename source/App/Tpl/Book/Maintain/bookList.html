@@ -1,0 +1,244 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar">
+	<label>ISBN：</label><input name="isbn" size="15" value='%'  maxlength="30">
+    <label>教材名：</label><input name="bookname" value='%'  size="15">
+    <label>教材性质：</label>
+    <select name="booknature" class="easyui-combobox" data-options="editable:false">
+		<option value="%">全部</option>
+		<option value="本科">本科</option>
+		<option value="高职高专">高职高专</option>
+		<option value="其他">其他</option>
+		<option value="自编">自编</option>
+	</select>
+    <label>状态：</label>
+    <input type="radio" name="status" value="%" checked="checked"> <span>全部</span>
+    <input type="radio" name="status" value="0"> <span>启用</span>
+    <input type="radio" name="status" value="1"> <span>禁用</span>
+    <a href="javascript:void(0)" id="searcher">检索</a>
+    <p style="height:2px;padding:0px;margin: 0px;"></p>
+    <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除</a>
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增</a>
+</div>
+<script type="text/javascript">
+var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+var dat=null;
+$(function(){
+	//新增教材窗口
+	var wd=$('#wd').window({
+        modal:true,
+        height:300,
+        width:850,
+        minimizable:false,
+        maximizable:false,
+        collapsible:false,
+        draggable:false,
+        resizable:false,
+        closed:true
+    });
+	//教材信息列表加载
+    var indexrow=undefined;
+    dat=$('#content').datagrid({
+        fit:true,
+        fitColumns:true,
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#content');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        striped:true,
+        columns:[[{field:'book_id',checkbox:true},
+                  {field:'isbn',title:'ISBN',align:'center',width:90,editor:{
+                    	type:'validatebox',options:{required:true}} },
+                  {field:'bookname',title:'教材名',align:'center',width:160,editor:{
+                    	type:'validatebox',options:{required:true}} },
+                  {field:'author',title:'作者',align:'center',width:160,editor:{
+                    	type:'validatebox',options:{required:true}} },
+                  {field:'press',title:'出版社',align:'center',width:100,editor:{type:'combobox',options:
+                  		{valueField:'id',textField:'name',url:'__URL__/ajaxPress/',mode:'remote'}} },
+                  {field:'booknature',title:'教材性质',align:'center',width:70,editor:{type:'combobox',options:{editable:false,
+        		          data:[{"text":"本科","value":"本科"},{"text":"高职高专","value":"高职高专"},
+        		                {"text":"其他","value":"其他"},{"text":"自编","value":"自编"}]}} },
+                  {field:'pubtime',title:'出版时间',align:'center',width:70,editor:{
+                    	type:'validatebox'} },
+                  {field:'dis_rate',title:'折扣率',align:'center',width:50,editor:{
+                  	type:'validatebox',options:{required:true}} },
+                  {field:'status',title:'状态',align:'center',width:40,formatter:function(value,row,index){
+                	  if(value==0) return "启用";
+                	  else return "禁用";
+  		          },editor:{type:'combobox',options:{editable:false,data:[{"text":"启用","value":"0"},{"text":"禁用","value":"1"}]}} }
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar',
+		onAfterEdit:function(index,dataRow,changes){
+        	if(!ajaxCheckIsbn(dataRow.book_id,dataRow.isbn)){
+        		$.messager.alert('提示','ISBN已存在！','?');
+        		dat.datagrid('beginEdit', index);
+        		return;
+        	}
+        	if(dataRow.isbn.length < 5){
+        		$.messager.alert('提示','ISBN格式不规范！','?');
+        		dat.datagrid('beginEdit', index);
+        		return;
+        	}
+        	if($.trim(dataRow.pubtime).length > 4){
+        		$.messager.alert('提示','出版时间只输入年份即可！','?');
+        		dat.datagrid('beginEdit', index);
+        		return;
+        	}
+        	if(!reg.test(dataRow.dis_rate)){
+        		$.messager.alert('提示','折扣率格式错误！','?');
+        		dat.datagrid('beginEdit', index);
+        		return;
+        	}
+        	var updated=dat.datagrid('getChanges','updated');
+            if(updated.length){
+                $.ajax({
+                    url:"__URL__/updateBook/hasJson/0",
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                    	var index = dat.datagrid('getRowIndex', dat.datagrid('getSelected'));
+                    	if(content){
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            $.messager.alert('提示','更新成功！','?');
+                        }else{
+                        	$.messager.alert('提示','更新失败！','?');
+                        }
+                    }
+                });
+            }
+        }
+    });
+    //删除教材
+    function ddel(){
+        var row = dat.datagrid('getSelections');
+        if (row.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row.length;i++){
+                        infoarr[i]=row[i].book_id;
+                    }
+                    $.ajax({
+                        url:'__URL__/delBook/hasJson/1',
+                        data:{'in':infoarr},
+                        type:'POST',
+                        dataType:"JSON",
+                        success:function(del){
+                            if(del){
+                                if(del.failure==-1){
+                                    $.messager.alert('提示','删除失败，教材已被征订引用','?');
+                                }else{
+                                    $.messager.alert('提示','成功删除'+del.succeed+'条数据，失败'+del.failure+'条','?');
+                                    dat.datagrid('reload');
+                                }
+                            }else{
+                                $.messager.alert('提示','删除失败,没权限操作','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }else{
+        	$.messager.alert('提示','请选择要删除的数据','?');
+        }
+    }
+    //删除
+    $("#delBut").bind('click',ddel);
+    $('#admin_del').bind('click',ddel);
+    //编辑教材
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');//获取所有被选中的
+        dat.datagrid('removeEditor','book_id');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行编辑,不能选多条','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要编辑的数据','?');//用户没选择行
+        }else{
+            if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+            var row = dat.datagrid('getSelected');//获得被选中的索引
+            var index = dat.datagrid('getRowIndex', row);
+            dat.datagrid('beginEdit', index);
+            indexrow=index;
+        }
+    }
+    //编辑
+    $("#editBut").click(eedit);
+    $('#admin_edit').bind('click',eedit)
+    //取消编辑
+    $("#cancelBut").click(function(){
+    	dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    });
+    //保存
+    $("#saveBut").click(function(){
+    	dat.datagrid('endEdit',indexrow);
+    });
+    //新增
+    $("#addBut").click(function(){
+    	wd.window({closed:false});
+    });
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls: 'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	dat.datagrid("options").url = "__URL__/bookList/hasJson/1";
+    	dat.datagrid('load',{
+    		isbn:$.trim($("#toobar [name='isbn']").val()),
+    		bookname:$.trim($("#toobar [name='bookname']").val()),
+    		booknature:$.trim($("#toobar [name='booknature']").val()),
+    		status:$.trim($("#toobar [name='status']:checked").val())
+        });
+    });
+});
+
+//ajax验证
+function ajaxCheckIsbn(id,isbn){
+	var bool=true;
+	$.ajax({
+        url:"__URL__/getIsbnCount/hasJson/1",
+        async:false,
+        type:"POST",
+        data:{"id":id,"isbn":isbn},
+        success: function(data){
+            if(data > 0){
+            	bool=false;
+            }
+        }
+    });
+	return bool;
+}
+</script>
+<div id="wd" title="添加自编教材">
+	<include file="addBook" />
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+
+<include file="./methods" />
+</body>
+</html>

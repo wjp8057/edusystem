@@ -1,0 +1,251 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<div id="datagrid"></div>
+    </div>
+</div>
+<div id="toobar">
+    <label>学年：</label><input name="year" size="4" maxlength="4">
+    <label>学期：</label><input name="term" size="1" maxlength="1">
+    <label>修课方式：</label>
+    <select class="easyui-combobox" name="approaches" data-options="editable:false">
+        <option value="%">全部</option>
+        <volist name="approaches" id="a">
+            <option value="{$a.NAME}">{$a.VALUE}</option>
+        </volist>
+    </select>
+    <label>课号：</label><input value='%'  name="courseno" size="14" maxlength="9">
+    <label>课名：</label><input value='%'  name="coursename" size="16">
+    <label>开课学院：</label>
+    <select class="easyui-combobox" name="school" data-options="editable:false">
+        <option value="">全部</option>
+        <volist name="school" id="s">
+            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+        </volist>
+    </select>
+    <label>班号：</label><input name="classno" size="14" value='%' maxlength="10">
+    <p style="height:4px;padding:0px;margin: 0px;"></p>
+    <label>征订状态：</label>
+    <select class="easyui-combobox" name="status" data-options="editable:false">
+        <option value="%">全部</option>
+        <option value="0">未征订</option>
+        <option value="1">已征订</option>
+        <option value="2">暂不征订</option>
+        <option value="3">已发放</option>
+    </select>
+    <label>征订时间：</label>
+    <input name="startTime" class="easyui-datebox"> 至  <input name="endtime" class="easyui-datebox">
+    <a href="javascript:void(0)" id="searcher"  class="easyui-linkbutton" data-options="iconCls:'icon-search'">检索</a><br/>
+    <a href="#" id="browseBut" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">征定单浏览</a>
+    <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除征订记录</a>
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">修改征订记录</a>
+    <a href="javascript:void(0)" id="resetBut" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">重置征订状态</a>
+    <a href="javascript:void(0)" id="expBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出征订单</a>
+</div>
+<form action="__ROOT__/Book/Excel/createOrder/" method="post" id="expForm" style="display:none;">
+	<input name="year">
+	<input name="term">
+	<input name="school">
+	<input name="status" value="1">
+</form>
+<script type="text/javascript">
+var list=null;
+var datagrid=null;
+$(function(){
+    $("#toobar [name='year']").val(parent.$("#YEAR").val());
+    $("#toobar [name='term']").val(parent.$("#TERM").val());
+	/******************************************教材征订信息读取***********************************/
+	//教材征订信息
+	datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        fit:true,
+        border:false,
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#datagrid');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        striped:true,
+        columns:[[{field:'apply_id',checkbox:true},
+                  {field:'courseno',title:'课号',align:'center',width:40},
+                  {field:'coursename',title:'课名',align:'center',width:70},
+                  {field:'value',title:'修课方式',align:'center',width:35},
+                  {field:'attendents',title:'预计人数',align:'center',width:35},
+                  {field:'schoolname',title:'开课学院',align:'center',width:40},
+                  {field:'isbn',title:'ISBN',align:'center',width:60},
+                  {field:'bookname',title:'教材名称',align:'center',width:110},
+                  {field:'stu_quantity',title:'学生订数',align:'center',width:35},
+                  {field:'tea_quantity',title:'教师订数',align:'center',width:35},
+                  {field:'status',title:'征订状态',align:'center',width:35,formatter:function(value,row,index){
+                	  if(value == 1)
+	              		  return "<font color=\"#0000FF\">已征订</font>";
+	              	  else if(value == 3)
+	              		  return "<font color=\"#0000FF\">已发放</font>";
+	              	  else if(value == 2)
+	              		  return "暂不征订";
+	              	  else if(value == 0)
+	              		  return "未征订";
+  		        }},
+  		        {field:'booktime',title:'征订时间',align:'center',width:50} ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	//验证学年学期是否输入
+    	var year=$.trim($("#toobar [name='year']").val());
+    	var term=$.trim($("#toobar [name='term']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+    	//开始检索
+        datagrid.datagrid("options").url = "__URL__/applyList/hasJson/1";
+        datagrid.datagrid("load",getData());
+    });
+    //删除征订单
+    function ddel(){
+        list=datagrid.datagrid('getSelections');
+        if (list.length){
+            $.messager.confirm('提示','若订单状态为“ 已发放 ”，将删除发放信息，您确定要删除吗？',function(b){
+                if(b){
+                    var ary=[];                      //存储删除信息的数组
+                    for(var i=0;i<list.length;i++){
+                        ary[i]=list[i].apply_id;
+                    }
+                    $.ajax({
+                        url:'__URL__/del/',
+                        data:{'ids':ary},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","删除成功！","info");
+                                datagrid.datagrid('reload');
+                            }else{
+                                msgShow("系统提示：","删除失败,没权限操作","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }else{
+        	 msgShow("系统提示：","请选择要删除的数据","info");
+        }
+    }
+    //删除征订信息
+    $("#delBut").bind('click',ddel);
+    $('#admin_del').bind('click',ddel)
+    //重置征订状态
+    function ccz(){
+        list=datagrid.datagrid('getSelections');
+        if (list.length < 1){
+            msgShow("系统提示：","没有选择任何数据进行操作！","error");
+            return;
+        }else{
+            $.messager.confirm('提示','您确定要重置征订状态吗？',function(b){
+                if(b){
+                    var ary=[];
+                    for(var i=0;i<list.length;i++){
+                        if(list[i].approaches=="E" || parseInt(list[i].status)==2){
+                            ary[i]={"apply_id":list[i].apply_id,"status":list[i].status};
+                        }else{
+                            msgShow("系统提示：","您只能重置选修课或状态为“暂不征订”教材的征订状态!","info");
+                            return;
+                        }
+                    }
+                    $.ajax({
+                        url:'__URL__/reset/',
+                        data:{'ids':ary},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","重置成功！","info");
+                                datagrid.datagrid('reload');
+                            }else{
+                                msgShow("系统提示：","重置失败,没权限操作","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+    //重置征订信息
+    $("#resetBut").bind('click',ccz);
+    $('#admin_cz').bind('click',ccz);
+    //浏览征订单
+	function ll(){
+    	list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		var year=$.trim($("#toobar [name='year']").val());
+            var term=$.trim($("#toobar [name='term']").val());
+            var school=$.trim($("#toobar [name='school']").val());
+            if(year=="" || term==""){
+                msgShow("系统提示：","请先输入学年学期再进行征订单浏览","info");
+                return;
+            }
+            var url="__URL__/bookApplyList/year/"+year+"/term/"+term+"/school/"+school;
+            openTabsWindows(year+"年第"+term+"学期教材征订单浏览",url);
+    	}else{
+    		msgShow("系统提示：","目前没有征订申请信息","info");
+    	}
+    }
+	//浏览征订单
+    $("#browseBut").bind('click',ll);
+    $('#admin_look').bind('click',ll);
+    //导出征订单
+    $("#expBut").click(function(){
+    	list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		$.messager.confirm('提示','系统将按照您当前指定的学年、学期及学院导出已征订的教材信息，您确认导出？',function(b){
+                if(b){
+                	$("#expForm [name='year']").val(getData().year);
+                	$("#expForm [name='term']").val(getData().term);
+                	$("#expForm [name='school']").val(getData().school);
+	        		$("#expForm").submit();
+                }
+            });
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的征订信息","info");
+    	}
+    });
+});
+
+//获取检索条件信息
+function getData(){
+	var data={
+        	year:$.trim($("#toobar [name='year']").val()),
+        	term:$.trim($("#toobar [name='term']").val()),
+        	approaches:$.trim($("#toobar [name='approaches']").val()),
+        	courseno:$.trim($("#toobar [name='courseno']").val()),
+        	coursename:$.trim($("#toobar [name='coursename']").val()),
+        	school:$.trim($("#toobar [name='school']").val()),
+        	classno:$.trim($("#toobar [name='classno']").val()),
+        	status:$.trim($("#toobar [name='status']").val()),
+        	startTime:$.trim($("#toobar [name='startTime']").val()),
+        	endtime:$.trim($("#toobar [name='endtime']").val())
+        };
+	return data;
+}
+</script>
+<!--修改教材记录 -->
+<div id="apply_wd" title=" ">
+	<include file="editApply"/>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_look'>征订单浏览</div>
+    <div id='admin_del'>删除征订记录</div>
+    <div id='admin_cz'>重置征订状态</div>
+    <div id='admin_edit'>修改征订记录</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+$(function(){
+    var  dat = $('#dat');
+    dat.datagrid({
+        onDblClickRow: function (rowIndex) {
+            $(this).datagrid('beginEdit', rowIndex);
+        }
+    });
+
+    $("#add").click(function () {
+        $.post('__URL__/setBatch/tag/addbatch',{
+            'YEAR':parent.$('#YEAR').val(),
+            'TERM':parent.$('#TERM').val()
+        },function(c){
+            return Messager.show(c, function () {
+                dat.datagrid('reload');
+            });
+        });
+    });
+
+    $("#addbatch").click(function () {
+        if(Datagrid.hasSelected(dat)){
+            var row = Datagrid.getSelected(dat);
+            $.post('__URL__/setBatch/tag/addpici',{
+                'YEAR':parent.$('#YEAR').val(),
+                'TERM':parent.$('#TERM').val(),
+                'batch':row['flag']
+            }, function (c) {
+                return Messager.show(c, function () {
+                    dat.datagrid('reload');
+                });
+            });
+        }
+    });
+
+    $("#save").click(function () {
+        Datagrid.endEdit(dat);
+        var rowList = dat.datagrid('getRows');
+        $.post('__URL__/setBatch/tag/updatebatch',{rows:rowList},function(data){
+            return Messager.show(data, function () {
+                dat.datagrid('reload');
+            });
+        });
+    });
+    $("#edit").click(function () {
+        if(Datagrid.selectSingle(dat)){
+            var currow = Datagrid.getSelected(dat);
+            var index = dat.datagrid('getRowIndex',currow);
+            dat.datagrid('beginEdit',index);
+        }
+    });
+    $("#cancel").click(function () {
+        dat.datagrid('acceptChanges')
+    });
+
+});
+</script>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+
+    <div id="tbar">
+        <a id="add" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加批次</a>
+        <a id="addbatch" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">为选中批次添加场次</a>
+        <a id="save" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存时间</a>
+        <a id="edit" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+        <a id="cancel" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">取消编辑</a>
+    </div>
+
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid" id="dat"
+               data-options="url:'__URL__/setBatch/hasJson/1',fit:true,pagination:true,striped:true,singleSelect:true,pageList:[20,50,100],toolbar:'#tbar'">
+            <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'year',width:100,align:'right'" align="center">学年</th>
+                    <th data-options="field:'term',width:100,align:'right'" align="center">学期</th>
+                    <th data-options="field:'batch',width:100,align:'right'" align="center">批次</th>
+                    <th data-options="field:'flag',width:100,align:'right',editor:{type:'numberbox'}" align="center">场次</th>
+                    <th data-options="field:'testtime',width:320,align:'right',editor:{type:'text'}" align="center">时间设置</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>

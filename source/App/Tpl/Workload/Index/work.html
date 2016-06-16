@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link id='themes_css' rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/css/css.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/datagrid.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.fileDownload.min.js"></script>
+    <script type="text/javascript">
+        var current_datagrid=null;
+        var current_datagrid_obj=null;
+        var workload_work_obj=new Object();
+        workload_work_obj.editIndex=undefined; //用于存储填写时的index
+        var userSchool=$('#school', parent.document).val();
+        var workload_work_cmenu_obj=new Object();
+        workload_work_cmenu_obj.cmenu=""; //标题行右键菜单
+
+        var workload_work_obj2=new Object();
+        workload_work_obj2.editIndex=undefined; //用于存储填写时的index
+        var workload_work_distribute_row=undefined;// 当前正在二次分配的行
+        $(function(){
+            var tt=$('#workload_work_dg');
+            if(userSchool!="A1") {
+                $('#workload_work_school').combobox('setValue', userSchool);
+            }
+            $('#teacher_dlg_school').combobox('setValue', userSchool);
+            //生成主表
+            tt.datagrid({
+                idField:'id',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:20,
+                url:'/Workload/Work/query?hasJson=true',
+                toolbar:'#workload_work_toolbar',
+                rowStyler:function(index,row){
+                if (row.settled!=row.work){
+                    return 'color:red;font-weight:bold;';
+                }},
+                queryParams: {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val(),
+                    school:$('#workload_work_school').combobox('getValue')
+                },
+                columns:[[
+                    {field:'checked',title:'分配确认*',width:65,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                        formatter:function(val,rec){
+                            if(val==1){
+                                if(rec.work!=rec.settled) {
+                                    $.messager.alert('错误', rec.courseno+rec.group+rec.coursename+'的总工作量与已分配工作量不符！无法分配确认。', 'error');
+                                    rec.checked=0;
+                                }
+                                else
+                                    return '√';
+                            }
+
+                        }},
+                    {field:'courseno',title:'课号',width:60,align:'center'},
+                    {field:'group',title:'组号',width:30,align:'center'},
+                    {field:'coursename',title:'课名',width:260,align:'center'},
+                    {field:'schoolname',title:'开课学院',width:100,align:'center'},
+                    {field:'classname',title:'主修班级',width:100,align:'center'},
+                    {field:'worktypename',title:'工作量类型',width:140,align:'center'},
+                    {field:'stand',title:'标准班',width:40,align:'center' },
+                    {field:'attendent',title:'人数',width:40,align:'center' },
+                    {field:'total',title:'总课时',width:40,align:'center'},
+                    {field:'week',title:'周数',width:40,align:'center'},
+                    {field:'factor',title:'系数',width:40,align:'center'},
+                    {field:'addfactor',title:'加系数',width:55,align:'center'},
+                    {field:'work',title:'工作量',width:50,align:'center'},
+                    {field:'settled',title:'任课分配',width:55,align:'center'},
+                    {field:'psettled',title:'实践分配',width:55,align:'center'},
+                    {field:'rem',title:'备注',width:150,align:'center'}
+                ]],
+                //标题行右键菜单
+                onHeaderContextMenu: function(e, field){
+                    e.preventDefault();
+                    if (!workload_work_cmenu_obj.cmenu)//没有的话创建一个
+                        $('#workload_work_dg').datagrid('createColumnMenu',workload_work_cmenu_obj);
+                    workload_work_cmenu_obj.cmenu.menu('show', {
+                        left:e.pageX,
+                        top:e.pageY
+                    });
+                },
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_work_obj.index=index; //初始化参数
+                    workload_work_obj.field=field;
+                    $('#workload_work_dg').datagrid('startEditing',workload_work_obj);
+                    current_datagrid=$('#workload_work_dg');
+                    current_datagrid_obj=workload_work_obj;
+                },
+                //数据行上右键菜单
+                onRowContextMenu:function(e,rowindex,row){
+                    var tt=$('#workload_work_dg');
+                    if(!endEditing(tt,workload_work_obj)) return;//结束编辑,如果没有验证通过就退出
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#workload_work_menu').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                },
+                onSelect:function(index,row){
+                    workload_work_distribute_row=row;
+                    //首先清空子表的记录
+                    var tt=$('#workload_work_dg2');
+                    tt.datagrid('loadData',{total:0,rows:[]});
+                    tt.datagrid('getPanel').panel('setTitle','"'+row.courseno+row.group+row.coursename+'" ,共可分配 <span style="color:red">'+row.work+'</span> 分');
+                    tt.datagrid('load',{ map:row.id});
+                }
+
+            });
+            //生成详细分配表
+            tt=$('#workload_work_dg2');
+            tt.datagrid({
+                idField:'id',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:100,
+                pageList:[10,50,100,200],
+                title:'分配详细表',
+                url:'/Workload/Work/detail?hasJson=true',
+                toolbar:'#workload_work_toolbar2',
+                queryParams: {
+                    id:0
+                },
+                columns:[[
+                    {field:'teacherno',title:'教师号',width:80,align:'center'},
+                    {field:'teachername',title:'姓名',width:100,align:'center'},
+                    {field:'schoolname',title:'所在学院',width:140,align:'center'},
+                    {field:'work',title:'工作量*',width:60,align:'center',editor:{type:'numberbox',options:{precision:2,required:true}},
+                        formatter:function(val,rec){
+                            if(val<0){
+                                rec.work=1;
+                                $.messager.alert('错误', '分配的工作量不能小于0','error');
+                            }
+                            return rec.work;
+                        }},
+                    {field:'teachertype',title:'任务类型*',width:120,align:'center',
+                        editor:{
+                            type:'combobox',
+                            options:{url:'/Workload/Option/workteachertype',valueField:'type',textField:'name',panelWidth:'150',panelHeight:'auto',onSelect:onWorkTeacherTypeSelect}
+                        },
+                        formatter:function(val,rec){
+                            return rec.teachertypename;
+                        }}
+                ]],
+
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_work_obj2.index=index; //初始化参数
+                    workload_work_obj2.field=field;
+                    $('#workload_work_dg2').datagrid('startEditing',workload_work_obj2);
+                    current_datagrid=$('#workload_work_dg2');
+                    current_datagrid_obj=workload_work_obj2;
+                },
+                //数据行上右键菜单
+                onRowContextMenu:function(e,rowindex,row){
+                    var tt=$('#workload_work_dg2');
+                    if(!endEditing(tt,workload_work_obj2)) return;//结束编辑,如果没有验证通过就退出
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#workload_work_menu2').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                }
+
+            });
+            //生成教师检索表
+            tt=$('#teacher_dlg_dg');
+            tt.datagrid({
+                idField:'teacherno', striped:'true', pagination:'true', rownumbers:true, singleSelect:true, pageSize:10, pageList:[10],
+                url:'/Workload/Work/teacher?hasJson=true',
+                toolbar:'#teacher_dlg_toolbar',
+                queryParams: {
+                    name:$('#teacher_dlg_name').val(),
+                    school:$('#teacher_dlg_school').combobox('getValue'),
+                    teacherno:$('#teacher_dlg_teacherno').val()
+                },
+                columns:[[
+                    {field:'teacherno',title:'教师号',width:80,align:'center'},
+                    {field:'teachername',title:'姓名',width:100,align:'center'},
+                    {field:'schoolname',title:'所在学院',width:140,align:'center'}
+                ]]
+            });
+            $('#teacher_dlg').dialog({
+                title:'检索教师',modal:true,closed:true,closable:false, width:600,height:500,
+                buttons:[{
+                    text:'确定',
+                    handler:function(){
+                        selectrow=$('#teacher_dlg_dg').datagrid('getSelected');
+                        if(!selectrow){
+                            $.messager.alert('错误','没有选择行','error');
+                            return;
+                        }
+                        tt=$('#workload_work_dg2');
+                        tt.datagrid('insertRow',{
+                            index: 0,	// index start with 0
+                            row: {
+                                teacherno:selectrow.teacherno,
+                                teachername:selectrow.teachername,
+                                schoolname:selectrow.schoolname,
+                                map: workload_work_distribute_row.id,
+                                work:0,
+                                teachertype:'A',
+                                teachertypename:'任课教师'
+
+                            }
+                        });
+                        $('#teacher_dlg').dialog('close');
+                    }
+                },{
+                    text:'取消',
+                    handler:function(){
+                        $('#teacher_dlg').dialog('close');
+                    }
+                }]
+            });
+            //绑定点击保存按钮事件
+            $("#workload_work_repeat").click(function(){
+                    $.messager.confirm('确认', "真的要重新计算重复课系数么？<br/>只有已确认的课程会计算重复课系数！。", function(r){
+                        if (r){
+                            $('#w').window('open');
+                            $.post('/Workload/Check/repeat?hasJson=true',{year:$('#year', parent.document).val(),term:$('#term', parent.document).val()},function(result){
+                                if (result.status==1){
+                                    $.messager.alert("成功",result.info,'info');
+
+                                } else {
+                                    $.messager.alert(result.status,result.info,'error');
+                                }
+                            },'json').always(function() {
+                                $('#w').window('close');
+                            });
+                        }
+                    });
+            });
+            $("#workload_work_save").click(function(){
+                var tt=$('#workload_work_dg');
+                if(!endEditing(tt,workload_work_obj)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                for(var i=0;i<rows.length;i++) {
+                    if(rows[i]['school']!=userSchool&&userSchool!="A1"){
+                        $.messager.alert("无法修改","非教务处人员无法修改非本学院的课程。"+rows[i]['coursename'],'error');
+                        return;
+                    }
+                }
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                if(count<=0) //如果没有任何更新，就退出
+                    return;
+
+                $('#w').window('open');
+                $.post('/Workload/Work/update?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+            $("#workload_work_export_total").click(function(){
+                var queryString="year="+$('#year', parent.document).val();
+                queryString+="&term="+$('#term', parent.document).val();
+                queryString+="&courseno="+$('#workload_work_courseno').val();
+                queryString+="&coursename="+$('#workload_work_coursename').val();
+                queryString+="&school="+$('#workload_work_school').combobox('getValue');
+                queryString+="&worktype="+$('#workload_work_worktype').combobox('getValue');
+                queryString+="&checked="+$('#workload_work_status').combobox('getValue');
+                $.fileDownload("/Workload/Export/workExportAll?"+queryString, {
+                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                    failMessageHtml: "导出失败，请重试或者联系管理员",
+                    dialogOptions: { modal: true,title:'提示' }
+                });
+                return false; //this is critical to stop the click event which will trigger a normal file download!
+
+            });
+            //搜索按钮
+            $("#workload_work_search").click(function(){
+                var tt=$('#workload_work_dg');
+
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val(),
+                    coursename:$('#workload_work_coursename').val(),
+                    courseno:$('#workload_work_courseno').val(),
+                    school:$('#workload_work_school').combobox('getValue'),
+                    worktype:$('#workload_work_worktype').combobox('getValue'),
+                    checked:$('#workload_work_status').combobox('getValue')
+                });
+            });
+            $("#teacher_dlg_search").click(function(){
+                var tt=$('#teacher_dlg_dg');
+
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    name:$('#teacher_dlg_name').val(),
+                    school:$('#teacher_dlg_school').combobox('getValue'),
+                    teacherno:$('#teacher_dlg_teacherno').val()
+                });
+            });
+            //取消更改
+            $("#workload_work_cancel").click(function(){
+                var tt= $('#workload_work_dg');
+                endEditing(tt,workload_work_obj);
+                tt.datagrid('rejectChanges');
+            });
+            $("#workload_work_insert2").click(function(){
+                var tt=$('#workload_work_dg2');
+                if( workload_work_distribute_row==null) {
+                    $.messager.alert('错误', '请在上方表格选中要分配的课程！', 'error');
+                    return;
+                }
+
+                if( workload_work_distribute_row.school!=userSchool&&userSchool!="A1") {
+                    $.messager.alert('错误', '您无法分配其它学院的课程工作量！', 'error');
+                    return;
+                }
+                if( workload_work_distribute_row.disable=="1") {
+                    $.messager.alert('错误', '本课程不统计，无法添加！', 'error');
+                    return;
+                }
+                if(!endEditing(tt,workload_work_obj2)) return;//结束编辑,如果没有验证通过就退出
+                $('#teacher_dlg').dialog('open');
+            });
+
+            $("#workload_work_save2").click(function(){
+                var tt=$('#workload_work_dg2');
+                if(!endEditing(tt,workload_work_obj2)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getRows');
+                var totalwork=0;//普通任课教师的工作量
+                var totalwork2=0; //实践指导教师的工作量
+                for(var i=0;i<rows.length;i++){
+                    if(rows[i].teachertype=='A')
+                        totalwork+=1*rows[i].work;
+                    else
+                        totalwork2+=1*rows[i].work;
+                }
+                var work=workload_work_distribute_row.work;
+                if(Math.abs(totalwork-work*1)>=0.001){
+                    $.messager.alert('错误', '亲，任课教师可分配 '+work+' 分，已分配'+totalwork+'分！','error');
+                    return;
+                }
+                if(totalwork2>work*1/2){
+                    $.messager.alert('错误', '亲，实践指导教师最多分配 '+work/2+' 分，已分配'+totalwork+'分！','error');
+                    return;
+                }
+
+                rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                rows=tt.datagrid('getChanges','deleted');
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["deleted"]=$.toJSON(rows);
+                }
+                //获取添加的行
+                rows=tt.datagrid('getChanges','inserted');
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["inserted"]=$.toJSON(rows);
+                }
+                if(count<=0){  //ad
+                    $.messager.alert('提示', '没有需要更新的行！', 'info');
+                    return;
+                }
+                $('#w').window('open');
+                $.post('/Workload/Work/updatedetail?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $('#workload_work_dg').datagrid('reload');
+                        $.messager.show({
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+            $("#workload_work_delete2,#workload_work_menu2_delete").click(function(){
+
+                tt=$('#workload_work_dg2');
+                var row = tt.datagrid('getSelected');
+                if (row) {
+                    $.messager.confirm('确认', "确定删除么？", function(r){
+                        if (r){
+                            var rowIndex = tt.datagrid('getRowIndex', row);
+                            tt.datagrid('deleteRow', rowIndex);
+                        }
+                    });
+                }
+                else{
+                    $.messager.alert('提示', '请选中要删除的行！', 'info');
+                }
+            });
+            $("#workload_work_cancel2").click(function(){
+                var tt= $('#workload_work_dg2');
+                endEditing(tt,workload_work_obj2);
+                tt.datagrid('rejectChanges');
+            });
+            function onWorkTeacherTypeSelect(rec){
+                var tt=$('#workload_work_dg2');
+                tt.datagrid('getSelected').teachertypename=rec.name;
+            }
+        });
+    </script>
+    <title>工作量统计</title>
+</head>
+<body>
+
+
+<form action="/Workload/Export/workExportAll" method="POST" id="cpexcel">
+    <input type="hidden" name="year" id="year">
+    <input type="hidden" name="term" id="term">
+    <input type="hidden" name="courseno" id="courseno">
+    <input type="hidden" name="coursename" id="coursename">
+    <input type="hidden" name="school" id="school">
+    <input type="hidden" name="worktype" id="worktype">
+    <input type="hidden" name="checked"  id="checked">
+</form>
+<div id="workload_work_menu2" class="easyui-menu" style="width:100px;">
+    <div id='workload_work_menu2_delete'>删除此行</div>
+</div>
+<div id="w" class="easyui-window" title="请稍候..."
+     data-options="modal:true,closed:true,closable:false,minimizable:false,maximizable:false,iconCls:'icon-shield'"
+     style="width:250px;height:80px;padding:10px;">数据更新中，请稍候！
+</div>
+<div class="easyui-dialog" id="teacher_dlg" style="width:600px;height:410px"
+     data-options="">
+    <div id="teacher_dlg_toolbar">
+        <label for="teacher_dlg_name">姓名：</label><input id="teacher_dlg_name" class="easyui-validatebox"  value="%" size="10"/>
+        <label for="teacher_dlg_teacherno">教师号：</label><input id="teacher_dlg_teacherno" class="easyui-validatebox" size="10"  value="%"/>
+        <label for="teacher_dlg_school">学院：</label>
+        <input id="teacher_dlg_school" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/school',valueField:'school',textField:'name',panelWidth:150">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:'true'" id="teacher_dlg_search">检索</a>
+    </div>
+    <table id="teacher_dlg_dg"></table>
+</div>
+<div class="container">
+    <div id="workload_work_toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-diaocha',plain:'true'"  id="workload_work_repeat">计算重复课系数</a>|
+        <label for="workload_work_courseno">课号：</label><input id="workload_work_courseno" class="easyui-validatebox" size="10" value="%"/>
+        <label for="workload_work_coursename">课名：</label><input id="workload_work_coursename" class="easyui-validatebox" size="10"  value="%"/>
+        <label for="workload_work_school">学院：</label>
+        <input id="workload_work_school" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/school',valueField:'school',textField:'name',panelWidth:150">
+        <label for="workload_work_worktype">工作量类型：</label>
+        <input id="workload_work_worktype" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/worktype',valueField:'type',textField:'name',panelWidth:180">
+        <label for="workload_work_status">状态：</label>
+        <select class="easyui-combobox" id="workload_work_status"data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">已审核</option>
+            <option value="0">待审核</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:'true'"  id="workload_work_search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_work_save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_work_cancel">取消</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:'true'" id="workload_work_export_total">导出课程总工作量</a>
+    </div>
+    <table id="workload_work_dg">
+    </table>
+    <div class="space"></div>
+    <div id="workload_work_toolbar2">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:'true'"  id="workload_work_insert2">新增</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:'true'"  id="workload_work_delete2">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_work_save2">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_work_cancel2">取消</a>
+    </div>
+    <table id="workload_work_dg2"></table>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>可以按 Tab键进入下一个编辑单元格，或者按 Enter键进入下一行。</li>
+            <li>选中上表某行后，在下方单元格将显示详细分配，请根据实际情况分配到老师个人。</li>
+            <li class="warn">如果对工作量、系数确认有异议，请与教务处工作量管理人员联系，如无异议请自行分配。</li>
+            <li class="warn">如果课程不计算工作量，请在“不统计”列打勾，并在备注中写明原因，如“自考课程”等</li>
+        </ol>
+    </div>
+</div>
+</body>

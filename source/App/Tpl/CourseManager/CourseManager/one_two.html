@@ -1,0 +1,46 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+
+        $('#List_dat').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+        $('#List_dat').datagrid('load',{'Sqlpath':{'count':'CourseManager/One_two_count.SQL','select':'CourseManager/One_two_select.SQL'},
+            bind:{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val()}})
+    })
+</script>
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List_dat"
+                   data-options="fit:true,singleSelect:true,striped:true,pagination:true,toolbar:[{
+                     'text':'查看选课情况',
+                     iconCls:'icon-search',
+                     handler:function(a,b,c){
+                        var rowList=$('#List_dat').datagrid('getChecked')
+                        if(rowList==''){
+                            return $.messager.alert('提示','请选择一条要查看的记录')
+                        }
+openTabsWindows('课程的情况','__ROOT__/CourseManager/CourseManager/StudentList/YEAR/'+parent.$('[NAME=YEAR]').val()+'/TERM/'+parent.$('[name=TERM]').val()+'/COURSENO/'+rowList[0].kh,'',true);
+
+
+                     }
+                   }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:220,align:'right'" align="center">课名</th>
+                    <th data-options="field:'kclb',width:100,align:'right'" align="center">课程类别</th>
+                    <th data-options="field:'jsh',width:100,align:'right'" align="center">教室号</th>
+                    <th data-options="field:'jsjc',width:150,align:'right'" align="center">教室简称</th>
+                    <th data-options="field:'xxrs',width:100,align:'right'" align="center">选修人数</th>
+                    <th data-options="field:'zws',width:100,align:'right'" align="center">座位数</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>

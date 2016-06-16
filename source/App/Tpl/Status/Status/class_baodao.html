@@ -1,0 +1,162 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        function ggeren(){
+            var row=$('#class_datgrid').datagrid('getSelected');
+            var yiyi=document.getElementById('a123')
+            openTabsWindows('学生个人情况','__URL__/Window_studentinfo/EXAMNO/'+row.EXAMNO+'/STUDENTNO/'+row.STUDENTNO,'',true)
+        }
+        $('#e_geren').bind('click',ggeren)
+        $('#admin_geren').bind('click',ggeren)
+
+
+        function zzhuce(){
+            var row=$('#class_datgrid').datagrid('getSelected');
+            var yiyi=document.getElementById('a123')
+            openTabsWindows('学生注册情况','__URL__/Window_studentregis/STUDENTNO/'+row.STUDENTNO,'',true)
+        }
+
+        $('#e_zhuce').bind('click',zzhuce);
+        $('#admin_zhuce').bind('click',zzhuce)
+
+        var dat=$('#class_datgrid').datagrid({
+            toolbar:'#tdemo',
+            onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#class_datgrid');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+        })
+
+        var classno='{$classno}';
+        var year='{$year}';
+        var term='{$term}'
+
+        var obj={}
+        obj['CLASSNO']=classno
+        obj['YEAR']=year;
+        obj['TERM']=term;
+        obj['str']='<center>全班应报到学生xyingbaodaox名；现在已报到：xyibaodaox名。全班共有学生xyingbaodaox名</center>'
+        ajiakesi('__URL__/classbaodao',obj,function(c){
+            $('#class_title').html(c)
+            $('#class_datgrid').datagrid('load',obj)
+
+    })
+    })
+
+
+</script>
+        <div id="tdemo">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_geren" plain=true>查看学生个人情况</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_zhuce" plain=true>查看学生注册情况</a>
+        </div>
+<div id="cc2" class="easyui-layout" data-options="fit:true" >
+    <div data-options="region:'north',title:'',split:false,border:false" style="height:30px;">
+        <span id="class_title"></span>
+    </div>
+    <div data-options="region:'center',title:'',border:'false',split:false" style="background:#eee;">
+                 <table class="easyui-datagrid" id="class_datgrid"
+                   data-options="url:'__URL__/classbaodao/hasJson/1',fitColumns:true,singleSelect:true,fit:true,border:false">
+                <thead>
+                <tr>
+                    <th data-options="field:'EXAMNO',width:100,align:'center'">准考证号</th>
+                    <th data-options="field:'STUDENTNO',width:100,align:'center'">学号</th>
+                    <th data-options="field:'STUDENTNAME',width:100,align:'center'">学生姓名</th>
+                    <th data-options="field:'SEX',width:100,align:'center'">性别</th>
+                    <th data-options="field:'SCORE',width:100,align:'center'">高考总分</th>
+                    <th data-options="field:'PROVINCE',width:100,align:'center'">省份</th>
+                    <th data-options="field:'ARRIVED',width:100,align:'center'">记录时间</th>
+                    <th data-options="field:'YEARS',width:100,align:'center'">学制</th>
+                    <th data-options="field:'STATUS',width:100,align:'center'">学籍状态</th>
+                    <th data-options="field:'ENTERDATE',width:100,align:'center'">入学时间</th>
+                    <th data-options="field:'REGCODE',width:100,align:'center'">注册状态</th>
+                </tr>
+                </thead>
+            </table>
+
+    </div>
+</div>
+<a href="__URL__/" id="a123" target="_blank">123123</a>
+        <script>
+       /*     {
+                striped:true,
+                        url:'__URL__/classbaodao/hasJson/1',
+                    columns:[[
+                {checkbox:true},
+                {field:'EXAMNO',title:'准考证号',width:100,sortable:true,
+                    formatter:function(value,row,index){
+                        if(value=='null')return '';
+                        return value
+                    }
+                },
+                {field:'STUDENTNO',title:'学号',width:80,sortable:true
+                },
+                {field:'STUDENTNAME',title:'学生姓名',width:60,sortable:true
+                },
+                {field:'SEX',title:'性别',width:35,sortable:true
+                },
+                {field:'SCORE',title:'高考总分',width:75,sortable:true
+                },
+                {field:'PROVINCE',title:'省份',width:115,sortable:true
+                },
+                {field:'ARRIVED',title:'记录时间',width:115,sortable:true
+                },
+                {field:'YEARS',title:'学制',width:35,sortable:true
+                },
+                {field:'STATUS',title:'学籍状态',width:75,sortable:true
+                },
+                {field:'ENTERDATE',title:'入学时间',width:115,sortable:true
+                },
+                {field:'REGCODE',title:'注册状态',width:65,sortable:true
+                }
+            ]],
+                    pagination:true,
+                    pageList:[10,20,30,40,50],
+                    pageSize:30,
+                    toolbar:[{
+                text:'查看学生个人情况',
+                iconCls:'icon-search',
+                handler:function(){
+                    var yi=yitiao(class_dat,'请选择一条不能选择多条','请您选择一条查看');
+                    if(yi){
+                        var row=class_dat.datagrid('getSelected');
+                        var yiyi=document.getElementById('a123')
+                        openTabsWindows('学生个人情况','__URL__/Window_studentinfo/EXAMNO/'+row.EXAMNO+'/STUDENTNO/'+row.STUDENTNO,'',true)
+                        //yiyi.href=
+                        // yiyi.click();
+                    }
+                }},'-',{
+                text:'查看学生注册情况',
+                iconCls:'icon-personal',
+                handler:function(){
+                    var yi=yitiao(class_dat,'请选择一条不能选择多条','请您选择一条查看');
+                    if(yi){
+                        var row=class_dat.datagrid('getSelected');
+                        var yiyi=document.getElementById('a123')
+                        openTabsWindows('学生注册情况','__URL__/Window_studentregis/STUDENTNO/'+row.STUDENTNO,'',true)
+
+                        //yiyi.click();
+                    }
+                }},{
+                text:'返回',
+                iconCls:'icon-goleft',
+                handler:function(){
+                    big2.window({closed:true})
+                }}
+            ],onUnselect:function(rowIndex,rowData){
+                dat.datagrid('cancelEdit',rowIndex);
+            }}*/
+        </script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_geren'>查看学生个人情况</div>
+    <div id='admin_zhuce'>查看学生注册情况</div>
+</div>
+</body>
+</html>

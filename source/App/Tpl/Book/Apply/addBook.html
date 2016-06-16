@@ -1,0 +1,336 @@
+<style >
+.del{float: right;margin:20px 10px 0px 0px;color:#000099;display:none;}
+.sel{color:#000099;display:none;}
+</style>
+
+<div style="padding:10px 0px 0px 50px;">
+	<strong>注意：</strong>
+	<p>一、ISBN中间不要有“-”线，只要数字，例如：692452360199；</p>
+	<p>二、教材若有多个作者，姓名之间用“/”隔开，例如：王三/张四</p>
+</div>
+
+<form action="#" id="addForm">
+	<table border="0" align="center" width="90%" style="border-collapse: collapse;">
+	 <tbody>
+		<tr>
+			<th align="right">教材性质：</th>
+			<td align="left">
+				<select name="booknature" class="checkNull" onchange="nature($(this),false)">
+					<option value="%">请选择</option>
+				    <option value="本科">本科</option>
+				    <option value="高职高专">高职高专</option>
+				    <option value="其他">其他</option>
+				    <option value="自编">自编</option>
+			    </select> <font color="red">*</font>
+			</td>
+			<th align="right" width="12%">ISBN：</th>
+			<td align="left" width="38%">
+			<select class="isbn_1" style="display:none;" onchange="getBook($(this),false)">
+	        <option value="%">请选择</option>
+	        <volist name="isbn" id="s">
+	        	<option value="{$s.isbn}">{$s.isbn}</option>
+	        </volist>
+			</select>
+			<input name="isbn" class="checkNull isbn_2" onchange="getBook($(this),false)" maxlength="50" size="20"> <font color="red">*</font>
+			<a href="javascript:void(0)" class="sel" onclick="sel($(this))">手动输入</a></td>
+		</tr>
+		<tr>
+			<th align="right" width="12%">教材名：</th>
+			<td align="left"><input name="bookname" class="checkNull" maxlength="100" size="20"> <font color="red">*</font></td>
+			<th align="right">作者：</th>
+			<td align="left"><input name="author" class="checkNull" maxlength="50" size="20"> <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<th align="right">出版年份：</th>
+			<td align="left"><input name="pubtime" size="6" type="text" maxlength="4"></td>
+			<th align="right">出版社：</th>
+			<td align="left">
+				<input name="press" class="easyui-combobox" data-options="valueField:'id',textField:'name',url:'/index.php/Book/Maintain/ajaxPress/',mode:'remote'"/>
+				<font class="press" color="red">*</font>
+				<input type="hidden" name="book_id">
+			 </td>
+		</tr>
+		<tr height="60">
+			<th align="right">备注：</th>
+			<td align="left" colspan="3" ><textarea name="remarks" rows="3" cols="70"></textarea>
+			<a href="javascript:void(0)" class="del" onclick="del($(this))">删除</a></td>
+		</tr>
+	 </tbody>
+	</table>
+</form>
+<div style="line-height:40px;text-align:center;padding-bottom:10px;">
+	<td align="center" colspan="4">
+		<a href="javascript:void(0)" id="addbut" class="easyui-linkbutton" data-options="iconCls:'icon-add'">新增一本</a>&nbsp;&nbsp;&nbsp;
+		<a href="javascript:void(0)" id="savebut" class="easyui-linkbutton" data-options="iconCls:'icon-save'">提交征订</a>&nbsp;&nbsp;&nbsp;
+		<a href="javascript:void(0)" id="reset" class="easyui-linkbutton">重&nbsp;置</a>
+	</td>
+</div>
+<script type="text/javascript">
+//获取新增一本时要追加HTML的内容
+var txt=$("#addForm").html();
+var apply_wd=null;
+$(function(){
+	/******************************************征订申请***********************************/
+    //征订申请窗口
+	apply_wd=$('#apply_wd').window({
+        modal:true,height:500, width:800,minimizable:false,
+        maximizable:false,collapsible:false,draggable:false,
+        resizable:false,closed:true
+    });
+    //征订申请
+    function zzd(){
+        list=datagrid.datagrid('getSelections');
+        if(list.length < 1){
+            msgShow("系统提示：","没有选择任何数据进行操作！","error");
+            return;
+        }else{
+            var courseno=list[0].COURSENO;
+            var bool=true,apply=true;
+            if(list.length > 0){
+                for(var i=0;i<list.length;i++){
+                    //判断课号是否相同
+                    if(courseno!=list[i].COURSENO){
+                        bool=false;
+                        break;
+                    }
+                    //判断是否已有征订信息
+                    if(list[i].APPLYNUM > 0){
+                        apply=false;
+                    }
+                }
+            }
+            if(!bool){
+                msgShow("系统提示：","课号相同才能统一征订！","info");
+                return;
+            }
+            if(!apply){
+                msgShow("系统提示：","亲，您选中的数据已有申请记录，若需要修改，请点击修改申请记录!","error");
+                return;
+            }
+            apply_wd.window({closed:false,title:"课名："+list[0].COURSENAME});
+        }
+    }
+    //征订申请
+    $("#applyBut").bind('click',zzd);
+    $('#admin_apply').bind('click',zzd);
+    //重置按钮
+    $('#reset').click(function(){
+    	$("#addForm").html(txt);
+    	$("#addForm [name='press']").combobox({});
+    });
+    //新增一本
+    $('#addbut').click(function(){
+    	$("#addForm").append(txt);
+		var index=$("#addForm table").length-1;
+		$("#addForm .del:eq("+index+")").show();
+    	$("#addForm [name='press']:eq("+index+")").combobox({});
+    	
+    });
+	//保存信息
+	$('#savebut').click(function(){
+		var bool=true;
+		//验证非空字段
+		$("#addForm .checkNull").each(function(){
+			if(!check($(this))){
+				bool=false;
+			}else{
+				if($(this).attr("name")=="isbn" && $(this).val().length < 5){
+					$(this).next().html("格式不规范");
+					bool=false;
+				}
+			}
+		});
+		//出版社非空验证
+		var index=0;
+		$("#addForm [name='press']").each(function(){
+			if($.trim($(this).val())==""){
+				$("#addForm .press:eq("+index+")").html("不能为空");
+				bool=false;
+			}else{
+                if(!/^\d+$/.test($(this).val())){
+                    $("#addForm .press:eq("+index+")").html("该出版社不存在，请联系相关管理人员添加到库中之后再进行申请");
+                    bool=false;
+                }else $("#addForm .press:eq("+index+")").html("*");
+			}
+			index++;
+		});
+		//开始保存教材信息
+		if(bool){
+			var id="",booknature="",isbn="",bookname="",author="",pubtime="",press="",remarks="";
+			//教材数量
+			var len=$("#addForm table").length;
+			//封装教材信息
+			var bookList=new Array(len);
+			var _isbn=$.trim($("#addForm [name='isbn']:eq(0)").val());
+			for(var i=0;i<len;i++){
+				var ary=null;
+				id=$.trim($("#addForm [name='book_id']:eq("+i+")").val());
+				if(id!=""){
+					remarks=$.trim($("#addForm [name='remarks']:eq("+i+")").val());
+					ary={"book_id":id,"remarks":remarks};
+				}else{
+					booknature=$.trim($("#addForm [name='booknature']:eq("+i+")").val());
+					isbn=$.trim($("#addForm [name='isbn']:eq("+i+")").val());
+					bookname=$.trim($("#addForm [name='bookname']:eq("+i+")").val());
+					author=$.trim($("#addForm [name='author']:eq("+i+")").val());
+					pubtime=$.trim($("#addForm [name='pubtime']:eq("+i+")").val());
+					press=$.trim($("#addForm [name='press']:eq("+i+")").val());
+					remarks=$.trim($("#addForm [name='remarks']:eq("+i+")").val());
+					ary={"booknature":booknature,"isbn":isbn,"bookname":bookname,"author":author,"pubtime":pubtime,"press":press,"remarks":remarks}
+				}
+				bookList[i]=ary;
+			}
+			//封装课程信息
+			var courseList=new Array(list.length);
+			for(var i=0;i<list.length;i++){
+				var ary={"YEAR":list[i].YEAR,"TERM":list[i].TERM,"COURSENO":list[i].COURSENO,"GROUP":list[i].GROUP,
+						"ATTENDENTS":list[i].ATTENDENTS,"COURSETYPE":list[i].COURSETYPE,
+						"TEACHERNUM":list[i].TEACHERNUM,"SCHOOL":list[i].SCHOOL,"CLASSNO":list[i].CLASSNO,"MAP":list[i].S_RECNO};
+				courseList[i]=ary;
+            } 
+			//Ajax方式提交数据
+			$.ajax({
+                url:"__URL__/addApply/",
+                type:"POST",
+                data:{book:bookList,course:courseList},
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("系统提示：","申请征订成功！","info",function(){
+                    		$('#reset').click();
+                    		apply_wd.window({closed:true});
+                    		datagrid.datagrid('reload');
+                    	});
+                    }else msgShow("系统提示：","发生未知错误，申请失败！","error");
+                }
+            });
+		}
+	});
+});
+//input验证
+function check(ele){
+	var value=$.trim(ele.val());
+	if(value!=""){
+		ele.nextAll("font").html("*");
+	}else{
+		ele.nextAll("font").html("不能为空");
+		return false;
+	}
+	return true;
+}
+
+//删除新增一本
+function del(ele){
+	ele.parent().parent().parent().parent().remove();
+}
+/*教材类型选择*/
+function nature(ele,bool){
+	var parent=ele.parent("td").nextAll("td");
+	if(ele.val()=="自编" && parent.children(".isbn_1").children().length > 1){
+		parent.children(".isbn_1").show();
+    	parent.children(".isbn_2").hide();
+    	parent.children(".isbn_1").addClass("checkNull");
+    	parent.children(".isbn_2").removeClass("checkNull");
+		parent.children(".sel").show();
+	}else{
+		parent.children(".isbn_2").show();
+		parent.children(".isbn_1").hide();
+		parent.children(".isbn_2").addClass("checkNull");
+		parent.children(".isbn_1").removeClass("checkNull");
+		parent.children(".sel").hide();
+		var id=ele.parent().parent().parent().find("[name='book_id']").val();
+    	if(id!=null && id!=""){
+    		clear(ele,true);
+    	}
+	}
+	//bool为true就是编辑窗口，此时将文本框启用，delAttr方法在queryBook.html文件中
+	if(bool){
+		var applyId=ele.parent().parent().parent().find("[name='apply_id']").val();
+		if(applyId!=null && applyId!=""){
+			delAttr(ele);
+		}
+	}
+}
+//根据isbn获得图书信息
+function getBook(ele,bool){
+	var isbn=$.trim(ele.val());
+	if(isbn!="" && isbn!=null){
+		//bool为true就是编辑窗口，此时将文本框启用，delAttr方法在queryBook.html文件中
+		if(bool){
+			var applyId=ele.parent().parent().parent().find("[name='apply_id']").val();
+			if(applyId!=null && applyId!=""){
+				delAttr(ele);
+			}
+		}
+		$.ajax({
+            url:"__URL__/getBook/",
+            type:"POST",
+            dataType:"json",
+            data:{isbn:$.trim(ele.val())},
+            success: function(data){
+            	if(data==-1){
+            		$.messager.alert("系统提示：","该教材已禁用，请重新输入","info",function(){
+            			clear(ele,true);
+                	});
+            		return;
+            	}
+                if(data!=null){
+                	ele=ele.parent().parent().parent();
+                	ele.find("[name='bookname']").val(data.bookname);
+                	ele.find("[name='author']").val(data.author);
+                	ele.find("[name='pubtime']").val(data.pubtime);
+                	ele.find(".combo-text").val(data.pressname);
+                	ele.find("[name='press']").val(data.press);
+                	ele.find("[name='book_id']").val(data.book_id);
+                }else{
+                	var booknature=ele.parent().parent().parent().find("[name='booknature']").val();
+                	if(booknature=="自编"){
+                		$.messager.alert("系统提示：","该自编教材不存在，请重新输入","info",function(){
+                			clear(ele,true);
+                    	});
+                	}
+                	var id=ele.parent().parent().parent().find("[name='book_id']").val();
+                	if(id!=null && id!=""){
+                		clear(ele,false);
+                	}
+                }
+            }
+        });
+	}
+}
+//清空相应文本框内容
+function clear(ele,bool){
+	ele=ele.parent().parent().parent();
+	ele.find("[name='bookname']").val("");
+	if(bool){
+		ele.find("[name='isbn']").val("");
+	}
+	ele.find("[name='author']").val("");
+	ele.find("[name='pubtime']").val("");
+	ele.find("[name='press']").val("");
+	ele.find(".combo-text").val("");
+	ele.find("[name='book_id']").val("");
+	ele.find("[name='remarks']").text("");
+}
+//切换自编教材ISBN选择或输入
+function sel(ele){
+	if(ele.html()=="手动输入"){
+		ele.prevAll(".isbn_2").val("");
+		ele.prevAll(".isbn_2").show();
+		ele.prevAll(".isbn_1").hide();
+		ele.prevAll(".isbn_2").addClass("checkNull");
+		ele.prevAll(".isbn_1").removeClass("checkNull");
+		ele.html("教材选择");
+	}else{
+		ele.prevAll(".isbn_1").show();
+		ele.prevAll(".isbn_2").hide();
+		ele.prevAll(".isbn_1").addClass("checkNull");
+		ele.prevAll(".isbn_2").removeClass("checkNull");
+		ele.html("手动输入");
+	}
+	var id=ele.parent().parent().parent().find("[name='book_id']").val();
+	if(id!=null && id!=""){
+		clear(ele,true);
+		ele.prevAll(".isbn_1").val("");
+	}
+}
+</script>

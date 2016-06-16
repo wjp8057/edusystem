@@ -1,0 +1,1 @@
+insert into work(Totalwork_id,TeacherNo,TeacherName,work,status) select :Totalwork_id,TEACHERS.TEACHERNO,TEACHERS.NAME,0,0 from TEACHERS WHERE TEACHERNO in (:teacherno)

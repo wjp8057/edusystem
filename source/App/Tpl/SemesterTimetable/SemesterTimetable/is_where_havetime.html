@@ -1,0 +1,100 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var wd=$('#wd').window(new wind(0,0,false,false,false,true,true))
+
+        var arr=[];
+
+            var dat=$('#daaa2').datagrid({
+                view: detailview,
+                detailFormatter: function(rowIndex, rowData){
+                    arr[rowData.row]=rowData;
+                    return "<div id=a"+rowData.row+" style='width:500px;height:101px'>"+rowData.row+"</div>"
+                },
+                onExpandRow:function(index,row){
+                    $('#a'+row.row).html('<table width="500"><tr><td  align="center" nowrap ><font size="2">班级</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['bj']+'</font></td></tr><tr ><td  align="center" nowrap ><font size="2">教师</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['js']+'</font></td></tr><tr ><td  align="center" nowrap ><font size="2">备注</font></td><td align="left" colspan="12"><font size="2"></font></td></tr><tr ><td  align="center" nowrap ><font size="2">课程安排</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['kcap']+'</font></td></tr></table>')
+                }
+            })
+            var obj={}
+            obj['bind']={};
+
+            if('{$posta.ORDER1}'=='1'&&'{$posta.have_time}'=='1'){                                //todo:有时间安排的课程 && 非时段
+
+                obj['count']='count_Timetable_have_time.SQL';
+                obj['select']='select_Timetable_have_time.SQL'
+                obj['bind'][':YEAR']='{$posta.YEAR}';obj['bind'][':TERM']='{$posta.TERM}';obj['bind'][':COURSENO']='{$posta.COURSENO}%';obj['bind'][':COURSENAME']='{$posta.COURSENAME}%';obj['bind'][':GROUP']='{$posta.GROUP}%';
+                obj['bind'][':SCHOOL']='{$posta.SCHOOL}%';obj['bind'][':COURSETYPE']='{$posta.COURSETYPE}%';obj['bind'][':CLASSNO']='{$posta.CLASSNO}%';obj['bind'][':CLASSNAME']='{$posta.CLASSNAME}%';obj['bind'][':APPROACHES']='{$posta.APPROACHES}%';
+                obj['bind'][':EXAMTYPE']='{$EXAMTYPE}%';obj['bind'][':TEACHERNAME']='{$TEACHERNAME}%';obj['bind'][':TEACHERNO']='{$TEACHERNO}%';
+                obj['bind'][':DAY']='{$posta.DAY}%';obj['bind'][':TIME']='{$posta.TIME}';
+
+            }else if('{$posta.ORDER1}'=='2'&&'{$posta.have_time}'=='1'){                           //todo:有时间安排的课程 && 时段
+
+                obj['count']='count_Timetable_havetime_shiduan.SQL'
+                obj['select']='select_Timetable_havetime_shiduan.SQL'
+                obj['bind'][':YEAR']='{$posta.YEAR}';obj['bind'][':TERM']='{$posta.TERM}';obj['bind'][':COURSENO']='{$posta.COURSENO}%';obj['bind'][':GROUP']='{$posta.GROUP}%';
+                obj['bind'][':SCHOOL']='{$posta.SCHOOL}%';obj['bind'][':COURSETYPE']='{$posta.COURSETYPE}%';obj['bind'][':CLASSNO']='{$posta.CLASSNO}%';obj['bind'][':CLASSNAME']='{$posta.CLASSNAME}%';obj['bind'][':APPROACHES']='{$posta.APPROACHES}%';
+                obj['bind'][':EXAMTYPE']='{$EXAMTYPE}%';obj['bind'][':TEACHERNAME']='{$TEACHERNAME}%';obj['bind'][':TEACHERNO']='{$TEACHERNO}%';
+                obj['bind'][':DAY']='{$posta.DAY}%';obj['bind'][':TIME']='{$posta.TIME}';
+
+            }else if('{$posta.ORDER1}'=='2'&&'{$post.have_time}'!='1'){                              //todo：没有时间安排的  &&只有时段
+
+                obj['count']='count_Timetable_shiduan.SQL'
+                obj['select']='select_Timetable_shiduan.SQL'
+                obj['bind'][':YEAR']='{$posta.YEAR}';obj['bind'][':TERM']='{$posta.TERM}';obj['bind'][':COURSENO']='{$posta.COURSENO}%';obj['bind'][':GROUP']='{$posta.GROUP}%';
+                obj['bind'][':SCHOOL']='{$posta.SCHOOL}%';obj['bind'][':COURSETYPE']='{$posta.COURSETYPE}%';obj['bind'][':CLASSNO']='{$posta.CLASSNO}%';obj['bind'][':CLASSNAME']='{$posta.CLASSNAME}%';obj['bind'][':APPROACHES']='{$posta.APPROACHES}%';
+                obj['bind'][':EXAMTYPE']='{$EXAMTYPE}%';obj['bind'][':TEACHERNAME']='{$TEACHERNAME}%';obj['bind'][':TEACHERNO']='{$TEACHERNO}%';
+                obj['bind'][':DAY']='{$posta.DAY}%';obj['bind'][':TIME']='{$posta.TIME}';
+
+            }
+
+
+                setTimeout(function(){
+                        dat.datagrid('load',obj)},400)
+
+
+
+
+
+
+    })
+
+
+
+
+
+</script>
+<style>
+
+</style>
+<body>
+<!--todo:6行的-->
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+      <!--  <div data-options="region:'north',title:'',split:false,border:false" style="height:50px;">
+            <center><b><span class="tt">第{$posta.YEAR}学年,第{$posta.TERM}学期课程列表</span></b></center>
+        </div>-->
+        <div data-options="region:'center',title:'',split:false,border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="daaa2" title=' <center><b><span class="tt">第{$posta.YEAR}学年,第{$posta.TERM}学期课程列表</span></b></center>'
+                   data-options="url:'__URL__/is_where_havetime/hasJson/1',singleSelect:true,pagination:true,fit:true,pageList:[10,20,30,40],pageSize:20">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:80" align="center">课号</th>
+                    <th data-options="field:'km',width:350,align:'center'">课名</th>
+                    <th data-options="field:'xf',width:80,align:'center'">学分</th>
+                    <th data-options="field:'zxs',width:80,align:'center'">周学时</th>
+                    <th data-options="field:'zsy',width:150,align:'center'">周实验</th>
+                    <th data-options="field:'xk',width:80,align:'center'">修课</th>
+                    <th data-options="field:'kh2',width:80,align:'center'">考核</th>
+                    <th data-options="field:'kkxy',width:80,align:'center'">开课学院</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+
+
+</body>
+</html>

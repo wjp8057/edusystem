@@ -1,0 +1,320 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        var equipment=$('#equipment');
+        equipment.combobox({
+            url:'{$ROOT}/all/option/equipment?only=0',
+            valueField:'equipment',
+            textField:'name'
+        });
+        var area=$('#area');
+        area.combobox({
+            url:'{$ROOT}/all/option/area?only=0',
+            valueField:'area',
+            textField:'name'
+        });
+        var usage=$('#usage');
+        usage.combobox({
+            url:'{$ROOT}/all/option/usage?only=0',
+            valueField:'usage',
+            textField:'name',panelHeight:'auto'
+        });
+        var reserved=$('#reserved');
+        reserved.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',panelHeight:'auto'
+        });
+        var status=$('#status');
+        status.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',panelHeight:'auto'
+        });
+        //默认为高教园区南区
+        area.combobox('setValue','4');
+        if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
+            area.combobox('setValue','3');
+
+
+        $('#dg').datagrid({
+            title:'教室列表',idField:'roomno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/Base/Room/roomlist',
+            queryParams: {area:area.combobox('getValue')},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'roomno',title:'教室号*',width:80,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[9]',required:true}}},
+                {field:'no',title:'房间号*',width:50,align:'center',editor:{type:'validatebox',options:{validType:' maxLength[7]',required:true}}},
+                {field:'roomname',title:'名称*',width:140,align:'center',editor:{type:'validatebox',options:{validType:' maxLength[15]',required:true}}},
+                {field:'building',title:'楼名*',width:70,align:'center',editor:{type:'validatebox',options:{validType:' maxLength[15]',required:true}}},
+                {field:'area',title:'校区*',width:100,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/area',
+                    valueField:'area',textField:'name',
+                        onSelect:function(rec){
+                            tt=$('#dg').datagrid('getSelected');
+                            tt.areaname=rec.name;
+                        }}},
+                    formatter:function(val,rec){
+                        return rec.areaname;
+                    }},
+                {field:'seats',title:'座位*',width:40,align:'center',editor:{type:'numberbox',options:{precision:0,required:true}}},
+                {field:'testers',title:'考位*',width:40,align:'center',editor:{type:'numberbox',options:{precision:0,required:true}}},
+                {field:'equipment',title:'设施*',width:110,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/equipment',
+                        valueField:'equipment',textField:'name',
+                        onSelect:function(rec){
+                    tt=$('#dg').datagrid('getSelected');
+                    tt.equipmentname=rec.name;
+                }}},
+                formatter:function(val,rec){
+                    return rec.equipmentname;
+                }},
+                {field:'school',title:'优先学院*',width:100,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/school',
+                        valueField:'school',textField:'name',
+                        onSelect:function(rec){
+                    tt=$('#dg').datagrid('getSelected');
+                    tt.schoolname=rec.name;
+                }}},
+                formatter:function(val,rec){
+                    return rec.schoolname;
+                }
+                },
+                {field:'usage',title:'排课约束*',width:80,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/usage',panelHeight:'auto',
+                        valueField:'usage',textField:'name',
+                        onSelect:function(rec){
+                    tt=$('#dg').datagrid('getSelected');
+                    tt.usagename=rec.name;
+                }}},
+                formatter:function(val,rec){
+                    return rec.usagename;
+                }},
+                {field:'reserved',title:'保留*',width:50,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/zo',panelHeight:'auto',
+                        valueField:'zo',textField:'name'}},
+                    formatter:function(val,rec){
+                        if(val==1)
+                            return '是';
+                        else
+                            return '否';
+                    }},
+                {field:'status',title:'可用*',width:50,align:'center',editor:{type:'combobox', options:{editable:false,required:true,url:'{$ROOT}/all/option/zo',panelHeight:'auto',
+                    valueField:'zo',textField:'name'}},
+                    formatter:function(val,rec){
+                        if(val==1)
+                            return '是';
+                        else
+                            return '否';
+                    }}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                roomno: $('#roomno').val(),
+                name: $('#name').val(),
+                building: $('#building').val(),
+                area:$('#area').combobox('getValue'),
+                equipment:$('#equipment').combobox('getValue'),
+                seatmin: $('#seatmin').val(),
+                seatmax: $('#seatmax').val(),
+                testmin: $('#testmin').val(),
+                testmax: $('#testmax').val(),
+                school:$('#school').combobox('getValue'),
+                usage:$('#usage').combobox('getValue'),
+                reserved:$('#reserved').combobox('getValue'),
+                status:$('#status').combobox('getValue')
+            });
+        });
+        //显示更多项目
+        $("#more").click(function() {
+            var toolbar=$("#toolbar_hide");
+            if(toolbar.is(":hidden")){
+                toolbar.show();
+            }else{
+                toolbar.hide();     //如果元素为显现,则将其隐藏
+            }
+        });
+        $("#toolbar_hide").hide();
+        //导出教室信息
+        $('#menu_export,#export').click(function(){
+            var roomno = encodeURI($('#roomno').val());
+            var name = encodeURI($('#name').val());
+            var building = encodeURI($('#building').val());
+            var area = encodeURI($('#area').combobox('getValue'));
+            var equipment = encodeURI($('#equipment').combobox('getValue'));
+            var seatmin = encodeURI($('#seatmin').val());
+            var seatmax = encodeURI($('#seatmax').val());
+            var testmin = encodeURI($('#testmin').val());
+            var testmax = encodeURI($('#testmax').val());
+            var school = encodeURI($('#school').combobox('getValue'));
+            var usage = encodeURI($('#usage').combobox('getValue'));
+            var reserved = encodeURI($('#reserved').combobox('getValue'));
+            var status = encodeURI($('#status').combobox('getValue'));
+            $.fileDownload("{$ROOT}/base/room/exportroom?roomno="+roomno+"&name="+name+"&building=" +building+
+            "&area="+area+'&equipment='+equipment+'&seatmin='+seatmin+'&seatmax='+seatmax+'&testmin='+testmin
+            +'&testmax='+testmax+'&school='+school+'&usage='+usage+'&reserved='+reserved+'&status='+status, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+
+
+        // 绑定新建按钮事件
+        $("#insert,#menu_insert").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            tt.datagrid('insertRow',{
+                index: 0,
+                row: {
+                    status:1,
+                    reserved:0
+                }
+            });
+            tt.datagrid('startEditing',{field:'roomno',index:0});
+            current_datagrid=tt;
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = new Object();
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(rows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(rows);
+            }
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["inserted"]=$.toJSON(rows);
+            }
+            if(count<=0) //如果没有任何更新，就退出
+                return;
+
+            $.post('{$ROOT}/base/room/updateroom',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div class="menu-sep"></div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出信息</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"  id="insert">新增</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-system',plain:'true'" id="more">更多</a>
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name">名称：</label><input id="name" class="easyui-validatebox" size="8" value="%"/>
+            <label for="building">楼名：</label><input id="building" class="easyui-validatebox" size="6" value="%"/>
+            <label for="area">校区：</label><input id="area" size="15">
+            <label for="equipment">设施：</label><input id="equipment" size="15">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出信息</a>
+        </div>
+        <span id="toolbar_hide">
+            <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
+            <label for="testmin">考位数：</label><input id="testmin" class="easyui-validatebox" size="1" value="0"/> - <input id="testmax" class="easyui-validatebox" size="1" value="1000"/>
+            <label for="school">优先学院：</label>
+            <input id="school" size="15">
+            <label for="usage">排课约束：</label>
+            <input id="usage" size="10">
+              <label for="reserved">保留：</label>
+            <input id="reserved" size="5">
+              <label for="status">可用：</label>
+            <input id="status" size="5">
+        </span>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>点击“更多”按钮可以设置全部检索条件！</li>
+        </ol>
+    </div>
+</div>

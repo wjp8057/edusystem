@@ -1,0 +1,212 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+ <body style="background-color: #ffffff">
+ <script>
+     eval('var arr={$TList}');
+    // alert(arr)
+     var R15='{$R15}'
+     var UserGroup="{$teacherSCHOOL.SCHOOL}";            //todo:（应该是自己的）
+     var myschool='{$myschool}';
+
+      $(function(){
+          //todo:点搜索的时候
+          $('#ss').bind('click',function(){
+                $('#ddat').datagrid('options').url='__URL__/jiankaoanpai/hasJson/true';
+                $('#ddat').datagrid('load',{sqlpath:{'select':'exam/jiankaoanpai_select.SQL','count':'exam/jiankaoanpai_count.SQL'},
+                bind:{'teacherno':$('[name=tteacherno]').val(),'school':$('[name=sschool]').val(),
+                    'name':$('[name=nname]').val()},'year':parent.$('#YEAR').val(),'term':parent.$('#TERM').val()})
+          })
+
+
+          if(myschool!='A1'){
+              $('[name=sschool]').val(myschool)
+              $('[name=sschool]').attr('disabled',true)
+          }
+
+
+          //todo:点击更换颜色事件
+          $('[name=tcells]').bind('click',function(){
+              var tdList=$('[name=tcells]');
+             for(var i=0;i<tdList.length;i++){
+                $(tdList[i]).attr('bgcolor','white')
+             }
+                 $(this).attr('bgcolor','green');
+          })
+
+          //todo:点击设定的时候
+         $('#sd').bind('click',function(){
+             var teacher=$('#ddat').datagrid('getSelected')
+             if(teacher==''){
+                 return $.messager.alert('提示','请选择一条要设定的数据')
+             }
+            /* alert(myschool)
+             alert(teacher.school)*/
+             if(myschool!=teacher.school&&myschool!='A1'&&teacher.school!='10'){
+                 return $.messager.alert('提示','您不能安排别的学院的监考老师！')
+             }
+
+             for(var i=0;i<$('[name=tcells]').length;i++){
+
+                 if($($("[name=tcells]")[i]).attr('bgColor')=='green'|| $.trim($($("[name=tcells]")[i]).attr('bgColor'))=='#008000')
+                 {
+
+                     var numer="S"+(i+1);
+                     var Tnumer="T"+(i+1);
+                     S=arr[numer]
+                     T=arr[Tnumer]
+                     if(S!=myschool&&myschool!="A1"&&T!=""&&T!=null&&T!="000000"&&S!='10')                 //todo:UserGroup是自己所在的学院
+                     {
+                         return $.messager.alert('提示',"你也不能改变其它学院已经安排好的监考教师！");
+                     }
+                     else
+                     {
+
+                         arr[Tnumer]=teacher.teacherno;
+                         $($('[name=tcells]')[i]).html(teacher.name);
+                         S=arr[numer]=teacher.school;
+                         return;
+                     }
+
+                 }
+
+
+             }
+
+
+         })
+
+
+
+         //todo:点击提交
+          $('#mysubmit').bind('click',function(){
+
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'exam/jiankaoanpai_update.SQL',
+                'bind':{':T1':arr['T1'],':T2':arr['T2'],':T3':arr['T3'],':T4':arr['T4'],':T5':arr['T5'],':T6':arr['T6'],':T7':arr['T7'],':T8':arr['T8'],':T9':arr['T9']
+                        ,':R_ONE':$('#ROOM1').val(),':S_ONE':$('#SEATS1').val(),':R_TWO':$('#ROOM2').val(),':S_TWO':$('#SEATS2').val(),':R_THREE':$('#ROOM3').val(),
+                    ':S_THREE':$('#SEATS3').val(),':FLAG':$('[name=kssj]').val(),':REM':$('#rem').val(),':R15':R15
+                }},function(c){
+
+
+                $.messager.alert('提示','修改成功')
+            })
+
+
+          })
+
+
+          //todo:设置考试时间
+          $('[name=kssj]').val("{$info[0]['kssj2']}")
+      })
+</script>
+<table name="MyTable" BORDER=2 id="MyTable"  ALIGN=CENTER style="border-collapse: collapse; font-size: 10pt" bordercolor="#000000" height="317">
+    <tr bgcolor="#F2F2F2">
+        <td nowrap height="23">课号:<SPAN DATASRC=#dsoDATASET id=COURSENO>{$info[0].kh}</SPAN></td>
+        <td nowrap height="23">课名:<SPAN DATASRC=#dsoDATASET id=COURSENAME>{$info[0].km}</SPAN></td>
+        <td nowrap height="23">选课人数:<SPAN DATASRC=#dsoDATASET id=ATTENDENTS>{$info[0].xkrs}</SPAN></td>
+        <td nowrap height="23">考场1:<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" iD=ROOM1 size=10 value="{$info[0].kcc1}"></td>
+        <td nowrap height="23">考位1:<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" id=SEATS1 size=4 value="{$info[0].kw1}"> </TD>
+        <TD NOWRAP height="23">考场2:<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" id=ROOM2 size=10 value="{$info[0].kcc2}"></TD>
+        <TD NOWRAP height="23">考位2:<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" id=SEATS2 size=4 value="{$info[0].kw2}"></TD>
+        <TD NOWRAP height="23">考场3：<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" id=ROOM3 size=10 value="{$info[0].kcc3}"></TD>
+        <TD NOWRAP height="23">考位3：<INPUT TYPE=TEXT DATASRC=#dsoDATASET readOnly="true" id=SEATS3 size=4 value="{$info[0].kw3}"></TD>
+    </TR>
+    <TR>
+        <TD height="13">上课班级:</TD>
+        <TD COLSPAN=8 height="13">{$info[0].bj}</TD>
+    </TR>
+    <TR>
+        <TD height="23">考试时间：</TD>
+          <td>
+           <select name="kssj" disabled>
+                <volist name="time" id="t">
+                    <option value="{$t.FLAG}">{$t.TESTTIME}</option>
+                </volist>
+            </select>
+        </TD>
+    <TR>
+        <TD height="23">备注：</TD>
+        <TD COLSPAN=8 height="23"><INPUT TYPE=TEXT id=rem size=71 value="{$info[0]['rem']}"></TD>
+    <TR>
+        <TD rowspan="3" align="right" height="114">考场1监考</TD>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="38">{$teacherList[0]['TNAME1']}<SPAN id=T_TNAME1></SPAN></TD>
+        <TD NOWRAP COLSPAN=6 rowspan="9" height="234">
+            教师号:<input type="text" name="tteacherno" size="6" value="%" maxlength="6">&nbsp;&nbsp;
+            姓名:<input type="text" name="nname" size="6" value="%">
+            所在学院:<select name="sschool">
+            <volist name="schoolList" id="s">
+                <option value="{$s.SCHOOL}">
+                    {$s.NAME}
+                </option>
+            </volist>
+            </select>&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" id='ss' iconCls="icon-search">检索</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" id='sd'  plain='true' iconCls="icon-add">设定</a>
+            <table class="easyui-datagrid"  id="ddat"
+                   data-options="pagination:true,fitColumns:true,singleSelect:true,fit:true">
+                <thead>
+                <tr>
+                    <th data-options="field:'teacherno',width:100,align:'center'">教师号</th>
+                    <th data-options="field:'name',width:100,align:'center'">姓名</th>
+                    <th data-options="field:'schoolname',width:100,align:'center'">所属学院</th>
+                </tr>
+                </thead>
+            </table>
+
+        </TD>
+    </TR>
+    <TR>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="38">{$teacherList[0]['TNAME2']}<SPAN id=T_TNAME2></SPAN></TD>
+    </TR>
+    <TR>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="38">{$teacherList[0]['TNAME3']}<SPAN id=T_TNAME3></SPAN></TD>
+    </TR>
+    <tr>
+        <TD rowspan="3" height="116">
+            <p align="right">考场2监考</TD>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="38">{$teacherList[0]['TNAME4']}<SPAN id=T_TNAME4></SPAN></TD>
+    </tr>
+    <tr>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="39">{$teacherList[0]['TNAME5']}<SPAN id=T_TNAME5></SPAN></TD>
+    </tr>
+    <tr>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="39">{$teacherList[0]['TNAME6']}<SPAN id=T_TNAME6></SPAN></TD>
+    </tr>
+    <TR>
+        <TD rowspan="3" height="117">
+            <p align="right">考场3监考</TD>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="39">{$teacherList[0]['TNAME7']}<SPAN id=T_TNAME7></SPAN></TD>
+    </TR>
+    <TR>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="39">{$teacherList[0]['TNAME8']}<SPAN id=T_TNAME8></SPAN></TD>
+    </TR>
+    <TR>
+        <TD name=tcells style="cursor: hand" NOWRAP COLSPAN=2 height="39">{$teacherList[0]['TNAME9']}<SPAN id=T_TNAME9></SPAN></TD>
+    </TR>
+</table>
+<form name="postform" method="POST" action="/scripts/general.exe/write?" target="_blank">
+    <p align="center">　
+
+        <input type="hidden" name="T_{$teacherList[0]['T1']}" value="S_{$teacherList[0]['S1']}">
+        <input type="hidden" name="T_{$teacherList[0]['T2']}" value="S_{$teacherList[0]['S2']}">
+        <input type="hidden" name="T_{$teacherList[0]['T3']}" value="S_{$teacherList[0]['S3']}">
+        <input type="hidden" name="T_{$teacherList[0]['T4']}" value="S_{$teacherList[0]['S4']}">
+        <input type="hidden" name="T_{$teacherList[0]['T5']}" value="S_{$teacherList[0]['S5']}">
+        <input type="hidden" name="T_{$teacherList[0]['T6']}" value="S_{$teacherList[0]['S6']}">
+        <input type="hidden" name="T_{$teacherList[0]['T7']}" value="S_{$teacherList[0]['S7']}">
+        <input type="hidden" name="T_{$teacherList[0]['T8']}" value="S_{$teacherList[0]['S8']}">
+        <input type="hidden" name="T_{$teacherList[0]['T9']}" value="S_{$teacherList[0]['S9']}">
+
+        <a href="javascript:void(0)" id=mysubmit class="easyui-linkbutton">提交</a>
+        <input type=hidden name=SQL value="UPDATEKS.SQL">
+        <input type=hidden name=MID value="EM07">
+        <input type=hidden name=XML value="">
+    </p>
+</form>
+<p><font size="2">使用方法：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1、先点中监考教师列表中的一格，待其变绿后，在学院教师列表中选择要安排的教师，然后按“设定”按钮。</font></p>
+<p><font size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2、一次性地将监考教师安排好，按“提交”按钮提交。</font></p>
+<p><font size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3、你只能安排本学院的教师，并且不能改变其它学院已经安排的监考教师。</font></p>
+<p><font size="2">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 4、目前系统内尚无检查教师排考冲突功能，安排时注意不要冲突。方法是分场次安排教师，不要将同一教师在同一场次排考一次以上。</font></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <font size="2">5、只有教务处人员才可以改变考场和场次。</font></p>
+</body>
+
+</html>

@@ -1,0 +1,92 @@
+<html>
+    <script>
+        var time='{$value.TIME}';
+        if(time==""){
+            time='全天'
+        }
+
+    </script>
+<head>
+    <META name=VI60_defaultClientScript content=JavaScript>
+    <meta http-equiv="Content-Language" content="zh-cn">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>教 室 借 用 申 请 批 复</title>
+
+</head>
+
+<body >
+
+<div align="center">
+    <center>
+        <table border="0" cellpadding="0" cellspacing="0" width="57%" height="20" datasrc=#dsoLEASE>
+            <tr>
+                <td align="center">
+                    <p align="center"><b><font size="4"><LABEL> {$value.YEAR}</LABEL>学年第<LABEL >{$value.TERM}</LABEL>学期</font></b></p>
+                    <p align="center"><font size="5"><b>多媒体教室借用申请批准单</b></font></p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</div>
+<div align="center">
+    <center>
+        <table border="1" align="center" cellpadding="0" cellspacing="0" width="75%" height="125">
+            <tr>
+                <td width="75%" height="125">
+                    <p align="center">&nbsp;
+                    <p align="center">教师使用须知<p style="line-height: 150%; margin-top: 6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    教师使用多媒体教室前需参加过操作培训。教师借用后请提前与装备部联系（南区7号实训楼106办公室,短号654335,蒋老师），了解所借多媒体教室的管理规定及操作方法，以免使用不当造成设施损坏、影响教学。请提前将此单送至相应教学楼值班室。</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        请使用教室的教师签字确认已了解并办妥上述事项。
+                    <p align="center">教师签字:__________  联系电话:____________
+                    <p>　 </td>
+            </tr>
+        </table>
+    </center>
+</div>
+<p>&nbsp; </p>
+
+<div align="center">
+    <center>
+        <table border="1" cellpadding="0" cellspacing="0" width="75%" height="300" >
+            <tr>
+                <td width="100%" height="298" valign="top">
+                    <p>　</p>
+                    <p>&nbsp;<SPAN> {$value.BUILDING}</SPAN> 门卫2：</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 现有<SPAN >{$value.SCHOOL}</SPAN>需借用本楼教室<SPAN >{$value.JSN}</SPAN>(<SPAN> {$value.ROOMNO}</SPAN>)，</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 使用时间是：</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 星期<SPAN >{$value.DAY}</SPAN>；<SPAN ><script>document.write(time)</script></SPAN>；<SPAN >{$value.OEW}</SPAN>；</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;周次：<SPAN >{$value.WEEKS}</SPAN></p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 用途：<SPAN >{$value.PURPOSE}</SPAN></p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 借用设备：___________________________</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;联系人及电话：_______________________</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 请按多媒体教室有关管理规定给予办理。若有疑问，请拨打教务处电话
+                        88122243 查询。</p>
+                    <p>&nbsp; </p>
+
+
+                </td>
+            </tr>
+        </table>
+    </center>
+</div>
+<div align="center">
+    <center>
+        <table border="0" cellpadding="0" cellspacing="0" width="75%" height="50" >
+            <tr>
+                <td width="100%" height="18" valign="top">
+                    <p>　</p>
+                    <p align="center">教务处</p>
+                    <p align="center"><SPAN> {$value.ISSUEDATE}</SPAN>　</p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</div>
+</body>
+
+</html>
+
+

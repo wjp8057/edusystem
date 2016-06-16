@@ -1,0 +1,175 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var free=$('#free');
+        free.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
+        free.combobox('setValue','1');
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+
+        $('#dg').datagrid({
+            title:'课程列表',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/setting/studentlist',
+            queryParams: {free:free.combobox('getValue')},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'studentno',title:'学号',width:80,align:'center'},
+                {field:'name',title:'姓名',width:100,align:'center'},
+                {field:'classname',title:'班级',width:150,align:'center'},
+                {field:'schoolname',title:'学院',width:120,align:'center'},
+                {field:'statusname',title:'学籍状态',width:60,align:'center'},
+                {field:'free',title:'选课锁定*',width:70,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                    formatter:function(val,rec){
+                        if(val==1)
+                            return '是';
+                        else
+                            return '否';
+                    }}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt= $('#dg');
+                tt.datagrid('startEditing',{index:index,field:field});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue'),
+                free:$('#free').combobox('getValue')
+            });
+        });
+        $("#save").click(function(){
+            var tt=$('#dg');
+            var length;//删除或更新的行数
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            length=rows.length;
+            if(rows.length>0){
+                var updateRows=[];
+                for(var i=0;i<length;i++){
+                    var updateObj={}; //插入的单元格
+                    updateObj.studentno=rows[i].studentno;
+                    updateObj.free=rows[i].free;
+                    updateRows.push(updateObj);
+                }
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(updateRows);
+            }
+            if(count<=0) { //如果没有任何更新，就退出
+                $.messager.alert('提示','没有需要更新的记录','info');
+                return;
+            }
+            $.post('{$ROOT}/selective/setting/studentupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+
+        $("#without_limit").click(function() {
+            $.messager.confirm('确认', "确认要无限制开放所有课程么（选课人数无上限）'", function(r){
+                if (r){
+                    updateAllStatus(0,0);
+                }
+            });
+        });
+        $("#limit").click(function() {
+            $.messager.confirm('确认', "确认要有限制开放所有课程么（选课人数上限为预计人数）'", function(r){
+                if (r){
+                    updateAllStatus(0,1);
+                }
+            });
+        });
+        $("#lockall").click(function() {
+            $.messager.confirm('确认', "确认锁定所有课程么'", function(r){
+                if (r){
+                    updateAllStatus(1,1);
+                }
+            });
+        });
+    });
+    function updateAllStatus(halflock,lock){
+
+        $.post('{$ROOT}/selective/setting/updateallstatus',{year: $('#year').val(),term: $('#term').val(),halflock:halflock,lock:lock},function(result){
+            if (result.status==1){
+                $('#dg').datagrid('reload');
+                $.messager.show({	// show error message
+                    title: '成功',
+                    msg: result.info
+                });
+            } else {
+                $.messager.alert('错误',result.info,'error');
+            }
+        },'json');
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存修改</div>
+    </div>
+    <div id="toolbar">
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="7" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school" size="15">
+        <label for="free">锁定：</label>
+        <input id="free" size="5">
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存修改</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>可以点击编辑单个学生锁定状态，然后点保存。</li>
+    </div>
+</div>

@@ -1,0 +1,262 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+
+<script>
+    var page='{$page}'
+    function uud(str){
+        if(typeof str=='undefined'){
+            return ''
+        }
+        return str
+    }
+    var youxiu=0;                     //todo:优秀人数
+    var lianghao=0;                   //todo:良好人数
+    var zhongdeng=0;                  //todo:中等人数
+    var jige=0;                        //todo:及格人数
+    var bujige=0;                     //todo:不及格人数
+
+    var kaoshishijian;                  //todo:考试时间
+    var tianbiaoriqi;                   //todo:填表日期
+
+    var StudentContent={};         //todo:保存content数据
+    var year='{$shuju.YEAR}'
+    var term='{$shuju.TERM}'
+
+    var courseno='{$shuju.COURSENO}'
+    $(function(){
+        var dataa=$('#List')
+        $('#demo_wd').window(new wind(0,0,false,false,true,true,true))
+        dataa.datagrid({onLoadSuccess:function(data){
+            var obj
+
+            if(!StudentContent[1]){
+                return
+            }
+            for(var i=1;i<41;i++){
+                if(!StudentContent[i]){
+                    StudentContent[i]={}
+                    StudentContent[i].xm='&nbsp'
+                    StudentContent[i].xh='&nbsp'
+
+                    StudentContent[i].qm='&nbsp'
+                    StudentContent[i].zp='&nbsp'
+                    StudentContent[i].ps='&nbsp'
+                }
+                if(!StudentContent[i+40]){
+                    StudentContent[i+40]={}
+                    StudentContent[i+40].xm='&nbsp'
+                    StudentContent[i+40].xh='&nbsp'
+
+                    StudentContent[i+40].qm='&nbsp'
+                    StudentContent[i+40].zp='&nbsp'
+                    StudentContent[i+40].ps='&nbsp'
+                }
+
+                if(!StudentContent[i+80]){
+                    StudentContent[i+80]={}
+                    StudentContent[i+80].xm=''
+                    StudentContent[i+80],xh=''
+
+                    StudentContent[i+80].ps='&nbsp'
+                    StudentContent[i+80],qm=''
+                    StudentContent[i+80].zp=''
+                }
+                /*           obj={'xh':StudentContent[parseInt(i)].xh,
+                 'xm':StudentContent[parseInt(i)].xm,
+
+                 'qm':StudentContent[parseInt(i)].qm,
+                 'zp':StudentContent[parseInt(i)].zp,
+                 'ps':StudentContent[parseInt(i)].ps,
+                 'xh2':StudentContent[parseInt(i)+40].xh,
+                 'xm2':StudentContent[parseInt(i)+23].xm,
+
+                 'qm2':StudentContent[parseInt(i)+23].qm,
+                 'zp2':StudentContent[parseInt(i)+23].zp,
+                 'ps2':StudentContent[parseInt(i)+23].ps,
+                 'xh3':StudentContent[parseInt(i)+46].xh,
+                 'xm3':StudentContent[parseInt(i)+46].xm,
+                 'ps3':StudentContent[parseInt(i)+46].ps,
+                 'qm3':StudentContent[parseInt(i)+46].qm,
+                 'zp3':StudentContent[parseInt(i)+46].zp}*/
+
+                $('[name=SUMMARY]').append('<tr><td align="center" noWrap >'+uud(StudentContent[parseInt(i)].xh)+'</td><td align="center" noWrap >'+uud(StudentContent[parseInt(i)].xm)+'</td>' +
+//                        '<td align="center" noWrap >'+uud(StudentContent[parseInt(i)].ps)+'</td>' +
+//                        '<td align="center" noWrap >'+uud(StudentContent[parseInt(i)].qm)+
+                        '</td><td align="center">'+uud(StudentContent[parseInt(i)].zp)+'</td>' +
+                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+40].xh)+'</td>' +
+                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+40].xm)+'</td>' +
+//                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+40].ps)+'</td>' +
+//                        '<td align="center" noWrap >'+uud(StudentContent[parseInt(i)+40].qm)+
+                        '</td><td td align="center">'+uud(StudentContent[parseInt(i)+40].zp)+'</td>' +
+                        '<td align="center" noWrap >'+uud(StudentContent[parseInt(i)+80].xh)+'</td>' +
+                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+80].xm)+'</td>' +
+//                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+80].ps)+'</td>' +
+//                        '<td align="center" noWrap>'+uud(StudentContent[parseInt(i)+80].qm)+
+                        '</td><td td align="center">'+uud(StudentContent[parseInt(i)+80].zp)+'</td></tr>')
+
+                StudentContent[i]=null
+
+                StudentContent[i+40]=null
+
+                StudentContent[i+80]=null
+
+                //      $('#List2').datagrid('appendRow',obj)
+
+            }
+
+
+
+            //todo:选课人数
+            $('#title_total').html(data.total)
+            $('#bot').append('<tr><td align="center" >百分率</td><td align="center">'+formatFloat(youxiu/data.total*100,2)+'%'+'</td>' +
+                    '<td align="center">'+formatFloat(lianghao/data.total*100,2)+'%'+'</td>' +
+                    '<td align="center">'+formatFloat(zhongdeng/data.total*100,2)+'%'+'</td>' +
+                    '<td align="center">'+formatFloat(jige/data.total*100,2)+'%'+'</td>' +
+                    '<td align="center">'+formatFloat(bujige/data.total*100,2)+'%'+'</td></tr>')
+
+            //todo:考试时间
+            $('#EDATE').html(kaoshishijian)
+
+            //todo:填表日期
+
+            $('#TDATE').html(tianbiaoriqi)
+
+        }})
+
+        dataa.datagrid('load',{'Sqlpath':{'select':'Results/Four_one_daying_youbian.SQL','count':'Results/Four_one_daying_youbian_count.SQL'}
+            ,'bind':{':YEAR':year,':TERM':term,':COURSENO':courseno},'page2':page})
+
+
+        $('#next').bind('click',function(){
+            //alert('123')
+            open(window.location+'/page/'+(parseInt(page)+1))
+            //print();
+        })
+    })
+
+
+</script>
+<style>
+    *{font-family: '宋体';font-size: 14px;}
+</style>
+<body style="background-color: #fff;overflow-y:scroll">
+<center>
+<span style="font-size:22px;">宁波城市学院{$shuju.YEAR}--{$year2}
+        学年第{$shuju.TERM}学期补考成绩登记表</span>
+     <div style="margin-top:8px">
+    课号：{$haha.courseno}&nbsp&nbsp课名：{$haha.coursename}&nbsp&nbsp开课学院：{$haha.schoolname}&nbsp&nbsp
+    选课人数:<span id="title_total">0</span>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" id="next" style="color:blue" title="下一页">>></a>
+</div>
+    <br>
+</center>
+
+<div style="display:none">
+    <table class="easyui-datagrid" id="List"
+           data-options="url:'__URL__/daying_query/hasJson/1',fitColumns:true,fit:true,singleSelect:true,pagination:true">
+        <thead>
+        <tr>
+            <th data-options="field:'xh',width:100,align:'center',formatter:function(a,b,c){
+
+                kaoshishijian=b.kssj
+                tianbiaoriqi=b.tbsj
+                StudentContent[b.row]=b
+            }">学号</th>
+            <th data-options="field:'xm',width:100,align:'center',formatter:function(a,b,c){
+
+            }">姓名</th>
+            <!--<th data-options="field:'ps',width:100,align:'center'">平时</th>-->
+            <!--<th data-options="field:'qm',width:100,align:'center'">期末</th>-->
+            <th data-options="field:'zp',width:100,align:'center',formatter:function(a,b,c){
+
+                    if(parseInt(a)>=90){
+                        youxiu++
+                    }else if(parseInt(a)>=80){
+                        lianghao++
+                    }else if(parseInt(a)>=70){
+                        zhongdeng++
+                    }else if(parseInt(a)>=60){
+                        jige++
+                    }else if(parseInt(a)<60){
+                        bujige++
+                    }else if(a.trim()=='优秀'){
+                        youxiu++
+                    }else if(a.trim()=='良好'){
+                        lianghao++
+                    }else if(a.trim()=='及格'){
+                        jige++
+                    }else if(a.trim()=='中等'){
+                        zhongdeng++
+                    }else if(a.trim()=='不及格'){
+                        bujige++
+                    }
+            }">总评</th>
+            <th data-options="field:'xh2',width:100,align:'center'">学号</th>
+            <th data-options="field:'xm2',width:100,align:'center',formatter:function(a,b,c){
+            }">姓名</th>
+            <!--<th data-options="field:'ps2',width:100,align:'center'">平时</th>-->
+            <!--<th data-options="field:'qm2',width:100,align:'center'">期末</th>-->
+            <th data-options="field:'zp3',width:100,align:'center'">成绩</th>
+            <th data-options="field:'xh3',width:100,align:'center'">学号</th>
+            <th data-options="field:'xm3',width:100,align:'center'">姓名</th>
+            <!--<th data-options="field:'ps3',width:100,align:'center'">平时</th>-->
+            <!--<th data-options="field:'qm3',width:100,align:'center'">期末</th>-->
+            <th data-options="field:'zp3',width:100,align:'center'">成绩</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<FONT face=宋体 size="3"  >
+    <table id=SUMMARY style="FONT-SIZE: 14px; BORDER-COLLAPSE: collapse"
+           cellSpacing=0 cellPadding=0 width="100%" align=center border=1 name="SUMMARY" name="SUMMARY">
+        <TBODY>
+        <TR>
+            <TD noWrap align=middle width="8%">学号</TD>
+            <TD noWrap align=middle width="6%">姓名</TD>
+            <!--<TD noWrap align=middle width="6%">平时</TD>-->
+            <!--<TD noWrap align=middle width="6%">期末</TD>-->
+            <TD noWrap align=middle width="6%">成绩</TD>
+            <TD noWrap align=middle width="8%">学号</TD>
+            <TD noWrap align=middle width="8%">姓名</TD>
+            <!--<TD noWrap align=middle width="6%">平时</TD>-->
+            <!--<TD noWrap align=middle width="6%">期末</TD>-->
+            <TD noWrap align=middle width="6%">成绩</TD>
+            <TD noWrap align=middle width="8%">学号</TD>
+            <TD noWrap align=middle width="8%">姓名</TD>
+            <!--<TD noWrap align=middle width="6%">平时</TD>-->
+            <!--<TD noWrap align=middle width="6%">期末</TD>-->
+            <TD noWrap align=middle width="4%">成绩</TD>
+        </TR>
+
+        </TBODY>
+    </table>
+</font>
+<br>
+<TABLE height=1 align='center' cellSpacing=0 cellPadding=1 width="100%" border=1 id="bot">
+    <TR>
+        <TD align=center width="10%" height=1><font face="宋体" color="#0000ff" size="2">成绩</font></TD>
+        <TD align=center width="17%" height=1><font face="宋体" color="#0000ff" size="2">优秀（&gt;90分）</font></TD>
+        <TD align=center width="17%" height=1><font face="宋体" color="#0000ff" size="2">良好（80-89分)</font></TD>
+        <TD align=center width="18%" height=1><font face="宋体" color="#0000ff" size="2">中等（70-79分）</font></TD>
+        <TD align=center width="18%" height=1><font face="宋体" color="#0000ff" size="2">及格（60-69分）</font></TD>
+        <TD align=center width="18%" height=1><font face="宋体" color="#0000ff" size="2">不及格（&lt;60分）</font></TD></TR>
+    </TBODY>
+
+</TABLE></DIV>
+
+<P style="LINE-HEIGHT: 10px" align=left><font face="宋体" color="#0000ff" size="2">说明:
+
+    <P style="LINE-HEIGHT: 10px" align=left><font face="宋体" color="#0000ff" size="2">1、请一律使用打印件，手写件、成绩涂改或教师未签名则无效。</font></P>
+
+    <P style="LINE-HEIGHT:10px" align=left><font face="宋体" color="#0000ff" size="2">2、本表一式两份应于本课程考后三天内分别交开课学院存档。&nbsp;&nbsp;</font><font face="宋体" color="#0000ff" size="3">&nbsp;</font></P>
+
+    <P style="LINE-HEIGHT: 200%" align=center><FONT face=宋体 color=#0000ff size=1>&nbsp;&nbsp;</FONT><FONT face=宋体 color=#0000ff size=2>
+        考试日期：<LABEL ID=EDATE></LABEL>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        填表日期：<LABEL ID=TDATE></LABEL>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        教师签名：</FONT></FONT>
+</body>
+
+
+
+</html>
+

@@ -1,0 +1,219 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var myschool='{$myschool}'      //todo:我的学院
+    var arr=[]
+    var type=[]
+
+
+    $(function(){
+
+
+        //todo:应用英语A级
+
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+
+      //  var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+        //todo:刚进去的window
+        var dawd=$('#da_wd').window(new wind(600,600,false,false,false,true,false))
+
+
+        //todo:学生列表的window
+        var studentwd=$('#student_wd').window(new wind(0,0,false,false,true,true,true))
+
+        studentwd.datagrid({
+            toolbar:'#toobar'
+        })
+
+
+
+
+
+
+        $('#look_student').bind('click',function(){
+            var year=parent.$('[NAME=YEAR]').val();
+            var term=parent.$('[name=TERM]').val()
+            // $('#student_wd').window({closed:false})
+            var row=$('#yingyuA').datagrid('getSelected')
+            COURSENO=row.kh
+            openTabsWindows('课程的情况','__URL__/StudentList/YEAR/'+parent.$('[NAME=YEAR]').val()+'/TERM/'+parent.$('[name=TERM]').val()+'/COURSENO/'+COURSENO)
+
+             //todo:★★★★★标题部分★★★★★★
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'CourseManager/One_one_title_select.SQL','bind':{
+            ':YEAR':parent.$('[NAME=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':COURSENO':row.kh
+        }},function(c){
+        eval('var one='+c)
+        $('#t_kh').html(one[0]['COURSENOGROUP']);
+        $('#t_km').html(one[0]['COURSENAME']);
+        $('#t_xf').html(one[0]['CREDITS'])
+        $('#t_xy').html(one[0]['SCHOOLNAME']);
+        $('#t_yjrs').html(one[0]['ESTIMATE'])
+        $('#numlimit').val(one[0]['ESTIMATE'])
+
+    })
+    if(row==''){
+        return $.messager.alert('提示','请选择一个要查看的记录')
+    }
+
+    })
+
+
+
+
+        var dat=$('#yingyuA').datagrid({
+            view: detailview,
+            detailFormatter: function(rowIndex, rowData){
+                arr[rowData.row]=rowData;
+                return "<div id=a"+rowData.row+" style='width:500px;height:91px'>"+rowData.row+"</div>"
+            },
+            onExpandRow:function(index,row){
+                $('#a'+row.row).html('<table width="500" border="0"><tr><td  align="center" bgcolor="#E0ECFF" width="25%" nowrap ><font size="2">班级</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['bj']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">教师</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['js']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">备注</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['bz']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">课程安排</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['kcap']+'</font></td></tr></table>')
+            },onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#yingyuA');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        })
+
+
+        function llook(){
+            var year=parent.$('[NAME=YEAR]').val();
+            var term=parent.$('[name=TERM]').val()
+            // $('#student_wd').window({closed:false})
+            var row=$('#yingyuA').datagrid('getSelected')
+            COURSENO=row.kh
+
+            openTabsWindows('课程的情况',"__ROOT__/CourseManager/CourseManager/StudentList/YEAR/"+parent.$('[NAME=YEAR]').val()+'/TERM/'+parent.$('[name=TERM]').val()+'/COURSENO/'+COURSENO+'/SCHOOL/'+row.SCHOOLNO+'/COURSETYPE/'+row.xk2,'',true);
+
+        }
+        $('#searcher22').bind('click',llook)
+
+        $('#admin_look').bind('click',llook)
+
+        $('#search').linkbutton({
+            text:'检索',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    var str=0
+                    var count=''
+                    var select=''
+
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_one_select.SQL','count':'CourseManager/One_one_count.SQL'
+                    },bind:{':YEAR':parent.$('[NAME=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':COURSE':$('[name=COURSENO]').val(),':CNAME':$('[name=COURSENAME]').val(),
+                        ':CTYPE':'%',':SCHOOL':$('[name=SCHOOL]').val(),':CLASSNO':$('[name=CLASSNO]').val(),':SEATSLOCK':'%'}})
+                    wd_two.window({closed:false})
+                })
+
+
+
+                $('#one_search').bind('click',function(){
+                    wd.window({closed:false})
+                })
+
+    })
+
+    //todo:修改 重修和 重修费的函数
+    function up_status(index,ziduan){
+
+        var row=$('#student_dat').datagrid('getRows')[index]            //todo:要改变的行
+         //todo:如果被选中的
+        if($('[name='+ziduan+index+']').is(":checked")){
+            row[ziduan]=1
+        }else{
+            row[ziduan]=0
+        }
+    }
+
+    //todo:修改 重修和 重修费的函数
+    function up_status2(index,ziduan){
+
+        var row=$('#student_dat').datagrid('getRows')[index]            //todo:要改变的行
+        //todo:如果被选中的
+        row['tkfs']=$('[name=tkfs'+index+']').find("option:selected").val()
+
+    }
+</script>
+<body style="background-color: #fff">
+
+
+
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            <form id="run_back">
+                <div>
+                &nbsp;&nbsp; 课号：<input type="text" name="COURSENO" value="%" size="9" >  9位&nbsp;&nbsp;&nbsp;&nbsp;
+                    课名：<input type="text" name="COURSENAME" value="%" size="9">&nbsp;&nbsp;&nbsp;&nbsp;
+
+                            学院：<select name="SCHOOL" >
+                            <option value="%">全部</option>
+                            <volist name="school" id="s">
+                                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                            </volist>
+                        </select>&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+                &nbsp;&nbsp; 班号：<input type="text" name="CLASSNO" value="%" size=9>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+                    &nbsp<a id="search">提交</a>&nbsp &nbsp&nbsp &nbsp&nbsp &nbsp
+
+
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-studentList"  plain=true id="searcher22">查看学生列表</a>
+                </div>
+            </form>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',singleSelect:true,fit:true,toolbar:'#tdemo',pagination:true">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'km',width:400" align="center">课名</th>
+                        <th data-options="field:'xf',width:70,align:'right'" align="center">学分</th>
+                        <th data-options="field:'zxs',width:70,align:'right'" align="center">周学时</th>
+                        <th data-options="field:'zsy',width:70,align:'right'" align="center">周实验</th>
+                        <th data-options="field:'xk',width:70,align:'right'" align="center">修课</th>
+                        <th data-options="field:'kh2',width:70,align:'right'" align="center">考核</th>
+                        <th data-options="field:'yxrs',width:70,align:'right'" align="center">已选人数</th>
+                        <th data-options="field:'kclb',width:70,align:'right'" align="center">课程类别</th>
+                        <th data-options="field:'kkxy',width:80,align:'right'" align="center">开课学院</th>
+                    </tr>
+                    </thead>
+                </table>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+</div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_look'>查看学生列表</div>
+    </div>
+</body>
+</html>

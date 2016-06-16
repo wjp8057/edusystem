@@ -1,0 +1,328 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $("#quan_search").bind('click',function(){
+            $('#quan_dat').datagrid('options').url='__APP__/Status/Status/Squery'
+            $('#quan_dat').datagrid('load',{
+                Sqlpath:{'select':'CoursePlan/select_teacher.SQL','count':'CoursePlan/count_teacher.SQL'},bind:{
+                    ':TEACHERNAME':$('#quan_teachername').val(),':TEACHERNO':$('#quan_teacherno').val(),':SCHOOL':$('#school').val()
+                }
+            })
+        })
+
+        $('#add_teacher').bind('click',function(){
+            var row=$('#quan_dat').datagrid('getSelected')
+
+            $('#wTEACHERNO').val(row.TEACHERNO)
+            $('#quanTeacher').window({closed:true})
+        })
+
+
+        $('#quan_dat').datagrid({
+            toolbar:'#tdemo'
+        })
+
+
+        //todo:让select也随着change改变
+        $('#wTEACHERNO').bind('change',function(){
+
+            $('#SELFTEACHER').val($('#wTEACHERNO').val().trim())
+        })
+
+
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url:"__ROOT__ /CoursePlan/Timetable/teacher/hasJson/true",
+            queryParams:{$queryParams},
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },
+            onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                });
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                datagrid.datagrid('unselectAll')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        //编辑事件
+        $("#handlerAdd").bind("click",function(){
+            setFormVal({});
+            $("#editForms").css("display","");
+            $("#editForms").window({title:"添加上课教师"});
+            $("#editForms").window("open");
+        });
+
+        function eedit(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一行数据进行编辑！","error");
+                return;
+            }
+            setFormVal(rows[0]);
+            $("#editForms").css("display","");
+            $("#editForms").window({title:"编辑上课教师"});
+            $("#editForms").window("open");
+        }
+        //编辑事件
+        $("#teacherEdit").bind("click",eedit);
+        $('#admin_edit').bind('click',eedit)
+
+
+
+        $("#efCancel").bind("click",function(){
+            $("#editForms").window("close");
+        });
+        $("#efOK").bind("click",function(){
+            var row = getFormVal();
+            if(checkData(row)==false) return;
+            var url = "__ROOT__ /CoursePlan/Timetable/teacherSave/hasJson/true";
+            if($.trim(row.RECNO)!="") url = "__ROOT__ /CoursePlan/Timetable/teacherUpdate/hasJson/true";
+            $.post(url, row, function(rsp) {
+                if(rsp){
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                    if(rsp.type=="info"){
+                     //   $("#editForms").window("close");
+                        datagrid.datagrid("reload");
+                    }
+                }
+            },"JSON");
+        });
+
+
+
+        $('#handlerQuery').bind('click',function(){
+            $('#quanTeacher').window({
+                closed:false
+            })
+        })
+
+        //删除排课计划
+        function ddel(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+            });
+            $.messager.confirm('系统消息：','你真的确定要删除选中的项？',function(r){
+                if (r){
+                    $.post("__ROOT__ /CoursePlan/Timetable/teacherDelete/hasJson/true", {ITEMS:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+        $("#handlerDelete").bind("click",ddel);
+        $('#admin_del').bind('click',ddel)
+
+        //将选中记录传递到课程总表
+        $("#handlerTransfer").bind("click",function(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+            });
+
+            $.post("__ROOT__ /CoursePlan/Timetable/transfer/hasJson/true", {ITEMS:arr}, function(rsp) {
+                if(rsp){
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+
+        $("#handlerHelp").bind("click",function(){
+            $("#editHelp").css("display","");
+            $("#editHelp").window("open");
+        })
+
+        function setFormVal(row){
+            $("#wYEAR").html("{$schedulePlan.YEAR}");
+            $("#wTERM").html("{$schedulePlan.TERM}");
+            if(typeof row.UNIT=='undefined')
+                $("#wUNIT").val(2);
+            else
+                $("#wUNIT").val(row.UNIT);
+//            $("#wTASK").val(row.TASK);
+            $("#wAMOUNT").val(row.AMOUNT);
+            $("#wTEACHERNO").val($.trim(row.TEACHERNO));
+            $("#SELFTEACHER").val($.trim(row.TEACHERNO));
+            $("#wHOURS").val(row.HOURS);
+            $("#wTOSCHEDULE").val(row.TOSCHEDULE);
+            $("#wREM").val($.trim(row.REM));
+            $("#wRECNO").val(row.RECNO);
+        }
+        function getFormVal(){
+            return {
+                YEAR : "{$schedulePlan.YEAR}",
+                TERM : "{$schedulePlan.TERM}",
+                MAP : "{$schedulePlan.RECNO}",
+                TEACHERNO : $("#wTEACHERNO").val(),
+                HOURS : $("#wHOURS").val(),
+                UNIT : $("#wUNIT").val(),
+                REM : $("#wREM").val(),
+                TASK : $("#wTASK").val(),
+                AMOUNT : $("#wAMOUNT").val(),
+                TOSCHEDULE : $("#wTOSCHEDULE").val(),
+                RECNO : $("#wRECNO").val()
+            }
+        }
+        function checkData(row){
+            if($.trim(row.HOURS)==""){
+                msgShow("系统提示：","<br />每周课时不能为空！","error");
+                return false;
+            }else if(isNaN($.trim(row.HOURS))){
+                $.messager.alert('系统提示','每周课时必须是数字')
+                return false;
+            }
+            return true;       }
+    });
+</script>
+
+<body>
+<div id="tdemo">
+    教师名:<input type="text" id="quan_teachername" value="%">&nbsp;&nbsp;&nbsp;
+    教师号:<input type="text" id="quan_teacherno" value="%">&nbsp;
+    所在学院:<select id="school"><option value="%">所有学院</option><volist name="schools" id="s"><option value="{$s.SCHOOL}">{$s.NAME}</volist></select>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" id="quan_search">检索</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="javascript:void(0)" id="add_teacher" iconCls='icon-add' class="easyui-linkbutton" plain="true">添加该教师</a>
+</div>
+
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'north',split:false,border:false" style="height:60px;background:#E0ECFF;overflow: hidden">
+        <p style="margin-left:20px">{$schedulePlan.YEAR}学年第{$schedulePlan.TERM}学期；课号：{$schedulePlan.COURSENO}；组号：{$schedulePlan.GROUP}；课名：{$schedulePlan.COURSENAME} 的上课教师列表</p>
+        <p style="margin-left:20px">
+            每周总学时数：{$schedulePlan.HOURS}；每周课堂教学学时数：{$schedulePlan.LHOURS}；
+            每周实验学时数：{$schedulePlan.EHOURS}；每周上机学时数：{$schedulePlan.CHOURS}；
+            每周实训学时数：{$schedulePlan.SHOURS}；每周课堂讨论学时数：{$schedulePlan.KHOURS}；
+            每周自主学习学时数：{$schedulePlan.ZHOURS}
+        </p>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" title="上课教师" iconCls="icon icon-users" fitColumns="false"
+               width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="50" pageList="[15,30,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'RECNO',align:'center',width:100" >记录号</th>
+                <th data-options="field:'TEACHERNO',align:'center',width:100">教师号</th>
+                <th data-options="field:'TEACHERSNAME',align:'center',width:100">姓名</th>
+                <th data-options="field:'POSITIONSNAME',align:'center',width:100">职称</th>
+                <th data-options="field:'HOURS',align:'center',width:80">周课时</th>
+                <th data-options="field:'UNITOPTIONSNAME',align:'center',width:80">排课方式</th>
+                <th data-options="field:'TASKOPTIONSNAME',align:'center',width:80">教学任务</th>
+                <th data-options="field:'REM',align:'center',width:100">备注</th>
+             <!--   <th data-options="field:'AMOUNT',align:'center',width:100">工作量课时</th>-->
+                <th data-options="field:'ZOVALUE',align:'center',width:80">要排课</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:150">学院</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <a href="#" id="handlerAdd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" style="float: left;">加入新记录</a>
+    <a href="#" id="teacherEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" style="float: left;">编辑</a>
+    <a href="#" id="handlerDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" style="float: left;">删除</a>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="handlerTransfer" class="easyui-linkbutton" data-options="iconCls:'icon-file3',plain:true">将选中记录传递到课程总表</a>
+    <a href="#" id="handlerHelp" class="easyui-linkbutton" data-options="iconCls:'icon-help',plain:true" >帮助</a>
+</div>
+
+
+<div id="quanTeacher" title=" " class="easyui-window" data-options="width:750,height:500,minimizable:false,maximizable:false,collapsible:false,closed:true">
+    <table class="easyui-datagrid" id="quan_dat"
+           data-options="fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[30,50,100]">
+        <thead>
+        <tr>
+            <th data-options="field:'TEACHERNO',width:100,align:'center'">教师号</th>
+            <th data-options="field:'NAME',width:100,align:'center'">姓名</th>
+            <th data-options="field:'SCHOOL',width:100,align:'center'">所在学院</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+<!-- 编辑界面 -->
+<div id="editForms" class="easyui-window" style="width:520px;height:260px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3 border="0" cellspacing="0">
+                <tr><th align="right">学年：</th><td><div id="wYEAR" /></td>
+                    <th align="right">排课单位：</th><td>
+                        <select size="1" name="UNIT" id="wUNIT">
+                            <option value="1">单课时</option>
+                            <option value="2" selected>双课时</option>
+                            <option value="3">三课时</option>
+                            <option value="4">四课时</option>
+                        </select></td></tr>
+                <tr><th align="right">学期：</th><td><div id="wTERM" /></td>
+                    <th align="right">课堂教学：</th><td><Cwebs:sqlselect id="wTASK" name="TASK" value="CODE" title="NAME"  selected="L" file="common/taskOptions.sql" /></td></tr>
+                <tr><th align="right">教师号：</th><td>
+                    <input id="wTEACHERNO" type="text" size="6" />
+                    本院：<select id="SELFTEACHER" style="width:80px" onchange="$('#wTEACHERNO').val(this.value);">
+                        <volist name="selfTeachers" id="item">
+                            <option value="{$item.CODE}">{$item.NAME}</option>
+                        </volist>
+                    </select>
+                    <a href="#" id="handlerQuery" title="检索其它学院教师号" class="easyui-linkbutton" data-options="iconCls:'icon-personal',plain:true" /></td>
+          <!--          <th align="right">工作量课时：</th><td><input id="wAMOUNT" type="text" size="2" /></td>--></tr>
+                <tr><th align="right">每周课时：</th><td><input id="wHOURS" type="text" size="2" /></td><th align="right">是否纳入排课：</th><td><select name="TOSCHEDULE" id="wTOSCHEDULE"><option value="1" selected>是</option><option value="0">否</option></select></td></tr>
+                <tr><th align="right">备注：</th><td colspan="3"><input id="wREM" type="text" style="width:320px" /></td></tr>
+            </table>
+            <input type="hidden" id="wRECNO" />
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="efOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="efCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+<!-- 帮助界面 -->
+<div id="editHelp" class="easyui-window" title="说明" style="width:350px;height:220px;display:none" data-options="iconCls:'icon-help',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div style="margin: 5px">
+    <p align="left">　　1、周时数中每一项（上课、实验、上机、实训、课堂讨论、自主学习）如果不为0，则都需要添加一条纪录，否则该课程不会进入课程总表。</p>
+    <p align="left">　　2、教学任务：与周时数类型相对应。</p>
+    <p align="left">　　3、备注:不用填写，给教学秘书自己看，对学生以及排课人员隐藏。</p>
+    <p align="left">　　4、每周课时、工作量课时：两者一致，与相对应的教学任务周时数相对应。</p>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</body>
+
+</html>
+

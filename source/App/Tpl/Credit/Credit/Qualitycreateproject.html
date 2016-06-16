@@ -1,0 +1,570 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+var panduan=0
+// eval('var kill={$tplarr}')//学院数组
+
+$(function(){
+    //todo:不在认定时间范围内的事件
+    $('[name=no_add]').bind('click',function(){
+        $.messager.alert('提示','不在认定时间范围内,不能创建')
+    })
+
+
+    $('#save').bind('click',{a:$('#project_info :text'),b:$('[name=cert_time]'),c:$('[name=info_credit]')},sub_info); //todo:暂时保存
+    $('#add').bind('click',{a:$('#project_info :text'),b:$('[name=cert_time]'),c:$('[name=info_credit]')},sub_info);  //todo:审核提交
+    $('#save_edit').bind('click',{a:$('#project_info_edit :text'),b:$('[name=cert_time_edit]'),c:$('[name=info_credit_edit]')},sub_info)
+    $('#add_edit').bind('click',{a:$('#project_info_edit :text'),b:$('[name=cert_time_edit]'),c:$('[name=info_credit_edit]')},sub_info)
+    $('#closed').bind('click',function(){
+
+        $('#apply_info').window({closed:true})});         //todo:关闭
+    //todo:点击搜索
+
+    function ssou(){
+        /*    var p1,p2,p3
+         switch ($('[name=zt]').val()){
+         case '':
+         p1=0,p2=1;
+         break;
+         case '0':
+         p1=0,p2=0
+         break;
+         case '1':
+         p1=1,p2=1
+
+         }*/
+        /*            alert($('[name=zt]').val())*/
+        /*    $('#apply_list').panel({closed:false})
+         $('#yichuangjian').panel({closed:true})
+         $('#project_info').panel({closed:true})*/
+        $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/Three_one_selectProject_list.SQL','count':'credit/Three_one_countProject_list.SQL'},
+            'bind':{':cone':3,':ctwo':3,':projectname':$('[name=search_studentno]').val().trim(),':zhongshen':'16'}})
+
+    }
+
+    $('#ss').bind('click',function(){
+        //  var arr=c_type_arr();
+        ssou();
+
+
+    })
+
+    var wd=$('#wd').window(new wind(0,0,false,false,false,true,true));        //todo:默认的页面
+    //  var apply=new wind(0,0,false,false,true,true,true)
+    //  var yichuangjian=$('#yichuangjian').window(new wind(0,0,false,false,true,true,true));
+
+
+    //  var apply_list=$('#apply_list').window(apply);        //todo:申请单列表的window
+    /*  var project_info=$('#project_info_edit').window(new wind(500,400,false,false,true,true,false))*/
+
+
+
+    $('[name=bt_select]').bind('click',{'a':$('#Project_div'),'b':'block'},none_block)
+    $('[name=bt_select2]').bind('click',{'a':$('#Project_div2'),'b':'block'},none_block)
+
+    $('#Project_list').bind('change',{a:$('[name=Project_NAME]'),b:$("#Project_list"),c:$('[name=info_credit]')},list_change)
+    $('#Project_list2').bind('change',{a:$('[name=Project_NAME2]'),b:$("#Project_list2"),c:$('[name=info_credit_edit]')},list_change)
+
+
+
+
+    $('#aplly_Details').window(new wind(500,400,false,false,true,true,false))
+
+
+    //todo:查看详情页的关闭按钮
+    $('#closed_look').linkbutton({
+        text:'关闭',
+        iconCls:'icon-edit'
+    }).bind('click',function(){
+                $('#aplly_Details').window({closed:true})
+            })
+
+
+
+    /*     //todo;查看暂存未提交的申请
+     $('#status_zero').bind('click',function(){
+     apply_list.window({closed:false})
+     $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/one_selectStudent_list.SQL','count':'credit/one_countStudent_list.SQL'},'bind':{
+     ':year':$('[name=year]').val(),':term':$('[name=term]').val(),':studentno':$('[name=search_studentno]').val().trim(),':studentname':$('[name=search_name]').val().trim(),':projectname':$('[name=search_projectname]').val().trim(),':projecttype':$('[name=search_projecttype]').val().trim(),
+     ':credittype':$('[name=search_credittype]').val(),':vone':0,':vtwo':0,':vthree':0,':vfour':0
+     }})
+
+     })
+
+     //todo;查看已经提交的申请
+     $('#status_one').bind('click',function(){
+     apply_list.window({closed:false})
+     $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/one_selectStudent_list.SQL','count':'credit/one_countStudent_list.SQL'},'bind':{
+     ':year':$('[name=year]').val(),':term':$('[name=term]').val(),':studentno':$('[name=search_studentno]').val(),':studentname':$('[name=search_name]').val().trim(),':projectname':$('[name=search_projectname]').val().trim(),':projecttype':$('[name=search_projecttype]').val().trim(),
+     ':credittype':$('[name=search_credittype]').val(),':vone':1,':vtwo':3,':vthree':2,':vfour':1
+     }})
+     })*/
+
+
+    $('#closed').bind('click',back)
+
+
+
+
+    $('#info_closed').bind('click',function(){
+        $('#aplly_Details').window({closed:true})
+    })
+
+
+    $('#create').bind('click',function(){
+        $('#project_info').window({closed:false})
+        /*            $('#yichuangjian').panel({closed:true});
+         $('#apply_list').panel({closed:true})*/
+    })
+
+
+})
+function c_type_arr(){
+    var c_arr=[]
+    if($('[name=c_type]').val()==""){
+        c_arr=[1,2]
+    }else{
+        c_arr=[$('[name=c_type]').val(),$('[name=c_type]').val()]
+    };
+    return c_arr
+}
+
+function none_block(e){                 //todo:选择框的   隐藏和显示
+    e.data.a.css('display',e.data.b)
+}
+
+
+function list_change(e){                  //todo:为选择 绑定onchange事件
+    if(this.value==''){
+        return;
+    }
+    var arr=this.value.split('_')
+    e.data.a.val(e.data.b.find("option:selected").text());
+    e.data.c.val(arr[1])
+}
+
+
+var yearaa='{$yearterm.YEAR}'
+var termaa='{$yearterm.TERM}'
+
+//todo:点击提交或保存
+function sub_info(e){
+    var inputlist= e.data.a
+    for(var i=0;i<inputlist.length;i++){
+        if(inputlist[i].value==""){
+            return $.messager.alert('提示','还有选项的没填哦,请不要留空白');
+        }
+    }
+   /* var zz=/((^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(10|12|0?[13578])([-\/\._])(3[01]|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(11|0?[469])([-\/\._])(30|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(0?2)([-\/\._])(2[0-8]|1[0-9]|0?[1-9])$)|(^([2468][048]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([3579][26]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][13579][26])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][13579][26])([-\/\._])(0?2)([-\/\._])(29)$))/ig
+    if(!zz.test(e.data.b.val())){
+        return $.messager.alert('提示','证书认定时间格式不正确')
+    }*/
+
+    if(isNaN(e.data.c.val())){
+        return $.messager.alert('提示','学分的格式不正确')
+    }
+    var year=parent.$('#YEAR').val()
+    var term=parent.$('#TERM').val()
+    var username='{$schoolname.USERNAME}'
+    var schoolname='{$schoolname.SCHOOL}'
+    //  alert(panduan)
+    if(panduan==0){
+        //var arr=$('#cc4').combo('getValues');
+        //var cc5=$('#cc5').combo('getValues');
+        //var str="";
+        /*for(var i=0;i<arr.length;i++){
+         if(i==arr.length-1){
+         str+=arr[i];
+         }else{
+         str+=arr[i]+',';
+         }
+         }*/
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'Credit/Three_one_insertProject.SQL',
+            'bind':{':projectname':$('[name=Project_NAME]').val(),':credit':$('[name=info_credit]').val(),
+                ':ctype':3,
+                ':cerater':username,
+                ':createdept':schoolname,
+                ':status':this.name,
+                ':zhongshen':'16'}},function(c){
+            $.messager.alert('提示','操作成功')
+            back();
+        })
+    }else if(panduan==1){
+
+
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'Credit/Three_one_updateProject_info.SQL',
+            'bind':{':projectname':$('[name=Project_NAME2]').val(),':credit':$('[name=info_credit_edit]').val(),':ctype':3,
+                ':creater':username,':createdept':schoolname,':status':this.name,':id':$('[name=projectid]').val()}},function(c){
+            $.messager.alert('提示','操作成功')
+
+            $('#project_info_edit').window({closed:true})
+            back()
+        })
+        panduan=0
+        refersh()
+    }
+
+}
+
+
+
+
+
+
+
+
+
+//todo:查看详情
+function run_select(num){
+    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/Three_one_lookDetails.SQL','bind':{':id':num}},function(c){
+        eval('one='+c);
+        $('#select_project').html(one[0]['projectname']);
+        $('#select_credittype').html(one[0]['credittype']);
+        $('#select_credit').html(one[0]['credit']);
+        $('#select_certficatetime').html(one[0]['certficatetime'])
+        //      var aarr=one[0]['schools_ids'].split(',');var str='';for(var i=0;i<aarr.length;i++){if(aarr[i]==''){continue;} if(aarr[i]==aarr.length-1){str+=kill[aarr[i]]}else{str+=kill[aarr[i]]+',';}}
+        //  $('#select_schools').html(str);
+        //    $('#select_audit').html(kill[one[0]['audit_deptid']]);
+        $('#aplly_Details').window({closed:false})
+    })
+}
+
+//todo:点击修改的时候
+function run_edit(num){
+    panduan=1
+    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/Three_one_lookDetails.SQL','bind':{':id':num}},function(c){
+        eval('one='+c);
+        $('[name=cert_time_edit]').val(one[0]['certficatetime'])
+        $('[name=credit_type_edit]').val(one[0]['credittype'])
+        $('[name=Project_NAME2]').val(one[0]['projectname'])
+        $('[name=info_credit_edit]').val(one[0]['credit'])
+
+        $('[name=projectid]').val(one[0]['batchproject_id'])
+        /*         $('#ee4').combobox('setValues',one[0]['schools_ids'].split(','))
+         $('#ee5').combobox('setValue',one[0]['audit_deptid']);*/
+        $('#project_info_edit').window({closed:false})
+    })
+}
+
+//todo:取消重置
+function back(){
+    $('[name=Project_NAME]').val('')
+    $('[name=credit_type][value="1"]').attr('checked',true);
+    $('[name=info_credit]').val('')
+    $('[name=cert_time]').val('')
+    $('#cc4').combobox('setValue','01')
+    $('#cc5').combobox('setValue','01')
+}
+
+
+
+
+
+</script>
+<style>
+    #project_info td{border:1px #95B8E7 solid;
+    }
+    #aplly_Details td,#project_info_edit td{border:1px #95B8E7 solid;height:20px
+    }
+    #project_info_edit input{height:23px;vertical-align:middle;}
+    .bt{height:25px;width:70px;background-color:#fcfcfc;border:1px #95B8E7 solid; }
+</style>
+<!--todo: 进来的默认页面-->
+<body >
+<div id="cc" class="easyui-layout" data-options="fit:true,border:false">
+    <div id="tdemo">
+        <b>项目名称</b>
+        <input type="text" name="search_studentno" size="15" value="%">
+        <!--      &nbsp&nbsp
+              <select name="c_type">
+                  <option value="">学分类别</option>
+                  <option value="1">创新学分</option>
+                  <option value="2">技能学分</option>
+              </select>-->
+        &nbsp&nbsp  &nbsp&nbsp  &nbsp&nbsp
+        <!--       <b>创建状态:</b>
+               <select name="zt">
+                   <option value="">全部</option>
+                   <option value="0">暂时保存</option>
+                   <option value="1">创建成功</option>
+               </select>-->
+        &nbsp&nbsp  &nbsp&nbsp  &nbsp&nbsp
+        <a href="javascript:void(0)" id="ss" class="easyui-linkbutton">查询</a>
+        <!--                    <a href="javascript:void(0)" id="look_status_one">查看已经创建的项目</a>-->
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" id="create" iconCls="icon-add" class="easyui-linkbutton" plain="true">项目创建</a>
+    </div>
+    <script>
+        //todo:以创建删除
+        function yichuangjian_del(num){
+            $.messager.confirm('提示','您确定要删除',function(a){
+                if(a){
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/Three_one_is_delete.SQL','bind':{':id':num}},function(c){
+                        if(c=='[]'){
+                            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'credit/Three_one_deleteProject.SQL','bind':{':id':num}},function(c){
+                                $.messager.alert('提示','删除成功')
+                                var arr=c_type_arr();
+                                $('#yichuangjian_dat').datagrid('load',{'Sqlpath':{'select':'credit/Three_one_selectYichuangjian.SQL','count':'credit/Three_one_countYichuangjian.SQL'}, 'bind':{':cone':arr[0],':ctwo':arr[1],':projectname':$('[name=search_studentno]').val().trim()}})
+
+
+                                var arr=c_type_arr();
+
+                                $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/Three_one_selectProject_list.SQL','count':'credit/Three_one_countProject_list.SQL'},
+                                    'bind':{':cone':arr[0],':ctwo':arr[1],':projectname':$('[name=search_studentno]').val()}})
+                            })
+                        }else{
+                            $.messager.alert('提示','该项目已经有认定信息不能删除')
+                        }
+                    })
+                }
+            })
+        }
+
+        function refersh(){
+            $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/Three_one_selectProject_list.SQL','count':'credit/Three_one_countProject_list.SQL'},
+                'bind':{':cone':3,':ctwo':3,':projectname':$('[name=search_studentno]').val().trim(),':zhongshen':'16'}})
+        }
+    </script>
+    <div data-options="region:'center',border:false,title:'',split:false,inline:true" >
+        <!--     &lt;!&ndash;todo:查看已经创建的项目&ndash;&gt;
+        <div id="yichuangjian" class="easyui-panel"
+             data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+            <table id="yichuangjian_dat"  class="easyui-datagrid"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,singleSelect:true,border:false">
+                <thead>
+                <tr>
+                    <th align="center" data-options="field:'projectname',width:100">项目名称</th>
+                    <th align="center" data-options="field:'credittype',width:100,formatter:function(a,b,c){
+
+                if(a=='1'){
+                    return '创新学分'
+                }else if(a=='2'){
+                    return '技能学分'
+                }
+            }">学分类别</th>
+                    <th align="center" data-options="field:'credit',width:100">认定学分</th>
+                    <th align="center" data-options="field:'certficatetime',width:100,align:'right'">证书时间</th>
+                    <th align="center" data-options="field:'schools_ids',width:500,align:'right',formatter:function(a,b,c){var aarr=a.split(',');var str='';for(var i=0;i<aarr.length;i++){if(aarr[i]==''){continue};if(i==aarr.length-1||aarr.length==1){str+=kill[aarr[i]]}else{str+=kill[aarr[i]]+',';}}return str}">报送学院</th>
+                    <th align="center" data-options="field:'audit_deptid',width:100,formatter:function(a,b,c){return kill[a]}">审核部门</th>
+                    <th align="center" data-options="field:'cert_name',width:100,formatter:function(a,b,c){return '<span onclick='+'run_edit('+b.batchproject_id+')'+'><a href='+'javascript:void(0)'+'><b>修改</b></a></span> | <span onclick='+'yichuangjian_del('+b.batchproject_id+')'+'><a href='+'javascript:void(0)'+'><b>删除</b></a></span> '}">操作</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>-->
+
+        <!--        <div id="cc2" class="easyui-layout" data-options="fit:true,border:false">-->
+        <!--            <div data-options="region:'center',title:'',border:false,split:false">-->
+        <div id="apply_list" class="easyui-panel"
+             data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" ><!--todo:项目列表-->
+            <table id="apply_dat"  class="easyui-datagrid"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pageList:[20,50,100,200,500],fit:true,pagination:true,singleSelect:true,border:false,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th align="center" data-options="field:'projectname',width:100">项目名称</th>
+                    <th align="center" data-options="field:'credittype',width:100,formatter:function(a,b,c){
+
+                if(a=='3'){
+                    return '素质学分'
+                }
+            }">学分类别</th>
+                    <th align="center" data-options="field:'credit',width:100">认定学分</th>
+                <!--    <th align="center" data-options="field:'certficatetime',width:100,align:'right'">证书时间</th>-->
+                    <!--                     <th align="center" data-options="field:'schools_ids',width:500,align:'right',formatter:function(a,b,c){var aarr=a.split(',');var str='';for(var i=0;i<aarr.length;i++){if(aarr[i]==''){continue};if(i==aarr.length-1||aarr.length==1){str+=kill[aarr[i]]}else{str+=kill[aarr[i]]+',';}}return str}">报送学院</th>
+                                         <th align="center" data-options="field:'audit_deptid',width:100,formatter:function(a,b,c){return kill[a]}">审核部门</th>-->
+                    <th align="center" data-options="field:'cert_name',width:100,formatter:function(a,b,c){ return '<span onclick='+'run_edit('+b.batchproject_id+')'+'><a href='+'javascript:void(0)'+' style=\'color:blue;text-decoration:underline\'><b>修改</b></a></span> | <span onclick='+'yichuangjian_del('+b.batchproject_id+')'+'><a href='+'javascript:void(0)'+' style=\'color:blue;text-decoration:underline\'><b>删除</b></a></span> '}">操作</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <!--todo:项目创建-->
+        <!--<div id="project_info" data-options="inline:true" title="">
+        -->
+        <!--        <div id="project_info" class="easyui-panel"
+                         data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >-->
+        <div id="project_info" data-options="minimizable:false,maximizable:false,collapsible:false,closable:true,width:500,height:400" title="项目创建">
+            <br><br><br><br>
+            <table border="0"  width="80%" style="" align="center" >
+                <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+                        <p align="right"><b>项目名称：</b></td>
+                    <td colspan="5" bgcolor="#fcfcfc">
+                        <div style="float:left">
+                            <input type="text" size="30" name="Project_NAME"><!--&nbsp&nbsp<a href="javascript:void(0)" name="bt_select" class="easyui-linkbutton">选择</a>-->
+                        </div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+                        <p align="right"><b>学分类别：</b></td>
+                    <td colspan="5" bgcolor="#fcfcfc">
+                        <!-- <input type="radio" name="credit_type" checked style="position: relative; bottom:3px;" value=1>-->素质学分
+                        <!--   <input type="radio" name="credit_type" style="position: relative; bottom:3px;" value="2">技能学分-->
+                    </td>
+                </tr>
+                <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+                        <p align="right"><b>认定学分：</b></td>
+                    <td colspan="2" width="360px" bgcolor="#fcfcfc"><input type="text" name="info_credit" size="4" value=""></td>
+                </tr>
+                <!--      <tr>
+                          <td width="107" bgcolor="#E0ECFF" height="25">
+                              <p align="right"><b>
+                                  证书认定时间：</b></td>
+                          <td colspan="2" width="360px" bgcolor="#fcfcfc">
+                              <input type="text" size="25" name="cert_time">&nbsp&nbsp格式:2014/01/01
+                          </td>
+                      </tr>-->
+                <tr>
+                    <td colspan="6" align="center" style="border:0px">
+                        <!--      <a href="javascript:void(0)" name="0" class="easyui-linkbutton" id="save">保存</a>&nbsp&nbsp&nbsp&nbsp-->
+                        <if condition="$is_time eq 'true'">
+                            <a href="javascript:void(0)" name="1" class="easyui-linkbutton" id="add">项目创建</a>&nbsp&nbsp&nbsp&nbsp
+                            <else />
+                            <a href="javascript:void(0)" class="easyui-linkbutton" name="no_add"><font color="#d3d3d3">项目创建</font></a>&nbsp&nbsp&nbsp&nbsp
+                        </if>
+
+                        <!-- <button class="bt" id="closed2">关闭</button>-->
+                    </td>
+                </tr>
+            </table>
+            <!--       </div>-->
+        </div>
+    </div>
+</div>
+</div>
+
+<!--todo:查看申请单的详情-->
+<div id="aplly_Details" title="证书信息">
+    <br><br><br><br>
+    <table border="0" style="" width="66%" style="" align="center" >
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>项目名称：</b></td>
+            <td colspan="5" bgcolor="#fcfcfc">
+                <span id="select_project"></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学分类别：</b></td>
+            <td colspan="5"  bgcolor="#fcfcfc">
+                <span id="select_credittype"></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>认定学分：</b></td>
+            <td colspan="2" width="360px"  bgcolor="#fcfcfc"><span id="select_credit"></span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>
+                    证书认定时间：</b></td>
+            <td colspan="2" width="360px"  bgcolor="#fcfcfc">
+                <span id="select_certficatetime"></span>
+            </td>
+
+        </tr>
+        <tr><td width="107" height="25" colspan="6" align="center" style="border:0px"><a href="javascript:void(0)" class="easyui-linkbutton" id="info_closed">关闭</a></td></tr>
+    </table>
+</div>
+
+
+
+<!--todo:项目创建编辑-->
+<div id="project_info_edit" class='easyui-window' data-options="minimizable:false,maximizable:false,collapsible:false,closable:true,width:500,height:400,closed:true" title="编辑">
+    <br><br><br><br>
+    <table border="0" style="border:0px solid #E0ECFF" width="80%" style="" align="center" >
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>项目名称：</b></td>
+            <td colspan="5" bgcolor="#fcfcfc">
+                <div style="float:left">
+                    <input type="text" size="30" name="Project_NAME2"><!--&nbsp&nbsp<a href="javascript:void(0)" name="bt_select2" class="easyui-linkbutton">选择</a>-->
+                </div>
+                <!--  <div id="Project_div2" style="float:left;height:25px;padding-top:3px;margin-left: 10px;display: none">
+                      <select style="width:100px" id="Project_list2">
+                          <option value="">--请选择--</option>
+                          <volist name="Project" id="p">
+                              <option value="{$p.cert_id}_{$p.credit}">{$p.cert_name}</option>
+                          </volist>
+                      </select>
+                  </div>-->
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学分类别：</b></td>
+            <td colspan="5" bgcolor="#fcfcfc">
+                <!-- <input type="radio" name="credit_type_edit" checked style="position: relative; bottom:3px;" value=1>-->素质学分
+                <!--      <input type="radio" name="credit_type_edit" style="position: relative; bottom:3px;" value="2">技能学分
+                      <input type="radio" name="credit_type_edit" style="position: relative; bottom:3px;" value="3">素质学分-->
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>认定学分：</b></td>
+            <td colspan="2" width="360px" bgcolor="#fcfcfc"><input type="text" name="info_credit_edit" size="4" value=""></td>
+
+        </tr>
+        <!--        <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+
+                        <p align="right"><b>
+                            证书认定时间：</b></td>
+                    <td colspan="2" width="360px" bgcolor="#fcfcfc">
+                        <input type="hidden" name="projectid" value>
+                        <input type="text" size="25" name="cert_time_edit">&nbsp&nbsp格式2014/01/01
+                    </td>
+                </tr>-->
+        <!--
+                <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+                        <p align="right"><b>报送学院：</b></td>
+                    <td width="" height="25" colspan="5">
+                        <select id="ee4" class="easyui-combobox" data-options="multiple:true,editable:false"  name="dept" style="width:200px;">
+                            <volist name="school" id="i">
+                                <option value="{$i.SCHOOL}">{$i.NAME}</option>
+                            </volist>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="107" bgcolor="#E0ECFF" height="25">
+                        <p align="right"><b>审核学院：</b></td>
+                    <td width="" height="25" colspan="5">
+                        <select id="ee5" class="easyui-combobox" data-options="editable:false"  name="dept" style="width:200px;">
+                            <volist name="school" id="i">
+                                <option value="{$i.SCHOOL}">{$i.NAME}</option>
+                            </volist>
+                        </select>
+
+                    </td>
+                </tr>-->
+        <input type="hidden" name="projectid" value>
+        <tr>
+            <td  colspan="6" align="center" style="border:0px">
+                <!--                <button name="0" class="bt" id="save_edit">保存</button>&nbsp&nbsp&nbsp&nbsp-->
+                <if condition="$is_time eq 'true'">
+                    <button name="1" class="bt" id="add_edit">修改</button>&nbsp&nbsp&nbsp&nbsp
+                    <else />
+                    <button class="bt" name="no_add"><font color="#d3d3d3">修改</font></button>&nbsp&nbsp&nbsp&nbsp
+                </if>
+
+                <!--    <button class="bt" id="closed" onclick="javascript:$('#project_info_edit').window({closed:true})">关闭</button>-->
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+
+
+</body>
+</html>

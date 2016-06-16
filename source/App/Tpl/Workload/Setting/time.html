@@ -1,0 +1,103 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var year='{$timearr.year}';
+    var term='{$timearr.term}';
+    var start1='{$timearr.begintime}'
+    var end1='{$timearr.endtime}'
+    var status='{$timearr.status}'
+    $(function(){
+        $('[name=year]').val(year);
+        $('[name=term]').val(term);
+        $("[name=status][value='{$timearr.status}']").attr('checked',true)
+
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        //todo:start
+        var ks= $('#start').datetimebox({
+            value: '3/4/2010 2:3',
+            required:true,
+            showSeconds:false
+        })
+
+        var js=$('#end').datetimebox({
+            value:'3/4/2010 2:3',
+            required:true,
+            showSeconds:false
+        })
+        //todo:设置开始时间默认值
+        ks.datebox('setValue',start1)
+        //todo:设置结束时间默认值
+        js.datebox('setValue',end1)
+
+
+        //todo;点击保存的时候
+        $('#bt').bind('click',function(){
+
+            if($('[name=year]').val()==""){
+                return $.messager.alert('提示','请您填写本学年的学年，不能为空')
+            }
+            if($('[name=term]').val()==""){
+                return $.messager.alert('提示','请您填写本学期的学期，不能为空')
+            }
+
+            if(ks.datebox('getValues')==""){
+                return $.messager.alert('提示','请您选择一个开始的时间')
+            }
+            if(js.datebox('getValues')==""){
+                return $.messager.alert('提示','请选择一个结束的时间')
+            }
+            ajiakesi('__URL__/time',{'bind':{':year':$('[name=year]').val(),':term':$('[name=term]').val(),':start':ks.datebox('getValues'),':end':js.datebox('getValues'),':status':$('[name=status]:checked').val()}},function(c){
+                $.messager.alert('提示','保存成功')
+           })
+        })
+
+
+
+
+    })
+</script>
+        <style>
+            td{border:1px #95B8E7 solid;
+            }
+            input{height:23px;vertical-align:middle;}
+            span{border:0px solid red;;vertical-align:middle;}
+
+        </style>
+<!--todo: 进来的默认页面-->
+<body style="background-color: #ffffff">
+<div id="wd" title="分解时间设置">
+    <table border="0"  width="456" style="margin-top: 80px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学年：</b></td>
+            <td width="209" height="25"><input name="year" type="text" size='4' value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学期：</b></td>
+            <td width="209" height="25"><input type="text" name="term" size="1" value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>开始时间：</b></td>
+            <td width="209" height="25"><span><input id="start" type="text" name="birthday"></span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>结束时间：</b></td>
+            <td width="209" height="25"><span><input id="end" type="text" name="birthday"></span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>开启状态：</b></td>
+            <td width="209" height="25"><span><input type="radio"  style="position: relative; bottom:2px;" checked name="status" value="1">开启</span>&nbsp<span><input type="radio" style="position: relative; bottom:2px;" name="status" value="0">关闭</span></td>
+        </tr>
+        <tr><td style="border:0px;" height="5" align="center" colspan="2"></td></tr>
+        <tr>
+            <td style="border:0px;" height="25" align="center" colspan="2">
+                <a href="javascript:void(0)" id="bt" class="easyui-linkbutton">保存</a> </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<include file=":Include:jqueryHeader" />
+<script>
+//用户角色
+var rules = "{$roles}";
+var upanduan=false;                 //判断添加的时候用户是否有正确填写教室号用
+var purpose=false;                      //判断用户的借用目的有没有写
+
+//查看教室周时间表
+function lookRoomWeek(roomno){
+    window.open("__URL__/roomWeek/roomno/"+roomno+"/year/"+$('#courseYEAR').val()+'/term/'+$('#courseTERM').val());
+}
+
+$(function () {
+
+    var exp_excel = $('#e_export');//excel到处按钮
+    var search_window = $('#wd');
+    var borrow_window = $('#wdd').window({closed:true});
+    var edit_room_window = $("#editroom");
+    var search_form = $("#biaodan2");//查询条件框
+    var search_button = $('#sousuo');
+    var borrow_purpose = $('#PURPOSE');
+    var roomno_input = $('#ADD_ROOMNO');
+    var add_borrow_form = $("#room_dengji");
+
+
+    //显示编辑窗口
+    function showEditWindow(roomno) {
+        $.post('__URL__/editroom', {'roomno': roomno}, function (data) {
+            var one = $("#editroom input");
+            var two = $('#editroom select');
+            var nm = '';
+            console.log(one);
+            for (var i = 0; i < one.length; i++) {
+                nm = one[i].name;
+                one[i].value =  data[nm] ;
+            }
+            for (var i = 0; i < two.length; i++) {
+                nm = two[i].name;
+                two[i].value =  data[nm] ;
+            }
+            $('#wd2').window({closed: false});
+        });
+    }
+
+    $('#searcher').bind('click',function(){
+        $('#wd').window({
+            closed:false,
+            modal:true,
+            minimizable:false,
+            maximizable:false,
+            collapsible:false
+        })
+    });
+    borrow_purpose.blur(function(){
+        if(this.value==""){
+            borrow_purpose.css('background','red');
+            purpose=false;
+        }else{
+            borrow_purpose.css('background','');
+            purpose=true;
+        }
+    });
+    //失去焦点是自动验证
+    roomno_input.blur(function(){
+        var roomno = this.value;
+        if(roomno==""){
+            roomno_input.css('background','red');
+            return Messager.showWarning('不能为空！');
+        }
+        $.post('__URL__/roomyz',{ roomno:roomno}, function (c) {
+            if(c.type === 'info'){
+            //教室不存在
+                roomno_input.css('background','red');
+                upanduan=false;
+                return Messager.showWarning(c.message);
+            }else{
+                upanduan=true;
+                roomno_input.css('background','');
+            }
+        });
+    });
+
+    //TODO:添加借用登记
+    $('#add').bind('click', function(){
+        borrow_purpose.blur();
+        roomno_input.blur();
+
+        var values = add_borrow_form.serialize();
+        var zhouci = Formor.getWeeks("#zc input");
+        $.post('__URL__/addjieyong',{_PARAMS_:values,'zhouci':zhouci}, function (c) {
+            return Messager.showInfo(c.message, c.type);
+        });
+    });
+    var  dat=$('#scinfo').datagrid({
+        striped:true,
+        url:'__URL__/selectroom/hasJson/1',
+        frozenColumns:[[{checkbox:true},
+            {field:'ROOMNO',title:'教室号',width:100,formatter:function(roomno){
+                return "<a href='javascript:void(0)' onclick='lookRoomWeek(\""+roomno+
+                    "\")' style='color:blue;text-decoration:underline'>"+roomno+"</a>";
+            },sortable:true,align:'center',
+                editor:{type:'validatebox',options:{required:true}}
+            }]],
+        columns:[[
+            {field:'NO',title:'房间号',width:50,sortable:true,align:'center'
+            },
+            {field:'JSN',title:'简称',align:'center',width:100,sortable:true
+            },
+            {field:'BUILDING',title:'楼名',align:'center',width:100,sortable:true
+            },
+            {field:'AREAVALUE',title:'校区',align:'center',width:100,sortable:true
+            },
+            {field:'SEATS',title:'座位数',align:'center',width:50,sortable:true
+            },
+            {field:'TESTERS',title:'考位数',align:'center',width:50,sortable:true
+            },
+            {field:'EQUIPMENTVALUE',title:'设施',align:'center',width:100,sortable:true
+            },
+            {field:'SCHOOLNAME',title:'优先学院',align:'center',width:100,sortable:true
+            },
+            {field:'USAGEVALUE',title:'排课约束',align:'center',width:80,sortable:true
+            },
+            {field:'RESERVED',title:'是否保留',align:'center',width:100,sortable:true,formatter:function(a){
+                return a=='1'?'是':'否';
+            }}
+        ]],
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:'#tdemo',onRowContextMenu:function(e,rowindex){
+            dat.datagrid('rejectChanges');
+            var tt=$('#scinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },onDblClickRow:function(keyrow,dataRow){                                       //双击时候也能触发弹窗
+            $.ajax({
+                type:'POST',
+                url:'__URL__/editroom',                                        //做ajax请求获取数据
+                data:{
+                    ROOMNO:dataRow.ROOMNO
+                },
+                success:function(content2){
+                    showEditWindow(content2);
+                }
+            })
+        }});
+
+    //导出
+    exp_excel.click(function(){
+        var values = search_form.serialize();
+        window.open('__URL__/selectroom/reqtag/exportexcel?'+values);//打开到处连接
+    });
+    //查询
+    search_button.click(function () {
+        var params = search_form.serialize();
+        search_window.window({closed:true});
+        dat.datagrid('load',{_PARAMS_:params});
+    });
+    //借用教室登记 开启窗口
+    $('#e_add2').bind('click',function(){
+        var row = dat.datagrid('getSelections');
+        if(row!='') roomno_input.val(row[0].ROOMNO);
+        borrow_window.window({closed:false})
+    });
+    //修改教室
+    $('#revision').bind('click',function(){                                //修改完 教室信息所触发的事件
+        if(parseInt($('#TESTERS').val())>parseInt($('#SEATS').val())){
+            return Messager.showWarning("考位数不能大于座位数");
+        }
+        var values = edit_room_window.serialize();
+        $.post('__URL__/updateroom',{_PARAMS_:values}, function (c) {
+            return Messager.showInfo(c.message, c.type, function () {
+                $('#wd2').window({closed: true});
+                dat.datagrid('reload');
+            });
+        });
+    });
+
+    //删除教室
+    function ddel(){
+        $.messager.confirm('提示','您确定要删除吗?',function(b){
+            if(b){
+                var row2 = dat.datagrid('getSelections');
+                var rooms = [];
+                for(var x in row2){
+                    rooms[x] = row2[x].ROOMNO;
+                }
+                $.post('__URL__/deleteroom/hasJson/1',{'rooms':rooms}, function (c) {
+                    return Messager.showInfo(c.message, c.type, function () {
+                        dat.datagrid('reload');
+                    })
+                });
+            }
+        });
+    }
+    $('#e_del').bind('click',ddel);
+    $('#admin_del').bind('click',ddel);
+    //修改
+    function eedit(){
+        if( Datagrid.selectSingle(dat)){
+            var row3 = dat.datagrid('getSelected');
+            showEditWindow(row3.ROOMNO)
+        }
+    }
+
+    $('#e_edit').bind('click',eedit);
+    $('#admin_edit').bind('click',eedit);
+
+    function llook(){
+        if(Datagrid.selectSingle(dat)){
+            var row=dat.datagrid('getSelected');
+            lookRoomWeek(row.ROOMNO);
+        }
+    }
+    $('#e_look').bind('click',llook);
+    $('#admin_look').bind('click',llook)
+});
+
+
+
+
+    $(function(){
+
+        function wdchuang(height,width)
+        {
+            this.closed=false;
+            this.height=height;
+            this.width=width;
+            this.modal=true
+        }
+        var wdobj=new wdchuang(420,700)
+        var ck=$('#wd').window(wdobj)
+        wdobj.closed=true
+        var ck2=$('#wd2').window(wdobj)
+        var wdobj2=new wdchuang(0,0)
+        wdobj2.closed=true
+        wdobj2.fit=true
+
+        var course_wd=$('#zhoucourse').window(wdobj2)
+
+    });
+
+    function closedWD3(){
+
+        $('#zhoucourse').window({
+            closed:true
+        })
+    }
+
+
+
+
+</script>
+<body>
+<!-- 查询条件 -->
+<div id="wd" title="按条件浏览教室" maximizable="false" minimizable="false" closable="false" collapsible="false">
+    <form method="POST" id="biaodan2"  >
+        <table border="0" style="margin-top:20px;margin-left:30px" width="600" align="center" cellspacing="8">
+            <tr>
+                <td width="16%" align="right"><font size="2">教室代号：</font></td>
+                <td width="21%"><input type="text" id='ROOMNO' name="ROOMNO" size="9" maxlength="9" value="%"></td>
+                <td width="24%" align="right"><font size="2">房间号：</font></td>
+                <td width="45%"><input type="text" name="NO" id="NO" size="6" maxlength='6' value="%"></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">楼名：</font></td>
+                <td width="21%"><input type="text" name="BUILDING" id="BUILDING" size="20" value="%"></td>
+                <td width="24%" align="right"><font size="2">校区：</font></td>
+                <td width="45%">
+                    <select name="AREA" id="AREA">
+                        <option value="%">所有校区</option>
+                        <volist name="area" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">座位数：</font></td>
+                <td width="21%"><font size="2"><input type="text" name="SEATSDOWN" size="4" value="0" id="SEATSDOWN">小于<input type="text" name="SEATSUP" size="4" value="1000" id="SEATSUP"></font></td>
+                <td width="24%" align="right"><font size="2">考位数：</font></td>
+                <td width="45%"><input type="text" name="TESTERSDOWN" size="4" maxlength="4" value="0" id="TESTERSDOWN">小于<input type="text" name="TESTERSUP" size="4" value="1000" id="TESTERUP"></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">设施：</font></td>
+                <td width="21%">
+                    <select name="EQUIPMENT" id="EQUIPMENT">
+                        <option value="%">所有情况</option>
+                        <volist name="roomoption" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+                <td width="24%" align="right"><font size="2">可用不可用：</font></td>
+                <td width="45%"><select size="1" name="STATUS" id="STATUS">
+                    <option selected value="%">所有情况</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select></td>
+
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">优先学院：</font></td>
+                <td width="21%"><select name="PRIORITY" id="PRIORITY">
+                    <option value="%">所有学院</option>
+                    <volist name="school" id="v">
+                        <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                    </volist>
+                </select></td>
+                <td width="24%" align="right"><font size="2">排课约束：</font></td>
+                <td width="45%">
+                    <select size="1" name="USAGE" id="USAGE">
+                        <option selected value="%">所有情况</option>
+                        <option value="P">人数限制  </option>
+                        <option value="C">授课限制  </option>
+                        <option value="N">无限制    </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">是否保留：</font></td>
+                <td width="21%">
+                    <select size="1" name="RESERVED" id="RESERVED">
+                        <option selected value="%">所有情况</option>
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">排序方式：</font></td>
+                <td width="90%" colspan="3">
+                    <p align="left"><input type="radio" value="ROOMNO" checked name="SORT" id="radio"><font size="2">教室代号；<input type="radio" name="SORT" value="SEATS">座位数；<input type="radio" name="SORT" value="EQUIPMENT">设施。</font></td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <a href="javascript:void(0)" id="sousuo" class="easyui-linkbutton" data-options="iconCls:'icon-search'" >
+                        搜索
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="left">
+                    <font color="red">备注:你可以点击 查看教室周课表 查看指定学年学期的教室课程安排</font>
+                </td>
+            </tr>
+
+        </table>
+    </form>
+</div>
+
+<!--两个窗口的分割线-->
+<div id="wd2" title="编辑教室" collapsible="false">
+    <form method="POST" id="editroom" >
+        <table border="0" style="margin-top:20px;margin-left:30px" width="600" align="center" cellspacing="8">
+            <tr>
+                <td width="16%" align="right"><font size="2">教室代号：</font></td>
+                <td width="21%">
+                    <input type="text" name="ROOMNO" size="9" maxlength="9" value="" readonly="readonly"></td>
+                <td width="24%" align="right"><font size="2">房间号：</font></td>
+                <td width="45%"><input type="text" name="NO" size="4" maxlength="4" value=""></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">楼名：</font></td>
+                <td width="21%"><input type="text" name="BUILDING" size="20" value=""></td>
+                <td width="24%" align="right"><font size="2">校区：</font></td>
+                <td width="45%">
+                    <select name="AREA">
+                        <option value="%">所有学院</option>
+                        <volist name="area" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">座位数：</font></td>
+                <td width="21%"><input type="text" name="SEATS" id="SEATS" size="4"></td>
+                <td width="14%" align="right"><font size="2">考位数：</font></td>
+                <td width="55%"><input type="text" name="TESTERS" id="TESTERS" size="4" maxlength="4"></td>
+            </tr>
+            <tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">设施：</font></td>
+                <td width="21%">
+                    <select name="EQUIPMENT">
+                        <option value="%">所有情况</option>
+                        <volist name="roomoption" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+                <td width="24%" align="right"><font size="2">可用不可用：</font></td>
+                <td width="45%"><select size="1" name="STATUS">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+
+                </select></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">优先学院：</font></td>
+                <td width="21%"><select name="PRIORITY">
+                    <option value="%">所有学院</option>
+                    <volist name="school" id="v">
+                        <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                    </volist>
+                </select></td>
+                <td width="24%" align="right"><font size="2">排课约束：</font></td>
+                <td width="45%"><select size="1" name="USAGE">
+                    <option value="P">人数限制  </option>
+                    <option value="C">授课限制  </option>
+                    <option value="N">无限制    </option>
+
+                </select></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">是否保留：</font></td>
+                <td width="21%"><select size="1" name="RESERVED">
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+
+                </select></td>
+                <td width="14%" align="right"><font size="2">备注：</font></td>
+                <td width="55%"><input type="text" name="REM" size="20" value="    "></td>
+            </tr>
+            <tr>
+                <td width="16%" align="right"><font size="2">简称：</font></td>
+                <td width="21%"><input type="text" name="JSN" size="20" value=""></td>
+                <td width="69%" align="right" colspan="2">　</td>
+            </tr>
+
+            <tr>
+                <td colspan="4" align="center">
+                    <br />
+                    <a href="javascript:void(0)" id="revision"
+                       class="easyui-linkbutton" iconCls="icon-edit" >修改</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+        学年<input type="text" id="courseYEAR" size="4" value="{$yearTerm.YEAR}">
+        学期：<input type="text" id="courseTERM" size="1" value="{$yearTerm.TERM}">
+        &nbsp&nbsp&nbsp
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"   id="searcher">点击按条件搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"  id="e_look" plain=true>查看教室周课表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-room" id="e_add2" plain=true>借用教室登记</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel"  id="e_import" plain=true>导入</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel"  id="e_export" plain=true>导出</a>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true"></div>
+    </div>
+</div>
+<div align="center" id="wdd" title="借用教室登记">
+    <center>
+        <form id="room_dengji">
+            <table border="0" cellpadding="0" cellspacing="10" width="100%" style="margin-top:10px">
+                <tr>
+                    <td width="25%" align="right"><font size="2">学年：</font></td>
+                    <td width="30%" align="left"><input type="text" name="YEAR" size="4" value="{$yearTerm.YEAR}" id="YEAR"></td>
+                    <td width="13%" align="right"><font size="2">学期：</font></td>
+                    <td width="32%" align="left"><input type="text" name="TERM" size="2" value="{$yearTerm.TERM}" id="TERM"></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right"><font size="2">教室号（9位）：</font></td>
+                    <td width="30%" align="left"><input type="text" name="ROOMNO" size="9" id="ADD_ROOMNO" maxlength="9" ><span id="ct2"></span></td>
+                    <td width="13%" align="right"><font size="2">日期：</font></td>
+                    <td width="32%" align="left"><select size="1" name="DAY" id="DAY">
+                        <option value="1">星期一</option>
+                        <option value="2">星期二</option>
+                        <option value="3">星期三</option>
+                        <option value="4">星期四</option>
+                        <option value="5">星期五</option>
+                        <option value="6">星期六</option>
+                        <option value="7">星期日</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right"><font size="2">时段：</font></td>
+                    <td width="30%" align="left"><font size="2">
+                        <select size="1" name="TIME" id="TIME">
+                            <volist name="timesectors" id="one">
+                                <option value="{$one.NAME}">{$one.VALUE}</option>
+                            </volist>
+                        </select>
+                    </font></td>
+                    <td width="13%" align="right"><font size="2">单双周：</font></td>
+                    <td width="32%" align="left"><select size="1" name="OEW" id="OEW">
+                        <option value="B">单双周</option>
+                        <option value="O">单周</option>
+                        <option value="E">双周</option>
+                    </select></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right"><font size="2">借用目的<font color="#FF0000">（必须）</font>：</font></td>
+                    <td width="75%" align="left" colspan="3"><font size="2"><input type="text" name="PURPOSE" id="PURPOSE" size="50" maxlength="50">最多25字</font></td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right"><font size="2">周次：</font></td>
+                    <td width="75%" align="left" colspan="3" id="zc">
+                        <font size="2">
+                            1:<input type="checkbox" name="C1" value="ON">
+                            2:<input type="checkbox" name="C2" value="ON">
+                            3:<input type="checkbox" name="C3" value="ON">
+                            4:<input type="checkbox" name="C4" value="ON" >
+                            5:<input type="checkbox" name="C5" value="ON">
+                            6:<input type="checkbox" name="C6" value="ON">
+                            7:<input type="checkbox" name="C7" value="ON">
+                            8:<input type="checkbox" name="C8" value="ON">
+                            9:<input type="checkbox" name="C9" value="ON" >
+                            10:<input type="checkbox" name="C10" value="ON" >
+                        </font>
+                        <font size="2">
+                            11:<input type="checkbox" name="C11" value="ON">
+                            12:<input type="checkbox" name="C12" value="ON">
+                            13:<input type="checkbox" name="C13" value="ON">
+                            14:<input type="checkbox" name="C14" value="ON">
+                            15:<input type="checkbox" name="C15" value="ON">
+                            16:<input type="checkbox" name="C16" value="ON">
+                            17:<input type="checkbox" name="C17" value="ON">
+                            18:<input type="checkbox" name="C18" value="ON">
+                        </font></td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center">
+                        <a href="javascript:void(0)" id="add"  class="easyui-linkbutton" data-options="iconCls:'icon-search'">>添加</a>
+                    </td>
+
+                </tr>
+            </table>
+        </form>
+    </center>
+</div>
+<div id="zhoucourse" title="周课表" collapsible="false" maximizable="false" minimizable="false" closable="false">
+    <div id="course_content"></div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+    <div id="admin_look">查看教室周课表</div>
+</div>
+</body>
+</html>
+
+
+

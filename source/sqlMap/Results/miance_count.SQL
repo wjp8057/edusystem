@@ -1,0 +1,2 @@
+select count(*) as ROWS from (select row_number() over(order by year) as row,year,term,studentno,name,classname,convert(varchar(10),time,20) as time,reason as reson
+from 免于测试名单 where year like :year and term like :term and name like :name) as b

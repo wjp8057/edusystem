@@ -1,0 +1,203 @@
+<include file=":Include:jqueryHeader" />
+<body style="background: #FFFFFF">
+	<div id="content" title=" ">
+		<form action="__URL__" id="report">
+		<table align="center" cellspacing="15" border="0"style="margin-top: 50px">
+		 <tr>
+		   <th align="right">学年：</th>
+		   <td><input name="YEAR" class="txt_" value="{$yearTerm.YEAR}" size="8" maxlength="4"> <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">学期：</th>
+		   <td><input name="TERM" class="txt_" value="{$yearTerm.TERM}" size="2" maxlength="1"> <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">周次：</th>
+		   <td>第<input name="WEEK" class="txt_" size="2" maxlength="4">周 <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">课号（9位）：</th>
+		   <td><input name="COURSENO" class="txt_" size="25" maxlength="9"> <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">上课时间：</th>
+		   <td><input name="DATETIME" class="easyui-datebox" maxlength="10"> <font color="red">（时间格式：2014-03-12）</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">节次：</th>
+		   <td><select name="TIMENO">
+		   <volist name="timesectors" id="t">
+		   <option value="{$t.NAME}">{$t.VALUE}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr>
+		   <th align="right">学号：</th>
+		   <td><input name="STUDENTNO" class="txt_" size="25" maxlength="9"> <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">学时：</th>
+		   <td><input value="2" class="txt_" name="TIMENUM" size="8" maxlength="18"> 
+		    <font color="red">*</font></td>
+		 </tr>
+		 <tr>
+		   <th align="right">上课情况：</th>
+		   <td><select name="REASON">
+		   <volist name="reason" id="r">
+		   <option value="{$r.code}">{$r.name}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr>
+		   <th align="right">违纪情况：</th>
+		   <td><select name="BREAKTHERULE">
+		   <option selected value="无">无</option>
+		   <option value="使用手机">使用手机</option>
+		   <option value="吃东西">吃东西</option>
+		   <option value="讲话">讲话</option>
+		   <option value="打瞌睡">打瞌睡</option>
+		   <option value="其他">其他</option>
+		   </select><span>（如学生违纪请选择具体情况）</span></td>
+		 </tr>
+		 <tr style="height: 50px">
+		   <td align="center" colspan="2"><a href="javascript:void(0)" id="register" data-options="">提&nbsp;交</a></td>
+		 </tr>
+		</table>
+		</form>
+	</div>
+</body>
+<script type="text/javascript">
+$(function(){
+	//按钮样式设置
+	$('#register').linkbutton({iconCls: 'icon-save'});
+	//鼠标离开文本框事件
+	$(".txt_").blur(function(){
+		if($(this).attr("name")=="COURSENO"){
+			ajaxCheck($(this),"__URL__/validation/hasJson/1","课号");
+		}else if($(this).attr("name")=="STUDENTNO"){
+			ajaxCheck($(this),"__URL__/validation/hasJson/0","学号");
+		}else {
+			if($.trim($(this).val())==""){
+				$(this).next().html("* 必填");
+			}
+		}
+	});
+	//提交及验证考勤信息
+	$("#register").click(function(){
+		//学年验证
+		var bool=true;
+		
+		var reg=/^\d{4}$/;
+		if(!check($("[name='YEAR']"),false,reg,"只能输入四位数字","学年")) bool=false;
+		//学期验证
+		reg=/^[1-2]{1}$/;
+		if(!check($("[name='TERM']"),false,reg,"只能输入1或2","学期")) bool=false;
+		//周次验证
+		var ele=$("[name='WEEK']");
+		reg=/^\d{1,2}$/;
+		if(!check(ele,false,reg,"输入范围只能是1~20之间","周次")) bool=false;
+		else{
+			if(parseInt($.trim(ele.val()))>20 || parseInt($.trim(ele.val()))<=0){
+				ele.next().html("周次输入范围只能是1~20之间");bool=false;
+			}
+		}
+		//课号验证
+		ele=$("[name='COURSENO']");
+		str=$.trim(ele.val());
+		if(str!=""){
+			if(!ajaxCheck(ele,"__URL__/validation/hasJson/1","课号"))bool=false;
+		}else{
+			ele.next().html("课号不能为空");bool=false;
+		}
+		//学号验证
+		ele=$("[name='STUDENTNO']");
+		str=$.trim(ele.val());
+		if(str!=""){
+			if(!ajaxCheck(ele,"__URL__/validation/hasJson/0","学号"))bool=false;
+		}else{
+			ele.next().html("学号不能为空");bool=false;
+		}
+		//学时验证
+		reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+		if(!check($("[name='TIMENUM']"),false,reg,"输入格式只能是小数或整数","学时")) bool=false;
+		//开始提交
+		if(bool){
+			//将信息封装到数组
+			var ary={YEAR:$.trim($("[name='YEAR']").val()),
+					TERM:$.trim($("[name='TERM']").val()),
+					WEEK:$.trim($("[name='WEEK']").val()),
+					COURSENO:$.trim($("[name='COURSENO']").val()),
+					DATETIME:$.trim($("[name='DATETIME']").val()),
+					TIMENO:$.trim($("[name='TIMENO']").val()),
+					STUDENTNO:$.trim($("[name='STUDENTNO']").val()),
+					TIMENUM:$.trim($("[name='TIMENUM']").val()),
+					REASON:$.trim($("[name='REASON']").val()),
+					BREAKTHERULE:$.trim($("[name='BREAKTHERULE']").val())};
+			//Ajax方式提交数据
+			$.ajax({
+                url:"__URL__/report/hasJson/1",
+                type:"POST",
+                data:ary,
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("提示","提交数据成功！");
+                    	$("#report")[0].reset();
+                    }else  $.messager.alert("提示","数据提交失败！请检查您提交的数据是否合法");
+                }
+            });
+		}
+	});
+	//子窗口
+	$("#content").window({
+        height:580,
+        width:700,
+        modal:true,
+        minimizable:false,
+        maximizable:false,
+        closable:false,
+        collapsible:false,
+        draggable:false,
+        resizable:false,
+        modal:false
+    });
+});
+//ajax验证
+function ajaxCheck(ele,url,str){
+	var bool=true;
+	if($.trim(ele.val())!=""){
+		$.ajax({
+            url:url,
+            async:false,
+            type:"POST",
+            data:{VALUE:$.trim(ele.val())},
+            success: function(data){
+                if(data==0){
+                	ele.next().html("该"+str+"不存在");
+                	bool=false;
+                }else ele.next().html("*");
+            }
+        });
+	}else ele.next().html(str+"不能为空");
+	return bool;
+}
+//input验证
+function check(ele,isNull,reg,str,name){
+	var value=$.trim(ele.val());
+	if(!isNull){
+		if(value!=""){
+			if(reg!=null && !reg.test(value)){
+				ele.next().html(str);return false;
+			}else ele.next().html("*");
+		}else{
+			ele.next().html(name+"不能为空");return false;
+		}
+	}else{
+		if(reg!=null && !reg.test(value)){
+			ele.next().html(str);return false;
+		}
+	}
+	return true;
+}
+</script>
+</html>
+

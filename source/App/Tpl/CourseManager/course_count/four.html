@@ -1,0 +1,45 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        $('#search_one').bind('click',function(){
+            $('#dat_four').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+
+            $('#dat_four').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_four_select.SQL',
+                'count':'CourseManager/Five_four_count.SQL'},'bind':{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),
+                ':RS':$('[name=numbers]').val()}});
+
+        })
+
+
+    })
+</script>
+<!--todo:预计人数小于教室座位数人以上的课程。-->
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            预计人数小于教室座位数<input type="text" size="6" name="numbers" value="20">人以上的课程
+            &nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0) " id="search_one" class="easyui-linkbutton">统计</a>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="dat_four"
+                   data-options="fit:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'xn',width:100,align:'right'" align="center">学年</th>
+                    <th data-options="field:'xq',width:100,align:'right'" align="center">学期</th>
+                    <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                    <th data-options="field:'jsh',width:220,align:'right'" align="center">教室号</th>
+                    <th data-options="field:'jsm',width:150,align:'right'" align="center">教室名</th>
+                    <th data-options="field:'zws',width:100,align:'right'" align="center">座位数</th>
+                    <th data-options="field:'yjrs',width:100,align:'right'" align="center">预计人数</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+

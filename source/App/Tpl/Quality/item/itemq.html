@@ -1,0 +1,377 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:5px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+	<div id="tdemo" class="query">
+	           <form action="__URL__" method="POST" id="biaodan">
+			   <label>学年：</label><input type="text" name="year" size="4" class="easyui-validatebox" value="{$yearTerm.YEAR}">
+			   <label>学期:</label><input type="text" name="term" size="5" class="easyui-validatebox" value="{$yearTerm.TERM}">
+			   <label>教师姓名:</label><input type="text" value='%'  name="teachername" size="6" class="easyui-validatebox">
+			   <label>课程类型:</label>
+			   <select size="1" name="task" class="easyui-combobox" data-options="editable:false">
+                        <option value="%">全部</option>
+                   <volist name="coursetypeoptions2" id="t">
+                       <option value="{$t.TYPE}">{$t.NAME}</option>
+                   </volist>
+			   </select>
+			   <label>课号:</label><input type="text" name="courseno" size="10" class="easyui-validatebox">（9位）
+			   <label>课程名称：</label><input type="text" name="coursename" size="20" value='%'  class="easyui-validatebox">
+			   <label>参评情况：</label>
+			   <select size="1" name="enabled" class="easyui-combobox" data-options="editable:false">
+	               <option selected value="%">全部</option>
+	               <option value="1">参评</option>
+	               <option value="0">不参评</option>
+               </select>
+
+               <label>锁定：</label>
+               <select size="1" name="lock" class="easyui-combobox" data-options="editable:false">
+                     <option selected value="%">全部</option>
+                     <option value="1">锁定</option>
+                     <option value="0">不锁定</option>
+                </select>
+			   <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton">搜索</a>
+                   <br>
+                   <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+             <!--      <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>-->
+     <!--              <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+                   <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>-->
+
+                   <a href="javascript:void(0)" class="easyui-linkbutton"  id="sd"  iconCls="icon-edit" plain="true">将选中条目设定</a>
+                   <select name="status">
+                       <volist name="coursetypeoptions2" id="t">
+                           <option value="{$t.TYPE}">{$t.NAME}</option>
+                       </volist>
+                   </select>
+                   &nbsp;
+                   &nbsp;
+                   &nbsp;
+                   <a href="javascript:void(0)" class="easyui-linkbutton"  id="sd2"  iconCls="icon-edit" plain="true">将选中条目设定</a>
+                    <select name="cp">
+                        <option value="0">不参评</option>
+                        <option value="1">参评</option>
+                    </select>
+                   &nbsp;
+                   &nbsp;
+                   &nbsp;
+                   <a href="javascript:void(0)" class="easyui-linkbutton"  id="sd3"  iconCls="icon-edit" plain="true">将选中条目设定</a>
+                   <select name="lock2">
+                       <option value="0">不锁定</option>
+                       <option value="1">锁定</option>
+                   </select>
+               </form>
+
+	</div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="clinfo"></div>
+    </div>
+</div>
+</body>
+<script>
+eval('one=\'{$sjson}\'')
+eval('two=\'{$sjson3}\'')
+/*var quanxian='{$quanxian}'  //todo:用户权限
+var name='{$name}'  //todo:用户姓名
+
+var zz=/A|D|6/
+if(!zz.test(quanxian)){
+    $('[name=teachername]').val(name)
+    $('[name=teachername]').attr('readOnly',"true");
+}*/
+$(function(){
+    var quanxian='{$quanxian}'  //todo:用户权限
+    var name='{$name}'  //todo:用户姓名
+    var myschool='{$myschool}'
+    var zz=/A|D|6/
+    if(!zz.test(quanxian)){
+
+        $('#searcher').bind('click',function(){
+            $('#clinfo').datagrid('options').url='__URL__/mycreate'
+            $('#clinfo').datagrid('load',{'school':myschool,'year':$('[name=year]').val(),'term':$('[name=term]').val()});
+
+        })
+
+    }else{
+
+        //点击搜索时候触发的事件
+        $('#searcher').bind('click',function(){
+            $('#clinfo').datagrid("options").url = "__URL__/itemq/hasJson/1";
+            $('#clinfo').datagrid('load',{
+                YEAR:$('#biaodan').find('[name=year]').val(),
+                TEACHERNAME:$('#biaodan').find('[name=teachername]').val(),
+                TERM:$('#biaodan').find('[name=term]').val(),
+                TASK:$('#biaodan').find('[name=task]').val(),
+                COURSENO:$('#biaodan').find('[name=courseno]').val(),
+                COURSENAME:$('#biaodan').find('[name=coursename]').val(),
+                ENABLED:$('#biaodan').find('[name=enabled]').val()
+            });
+        })
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //todo:批量设定类型
+    $('#sd').bind('click',function(){
+       var rowlist=$('#clinfo').datagrid('getSelections')
+        var recnoarr={}
+        for(var i=0;i<rowlist.length;i++){
+
+          recnoarr[i]=rowlist[i]['RECNO']
+       }
+        ajiakesi('__URL__/updateit/hasJson/1',{bind:recnoarr,task:$('[name=status]').val()},function(c){
+            $.messager.alert('提示',c);
+       })
+        $('#clinfo').datagrid('reload',{
+            YEAR:$('#biaodan').find('[name=year]').val(),
+            TEACHERNAME:$('#biaodan').find('[name=teachername]').val(),
+            TERM:$('#biaodan').find('[name=term]').val(),
+            TASK:$('#biaodan').find('[name=task]').val(),
+            COURSENO:$('#biaodan').find('[name=courseno]').val(),
+            COURSENAME:$('#biaodan').find('[name=coursename]').val(),
+            ENABLED:$('#biaodan').find('[name=enabled]').val()
+        });
+    })
+
+    //todo:批量设定类型
+    $('#sd2').bind('click',function(){
+        var rowlist=$('#clinfo').datagrid('getSelections')
+        var recnoarr={}
+        for(var i=0;i<rowlist.length;i++){
+
+            recnoarr[i]=rowlist[i]['RECNO']
+        }
+        ajiakesi('__URL__/updateit',{bind:recnoarr,task:$('[name=cp]').val()},function(c){
+            $.messager.alert('提示',c);
+        })
+        $('#clinfo').datagrid('reload',{
+            YEAR:$('#biaodan').find('[name=year]').val(),
+            TEACHERNAME:$('#biaodan').find('[name=teachername]').val(),
+            TERM:$('#biaodan').find('[name=term]').val(),
+            TASK:$('#biaodan').find('[name=task]').val(),
+            COURSENO:$('#biaodan').find('[name=courseno]').val(),
+            COURSENAME:$('#biaodan').find('[name=coursename]').val(),
+            ENABLED:$('#biaodan').find('[name=enabled]').val()
+        });
+    })
+
+
+    //todo:批量设定锁定
+    $('#sd3').bind('click',function(){
+        var rowlist=$('#clinfo').datagrid('getSelections')
+        var recnoarr={}
+        for(var i=0;i<rowlist.length;i++){
+
+            recnoarr[i]=rowlist[i]['RECNO']
+        }
+        ajiakesi('__URL__/updatelock',{bind:recnoarr,lock:$('[name=lock2]').val()},function(c){
+            $.messager.alert('提示',c);
+        })
+        $('#clinfo').datagrid('reload',{
+            YEAR:$('#biaodan').find('[name=year]').val(),
+            TEACHERNAME:$('#biaodan').find('[name=teachername]').val(),
+            TERM:$('#biaodan').find('[name=term]').val(),
+            TASK:$('#biaodan').find('[name=task]').val(),
+            COURSENO:$('#biaodan').find('[name=courseno]').val(),
+            COURSENAME:$('#biaodan').find('[name=coursename]').val(),
+            ENABLED:$('#biaodan').find('[name=enabled]').val()
+        });
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+    var pd=false;
+    var indexrow=undefined;                            // 保存索引键的变量
+    var dat=$('#clinfo').datagrid({
+        fitColumns:true,
+        fit:true,
+        striped:true,
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#clinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{checkbox:true},
+        {field:'RECNO',title:'编号',align:'center',width:100,sortable:true,editor:{
+            type:'validatebox',options:{required:true} }},
+        {field:'TEACHERNAME',title:'教师姓名',align:'center',width:100,sortable:true},
+        {field:'TEACHERNO',title:'教师号',align:'center',width:100,sortable:true},
+        {field:'COURSENAME',title:'课程名称',align:'center',width:200,sortable:true},
+        {field:'COURSENO',title:'课号',align:'center',width:100,sortable:true},
+        {field:'TASK',title:'类型',align:'center',width:70,sortable:true,formatter:function(value,row,index){
+        	if(value=="K") return "理论课";
+        	else if(value=="S") return "实践课";
+        	else if(value=="B") return "毕业实践";
+            else if(value=="C") return "理实一体";
+        },editor:{type:'combobox',options:{data:eval(one)} }},
+        {field:'ENABLED',title:'是否参评',align:'center', width:50,sortable:true,formatter: function(value,row,index){
+        	if(value=="1") return "参评";
+        	else return "不参评";
+        },editor:{type:'combobox',options:{data:eval(two)} }},
+        {field:'lock',title:'锁定',align:'center', width:50,sortable:true,formatter: function(value,row,index){
+                if(value=="1") return "锁定";
+                else return "不锁定";
+            },editor:{type:'combobox',options:{data:eval(two)} }} ]],
+        sortName:'RECNO',                      //排序用的
+        sortOrder:'asc',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:'#tdemo',onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+            //alert(indexrow);
+            pd=false;
+            var Purl='';                //保存请求的URL地址的
+            var inserted=dat.datagrid('getChanges','inserted');
+            var updated=dat.datagrid('getChanges','updated');
+            if(updated.length){
+                Purl='__URL__/updateit/hasJson/1';
+            }
+            $.ajax({
+                url:Purl,
+                type:'POST',
+                data:dataRow,
+                success:function(content){
+                    if(content){
+                        indexrow=undefined;
+                        dat.datagrid('reload');
+                        $.messager.alert('提示','操作成功!','?');
+                    }else{
+                        $.messager.alert('提示','考评编号有误，请检查！','?');
+                    }
+                }
+            });
+        }
+    });
+    $('#dtnfo').layout({});
+    var searcher=$('#searcher').linkbutton({});                 //搜索按钮
+
+
+    function ddel(){
+        var row2 = dat.datagrid('getSelections');
+        if (row2.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row2.length;i++){
+                        infoarr[i]=row2[i].RECNO;
+                    }
+                    $.ajax({
+                        url:'__URL__/deleteit/hasJson/1',
+                        data:{'in':infoarr},
+                        type:'POST',
+                        success:function(C){
+                            if(C){
+                                $.messager.alert('提示','删除成功！','?');
+                                dat.datagrid('reload');
+                            }else{
+                                $.messager.alert('提示','删除失败,没权限操作','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }else  $.messager.alert('提示','请选择需要删除的数据!','?');
+    }
+
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+
+
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+        dat.datagrid('removeEditor','RECNO');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行编辑,不能选多条!','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要编辑的数据!','?');                         //用户没选择行
+        }else{
+            if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+            var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+            var index3 = dat.datagrid('getRowIndex', row3);
+            dat.datagrid('beginEdit', index3);
+            indexrow=index3;
+        }
+    }
+
+    $('#e_edit').bind('click',eedit);
+    $('#admin_edit').bind('click',eedit);
+
+
+    $('#e_back').bind('click',function(){
+        pd=false;
+        dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    })
+
+    $('#e_save').bind('click',function(){
+        dat.datagrid('endEdit',indexrow);
+        indexrow=undefined;
+    })
+
+
+});
+
+
+
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item.field);
+                e.editor = item.editor;
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param.field);
+            e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item);
+                e.editor = {};
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param);
+            e.editor = {};
+        }
+    }
+});
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</html>

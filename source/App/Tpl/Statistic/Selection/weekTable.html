@@ -1,0 +1,155 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    .query{border: solid 1px #ccc;margin:5px;padding: 5px 5px 7px 5px;}
+    legend{margin-left: 20px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    #searcher{margin-left: 20px;}
+    #WeekSchedule{margin:15px auto;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#FFF;">
+        <div id="head" style="overflow:hidden;padding: 12px;">
+            <form id="queryForm" target="weekTable" action="/index.php/CourseManager/Class_admin/Class_week_course/" method="get">
+                <div>
+                    <label>学年：</label><input value="{$YEAR}" name="year" size="8" maxlength="4">
+                    <label>学期：</label><input value="{$TERM}" name="term" size="4" maxlength="1">
+                    <label>班号：</label><input value="{$CLASSNO}" name="CLASSNO" size="10" maxlength="15" >
+                    <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+                </div>
+            </form>
+        </div>
+        <!--
+        <p align="center" style="font-size: 24px;font-family:'隶书';color:#000080">{$CLASSNAME}{$YEAR}学年第{$TERM}学期的周课表</p>
+        <p align="center">打印时间：<?php echo date("Y-m-d H:i:s"); ?></p>
+        <table id="WeekSchedule" name="WeekSchedule"  style="color: #000000; font-size: 10px; border-collapse: collapse" border="1" cellpadding="0" cellspacing="0" width="90%" height="196" bordercolorlight="#336699" bordercolordark="#003399">
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="13"><font size="2">节次/星期</font></td>
+                <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期一</font></td>
+                <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期二</font></td>
+                <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期三</font></td>
+                <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期四</font></td>
+                <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期五</font></td>
+                <td width="5%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期六</font></td>
+                <td width="5%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期天</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第一节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[1][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[1][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[1][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[1][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[1][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[1][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[1][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第二节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第三节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[2][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[2][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[2][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[2][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[2][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[2][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[2][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第四节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第五节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[3][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[3][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[3][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[3][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[3][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[3][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[3][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第六节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第七节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[4][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[4][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[4][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[4][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[4][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[4][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[4][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="17"><font size="2">第八节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第九节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[5][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[5][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[5][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[5][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[5][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[5][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[5][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第十节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第11节</font></td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[6][1]}</td>
+                <td width="16%" align="center" rowspan="2" height="34">{$list[6][2]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[6][3]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[6][4]}</td>
+                <td width="16%" align="center" height="32" rowspan="2">{$list[6][5]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[6][6]}</td>
+                <td width="5%" align="center" height="32" rowspan="2">{$list[6][7]}</td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第12节</font></td>
+            </tr>
+            <tr>
+                <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">时间未定</font></td>
+                <td colspan="7">{$list[0]}</td></tr>
+        </table>
+        <p align="center"><a href="javascript:void(0)" id="printBut">打&nbsp;印</a></p>-->
+    </div>
+</div>
+<script type="text/javascript">
+    $(function(){
+        /*
+         * 条件查询开始
+         */
+        $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+        $('#searcher').click(function(){
+            var year=$.trim($("[name='year']").val());
+            var term=$.trim($("[name='term']").val());
+            var classno=$.trim($("[name='CLASSNO']").val());
+            if(year=="" || term=="" || classno==""){
+                msgShow("系统提示：","检索时学年、学期、班号都不能为空！","error");
+                return;
+            }
+            $("#queryForm").submit();
+        });
+        /*//打印
+         $('#printBut').linkbutton({iconCls:'icon-print'});//打印按钮
+         $("#printBut").click(function(){
+         $("#head").hide();
+         $(this).hide();
+         window.print();
+         $("#head").show();
+         $(this).show();
+         });
+         //禁用右键
+         $(document).bind("contextmenu",function(e){
+         msgShow("系统提示：","该页面禁止右键","info");
+         return false;
+         });*/
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+select cert_id,cert_name,credit,status from CreditCertficate where cert_id=:cert_id

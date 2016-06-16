@@ -1,0 +1,36 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val())
+        $("#TERM").val(parent.$("#TERM").val())
+
+        //生志数据
+        $("#btAuto").bind("click",function(){
+            $.post("__ROOT__/Schedule/Index/setResStatus/hasJson/true", {SCHEDULERESOURCE:$("#SCHEDULERESOURCE").val()}, function(rsp) {
+                if(rsp){
+                    msgShow("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#FFFFFF;">
+        <table border="0">
+            <tr><td height="20"></td></tr>
+            <tr><td width="240" align="right">目前排课教室资源的竞争状态为：</td><td>
+                <select size="1" name="SCHEDULERESOURCE" id="SCHEDULERESOURCE">
+                    <option value="0">所有教室资源自由竞争</option>
+                    <option value="1" <if condition="$ScheduleResource eq 1">selected</if>>按学院优先教室排课</option>
+                </select></td></tr>
+            <tr><td></td><td><input type="button" id="btAuto" value="设定资源竞争状态"></td></tr>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
+

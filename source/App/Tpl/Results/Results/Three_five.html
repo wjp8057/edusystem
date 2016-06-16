@@ -1,0 +1,118 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$school.SCHOOL}'
+
+    var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+    $('[name=SCHOOL]').val(school)
+    var arr=[];
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+
+
+
+        $('#cjsr').bind('click',function(){
+            var len=$('#dat_Five').datagrid('getSelections')
+            if(len.length>1){
+                return $.messager.alert('提示','请选择一条数据进行操作不能选择多条')
+            }else if(len.length<1){
+                return $.messager.alert('提示','请选择一条数据进行操作')
+            }
+            var row=$('#dat_Five').datagrid('getSelected');
+            open('__URL__/Three_BYQBK_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh+'/R1/'+$('[type=radio]:checked').val())
+        })
+
+
+
+        $('#kaifang').bind('click',function(){
+            $.messager.confirm('提示','您确定要开放选中课程吗？',function(c){
+                if(c){
+                    var rowList=$('#dat_Five').datagrid('getSelections')
+                    ajiakesi('__URL__/kf_cs',{bind:rowList,year:$('[name=YEAR]').val(),term:$('[name=TERM]').val()},function(c){
+                        $.messager.alert('提示',c)
+                        $('#dat_Five').datagrid('reload',{'Sqlpath':{'select':'Results/Three_one_Five_select.SQL','count':'Results/Three_one_Five_count.SQL'
+                        },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+                    });
+                }
+            })
+        })
+
+        $('#search_four').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+
+                    var datagA=$('#dat_Five');
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','您只能输入自己学院的！')
+                    }
+
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/Three_five_title.SQL',bind:{':school':$('[name=SCHOOL]').val()}},function(c){
+
+                        eval("var one="+c)
+                        $('#five_title').html(one[0]['name']+$('[name=YEAR]').val()+'学年第'+$('[name=TERM]').val()+'学期毕业前补考课程列表' )
+
+                    })
+                    $('#wd5').panel({closed:false}) ;$('#wd').panel({closed:true})
+                    setTimeout(function(){
+                        datagA.datagrid('reload',{'Sqlpath':{'select':'Results/Three_one_Five_select.SQL','count':'Results/Three_one_Five_count.SQL'
+                        },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+
+                    },1000)
+
+                })
+
+    })
+
+
+
+
+</script>
+<body style="background: #fff">
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            学年：<input type="text" name="YEAR" size="4">&nbsp&nbsp
+
+            学期：<input type="text" name="TERM" size="1">
+
+            所在学院：<select name="SCHOOL">
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+            <a id="search_four">查询</a><font size="2">
+			<input type="radio" value="five" ID="five" name="R12">五级制&nbsp
+            <input type="radio" value="ten" ID="ten" name="R12" checked=checked>百分制</font>
+            <a href="javascript:void(0)" id="cjsr" class="easyui-linkbutton" iconCls="icon-edit" plain="true">成绩输入</a>
+            <a href="javascript:void(0)" id="kaifang" class="easyui-linkbutton" iconCls="icon-cut" plain="true">开放选中课程</a>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="dat_Five"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pageList:[20,50,100,200,500],fitColumns:true,pagination:true,fit:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                    <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                    <th data-options="field:'rs',width:100" align="center">人数</th>
+                    <th data-options="field:'zt',width:100" align="center">状态</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+

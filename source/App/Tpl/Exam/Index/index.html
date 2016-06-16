@@ -1,0 +1,188 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-admin","menuname": "统考管理",
+                "menus": [
+                    {"menuid": "12","menuname": "统考科目管理","icon": "icon-admin","url": "__ROOT__/Exam/Unity/qlist"},
+                    {"menuid": "10","menuname": "统考报名管理","icon": "icon-xuadmin","url": "__ROOT__/Exam/Unity/signList"}]
+            },
+            {"menuid": "2","icon": "icon-book","menuname": "期末考试管理",
+                "menus": [
+                    {"menuid": "21","menuname": "统一排考申请","icon": "icon-hand","url": "__ROOT__/Exam/FinalAdmin/examCourses"},
+                    {"menuid": "20","menuname": "排考初始化","icon": "icon-refresh","url": "__ROOT__/Exam/FinalAdmin/dataInit"},
+                    {"menuid": "22","menuname": "设置等价课程","icon": "icon-book","url": "__ROOT__/Exam/FinalAdmin/equalCourses"},
+                    {"menuid": "25","menuname": "设置考试批次","icon": "icon-bookList","url": "__ROOT__/Exam/ArrangeTest/setpici"},
+                    {"menuid": "30","menuname": "自动排考","icon": "icon-join","url": "__ROOT__/Exam/ArrangeTest/auto"},
+
+                    {"menuid": "23","menuname": "安排时间考场","icon": "icon-calendar","url": "#",
+                        "child": [
+                            {"menuid": "230","menuname": "考试场次设置","icon": "icon-calendar","url": "__ROOT__/Exam/FinalAdmin/setBatch"},
+                            {"menuid": "231","menuname": "考试地点设置","icon": "icon-address","url": "__ROOT__/Exam/FinalAdmin/setAddress"}
+                        ]},
+                    {"menuid": "24","menuname": "安排监考教师","icon": "icon-users","url": "__ROOT__/Exam/FinalAdmin/invigilate/examType/M"}]
+            },
+            {"menuid": "3","icon": "icon-search","menuname": "期末考试查询",
+                "menus": [
+                    {"menuid": "31","menuname": "考试查询","icon": "icon-search2","url": "__ROOT__/Exam/FinalQuery/FinalExamQuery"},
+                    {"menuid": "32","menuname": "期末监考冲突","icon": "icon-plan","url": "__ROOT__/Exam/FinalQuery/ExamConflictQuery"},
+                    {"menuid": "33","menuname": "试卷查询","icon": "icon-search3","url": "#"}]
+            },
+            {"menuid": "4","icon": "icon-personal","menuname": "缓考报名",
+                "menus": [
+                    {"menuid": "41","menuname": "报名查询","icon": "icon-search3","url": "__ROOT__/Exam/DeferredExam/enrollQuery"},
+                    {"menuid": "42","menuname": "考试冲突原因缓考报名","icon": "icon-personal2","url": "__ROOT__/Exam/DeferredExam/DeferredEnroll"},
+                    {"menuid": "43","menuname": "其它原因缓考报名","icon": "icon-personalList","url": "__ROOT__/Exam/DeferredExam/OtherDeferred"}]
+            },
+            {"menuid": "5","icon": "icon-book","menuname": "学期初补考",
+                "menus": [
+                    {"menuid": "50","menuname": "本科学位课筛选","icon": "icon-plan","url": "__ROOT__/Exam/XqcExam/DegreeScreening"},
+                    {"menuid": "51","menuname": "补考名单查询","icon": "icon-search3","url": "__ROOT__/Exam/XqcExam/examQuery"},
+                    {"menuid": "52","menuname": "设置等价课程","icon": "icon-book2","url": "__ROOT__/Exam/FinalAdmin/equalCourses"},
+                    {"menuid": "53","menuname": "补考考务安排","icon": "icon-plan","url": "#","child": [
+                        {"menuid": "230","menuname": "考试批次设置","icon": "icon-calendar","url": "__ROOT__/Exam/FinalAdmin/setBatch"},
+                        {"menuid": "231","menuname": "考试地点设置","icon": "icon-address","url": "__ROOT__/Exam/FinalAdmin/setAddress"}
+                    ]},{"menuid": "30","menuname": "自动排考","icon": "icon-join","url": "__ROOT__/Exam/ArrangeTest/auto"},
+                    {"menuid": "24","menuname": "安排监考教师","icon": "icon-users","url": "__ROOT__/Exam/FinalAdmin/invigilate/examType/C"},
+                    {"menuid": "54","menuname": "补考考务查询","icon": "icon-plan","url": "__ROOT__/Exam/XqcExam/kaowuquery"}]
+            },
+            {"menuid": "6","icon": "icon-bookList","menuname": "毕业重修免听考管理",
+                "menus": [
+                    {"menuid": "61","menuname": "毕业免听考报名","icon": "icon-personal","url": "__ROOT__/Exam/GraduationAdmin/GraduationMtbm"},
+                    {"menuid": "62","menuname": "毕业免听考查询","icon": "icon-search2","url": "__ROOT__/Exam/GraduationAdmin/GraduationMtQuery"},
+                    {"menuid": "63","menuname": "毕业免听考排考筛选","icon": "icon-tongji","url": "__ROOT__/Exam/GraduationAdmin/GraduationMtPaikao"},
+                    {"menuid": "64","menuname": "毕业免听考排考","icon": "icon-calendar","url": "#","child": [
+                        {"menuid": "230","menuname": "考试批次设置","icon": "icon-calendar","url": "__ROOT__/Exam/FinalAdmin/setBatch"},
+                        {"menuid": "231","menuname": "考试地点设置","icon": "icon-address","url": "__ROOT__/Exam/FinalAdmin/setAddress"}
+                    ]},{"menuid": "30","menuname": "自动排考","icon": "icon-join","url": "__ROOT__/Exam/ArrangeTest/auto"},
+                    {"menuid": "24","menuname": "安排监考教师","icon": "icon-users","url": "__ROOT__/Exam/FinalAdmin/invigilate/examType/B"},
+                    {"menuid": "65","menuname": "毕业免听考考试查询","icon": "icon-search3","url": "__ROOT__/Exam/GraduationAdmin/kaowuquery"}]
+            }
+        ]
+    };
+    var menuTabs = null;
+
+    $(function() {
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Teacher/Login/logout';
+                }
+            });
+        });
+
+        //考试的学年学期保存
+        $("#handlerConfig").bind("click",function(){
+            $.post("__ROOT__/Exam/Index/config/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()}, function(rsp) {
+                if(rsp){
+                    msgShow("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="考务管理" style="width:180px;" id="west"></div>
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">考务管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">考务管理：实现各类统考报名、校内考试的时间与地点安排，毕业前补考、缓考报名等功能。包含：统考管理（统考科目管理、统考报名管理）、期末考试管理（排考初始化、统一排考申请、设置等价课程、安排时间考场、自动排考、安排监考老师）、期末考试查询（考试查询、期末监考冲突查询）、缓考报名管理（报名查询、考试冲突原因缓考报名、其它原因缓考报名）、学期初补考（补考名单查询、设置等价课程、补考考务安排、补考考务查询）、毕业重修免听考管理（毕业免听考报名、毕业免听考查询、毕业免听考排考筛选、毕业免听考排考、毕业免听考考试查询）等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、统考管理:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、统考管理</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可新增、修改、删除各类型的统考科目，考试科目课号唯一，并对选择的统考科目发布考试通知。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、统考报名管理</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年学期、学院设置检索条件，可查看全校所有学院的各个统考科目的报名情况，并可修改或删除统考科目。可以对某门统考科目的学生进行查看或者报名，或者删除报名的学生，也可对全班学生进行批量报名。导出各统考科目的报名汇总表。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、期末考试管理:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、排考初始化</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">该操作将清空原先设定的考试课程、学生；并且重新生成考试课程、考试学生。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、统一排考申请</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可检索全校所有课程，对是否需要参加统一安排期末考试的课程提出申请，并导出excel表。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、设置等价课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可对7位课号不相同的，但试卷是用同一份的，进行标注，设置为等价课程，若试卷一样，可设置多门课程在同一个时间考，并可修改等价课程。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、安排时间考场</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可安排考试批次，并进行考试地点的设置安排，设置好的考试教室可以做修改考位人数和是否启用该教室做考场的操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、自动排考</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">对当前需要进行统一安排期末考试的科目一键自动排考，自动分配考场，并将排考结果导入到考试计划。自动排考原则如下：
+            <br>A．一个考生同一批次只能安排一场考试；
+            <br>B．前7位课号相同的必须安排在同一批次进行考试。
+            <br>C．7位课号不相同的但使用同一份试卷的课程，要安排在同一批次进行考试。
+            若以上自动排考有冲突的话，不进行手工调整，由程序自动筛选直到没有冲突为止。也可能排不了，可以通过增加考试批次或者增加考位人数再重新进行一次自动排考。
+         </p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、安排监考教师</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">学院可以查看全校科目的监考老师安排情况，但只能对本院的考试、考场安排监考教师，和更改考试时间。教务处可以对全校的考试科目进行查看更改管理操作。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">三、期末考试查询:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、考试查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">按学年、学期、学院、班号检索符合条件的考试，并可按课号进行查看该门课程的考位安排，且考位安排表可打印。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、期末监考冲突</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看某学年、学期的期末考试有冲突安排的监考老师信息。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">四、缓考报名:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、报名查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看全校所有的缓考报名情况，并导出Excel表。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、考试冲突原因缓考报名</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">因为考试冲突原因造成需要缓考的学生进行报名。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、其它原因缓考报名</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">其它原因造成需要进行缓考的学生，根据相应的学年、学期、学号、课程进行报名。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">五、学期初补考:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以对所有学院的学生选课人数进行不同类型的人数统计，并可查看学生名单。类型包括跟班重修学生、重修班选课学生、申请免听免修学生、各门课程选课的人数、选课人数小于座位数的课程、各类课程选课总人数的统计</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、本科学位课筛选</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可对本科学位课分数为75分以下的学生进行筛选，再对原先所安排的考试进行初始化操作，该操作将清空原先设定的考试课程、学生，并且重新生成考试课程、考试学生。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、补考名单查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可根据学年、学期、学号、课号检索查询需要补考学生的名单。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、设置等价课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可对7位课号不相同的，但试卷是用同一份的，进行标注，设置为等价课程，若试卷一样，可设置多门课程在同一个时间考，并可修改等价课程。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、补考考务安排</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可安排考试批次，并进行考试地点的设置安排，设置好的考试教室可以做修改考位人数和是否启用该教室做考场的操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、自动排考</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">对当前需要进行学期初补考考试的科目一键自动排考，自动分配考场，并将排考结果导入到考试计划。自动排考原则如下：
+            <br>A．一个考生同一批次只能安排一场考试；
+            <br>B．前7位课号相同的必须安排在同一批次进行考试。
+            <br>C．7位课号不相同的但使用同一份试卷的课程，要安排在同一批次进行考试。
+            若以上自动排考有冲突的话，不进行手工调整，由程序自动筛选直到没有冲突为止。也可能排不了，可以通过增加考试批次或者增加考位人数再重新进行一次自动排考。
+        </p>
+
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、安排监考教师</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">学院可以查看全校学期补考科目的监考老师安排情况，但只能对本院的考试、考场安排监考教师，和更改考试时间。教务处可以对全校的学期补考考试科目进行查看更改管理操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、补考考务查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以查询全校每门课程的补考考务安排详细情况，并导出Excel表格。</p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">六、毕业重修免听考管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以对所有学院的学生选课人数进行不同类型的人数统计，并可查看学生名单。类型包括跟班重修学生、重修班选课学生、申请免听免修学生、各门课程选课的人数、选课人数小于座位数的课程、各类课程选课总人数的统计</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、毕业免听考报名</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以通关学年、学期、学号检索出需要参加重修考试的学生。并对该学生相应的课程进行报名。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、毕业免听考查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可根据学年、学期、学号、课号检索查询需要参加考试学生的名单，并导出Excel表格。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、毕业免听考排考筛选</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可按照课号来查看考试的课程，对7位课号不相同的，但试卷是用同一份的，进行标注，设置为等价课程。并可对原先所安排的考试进行初始化操作，该操作将清空原先设定的考试课程、学生，并且重新生成考试课程、考试学生。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、毕业免听考排考</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可增加、删除、修改毕业免听考试批次，设定时间，并进行考试地点的设置安排，设置好的考试教室可以做修改考位人数和是否启用该教室做考场的操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、自动排考</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">对当前需要进行毕业免听考试的科目一键自动排考，自动分配考场，并将排考结果导入到考试计划。自动排考原则如下：
+            <br>A．一个考生同一批次只能安排一场考试；
+            <br>B．前7位课号相同的必须安排在同一批次进行考试。
+            <br>C．7位课号不相同的但使用同一份试卷的课程，要安排在同一批次进行考试。
+            若以上自动排考有冲突的话，不进行手工调整，由程序自动筛选直到没有冲突为止。也可能排不了，可以通过增加考试批次或者增加考位人数再重新进行一次自动排考。
+
+        </p>
+
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、安排监考教师</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">学院可以查看全校毕业免听考试科目的监考老师安排情况，但只能对本院的考试、考场安排监考教师，和更改考试时间。教务处可以对全校的毕业免听考试考试科目进行查看更改管理操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、补考考务查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以查询全校毕业免听考试考务安排详细情况，并导出Excel表格。</p>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

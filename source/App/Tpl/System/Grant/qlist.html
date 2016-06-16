@@ -1,0 +1,318 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var collapseAll = false; //是否全局收缩
+    var datagrid = null; //数据表
+    var menuComboTree = null; //获得菜单树形
+    $(function() {
+        //todo 初始化数据表
+        datagrid = $('#datagrid').treegrid({
+            toolbar: '#toobar',
+            url:"/System/Grant/qlist/hasJson/1",
+            onLoadSuccess:function(){
+                if(collapseAll==false) {
+                    $(this).treegrid("collapseAll","");
+                    collapseAll = true;
+                }
+            }
+        });
+
+        //todo 添加事件
+        $("#event_add").bind("click",function(){
+            var node = datagrid.treegrid("getSelected");
+            clearData();
+            bindMenuComboTree(node ? node.ID : null);
+            $("#wActionType").val(1);
+            $('#win').window('open');
+        });
+
+        //todo 编辑事件
+        $("#event_edit").bind("click",function(){
+            var node = datagrid.treegrid("getSelected");
+            if(!node){
+                msgShow("系统提示：","至少需要选择一条纪录进行编辑！","error");
+                return;
+            }
+            bindMenuComboTree(node ? node.PID : null);
+            setData(node);
+            $("#wActionType").val(2);
+            $('#win').window('open');
+        });
+
+        //todo 保存事件
+        $("#wfOK").bind("click", function(){
+            if(checkData()==false) return;
+            var postData = $("#wDataForm").serialize();
+            $.post("/System/Grant/save/hasJson/1",postData,function(rep){
+                if(rep){
+                    if(rep.type=="info"){
+                        $('#win').window('close');
+                        //$("#ID").val(rep.data["ID"]);
+                    }
+                    msgShow("系统提示：", rep.message, rep.type);
+                }else alert("发生未知道错误！");
+            });
+        });
+
+        //todo 取消编辑事件
+        $("#wfCancel").bind("click",function(){
+            $('#win').window('close');
+        });
+
+        //todo 删除事件
+        $("#event_del").bind("click",function(){
+            var node = datagrid.treegrid('getSelected');
+            if(!node || node.length==0){
+                msgShow("系统提示：","没有选择任一要删除的数据！","error");
+                return;
+            }
+
+            var children = datagrid.treegrid('getChildren',node.ID);
+            if(children && children.length>0){
+                msgShow("系统提示：","要删除指定模块，请先删除子模块！","error");
+                return;
+            }
+
+            $.messager.confirm("系统提示：","确认要删除指定的项目？",function(confirm){
+                if(confirm){
+                    $.post("/System/Grant/delete/hasJson/1",{ID:node.ID},function(rep){
+                        if(rep){
+                            if(rep.type=="info") {
+                                datagrid.treegrid("remove",node.ID);
+                                datagrid.treegrid("acceptChanges");
+                            }
+                            msgShow("系统提示：", rep.message, rep.type);
+                        }else alert("发生未知道错误！");
+                    });
+                }
+            });
+        });
+
+        //todo 搜索事件
+        $("#event_searcher").bind("click",function(){
+            collapseAll = true;
+            datagrid.treegrid("load",{NAME:$("#NAME").val(), ID:$("#ID").val(), URL:$("#URL").val()});
+        });
+
+        function bindMenuComboTree(selected){
+            var _selected = selected;
+            if(menuComboTree==null){
+                menuComboTree = $('#wPID').combotree({
+                    url: '/System/NonSafe/getMenuComboTree/hasJson/1'
+                });
+            }else{
+                menuComboTree.combotree('reload');
+            }
+            menuComboTree.combotree({onLoadSuccess  : function(){ expandSelfNode(_selected); }});
+            menuComboTree.combotree('setValue', selected);
+        }
+        function expandSelfNode(_selected){
+            $("#wPID").combotree('tree').tree('collapseAll');
+            var node = $('#wPID').combotree('tree').tree('find', _selected);
+            if(node) $('#wPID').combotree('tree').tree('expandTo', node.target);
+        }
+        function clearData(){
+            $("#wId").val("");
+            $("#wName").val("");
+            $("#wAction").val("");
+            $("#wInnerid").val("");
+            $("#wRoles").val("");
+            $("#wIsmenu").val(1);
+            $("#wRem").val("");
+            if(menuComboTree!=null) menuComboTree.combotree('setValue', "");
+        }
+        function setData(node){
+            $("#wId").val(node.ID);
+            $("#wOldID").val(node.ID);
+            $("#wName").val(node.NAME);
+            $("#wAction").val(node.ACTION);
+            $("#wInnerid").val(node.INNERID);
+            $("#wRoles").val(node.ROLES);
+            $("#wIsmenu").val(node.ISMENU);
+            $("#wRem").val(node.REM);
+        }
+        function checkData(){
+            if($.trim($("#wId").val())=="") {
+                msgShow("系统提示","模块号不能为空！","error");
+                return false;
+            }
+            if($.trim($("#wName").val())=="") {
+                msgShow("系统提示","模块名称不能为空！","error");
+                return false;
+            }
+            if($.trim($("#wAction").val())=="") {
+                msgShow("系统提示","ACTION不能为空，如果没有请填写“#”！","error");
+                return false;
+            }
+            return true;
+        }
+
+        //授权事件
+        $("#event_grant").bind("click",function(){
+            $("#dgSID").val("");
+            $("#dgRoles").combobox("setValue","");
+            $('#dgPID').combotree({
+                url : '/System/NonSafe/getMenuComboTree/hasJson/1',
+                multiple : true,
+                cascadeCheck : false,
+                onLoadSuccess  : function(){
+                    $("#dgPID").combotree('tree').tree('collapseAll');
+                }
+            });
+            $('#divGrant').window('open');
+        });
+
+        //取消授权面页
+        $("#dgCancel").bind("click",function(){
+            $('#divGrant').window('close');
+        });
+
+        //当角色选定时取得此角色的授权信息
+        $("#dgRoles").combobox({
+            onSelect : function(rows){
+                $('#dgPID').combotree('clear');
+                if(rows.value=="") return;
+                $.post("/System/Grant/getRolesById/hasJson/1",{ROLESID:rows.value},function(rep){
+                    if(rep) $('#dgPID').combotree('setValues', rep);
+                    else alert("发生未知道错误！");
+                });
+            }
+        });
+
+        //把单一模块的授权信息添加到选定角色中
+        $("#dgAdd").bind("click",function(){
+            if($("#dgRoles").combobox("getValue")==""){
+                alert("请先选择授权角色！");
+                return;
+            }
+
+            var sid = $.trim($("#dgSID").val());
+            if(sid!=""){
+                var node = $('#dgPID').combotree('tree').tree('find',sid);
+                if(!node) {
+                    alert("没有找到指定模块ID:"+sid);
+                    return;
+                }
+                $('#dgPID').combotree('tree').tree('check',node.target);
+            }
+        });
+
+        //保存角色授权
+        $('#dgOK').bind("click",function(){
+            var rolesId = $("#dgRoles").combobox("getValue");
+            if(rolesId=="") return;
+
+            var grantIds = $("#dgPID").combotree("getValues");
+            $.post("/System/Grant/saveGrantByRoles/hasJson/1",{ROLESID:rolesId, GRANTIDS:grantIds},function(rep){
+                if(rep) {
+                    msgShow("系统提示：", rep.message, rep.type)
+                }else alert("发生未知道错误！");
+            });
+        });
+
+        $("#dgCascadeCheck").bind("click", function(){
+            var _checked = $(this).attr("checked") ? true :false;
+            $('#dgPID').combotree("tree").tree("options").cascadeCheck = _checked;
+        });
+
+        $("#dgClear").bind("click",function(){
+            $('#dgPID').combotree("setValues", []);
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="background: #fff;padding:0px;overflow-y: hidden"  fit="true" split="false" scroll="no" >
+
+<!-- 主页面 -->
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:3px; " >
+    <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true" idField="ID"
+           pagination="false" pageSize="5" pageList="[5]" striped="true" treeField="NAME" >
+        <thead>
+        <tr><th data-options="field:'NAME',width:320">模块名称</th>
+            <th data-options="field:'ID',width:100">模块号</th>
+            <th data-options="field:'ACTION',width:300">ACTION</th>
+            <th data-options="field:'INNERID',width:80">关联权限</th>
+            <th data-options="field:'ROLES',width:120">角色</th>
+            <th data-options="field:'ISMENU',width:80,align:'center'">菜单</th></tr>
+        </thead>
+    </table>
+</div>
+
+<!-- 主页面工具条 -->
+<div id="toobar">
+    <span class="datagrid-btn-separator-area">
+        <label for="NAME">模块名称:<input type="text" id="NAME" size="10"  value='' class="easyui-validatebox"></label>
+        <label for="ID">模块ID: <input type="text" id="ID" size="10"  value='' class="easyui-validatebox"></label>
+        <label for="URL">URL: <input type="text" id="URL" size="20"  value='%' class="easyui-validatebox"></label>
+        <a id="event_searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">搜索</a>
+    </span>
+    <a class="datagrid-btn-separator"></a>
+    <span class="datagrid-btn-separator-area">
+        <a id="event_add" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" >添加</a>
+        <a id="event_del" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true">删除</a>
+        <a id="event_edit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    </span>
+    <a class="datagrid-btn-separator"></a>
+    <a id="event_grant" class="easyui-linkbutton" data-options="iconCls:'icon-personal',plain:true">角色授权</a>
+</div>
+
+<!-- 添加修改界面 -->
+<div id="win" class="easyui-window" style="width:460px;height:340px" title="添加修改模块" data-options="minimizable:false,maximizable:false,collapsible:false,modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border:0px;border-bottom:1px solid #ccc;">
+            <form id="wDataForm">
+            <table cellpadding=3>
+                <tr><th align="right"><font color="red">*</font>模块号：</th><td><input id="wId" type="text" name="ID" /></tr>
+                <tr><th align="right"><font color="red">*</font>模块名称：</th><td><input id="wName" type="text" name="NAME" style="width:320px" /></td></tr>
+                <tr><th align="right">所属模块：</th><td><select id="wPID" name="PID" style="width:320px;"></select> </td></tr>
+                <tr><th align="right"><font color="red">*</font>ACTION：</th><td><textarea style="width:320px;height:40px;resize:none;" name="ACTION" id="wAction" maxlength="500"></textarea></td></tr>
+                <tr><th align="right">关联权限：</th><td><input id="wInnerid" type="text" name="INNERID" style="width:320px" maxlength="255" /></td></tr>
+                <tr><th align="right">授权角色：</th><td><input id="wRoles" type="text" name="ROLES" style="width:320px" /></td></tr>
+                <tr><th align="right"><font color="red">*</font>菜单：</th><td>
+                    <select name="ISMENU" id="wIsmenu">
+                        <OPTION VALUE=1>是</OPTION>
+                        <OPTION VALUE=0>否</OPTION>
+                    </select></td></tr>
+                <tr><th align="right">备注：</th><td><input id="wRem" type="text" name="REM" style="width:320px" maxlength="100" /></td></tr>
+            </table>
+            <!-- 1=添加 2=修改 -->
+            <input type="hidden" name="actionType" id="wActionType" value="1" />
+            <input type="hidden" name="OLD_ID" id="wOldID" value="" />
+            </form>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="wfOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="wfCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+<!-- 角色授权界面 -->
+<div id="divGrant" class="easyui-window" style="width:460px;height:340px" title="角色授权" data-options="minimizable:false,maximizable:false,collapsible:false,modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border:0px;border-bottom:1px solid #ccc;">
+            <form id="divGrantForm">
+                <table cellpadding=3>
+                    <tr><th align="right">授权角色：</th><td>
+                        <select id="dgRoles" name="ROLES" class="easyui-combobox" style="width:200px;">
+                            <option value="">=== 请选择角色 ===</option>
+                            <volist name="rolesList" id="data">
+                            <option value="{$data.id}">{$data.id} - {$data.text}</option>
+                            </volist>
+                        </select> </td></tr>
+                    <tr><th align="right">授权模块：</th><td><select id="dgPID" name="PID" style="width:300px;"></select> </td></tr>
+                    <tr><th align="right">授权模块：</th><td><input id="dgSID" style="width:60px;"> <a id="dgAdd" class="easyui-linkbutton" icon="icon-add" >看花了，直接写个模块ID新增！</a></td>
+                    <tr><th align="right">选择级联：</th><td><input id="dgCascadeCheck" type="checkbox" value="1" />  <a id="dgClear" class="easyui-linkbutton" >一键清空指定角色的授权</a></td></tr>
+                    <tr><th align="right"></th><td> </td></tr>
+                </table>
+            </form>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="dgOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="dgCancel" class="easyui-linkbutton" icon="icon-cancel">关闭</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>;

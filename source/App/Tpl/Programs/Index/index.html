@@ -1,0 +1,75 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-sys","menuname": "教学计划",
+                "menus": [
+                    {"menuid": "10","menuname": "新建教学计划","icon": "icon-classTable","url": "__ROOT__/Programs/Index/create"},
+                    {"menuid": "20","menuname": "检索教学计划","icon": "icon-weekTable","url": "__ROOT__/Programs/TeachingPlan/search"},
+                    {"menuid": "21","menuname": "班级修课计划","icon": "icon-evaluate","url": "__ROOT__/Programs/ClassesPlan/search"},
+                    {"menuid": "22","menuname": "学生修课计划","icon": "icon-plan","url": "__ROOT__/Programs/StudentsPlan/search"}]
+            }
+        ]
+    };
+    var menuTabs = null;
+
+    $(function() {
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:hidden; color:#000000; " >
+            <span style="font-size: 20px">一、教学计划功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">实现教学计划管理，指定个人与班级修课计划。有新建教学计划、检索教学计划、班级修课计划、学生修课计划等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、新建教学计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">管理员（一般是教务处或各学院的教学秘书）可以建立各类型的教学计划，包括“主修、辅修、双学位、双专业、其它”，并对此计划设定是否有效，教学计划编号一般为7位，编号唯一不可重复。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、检索教学计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">各学院管理员可以通过设置教学计划编号、教学计划名称、学院为检索条件查看本学院的教学计划，但无法做删除修改操作，包括查看教学计划中的修读班级、修读辅修班、修读学生、课程。各学院管理员只可以对本开课学院的教学计划进行修改、删除等管理操作。若是教务处管理员那就可以对所有学院的教学计划进行管理操作。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、班级修课计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">各学院管理员可以查看所有学院的所有班级的修课教学计划，但是无法对此进行修改、删除管理。教师只可对本开课学院的班级修课计划进行修改、删除、绑定某个教学计划等操作。若是教务处管理员那就可以对所有学院的班级修课计划进行管理操作。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、学生修课计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">各学院管理员可以查看所有学院的学生的修课计划，但无法对此进行做添加、删除操作。各学院管理员只可对本开课学院的学生进行添加、删除修读计划。若是教务处管理员那就可以对所有学院的学生修课计划进行管理操作。</p>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

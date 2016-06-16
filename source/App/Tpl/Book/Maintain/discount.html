@@ -1,0 +1,50 @@
+<include file=":Include:jqueryHeader" />
+<style >
+table.discount{margin:15px auto;}
+.discount td,.discount th{border-bottom:dashed 1px #CCC;height:40px;}
+</style>
+<body style="background:#FFF;padding-top:150px;">
+   <table class="discount" border="0" align="center" width="50%" style="border-collapse: collapse;">
+   		<tr><th align="right" width="18%">当前学年：</th><td width="30%">{$yearTerm.YEAR}
+   			<input type="hidden" value="{$yearTerm.YEAR}" name="year"></td>
+   		<th align="right" width="18%">当前学期：</th><td>{$yearTerm.TERM}
+   			<input type="hidden" value="{$yearTerm.TERM}" name="term"></td></tr>
+   		<tr><th align="right">教材折扣率：</th><td colspan="3">
+   			<input name="dis_rate" value="{$dis.dis_rate}"> <font color="red"></font></td></tr>
+   		<tr><td colspan="4" align="center">
+   		<input type="hidden" value="{$dis.id}" name="id">
+   		<a href="javascript:void(0)" id="savebut">更&nbsp;新</a></td></tr>
+   </table>
+<script type="text/javascript">
+$(function(){
+    //提交修改按钮
+    $('#savebut').linkbutton({iconCls: 'icon-save'});
+	//修改口令
+	$('#savebut').click(function(){
+		var rate=$.trim($("[name='dis_rate']").val());
+		var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+		if(!reg.test(rate)){
+			$("[name='dis_rate']").next().html("×");
+			return false;
+		}else{
+			$("[name='dis_rate']").next().html("");
+		}
+		var ary={year:$("[name='year']").val(),term:$("[name='term']").val(),id:$("[name='id']").val(),dis_rate:rate}
+        $.ajax({
+            url:"__URL__/discount/hasJson/1",
+            type:'POST',
+            data:ary,
+            success:function(data){
+             if(data){
+                    $.messager.alert('提示','更新成功！','?');
+                }else{
+                	$.messager.alert('提示','更新失败！','?');
+                }
+            }
+        });
+	});
+	
+});
+</script>
+</body>
+</html>

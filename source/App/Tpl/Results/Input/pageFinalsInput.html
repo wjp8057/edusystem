@@ -1,0 +1,207 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/datagrid-bufferview.js'> </script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/common.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/modules/results.js"></script>
+<div id="modal2" class="easyui-window" style="width:500px" data-options="modal:true,closed:true" >
+</div>
+<script>
+var year = "{$year_a}";
+var term = "{$term}";
+var scoretype = "{$scoretype}";
+var examtime = "{$examtime}";
+var coursegroupno = "{$coursegroupno}";
+
+
+$(function(){
+    var datebox_input = $('#datebox_input');
+    var dgrid = $("#demo");
+    Formor.setDateBox(datebox_input,examtime);
+
+    //全部设置为二进制的合格
+    function setAllPassedWhenTwoStage(){
+        if(scoretype !== 'two'){
+            return Messager.showWarning("该操作只对二级制有效!");
+        }
+        var rowlist = Datagrid.getRows(dgrid);
+        for(var i=0;i<rowlist.length;i++){
+            if(parseInt(rowlist[i].lock) > 0) continue;
+
+            dgrid.datagrid("beginEdit", i);
+            dgrid.datagrid('getEditor', {index:i,field:'finalscore'}).target.val(1);
+            dgrid.datagrid("endEdit", i);
+
+            //rowlist[i].finalscore = '合格';
+            //dgrid.datagrid('updateRow',{index:i,row:rowlist[i]});
+            //Datagrid.refreshRow(dgrid,i);
+        }
+    }
+    $('#setAllPassedWhenTwoStage2').click(setAllPassedWhenTwoStage);
+
+    //表格编辑行为
+    initDataGridEditor(dgrid,'finalscore', function () {
+        return false;
+    });
+
+    /**
+     * 期末成绩输入 表单获取值转数据表装填值
+     * @param score
+     * @param params
+     * @returns {*}
+     */
+    function dowithEditValue(score,params){
+        if($.trim(score) === ''){
+            return {
+                '_error':true,
+                '_info' :"还有成绩没有填完,不能提交!"
+            }
+        }
+
+        var result = {};
+        var visualval = edit2visual(score,params['scoretype']);
+
+        if(true !== checkVisualValue(visualval)){
+            return {
+                '_error':true,
+                '_info' :visualval
+            }
+        }
+        if(params['scoretype']  == 'ten'){
+            if(isNaN(visualval) /* || inObj(cj)*/){/* 中文 (或者 qhw中的值 )可缺少 */
+                result.examscore = 0;
+                result.testscore = visualval;
+            }else{
+                result.examscore = parseInt(visualval);
+                result.testscore = '';
+            }
+        }else{
+            result.examscore = 0;
+            result.testscore = visualval;
+        }
+        return result;
+    }
+
+
+    $('#save2').bind('click', function () {
+        var examdate = Formor.getDateBox(datebox_input);
+        if(!examdate){
+            return Messager.showWarning("请填写考试日期!");
+        }
+        var subdata = getDatagridByFields(dgrid,'finalscore',dowithEditValue,{scoretype:scoretype});
+//        console.log(subdata);return;
+        var sp = (scoretype=='ten')?0:'无';
+        $.post('__URL__/Three_two_sub/tag/qmcjsr',{'rows':subdata,'sp':sp,'examtime':examdate},function(c){
+            Messager.showMessage(c, function () {
+                location.reload();
+            });
+        });
+    });
+
+
+    //打印成绩单
+    $('#doprint').bind('click',function(){
+        window.open('__URL__/Three_three_daying/year/'+year+'/term/'+term+'/courseno/'+coursegroupno)
+    });
+
+
+
+    //自动获取列表数据
+    $.post('__URL__/Three_two_sub/tag/qmcjhq',{'year':year,'term':term,'courseno':coursegroupno},function(c){
+        if(Ajaxor.isMessage(c)){
+            return Messager.showMessage(c);
+        }
+        Datagrid.loadData(dgrid,c);
+    });
+});
+
+</script>
+<style>
+    p.statement {
+        line-height: 150%;
+        word-spacing: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        text-align: left;
+        font-family: 宋体;
+        font-size: 10pt;
+        color: #0000ff;
+    }
+
+</style>
+<style>
+    th {
+        text-align: center;
+    }
+</style>
+
+<body style="background-color: #fff">
+<div id="modal" inline="true" title="">
+</div>
+<div id="cc" class="easyui-layout" data-options="" style="height:750px">
+    <div data-options="region:'north',split:false,border:false" style="height:260px;">
+
+        <p align="center" style="font-size:14px">
+            <b>
+                宁波城市学院{$year_a}--{$year_b}学年第{$term}学期
+
+                <php>
+                    if(isset($isretake) and $isretake === true){
+                        echo '毕业前补考';
+                    }else{
+                        echo '期末';
+                    }
+                </php>
+                成绩输入单({$scoretypetext}) </b>
+        </p>
+        <p align="center" style="line-height: 5%">
+            课号：<span style="font-size:10pt"  >{$courseinfo.coursegroupno}</span>&nbsp;
+            课名:<span style="font-size:10pt" >{$courseinfo.coursename}</span>&nbsp;
+            教师名称:<span style="font-size:10pt" >{$teachers}</span>&nbsp;
+            选课人数:<span id="xuanke"></span>
+        </p>
+        <p  class="statement">1、百分制输入时成绩应为0-100之间或者使用字母（q、h、w)；</p>
+        <p  class="statement">2、五级制输入时成绩1-5之间或者使用字母（q、h、w)，数字对应成绩如下：1-优秀，2-良好，3-中等，4-及格，5-不及格；
+        <p  class="statement">3、二级制输入时成绩为数值0-1或者使用字母（q、h、w)，1-合格，0-不合格;
+        <p  class="statement">4、字母对应字符如下:q-缺考，h-缓考，w-违纪；</p>
+        <p  class="statement">5、如期末考核缺考，则总评成绩应记为缺考，缓考者在成绩单课程状态中注明。</p>
+        <p  class="statement">6、按Tab键移动光标到下一个输入框.</p>
+        <p  class="statement">7、本课程考试日期为：
+            <input id="datebox_input" name="datebox_input" type="text" class="easyui-datebox" />
+        </p>
+
+    </div>
+    <div data-options="region:'center',split:false,border:false" style="padding:0;background:#FFF;overflow: visible">
+        <div align="center">
+            <table id="demo" title="" style="width:600px;height:492px" data-options="view:bufferview,rownumbers:true,singleSelect:true,
+            pageList:[500,1000],autoRowHeight:false,pageSize:800,pagination:false">
+                <thead>
+                <tr>
+                    <th data-options="field:'studentno',width:100">学号</th>
+                    <th data-options="field:'studentname',width:100">姓名</th>
+                    <th data-options="field:'finalscore',width:100,editor:{type:'text'}">成绩</th>
+                    <th data-options="field:'status',width:100,formatter:function(a,b,c){
+                            if(a=='H')return '缓考'
+                            else if(a=='N')return '正常'
+                        }">状态</th>
+                    <th data-options="field:'lock',width:100,hidden:false,formatter:function(a,b,c){
+                        return parseInt(a) > 0 ? '锁定':'-';
+                        }">锁</th>
+                    <th data-options="field:'recno',hidden:true,width:100">recno</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>
+<div style="margin-top: 30px;margin-bottom: 30px;">
+    <div align="center">
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="save2" iconCls="icon-save">提交数据</a>&nbsp&nbsp&nbsp&nbsp&nbsp
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="doprint" iconCls="icon-print">打印成绩单</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="setAllPassedWhenTwoStage2"  iconCls="icon-edit">全部设为合格</a>
+    </div>
+</div>
+
+</body>

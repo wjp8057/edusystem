@@ -1,0 +1,571 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+var type=[];
+    $(function(){
+        var indexrow=undefined;             //保存索引键的变量
+        var upanduan=false;                 //判断添加的时候用户是否有正确填写教室号用
+        var purpose=false;                      //判断用户的借用目的有没有写
+        var chuang={
+            modal:true,
+            height:350,
+            width:600,
+            minimizable:false,
+            maximizable:false,
+            closed:true
+        }
+        var wd=$('#wd').window(chuang)                  //window弹窗之    借用教室添加
+        var wd3=$('#wd3').window(chuang)               //window弹窗之   借用教室修改
+        var back_bool=false
+        $('#layout').layout()       //layout
+
+       var dat=$('#datgrid').datagrid({
+            striped:true,
+            url:'__URL__/selectjieyong/hasJson/1',
+            frozenColumns:[[{field:'RECNO',checkbox:true},{field:'ROOMNO',title:'教室号',width:80,sortable:true,align:'center',
+                formatter:function(a2,b,c){
+                    return "<a href='javascript:void(0)' onclick='weekbiao(\""+a2+"\")' style='color:blue;text-decoration:underline'>"+a2+"</a>"
+                }
+               }]],
+            columns:[[
+                {field:'JSN',title:'简称',width:100,sortable:true,align:'center'
+                },
+                {field:'EQUIPMENT',title:'设施',width:100,sortable:true,align:'center'
+                },
+                {field:'STATUS',title:'可用',width:50,align:'center',sortable:true,formatter:function(c){return c?'可用':'不可用';}
+                },
+                {field:'RESERVED',title:'保留',align:'center',width:50,sortable:true,formatter:function(c){return c?'保留':'不保留';}
+                },
+                {field:'DAY',title:'星期',align:'center',width:30,sortable:true
+                },
+                {field:'TIME',title:'节次',align:'center',width:90,sortable:true,formatter:function(c){return c=='null'?'全天':c;}
+                },
+                {field:'OEW',title:'单双周',align:'center',width:50,sortable:true
+                },
+                {field:'WEEKS',title:'周次',align:'center',width:165,sortable:true,formatter:function(a,b,c){
+                    var str=a.substring(0,4);
+                    var str2=a.substring(4,8);
+                    var str3=a.substring(8,12);
+                    var str4=a.substring(12,16);
+                    var str5=a.substring(16,20);
+                    return '<font color="blue">'+str+'</font><font color="red">&nbsp'+str2+'</font><font color="navy">&nbsp'+str3+'</font><font color="green">&nbsp'+str4+'</font><font color="#87ceeb">&nbsp'+str5+'</font>';
+                }
+                },
+                {field:'SCHOOL',title:'借用单位',align:'center',width:90,sortable:true
+                },
+                {field:'APPLYDATE',title:'申请日期',align:'center',width:150,sortable:true,formatter:function(a2,b,c){
+                    return "<a href='javascript:void(0)' onclick='shenqingdan(\""+c+"\")' style='color:blue;text-decoration:underline'>"+a2+"</a>"
+                }
+                },
+                {field:'USERNAME',title:'申请人',align:'center',width:50,sortable:true
+                },
+                {field:'APPROVED',title:'批准',align:'center',width:80,sortable:true, formatter:function(a,b,c){
+                    var aa = a?'checked=checked':'';
+                    type[c]=a;
+                    return "<input type='checkbox' name='pzzt_"+c+"' "+aa+">"
+                }},
+                {field:'PURPOSE',title:'用途',align:'center',width:150,sortable:true}
+            ]],
+           onLoadSuccess:function(data){
+             for(var i=0;i<type.length;i++){
+                 $('[name=pz'+i+']').val(type[i])
+             }
+           },
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:30,
+            toolbar:'#tdemo',onRowContextMenu:function(e,rowindex,row){
+               dat.datagrid('rejectChanges');
+               var tt=$('#datgrid');
+
+               e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+               tt.datagrid('selectRow',rowindex);
+               $('#admin_access_menu').menu('show',{
+                   left: e.pageX,
+                   top: e.pageY
+               });
+           },onDblClickRow:function(keyrow,dataRow){                                       //双击时候也能触发弹窗
+
+            },onAfterEdit:function(index,dataRow,changes){                              //当完成编辑的时候 触发此方法
+               $.ajax({
+                   url:'__URL__/shenhejieyong',
+                   type:'POST',
+                   data:{
+                       RECNO:dataRow.RECNO,
+                       APPROVED:dataRow.APPROVED
+                   },
+                   success:function(content){
+                       $.messager.alert('提示',content);
+                   }
+               })
+           },onUnselect:function(rowIndex,rowData){
+               dat.datagrid('cancelEdit',rowIndex);
+           }});
+
+        //搜索
+        $('#seacher').bind('click',function(){
+            var values = $("#search_form").serialize();
+            dat.datagrid('load',{_PARAMS_:values})
+        });
+        //删除
+        function ddel(){
+            if(Datagrid.hasSelected(dat)){
+                $.messager.confirm('提示','您确定要删除吗',function(b) {
+                    if (b) {
+                        var row2 = Datagrid.getSelections(dat);
+                        var infoarr = [];                                                //存储删除信息的数组
+                        for (var i = 0; i < row2.length; i++) {
+                            infoarr[i] = row2[i].RECNO;
+                        }
+                        $.post('__URL__/deletejieyong', {'recos': infoarr}, function (data) {
+                            return Messager.showInfo(data.message, data.type, function () {
+                                if ('info' === data.type) {
+                                    dat.datagrid('reload');
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+        }
+        $('#e_del').bind('click',ddel);
+        $('#admin_del').bind('click',ddel);
+        //修改教室借用
+        function eedit(){
+            if(Datagrid.selectSingle(dat)){
+                var row3 = Datagrid.getSelected(dat);                 //获得被选中的索引
+                if(row3.APPROVED){
+                    return Messager.showWarning("不能编辑已经通过批准的");
+                }else{
+                    $('#RECNO').val(row3.RECNO);         //给隐藏域RECNO赋值
+                    $.post('__URL__/editjieyong',{recno:row3.RECNO}, function (data) {
+                        //自动填写表单
+                        var text=$("#wd3 :text");
+                        var select=$('#wd3 select');
+                        var ckbox=$('#wd3 :checkbox');
+                        var nm='';
+                        for(var i=0;i<text.length;i++){
+                            nm=text[i].name;
+                            text[i].value=data[nm];
+                        }
+                        for(var i=0;i<select.length;i++){
+                            nm=select[i].name;
+                            $("#wd3").find("[name="+nm+"]").val(data[nm]);                 //设置select的值
+                        }
+                        for(var i=0;i<ckbox.length;i++){
+                            ckbox[i].checked=false;
+                        }
+                        for(var i=0;i<data['chek'].length;i++){
+                            $('#wd3 [name='+data['chek'][i]+']').attr('checked','checked')
+                        }
+                        wd3.window({
+                            closed:false
+                        })
+                    });
+                    indexrow=dat.datagrid('getRowIndex',row3);
+                }
+            }
+        }
+        $('#e_edit').bind('click',eedit);
+        $('#admin_edit').bind('click',eedit);
+
+        //保存批准状态
+        $('#e_save').bind('click',function(){
+            //目前对于checkbox 由于是formarter返回的，故不存在修改状态
+//            var List=Datagrid.getUpdated(dat);
+            //return Messager.showConfirm('目前本系统不支持自动冲突检查，请确认是否审核完毕?', function (c) {
+                //if(c){
+                    var List = Datagrid.getAll(dat);
+                    //查看复选框勾选状态
+                    for(var x in List) List[x]['APPROVED'] = ($('[name=pzzt_'+x+']').attr("checked")=='checked')?1:0;
+                    $.post('__URL__/shenhejieyong/hasJson/1',{list:List,'YEAR':$('#sh_year').val(),'TERM':$('#sh_term').val()},function(c){
+                        return Messager.showInfo( c.message, c.type, function () {
+                            $('#datgrid').datagrid('reload');
+                        });
+                    });
+                //}
+            //});
+        });
+        //弹出教室借用批准单
+        function ttanchu(){
+            if(Datagrid.selectSingle(dat)){
+                var row3 = Datagrid.getSelected(dat);
+                if(!row3.APPROVED) return Messager.showWarning('未批准的不能弹出申请');
+                var roomtype = 'p';
+                if($.trim(row3.EQUIPMENT) == '多媒体教室'){
+                    roomtype = 'd';
+                }
+                console.log(row3.EQUIPMENT);
+                window.open("__URL__/shenqingdan/RECNO/"+row3.RECNO+'/roomtype/'+roomtype,"_blank")
+            }
+        }
+        $('#e_tanchu').bind('click',ttanchu);
+        $('#admin_tanchu').bind('click',ttanchu);
+
+
+
+
+        var add=$('#add').linkbutton({              //添加按钮
+            text:'添加',
+            iconCls:'icon-add'
+        }).bind('click', function tianjia(){                         //点击添加按钮时候触发的事件
+                    $('#PURPOSE').blur();
+                    $('#ADD_ROOMNO').blur();
+                    if(!upanduan){
+                        $.messager.alert('提示','请填写正确的教室号');
+                        $('#ADD_ROOMNO').focuc();
+                        return;
+                    }
+                    if(!purpose){
+                        $.messager.alert('提示','请填写借用目的');
+                        $('#PURPOSE').focuc();
+                        return;
+                    }
+                    var two=$('#wd :text');
+                    var one=$('#wd :checkbox');
+                    xquzhi('#wd',two,one,'addjieyong')
+                    $('#room_dengji')[0].reset()
+
+                });
+
+
+
+
+
+        function xquzhi(data,two,one,url){              //获取用户对借用教室 添加  或  修改的值
+            var ct={};
+            for(var i=0;i<two.length;i++){
+                ct[two[i].name]=two[i].value;
+            }
+            var zhouci={};                  //周次
+            for(var i=0;i<one.length;i++){
+                if(one[i].checked){
+                    zhouci[one[i].name]=1;
+                }else{
+                    zhouci[one[i].name]=0;
+                }
+            }
+            ct['zhouci']=zhouci;
+            ct['DAY']=$(data).find("[name='DAY']").val()
+            ct['TIME']=$(data).find("[name='TIME']").val()
+            ct['OEW']=$(data).find("[name='OEW']").val()
+            ct['RECNO']=$('#RECNO').val();
+            $.ajax({
+                url:'__URL__/'+url,
+                type:'post',
+                data:ct,
+                success:function(data){
+                    $.messager.alert('提示',data);
+                }
+            })
+        }
+        $('#edit').bind('click',function(){                              //点击添加按钮时候触发的事件
+            var two=$('#wd3 :text');
+            var obj={};
+            for(var i=0;i<two.length;i++){
+                obj[two[i].name]=two[i].value;
+            }
+            obj['zhouci']=Formor.makeWeeksArray($('#wd3 :checkbox'));
+            obj['DAY']=$('#wd3').find("[name='DAY']").val();
+            obj['TIME']=$('#wd3').find("[name='TIME']").val();
+            obj['OEW']=$('#wd3').find("[name='OEW']").val();
+            obj['RECNO']=$('#RECNO').val();
+            $.post('__URL__/updatejieyong',obj, function (c) {
+                return Messager.showInfo(c.message, c.type, function () {
+                    wd3.window({closed:true});
+                    dat.datagrid('reload');
+                });
+            });
+        });
+        setTimeout(function(){
+            $('#datgrid').datagrid('load',{
+                CASE:0,
+                ROOMNO:'',
+                SCHOOL:'',
+                YEAR:$('#yyear').val(),
+                TERM:$('#tterm').val()
+            })
+        },500)
+
+//==============================================================================================================
+        $('#ADD_ROOMNO').bind('blur',roomnoyz);
+            function roomnoyz(){
+
+                if(back_bool){
+                    return
+                }
+                if(this.value==""){
+                    $('#ADD_ROOMNO').css('background','red');
+                    $('#ct2').html('<font color="red">不能为空！</font>')
+                    return;
+                }
+            $.ajax({
+                url:'__URL__/roomnoyz',
+                async : false,
+                type:'POST',
+                data:{
+                    ROOMNO:this.value
+                },
+                success:function(data){
+
+                  if(data=='false'){
+                        $('#ct2').html('<font color="red">号码无法使用！</font>')
+                       $('#ADD_ROOMNO').css('background','red');
+                        upanduan=false;
+                    }else{
+                        $('#ADD_ROOMNO').css('background','');
+                        $('#ct2').html('<font color="green">可以使用√</font>')
+                        upanduan=true;
+                    }
+
+                    back_bool=false
+                }
+            })
+        }
+
+        $('#PURPOSE').bind('blur',purposefc);
+        function purposefc(){
+            if(this.value==""){
+                $('#PURPOSE').css('background','red');
+                purpose=false;
+
+            }else{
+                $('#PURPOSE').css('background','');
+                purpose=true;
+
+            }
+        }
+
+        ////用来判断用户是不是选了一条的函数
+            function yitiao(){
+                var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+                if(rowList.length>1){
+                    alert('请选择一条进行批准,不能选多条');                         //用户选了多行编辑
+                }else if(rowList.length<1){
+                    alert('请选择一条要批准的数据');                         //用户没选择行
+                }else{
+                    return true;
+                }
+                return false;
+            }
+
+        var cz=$('#back').linkbutton({                      //重置按钮
+            text:'重置',
+            iconCls:'icon-back'
+        }).bind('click',function(){
+
+                $('#room_dengji')[0].reset()
+
+        })
+
+
+
+        //todo:
+        $('#e_add').bind('click',function(){
+            wd.window({
+                closed:false
+            })
+        })
+
+        $('#e_reload').bind('click',function(){
+            var ct={};
+            var list=$('#head input');
+            var listtwo=$('#head select');
+            for(var i=0;i<list.length;i++){
+                ct[list[i].name]=list[i].value;
+            }
+            for(var i=0;i<listtwo.length;i++){
+                ct[listtwo[i].name]=listtwo[i].value;
+            }
+            dat.datagrid('reload',ct)
+        })
+
+
+
+
+
+        function eedit2(){
+
+        /*    var boo=qxpanduan('BA12','__APP__/Book/Book/Bexecute')
+
+            if(!boo){
+                return $.messager.alert('提示','BA12 您没有足够的权限')
+            }*/
+            var one=yitiao();
+            if(one){
+                if(indexrow!=undefined){
+                    dat.datagrid('endEdit',indexrow);
+                }
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                var index3 = dat.datagrid('getRowIndex', row3);
+                dat.datagrid('beginEdit', index3);
+                indexrow=index3;
+            }
+        }
+
+
+
+        $('#e_edit2').bind('click',eedit2)
+        $('#admin_edit2').bind('click',eedit2);
+
+
+
+
+
+    })
+</script>
+<body id="layout">
+
+
+<div align="center" id="wd3" title="修改借用教室情况">
+    <center>
+        <table border="0" cellpadding="0" cellspacing="10" width="100%" style="margin-top:10px">
+            <tr>
+                <td width="25%" align="right"><font size="2">学年：</font></td>
+                <td width="14%" align="left"><input type="text" name="YEAR" id='sh_year' size="4" value="{$yearTerm.YEAR}"><span id="xct2"></span></td>
+                <td width="16%" align="right"><font size="2">学期：</font></td>
+                <td width="45%" align="left"><input type="text" name="TERM" id='sh_term' size="1" value="{$yearTerm.TERM}"></td>
+            </tr>
+            <tr>
+                <td width="25%" align="right"><font size="2">教室号（9位）：</font></td>
+                <td width="14%" align="left"><input type="text" name="ROOMNO" size="9" readonly="readonly"  value='%' maxlength="9"></td>
+                <td width="16%" align="right"><font size="2">日期：</font></td>
+                <td width="45%" align="left">
+                <select size="1" name="DAY">
+                    <option value="1">星期一</option>
+                    <option value="2">星期二</option>
+                    <option value="3">星期三</option>
+                    <option value="4">星期四</option>
+                    <option value="5">星期五</option>
+                    <option value="6">星期六</option>
+                    <option value="7">星期日</option>
+                </select></td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right"><font size="2">时段：</font></td>
+                <td width="14%" align="left"><font size="2">
+                    <select size="1" name="TIME">
+                        <volist name="timesectors" id="one">
+                            <option value="{$one.NAME}">{$one.VALUE}</option>
+                        </volist>
+                    </select>
+
+                </font></td>
+                <td width="16%" align="right"><font size="2">单双周：</font></td>
+                <td width="45%" align="left"><select size="1" name="OEW">
+                    <option  value="B">单双周</option>
+                    <option value="O">单周</option>
+                    <option value="E">双周</option>
+                </select></td>
+            </tr>
+            <tr>
+                <td width="25%" align="right"><font size="2">借用目的<font color="#FF0000">（必须）</font>：</font></td>
+                <td width="75%" align="left" colspan="3"><font size="2"><input type="text" name="PURPOSE" size="50" maxlength="50">最多25字</font></td>
+            </tr>
+            <tr>
+                <td width="25%" align="right"><font size="2">周次：</font></td>
+                <td width="75%" align="left" colspan="3"><font size="2">1:<input type="checkbox" name="C1" value="ON">2:<input type="checkbox" name="C2" value="ON">3:<input type="checkbox" name="C3" value="ON">4:<input type="checkbox" name="C4" value="ON" >5:<input type="checkbox" name="C5" value="ON">6:<input type="checkbox" name="C6" value="ON">7:<input type="checkbox" name="C7" value="ON">8:<input type="checkbox" name="C8" value="ON">9:<input type="checkbox" name="C9" value="ON" >10:<input type="checkbox" name="C10" value="ON" ></font>
+                    <p><font size="2">11:<input type="checkbox" name="C11" value="ON">12:<input type="checkbox" name="C12" value="ON">13:<input type="checkbox" name="C13" value="ON">14:<input type="checkbox" name="C14" value="ON">15:<input type="checkbox" name="C15" value="ON">16:<input type="checkbox" name="C16" value="ON">17:<input type="checkbox" name="C17" value="ON">18:<input type="checkbox" name="C18" value="ON">19:<input type="checkbox" name="C19" value="ON"></font></td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center">
+                    <input type="hidden" id="RECNO" value="">           <!--存放RECNO的隐藏域-->
+                    <a href="javascript:void(0)" id="edit" class="easyui-linkbutton" data-options="iconCls:'icon-edit'">修改</a>
+                </td>
+            </tr>
+        </table>
+    </center>
+</div>
+
+
+<p align="center">
+    <input type="button" value="提交" name="B1" onclick="return LEASEFORM_onsubmit();"><input type="reset" value="全部重写" name="B2"></p>
+<p align="center"><font size="2">时段设定为全部时表示全天借用</font></p>
+<input type="hidden" name="WEEKS" value="262143">
+</FORM>
+
+<!-- 表单栏 -->
+<div id="tdemo">
+    <form id="search_form">
+        <div id="head">
+            <label for="yyear">学年:</label>
+            <input type="text" name="YEAR" id="yyear" size="4" value="{$yearTerm.YEAR}">
+            <label for="tterm"> 学期：</label>
+            <input type="text" name="TERM" id='tterm' size="2" value="{$yearTerm.TERM}">
+            <label for="ccase">批准情况：</label>
+            <select size="1" name="APPROVED" id="ccase">
+                <option value="1">已批准</option>
+                <option value="0">待批准</option>
+                <option value="%" selected>所有</option>
+            </select>
+            <label for="sschool">借用学院：</label>
+            <select size="1" name="SCHOOL" id="sschool">
+                <option value="%">全部</option>
+                <volist name="school" id="v">
+                    <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                </volist>
+            </select>
+            <label for="rroomno">教室号：</label>
+            <input type="text" name="ROOMNO" id='rroomno' size="9" value="%">
+            <a href="javascript:void(0)" id="seacher" class="easyui-linkbutton" iconCls="icon-search">搜索</a>
+        </div>
+    </form>
+<div>
+            <!--<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>借用教室登记</a>-->
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-reload"  id="e_reload" plain=true>刷新页面</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>修改教室借用情况</a>
+<!--            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit2"  id="e_edit2" plain=true>修改批准状态</a>-->
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存批准状态</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-tanchu"  id="e_tanchu" plain=true>弹出教室借用批准单</a>
+       </div>
+        </div>
+    </div>
+
+    <script>
+
+    </script>
+<!-- 表格 -->
+<div data-options="region:'center',title:'',split:false,border:'false'" style="background:#eee;">
+    <div id="datgrid" data-options="fit:true,border:false">
+    </div>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>修改教室借用情况</div>
+<!--    <div id="admin_edit2">修改批准状态</div>-->
+    <div id="admin_tanchu">弹出申请单</div>
+</div>
+</body>
+<script>
+    function weekbiao(roomno){
+        window.open('__URL__/roomWeek/roomno/'+roomno+'/year/'+$('#yyear').val()+'/term/'+$('#tterm').val())
+    }
+
+
+    function shenqingdan(index){
+
+        $('#datgrid').datagrid('unselectAll');
+        $('#datgrid').datagrid('selectRow',index);
+        var row3=$('#datgrid').datagrid('getSelected')
+
+        if(row3.APPROVED==0){
+            return $.messager.alert('提示','您的申请尚未批准，无法打印申请单')
+        }
+        var htm='/html/shenqingdan_putong.html';
+
+        if(row3.EQUIPMENT[0]=='多'){
+            htm=""
+        }
+        window.open("__URL__/shenqingdan/RECNO/"+row3.RECNO+htm,"_blank")
+    }
+</script>
+</html>
+
+
+
+
+

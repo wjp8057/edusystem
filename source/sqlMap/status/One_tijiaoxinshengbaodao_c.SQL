@@ -1,0 +1,1 @@
+SELECT count(*) as ROWS FROM STUDENTS WHERE STUDENTNO=:studentno

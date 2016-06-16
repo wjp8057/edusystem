@@ -1,0 +1,88 @@
+<include file=":Include:jqueryHeader" />
+<script>
+var key=[];
+$(function(){
+    var yearInput = $("#year");
+    var termInput = $("#term");
+    var batchInput = $("#batch");
+    var flagInput = $("#flag");
+    var dat = $('#dat').datagrid();
+    var searchform = $("#searchform");
+
+    yearInput.val(GenKits.getParentYear());
+    termInput.val(GenKits.getParentTerm());
+
+    $('#btn').bind('click',function(){
+        var year = yearInput.val();
+        var term = termInput.val();
+        if(year==""||term==""){
+            return Messager.showWarning('请输入学年学期,不能为空！');
+        }
+        var batch = batchInput.val();
+        if(batch!='%' && isNaN(batch)){
+            return Messager.showWarning('批次只能输入'%'或者数字！');
+        }
+        dat.datagrid('load',{_PARAMS_:searchform.serialize()});
+    });
+
+
+    //设置批次
+    $('#set').bind('click',function(){
+        if(Datagrid.hasSelected(dat)){
+            var rowlist = dat.datagrid('getSelections');
+            var rows = [];
+            for(var x in rowlist){
+                rows[x] = rowlist[x]['coursegroup'];
+            }
+
+            $.post('__URL__/setpici/hasJson/1',{rows:rows,'flag':flagInput.val()},function(c){
+                return Messager.show(c, function () {
+                    dat.datagrid('reload');
+                });
+            });
+        }
+    });
+});
+</script>
+<body class="easyui-layout" style="background: #fff;padding:0;overflow-y: hidden"  fit="true" split="false" scroll="no">
+
+<!-- 主界面 -->
+<div data-options="region:'center',border:false" style="background: #fff; padding:3px; ">
+    <table class="easyui-datagrid" id="dat"
+           data-options="url:'__URL__/setpici/reqtag/getlist',fit:true,pagination:true,pageList:[50,100,150],toolbar:'#toolbar'">
+        <thead>
+        <tr>
+            <th data-options="field:'row',checkbox:true">选择</th>
+            <th data-options="field:'coursegroup',width:150,align:'right'" align="center">课号</th>
+            <th data-options="field:'coursename',width:320,align:'right'" align="center">课程名称</th>
+            <th data-options="field:'examtype',width:140,align:'right'" align="center">考试类型(考试/考查)</th>
+            <th data-options="field:'school',width:100,align:'right'" align="center">开课学院</th>
+            <th data-options="field:'classname',width:120,align:'right'" align="center">主修班级</th>
+            <th data-options="field:'batch',width:120,align:'center',formatter:function(a,b,c){
+                if(a==0) return '未安排'
+                else return '第'+a+'批'
+            }" align="center">是否排考</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<!-- 工具栏 -->
+<div id="toolbar">
+    <form id="searchform">
+        <span class="datagrid-btn-separator-area">
+            <label for="year">学年：</label><input name="year" id="year" type="text" size='4' >
+            <label for="term">学期：</label><input type="text" id="term" name="term" size="1" >
+            <label for="classno">班号：</label><input type="text" id="classno" name="classno" value="%" size="10">
+            <label for="batch">批次：</label><input type="text" id="batch" name="batch" value="%" size="4">
+            <a id="btn" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检索</a>
+            <span>&nbsp;&nbsp;</span>
+        </span>
+        <a class="datagrid-btn-separator"></a>
+        <b>将选中条目设定为</b><input type="text" name="lock" id="flag" value="0" size="4" /><b>批次</b>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="set" data-options="iconCls:'icon-edit'" >设定</a>
+        <span>"0"为未按排</span>
+    </form>
+</div>
+
+</body>

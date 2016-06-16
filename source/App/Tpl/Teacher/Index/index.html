@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style=" background:#FFFFFF;">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>__TITLE__</title>
+
+    <link href="__ROOT__/thirdparty/jquery/css/default.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/datagrid-detailview.js'> </script>
+    <link href="__ROOT__/res/css/css.css" type="text/css" rel="stylesheet" />
+</head>
+<script>
+    $(function(){
+        function serverChangePwd() {
+            var oldPwd = $('#oldPass');
+            var newPwd = $('#newPass');
+            var rePass = $('#rePass');
+
+            if (oldPwd.val() == '') {
+                msgShow('系统提示', '请输入原密码！', 'warning');
+                return false;
+            }
+            if (rePass.val() == '') {
+                msgShow('系统提示', '请在一次输入密码！', 'warning');
+                return false;
+            }
+
+            if (newPwd.val() != rePass.val()) {
+                msgShow('系统提示', '两次密码不一至！请重新输入', 'warning');
+                return false;
+            }
+
+            $.post("__ROOT__/Student/Index/changePwd/hasJson/true", {oldPwd:oldPwd.val(),newPwd:newPwd.val()}, function(rsp) {
+                if(rsp){
+                    msgShow("系统消息：", rsp.message, rsp.type);
+                    if(rsp.type != "error"){
+                        oldPwd.val('');
+                        newPwd.val('');
+                        rePass.val('');
+                        $("#winChangePassword").window('close');
+                    }
+                }
+            },"JSON");
+        }
+
+        //调出修改密码窗口
+        $("#changePassword").bind("click",function(){
+            $("#winChangePassword").window("resize",{width:300,height:170});
+            $("#winChangePassword").window('open');
+        });
+
+        $('#btnOK').click(function(){
+            serverChangePwd();
+        });
+        $("#btnCancel").bind("click",function(){
+            $("#winChangePassword").window('close');
+        })
+
+    })
+</script>
+<body>
+<!--修改密码窗口-->
+<div id="winChangePassword" class="easyui-window" title="修改密码" collapsible="false" minimizable="false" maximizable="false"
+     icon="icon-save" closed="true" modal="true"  style="width: 0px; height: 0px; padding: 5px;background: #fafafa;overflow: hidden;">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3>
+                <tr>
+                    <td align="right">原密码：</td>
+                    <td><input id="oldPass" type="Password"  /></td>
+                </tr>
+                <tr>
+                    <td align="right">新密码：</td>
+                    <td><input id="newPass" type="Password" /></td>
+                </tr>
+                <tr>
+                    <td align="right">确认密码：</td>
+                    <td><input id="rePass" type="Password" /></td>
+                </tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="btnOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="btnCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+<div class="head"></div>
+<!--<div class="teach">
+    <table width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td><img src="__ROOT__/res/img/j-bg2.jpg" /></td>
+        </tr>
+        <tr>
+            <td background="__ROOT__/res/img/j-bg.jpg">
+                <table width="75%" border="0" cellspacing="0" cellpadding="0" style="margin:10px auto">
+                    <tr>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/System" target="system" ><img src="__ROOT__/res/img/j1.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Userinfo" target="userinfo" ><img src="__ROOT__/res/img/j2.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Archive" target="archive"><img src="__ROOT__/res/img/j14.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Status" target="status"><img src="__ROOT__/res/img/j9.jpg" /></a></td>
+
+
+                    </tr>
+                    <tr>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Visit" target="visit"><img src="__ROOT__/res/img/j17.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Classes" target="classes"><img src="__ROOT__/res/img/j4.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Room" target="room"><img src="__ROOT__/res/img/j6.jpg" /></a></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Major" target="major"><img src="__ROOT__/res/img/j18.jpg" /></a></td>
+
+
+
+                    </tr>
+                    <tr>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Programs" target="programs"><img src="__ROOT__/res/img/j5.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Course" target="course"><img src="__ROOT__/res/img/j22.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/CoursePlan" target="courseplan"><img src="__ROOT__/res/img/j3.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Schedule" target="schedule"><img src="__ROOT__/res/img/j8.jpg" /></a></td>
+
+
+
+                    </tr>
+                    <tr>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/CourseManager" target="coursemanager"><img src="__ROOT__/res/img/j13.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/SemesterTimetable" target="semestertimetable"><img src="__ROOT__/res/img/j10.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/TeacherSchedules" target="teacherschedules"><img src="__ROOT__/res/img/j7.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Book" target="book"><img src="__ROOT__/res/img/j20.jpg" /></a></td>
+
+
+                    </tr>
+                    <tr>
+
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Exam" target="exam"><img src="__ROOT__/res/img/j11.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Results" target="results"><img src="__ROOT__/res/img/j12.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Workload" target="workload"><img src="__ROOT__/res/img/j16.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Quality" target="quality"><img src="__ROOT__/res/img/j19.jpg" /></a></td>
+
+
+
+
+
+
+                    </tr>
+                    <tr>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Attendance" target="attendance"><img src="__ROOT__/res/img/j21.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Credit" target="credit"><img src="__ROOT__/res/img/j23.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"><a href="__ROOT__/Statistic" target="statistic"><img src="__ROOT__/res/img/j15.jpg" /></a></td>
+                        <td height="56" align="center" valign="middle"></td>
+                        <td height="56" align="center" valign="middle"></td>
+                    </tr>
+                </table>
+                <table width="30%" border="0" cellspacing="0" cellpadding="0" style="margin:10px auto;">
+                    <tr>
+                        <td align="center" valign="middle"><a href="/Teacher/Login/logout"><img src="__ROOT__/res/img/but3.jpg"></a></td>
+                        <td align="left" valign="middle" ><a href="javascript:void(0)" id="changePassword" class="red">修改密码</a></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td><img src="__ROOT__/res/img/j-bg3.jpg" /></td>
+        </tr>
+    </table>
+
+</div>-->
+<div class="teach">
+    <table width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tbody><tr>
+            <td><img src="__ROOT__/res/img/j-bg2.jpg"></td>
+        </tr>
+        <tr>
+            <td align="center" valign="top" background="__ROOT__/res/img/j-bg.jpg">
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="__ROOT__/res/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">基础数据</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center">
+                        <td><a href="__ROOT__/System" ><img src="__ROOT__/res/img/j1.jpg" /></a></td>
+                        <td><a href="__ROOT__/Archive" ><img src="__ROOT__/res/img/j14.jpg" /></a></td>
+                        <td><a href="__ROOT__/Status"><img src="__ROOT__/res/img/j9.jpg" /></a></td>
+                        <td><a href="__ROOT__/Room"><img src="__ROOT__/res/img/j6.jpg" /></a></td>
+                        <td><a href="__ROOT__/Classes"><img src="__ROOT__/res/img/j4.jpg" /></a></td>
+                        <td><a href="__ROOT__/Course"><img src="__ROOT__/res/img/j22.jpg" /></a></td>
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="__ROOT__/res/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">教务过程</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" border="0" cellpadding="0" cellspacing="0">
+                    <tr height="55" align="center">
+                        <td><a href="__ROOT__/Programs" ><img src="__ROOT__/res/img/j24.jpg" /></a></td>
+                        <td><a href="__ROOT__/CoursePlan" ><img src="__ROOT__/res/img/j3.jpg" /></a></td>
+                        <td><a href="__ROOT__/Schedule" ><img src="__ROOT__/res/img/j8.jpg" /></a></td>
+                        <td><a href="__ROOT__/CourseManager"><img src="__ROOT__/res/img/j13.jpg" /></a></td>
+                        <td><a href="__ROOT__/Book"><img src="__ROOT__/res/img/j20.jpg" /></a></td>
+                        <td><a href="__ROOT__/Exam"><img src="__ROOT__/res/img/j11.jpg" /></a></td>
+                    </tr>
+                    <tr height="55" align="center">
+                        <td><a href="__ROOT__/Results"><img src="__ROOT__/res/img/j12.jpg" /></a></td>
+                        <td><a href="__ROOT__/Major"><img src="__ROOT__/res/img/j25.jpg" /></a></td>
+                        <td><a href="__ROOT__/Workload" ><img src="__ROOT__/res/img/j16.jpg" /></a></td>
+                        <td><a href="__ROOT__/Quality" ><img src="__ROOT__/res/img/j19.jpg" /></a></td>
+                        <td><a href="__ROOT__/Credit"><img src="__ROOT__/res/img/j23.jpg" /></a></td>
+                        <td><a href="__ROOT__/Attendance" ><img src="__ROOT__/res/img/j21.jpg" /></a></td>
+                        <!--  旁听管理                 <td height="55" align="center"><a href="__ROOT__/Visit"><img src="__ROOT__/res/img/j17.jpg" /></a></td>-->
+
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="__ROOT__/res/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">查询分析</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <table width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center" height="55">
+                        <td><a href="__ROOT__/TeacherSchedules" ><img src="__ROOT__/res/img/j7.jpg" /></a></td>
+                        <td><a href="__ROOT__/SemesterTimetable" ><img src="__ROOT__/res/img/j10.jpg" /></a></td>
+                        <td><a href="__ROOT__/Statistic/Index/kctj" ><img src="__ROOT__/res/img/j31.jpg" /></a></td>
+                        <td><a href="__ROOT__/Statistic/Index/jssktj" ><img src="__ROOT__/res/img/j32.jpg" /></a></td>
+                        <td><a href="__ROOT__/Statistic/Index/xjqktj" ><img src="__ROOT__/res/img/j33.jpg" /></a></td>
+                        <td><a href="__ROOT__/Statistic/Index/jstj" ><img src="__ROOT__/res/img/j34.jpg" /></a></td>
+
+                    </tr>
+                    <tr  align="center" height="55">
+                        <td><a href="__ROOT__/Statistic/Index/xktj" ><img src="__ROOT__/res/img/j35.jpg" /></a></td>
+                        <td><a href="__ROOT__/Statistic/Index/jczxsjxz" ><img src="__ROOT__/res/img/j36.jpg" /></a></td>
+                        <td><a href="__ROOT__/Results/Index/cjfx" ><img src="__ROOT__/res/img/j37.jpg" /></a></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <!--数据统计 <td align="right"><a href="__ROOT__/Statistic" ><img src="__ROOT__/res/img/j15.jpg" /></a></td>-->
+                    </tr>
+                </table>
+                <table width="93%" height="32" border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td width="4%" align="center"><img src="__ROOT__/res/img/point.jpg" width="11" height="11" /></td>
+                        <td width="96%" align="left" class="style_blue14">个人信息</td>
+                    </tr>
+                </table>
+                <table width="93%" height="2" border="0" cellpadding="0" cellspacing="0" bgcolor="#85a1d5">
+                    <tr>
+                        <td align="left"></td>
+                    </tr>
+                </table>
+                <table  width="93%" height="67" border="0" cellpadding="0" cellspacing="0">
+                    <tr align="center">
+                        <td><a href="__ROOT__/Userinfo"><img src="__ROOT__/res/img/j2.jpg" /></a></td>
+                        <td><a href="__ROOT__/Userinfo?16"><img src="__ROOT__/res/img/j38.jpg" /></a></td>
+                        <td><a href="__ROOT__/Userinfo?21"><img src="__ROOT__/res/img/j40.jpg" /></a></td>
+                        <td><a href="__ROOT__/Userinfo?15"><img src="__ROOT__/res/img/j39.jpg" /></a></td>
+                        <td><a href="__ROOT__/Userinfo?17"><img src="__ROOT__/res/img/j41.jpg" /></a></td>
+                        <td><a href="_#" style="visibility:hidden"><img src="__ROOT__/res/img/j41.jpg" /></a></td>
+                    </tr>
+                </table>
+                <table width="30%" border="0" cellspacing="0" cellpadding="0" style="margin:10px auto;">
+                    <tbody><tr>
+                        <td align="center" valign="middle"><a href="__ROOT__/Teacher/Login/logout"><img src="__ROOT__/res/img/but3.jpg"></a></td>
+                        <td align="left" valign="middle"><a href="javascript:void(0)" id="changePassword" class="red">修改密码</a></td>
+                        <td align="left" valign="middle"><a href="/web/"  class="red">进入城院自主版</a></td>
+                    </tr>
+                    </tbody></table>
+            </td>
+        </tr>
+        <tr>
+            <td><img src="__ROOT__/res/img/j-bg3.jpg"></td>
+        </tr>
+        </tbody></table>
+
+</div>
+<div class="footer">__COPYRIGHT__</div>
+</body>
+</html>

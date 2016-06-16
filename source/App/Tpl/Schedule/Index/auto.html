@@ -1,0 +1,43 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val())
+        $("#TERM").val(parent.$("#TERM").val())
+
+        //生志数据
+        $("#btAuto").bind("click",function(){
+            $.messager.confirm("系统提示：","自动创建课程总表先清除指定学年学期的记录，一旦操作成功该学期排课将会清空，继续吗？",function(data){
+                if(data){
+                    var ischeckedok = $("#btAutook").attr('checked') === 'checked'?1:0;
+
+                    $.post("__ROOT__/Schedule/Index/auto/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val(),"checked":ischeckedok}, function(rsp) {
+                        if(rsp){
+                            msgShow("系统消息：", rsp.message, rsp.type);
+                        }
+                    },"JSON");
+                }
+            });
+        });
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#FFFFFF;">
+        <table border="0">
+            <tr><td height="20"></td></tr>
+            <tr><td width="140" align="right">排课学年：</td><td><input type="text" id="YEAR" name="YEAR" /></td></tr>
+            <tr><td align="right">排课学期：</td><td><input type="text" id="TERM" name="TERM" /></td></tr>
+            <tr><td align="right">是否清空排课：</td>
+                <td>是<input type="checkbox" id="btAutook" value="是" />&nbsp;&nbsp;
+                否<input type="checkbox" id="btAutono" value="否" checked="checked" /></td>
+            </tr>
+            <tr><td></td><td><input type="button" id="btAuto" value="自动创建课程总表"></td></tr>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
+

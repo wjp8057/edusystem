@@ -1,0 +1,136 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-config","menuname": "教材维护",
+            "menus":[
+                {"menuid": "11","menuname": "教材维护","icon": "icon-book","url":" __ROOT__/Book/Maintain/bookList"},
+                {"menuid": "12","menuname": "出版社维护","icon": "icon-plan","url":" __ROOT__/Book/Maintain/pressList"},
+                {"menuid": "13","menuname": "教材单价维护","icon": "icon-result","url":" __ROOT__/Book/Maintain/priceList"}
+            ]
+        },{"menuid": "2","icon": "icon-sys","menuname": "征订申请",
+            "menus":[
+                {"menuid": "21","menuname": "征订申请","icon": "icon-edit","url": "__ROOT__/Book/Apply/applyList"},
+				{"menuid": "22","menuname": "检索征订记录","icon": "icon-file3","url": "__ROOT__/Book/Apply/query"}
+            ]
+        },{"menuid": "3","icon": "icon-lock","menuname": "征订管理",
+            "menus":[
+     			{"menuid": "31","menuname": "征订管理","icon": "icon-room2","url": "__ROOT__/Book/Manage/applyList"}
+            ]
+        },{"menuid": "4","icon": "icon-book","menuname": "教材发放",
+            "menus":[
+          		{"menuid": "41","menuname": "按征订单发放","icon": "icon-weekTable","url": "__ROOT__/Book/Issue/orderIssue"},
+          		{"menuid": "42","menuname": "按教材号发放","icon": "icon-plan","url": "__ROOT__/Book/Issue/bookIssue"},
+          		{"menuid": "43","menuname": "学生教材发放","icon": "icon-personal","url": "__ROOT__/Book/Issue/studentIssue"},
+                {"menuid": "44","menuname": "教师教材发放","icon": "icon-users","url": "__ROOT__/Book/Issue/teacherIssue"},
+                {"menuid": "45","menuname": "班级教材发放","icon": "icon-personalList","url": "__ROOT__/Book/Issue/classIssue"}
+            ]
+        },{"menuid": "5","icon": "icon-classTable","menuname": "教材结算",
+            "menus":[
+          		{"menuid": "51","menuname": "班级发放汇总","icon": "icon-personalList","url": "__ROOT__/Book/Summary/sumClass"},
+                {"menuid": "52","menuname": "学生发放汇总","icon": "icon-personal","url": "__ROOT__/Book/Summary/sumStudent"}
+            ]
+        }
+    ]
+};
+var menuTabs = null; 
+$(function(){
+	menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="教材管理" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">教材管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">数据统计：统计分析校内各类信息。包含课程统计、教师上课统计、学籍情况统计、教室统计、选课统计、教材统计等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、教材维护:可对全校的自编、一般教材信息、折扣率进行管理。</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、自编教材维护</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据ISBN、教材名进行查询全校的自编教材，并可对自编教材进行新增、修改、删除操作；也可在此新增一般教材。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、一般教材维护</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据ISBN、教材名进行查询全校的一般教材，并可对一般教材进行修改、删除操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、教材折扣率维护</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可对当前学年、学期的教材折扣率进行初始化设定。</p>
+<br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、征订申请:学院只可查询到本学院的课程信息</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、征订申请</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">a、根据学年、学期、修课方式、课号、课名、班号、教师检索本学院在该学年学期开课计划里的相关信息（课号、课名、上课班级、预计人数、开课学院、任课老师），并可进行教材“征定申请”。
+           <br> b、若该教材已征订过，则不能重复征订。
+            <br>c、征定原则如下：
+            <br>&nbsp&nbsp（1）前7位课号相同的课允许统一征订操作，若前7位课号不相同的课，不允许统一征订。
+            <br>&nbsp&nbsp（2）上述课程（前7位相同）中，也有个别课程也可以个性化征订。
+            <br>&nbsp&nbsp（3）有些同一课号的课程可能需要征订多本教材，可点击“新增一本”来操作实现。
+            <br>&nbsp&nbsp（4）有的教材可能征订不到，需要考虑书的重订。重订前必须先由教务处删除征订信息后才可操作。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、检索征订记录</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、修课方式、课号、课名、班号、教师检索本学院在该学年学期已申请征订的教材记录，并可对征订记录进行提交申请、修改、删除操作。</p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">三、征订管理:</font></b><br>
+        <p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            1、模块授权用户（教务处）可根据学年、学期、修课方式、课号、课名、班号、征订时间进行检索查看到所有开课学院提交上来的征订申请信息。
+            <br>2、可重置选修课或状态为“暂不征订”教材的征订状态!
+            <br>3、可删除学院提交上来的教材征订申请记录。
+            <br>4、可生成征订单，并导出excel表格，方便打印。
+
+        </p>
+
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">四、教材发放:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、按征订单发放 </b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">a、根据学年、学期、课号、课名、班号、学院进行检索查看到所有的教材征订单，并可修改该教材的单价、折扣率。
+            <br>b、可对每个征订单进行添加需要发放的学生，或删除需要发放的学生，并进行统一发放。
+            <br>c、可导出发放excel记录表，方便进行打印。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、按教材号发放</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">
+            a、根据学年、学期、ISBN、教材名、班号、学院进行检索查看到所有的学生教材发放记录。
+            <br>b、可按班级、学号进行批量添加该班级的所有学生或单个学生的发放记录，也可删除某学生的发放记录。
+            <br>c、可导出excel发放表，方便打印。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、学生发放查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、ISBN、教材名、班号、学院、学号、姓名进行查询全校学生的发放记录。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、教师发放查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、学院、教师号、教师姓名进行查询教师的征订教材记录。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">五、教材结算:</font></b><br>
+            <p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">模块授权用户（教务处）可根据学年、学期、ISBN、教材名、班号、学院进行查看到全校所有已“发放”教材的学生。并可导出excel结算表。</p>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

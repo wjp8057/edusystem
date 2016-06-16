@@ -1,0 +1,176 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function yitiao(obj){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            alert('请选择一条,不能选多条');                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            alert('请选择一条要编辑的数据');                         //用户没选择行
+        }else{
+            return true;
+        }
+        return false;
+    }
+    var ClassNo='{$info.classno}';         //todo:存放 添加修读计划时候 要用到的CLASSNO
+
+    var SCHOOLNO='{$info.schoolno}';        //todo:存放 学校NO 做权限判断时候用的
+
+    $(function(){
+        //todo:修课计划表的  datgrid≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡start≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+        var xiukejihua=$('#xiuxuejihua').datagrid({
+            url:'__URL__/Classjiaoxuejihua',
+            fit:true,
+            columns:[[{field:'CLASSNO',checkbox:true},{field:'PROGRAMNO',title:'教学计划号',align:'center',width:100},
+                {field:'PROGRAMNAME',title:'教学计划名称',align:'center',width:250},
+                {field:'SCHOOLNAME',title:'制订学院',align:'center',width:100},
+                {field:'PROGRAMTYPEVALUE',title:'计划类别',align:'center',width:100},
+                {field:'REM',title:'计划备注',align:'center',width:150}
+            ]],
+            toolbar:[{
+                text:'删除选定班级修课计划',                                  //todo:删除班级的修课计划的操作
+                iconCls: 'icon-cancel',
+                handler:function(){
+
+                    var yi=yitiao(xiukejihua);
+                    if(yi){
+                        var obj={}
+                        var row3 = xiukejihua.datagrid('getSelected');                 //获得被选中的索引
+                        //todo:方法。
+                        var fangfa=function(c1){
+                            if(c1=='true'){
+                                $.messager.confirm('提示','您确定要删除吗',function(c){
+                                    if(c){
+                                        obj['programno']=row3.PROGRAMNO;
+                                        obj['classno']=row3.CLASSNO;
+                                        obj['del']='true'
+                                        var gaga=function(cc){
+                                            $.messager.alert('提示',cc)
+                                            xiukejihua.datagrid('reload')
+                                        };
+                                        ajiakesi('__URL__/deleteClassprogram/hasJson/1',obj,gaga);
+                                    }
+                                })
+                                return
+                            }
+                            $.messager.alert('提示',c1);
+                        }
+                        ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+
+                    }
+                }
+            },'-',{
+                text:'添加修读计划',
+                iconCls: 'icon-add',
+                handler:function(){
+                    var fangfa=function(c){
+                        if(c=='true'){
+                            openTabsWindows('添加修读计划','__URL__/add_program/classno/'+ClassNo+'/schoolno/'+SCHOOLNO,'',true)
+                           // tianjiaxiudu.datagrid('rejectChanges')
+                          //  Goright.datagrid('rejectChanges')
+                            return
+                        }
+                        $.messager.alert('提示',c)
+                    }
+                    ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+                }
+            },'-',{
+                text:'将选中的教学计划统一绑定到班级学生',
+                iconCls:'icon-StudentBind',
+                handler:function(){
+                    var leng=xiukejihua.datagrid('getSelections');
+                    if(leng.length==0)
+                        return $.messager.alert('提示','<font color="red">请选择要绑定的教学计划</font>')
+                    var fangfa=function(c){
+                        if(c=='true'){
+                            var obj={}
+                            obj['P']=xiukejihua.datagrid('getSelections')        //todo:获得所有选中的修课计划
+                            obj['CLASSNO']=ClassNo;                                 //todo:赋值学生信息
+                            var fangfa2=function(c){
+                                $.messager.alert('提示',c);
+                            }
+                            ajiakesi('__URL__/addProgramToStudent/hasJson/1',obj,fangfa2)
+                            return
+                        }
+                        $.messager.alert('提示',c)
+
+
+                    }
+
+                    ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+
+                }
+            },'-',{
+                text:'刷新',
+                iconCls:'icon-reload',
+                handler:function(){
+                    xiukejihua.datagrid('load')
+                }
+            },{
+                text:'导出教学计划信息',
+                iconCls:'icon-excel',
+                handler:function(){
+                    $('[name=classno_e]').val(ClassNo)
+                    $('#classexcel').submit();
+                }
+            }
+            ],onRowContextMenu:function(e,rowindex,row){
+                xiukejihua.datagrid('rejectChanges')
+                var tt=$('#xiuxuejihua');
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20
+        })
+        $('#admin_del2').bind('click',function(){
+            var obj={}
+            var row3 = xiukejihua.datagrid('getSelected');                 //获得被选中的索引
+            //todo:方法。
+            var fangfa=function(c1){
+                if(c1=='true'){
+                    $.messager.confirm('提示','您确定要删除吗',function(c){
+                        if(c){
+                            obj['programno']=row3.PROGRAMNO;
+                            obj['classno']=row3.CLASSNO;
+                            obj['del']='true'
+                            var gaga=function(cc){
+                                $.messager.alert('提示',cc)
+                                xiukejihua.datagrid('reload')
+                            };
+                            ajiakesi('__URL__/deleteClassprogram/hasJson/1',obj,gaga);
+                        }
+                    })
+                    return
+                }
+                $.messager.alert('提示',c1);
+            }
+            ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+
+        })
+        setTimeout(function(){
+            xiukejihua.datagrid('load',{CLASSNO:ClassNo})},500)
+//todo:≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡end≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+    })
+
+</script>
+<!--todo:修课计划表-->
+<body>
+    <div id="xiuxuejihua">
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_del2'>删除选定班级修课计划</div>
+    </div>
+
+    <form action="__APP__/CourseManager/Excel/class_programList" method="POST" id="classexcel">
+        <input type="hidden" name="classno_e">
+
+    </form>
+</body>
+</html>

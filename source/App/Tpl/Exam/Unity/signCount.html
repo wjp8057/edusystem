@@ -1,0 +1,76 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var _RECNO = "{$Think.request.RECNO}";
+        var _SCHOOL = "{$Think.request.SCHOOL}";
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url: '__ROOT__/Exam/Unity/signCount/hasJson/true',
+            queryParams : {RECNO:_RECNO,SCHOOL:_SCHOOL},
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            }
+        });
+
+        $("#btExp").bind("click",function(){
+            msgShow("系统提示：","<br />数据较多请耐心等待，请不要重复点击！","info");
+            $("#hiddenForm").attr("action","__ROOT__ /Exam/Unity/signExp");
+            $("#hiddenForm").submit();
+        });
+    });
+
+    function checkSex(value,row,index){
+        return value=='M' ? '男' : '女';
+    }
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'north',split:false,border:false" style="height:70px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 17pt;">统 考 报 名 汇 总 表</font></p>
+        <p align=center>
+            <b>考试名称：</b>{$note.EXAMNAME} <b>考试代码：</b>{$note.TESTCODE} <b>考试日期：</b>{$note.DATEOFEXAM}
+            <b>报名截止日期：</b>{$note.DEADLINE} <b>考试说明：</b>{$note.EXAMREM} <b>本次考试说明：</b>{$note.NOTIFICATIONNOTE}</p>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:60">学号</th>
+                <th data-options="field:'STUDENTNAME',align:'center',width:60">姓名</th>
+                <th data-options="field:'SEX',align:'center',width:60,formatter:checkSex">性别</th>
+                <th data-options="field:'NATIONALITY',align:'center',width:60">民族</th>
+                <th data-options="field:'BIRTHDAY',align:'center',width:80">出生年月</th>
+                <th data-options="field:'ID',align:'center',width:120">身份证号</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:150">学院</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:100">班级</th>
+                <th data-options="field:'ENTERYEAR',align:'center',width:60">入学年份</th>
+                <th data-options="field:'YEARS',align:'center',width:60">学制</th>
+                <th data-options="field:'SCORE',align:'center',width:60">cet4成绩</th>
+                <th data-options="field:'SCORE2',align:'center',width:60">cet3成绩</th>
+                <th data-options="field:'SCORE3',align:'center',width:60">A级成绩</th>
+                <th data-options="field:'SCORE4',align:'center',width:60">B级成绩</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+
+<div id="toobar">
+    <a href="#" id="btExp" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出(最大5000条)</a>
+    <span>&nbsp;&nbsp;&nbsp;&nbsp;交费报名人数：{$roundup.APPLIERS}，共计收费：{$roundup.MONEY}元。</span>
+</div>
+
+
+<form id="hiddenForm" method="post" name="hiddenForm" target="hiddenFrame">
+    <input type="hidden" name="RECNO" value="{$Think.request.RECNO}">
+    <input type="hidden" name="SCHOOL" value="{$Think.request.SCHOOL}">
+</form>
+<iframe name="hiddenFrame" id="hiddenFrame" style="display:none;width:0;height:0"></iframe>
+</body>
+
+</html>
+

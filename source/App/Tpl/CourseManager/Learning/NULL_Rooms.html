@@ -1,0 +1,188 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var chuang={
+            modal:true,
+            fit:true,
+            minimizable:false,
+            maximizable:false,
+            closed:true
+        }
+        var chuang2={
+            modal:true,
+            width:450,
+            height:400,
+            minimizable:false,
+            maximizable:false,
+            closed:true
+        }
+        var obj2=null;                                   //todo:存放页面信息的对象
+        var wd=$('#wd').window(chuang)                  //window弹窗之    显示某个专业的培养计划的窗口
+        var wd2=$('#wd2').window(chuang)                //window弹窗之    超级表格的窗口
+        var wd3=$('#wd3').window(chuang)
+        $('#tijiao').bind('click',function(){
+
+                    var obj={}
+                    var inputList=$('#TB1 input')
+                    var selectList=$("#TB1 select")
+                    obj['arr']={}
+                    for(var i=0;i<inputList.length;i++){
+                        obj['arr'][inputList[i].name]=inputList[i].value;
+                    }
+                    for(var i=0;i<selectList.length;i++){
+                        obj['arr'][selectList[i].name]=selectList[i].value;
+                    }
+                    obj['arr']['ORDER']=$('input[name="ORDER"]:checked').val();
+
+                    obj['page']=1
+                    $('#page1223').val(1)
+                    obj2=obj;
+
+                    ajiakesi('__URL__/selectshiyong',obj,hanshu)
+                    wd2.window({closed:false})
+                })
+
+        var hanshu=function(c){
+            eval("var one="+c)
+            $('#content').html(one['str']);
+            $('#pageyeah').html(one['page']);
+            $('#page1223').val(one['nowpage'])
+            $('#IPage').val(one['nowpage'])
+            $('#total').html(one['total'])
+
+        }
+
+
+
+
+
+        //todo:上一页
+        $('#prev').bind('click',function(){
+
+            obj2.page=parseInt($('#page1223').val())-1
+
+            ajiakesi('__URL__/selectshiyong',obj2,hanshu)
+        })
+
+        //todo:下一页
+        $('#next').bind('click',function(){
+
+            obj2.page=parseInt($('#page1223').val())+1
+
+            ajiakesi('__URL__/selectshiyong',obj2,hanshu)
+        })
+
+
+        //todo:点击某个教室号 弹出该教室的课程列表
+
+    })
+    function tanchu(obj){
+        var obj2={}
+        obj2['roomno']=obj.innerHTML;
+        //  obj2['roomname']=obj
+        ajiakesi('__URL__/kecheng',obj2,function(c){
+
+            $('#wd3').html(c);
+            $('#wd3').window({
+                closed:false
+            })
+        })
+
+
+
+
+    }
+    //todo:ajax请求的方法
+    function ajiakesi(url,data,func){
+        $.ajax({
+            type:'post',
+            url:url,
+            data:data,
+            error:function(a,b,c){
+                $.messager.alert('系统提示','服务器异常,请求失效')
+            },
+            success:function(c){
+                func(c);
+            }
+        })
+    }
+
+
+    function closedWD3(){
+        $('#wd3').window({
+            closed:true
+        })
+    }
+</script>
+<!--todo:课程表的弹窗-->
+<div id="wd3" title="">
+
+</div>
+<div id="wd2" title="教室使用情况查询">
+    <include file="shiyong2" />
+</div>
+<body style="background-color: #fff">
+
+<div id="wd" title="课程列表">
+</div>
+<p align="center"><font face="隶书" size="4">请提供检索条件</font></p>
+
+<div>
+
+    <table border="1" cellpadding="0" cellspacing="0" id="TB1" width="620"  align="center">
+        <tr>
+            <td width="80" align="right"><font size="2">教室号：</font></td>
+            <td width="148"><input type="text" size="10" name="ROOMNO" value="%"></td>
+            <td width="112" align="right"><font size="2">教室名：</font></td>
+            <td colspan="3" width="266"><input type="text" size="10" name="JSN" value="%"></td>
+        </tr>
+        <tr>
+            <td width="80" align="right"><font size="2">所处校区：</font></td>
+            <td width="148"><select name="AREA"><volist name="areas" id="v"><option value="%">全部</option><option value="{$v.NAME}">{$v.VALUE}</option></volist></select></td>
+            <td width="80" align="right"><font size="2">单双周：</font></td>
+            <td width="526" colspan="5"><select size="1" name="OEW" style="font-size: 10pt">
+                <option selected value="B">单双周</option>
+                <option value="O">单周</option>
+                <option value="E">双周</option>
+            </select>
+            </td>
+
+        </tr>
+        <tr>
+            <td width="80" align="right"><font size="2">学年：</font></td>
+            <td width="148"><input type="text" size="4" name="YEAR" value="2013"></td>
+            <td width="112" align="right"><font size="2">学期：</font></td>
+            <td colspan="3" width="266"><input type="text" size="2" name="TERM" value="1"></td>
+        </tr>
+        <tr>
+            <td width="80" align="right"><font size="2">空闲时段：</font></td>
+            <td width="148"><select name="TIME"><option value="%">全部</option><volist name="timesectors" id="v"><option value="{$v.NAME}">{$v.VALUE}</option></volist></select></td>
+            <td width="112" align="right"><font size="2">空闲日期：</font></td>
+            <td colspan="3" width="266"><select size="1" style="font-size: 10pt" name="DAY">
+                <option value=":MON">星期一</option>
+                <option value=":TUE">星期二</option>
+                <option value=":WES">星期三</option>
+                <option value=":THU">星期四</option>
+                <option value=":FRI">星期五</option>
+                <option value=":SAT">星期六</option>
+                <option value=":SUN">星期日</option>
+                <option selected value="-1">不设定</option>
+            </select></td>
+        </tr>
+
+    </table>
+
+</div>
+<p align="center">
+    <input type="button" value="提交" id="tijiao"></button>
+    <inpu type="hidden" id="page1223" value=0>
+
+</p>
+
+<p>单双周只对空闲时段和空闲日期设定的情况起作用，例如，空闲时段设定为第1，2节，空闲日期不设定，
+    单双周设定为单周，则检索结果为所有单周1，2节每天都空闲的教室。如果空闲日期进一步设定为星期一，
+    则检索结果是所有星期一单周第1，2节空闲的教室。空闲时段为全部等于不设定。</p>
+</body>
+
+</html>

@@ -1,0 +1,176 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+        $("#SCHOOL").val("{$theacher.SCHOOL}");
+
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("clearSelections");
+                $(this).datagrid("unselectAll");
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                datagrid.datagrid('unselectAll')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        //搜索事件
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__ /CoursePlan/TranStopCourses/makeup/hasJson/true";
+            datagrid.datagrid("load", {YEAR:$.trim($("#YEAR").val()),TERM:$.trim($("#TERM").val()),COURSENO:$.trim($("#COURSENO").val()),SCHOOL:$.trim($("#SCHOOL").val()),TEACHERNAME:$.trim($("#TEACHERNAME").val())});
+        });
+
+        function eedit(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一行数据进行编辑！","error");
+                return;
+            }else if("{$theacher.SCHOOL}"!=rows[0].SCHOOL   && "{$theacher.SCHOOL}"!="A1"){
+                msgShow("系统提示：","<br />你不能修改其他学院的补课信息！","error");
+                return;
+            }
+            $("#wCOURSENO").html($.trim(rows[0].COURSENO));
+            $("#wCOURSENAME").html($.trim(rows[0].COURSENAME));
+            $("#wTIME").html($.trim(rows[0].TIME));
+            $("#wADDTION").val($.trim(rows[0].ADDTION));
+            $("#wRECNO").val($.trim(rows[0].RECNO));
+
+            $("#editForms").css("display","");
+            $("#editForms").window("open");
+        }
+        //编辑补课记录
+        $("#btEdit").bind("click",eedit);
+        $('#admin_edit').bind('click',eedit)
+
+
+
+
+
+        $("#efCancel").bind("click",function(){
+            $("#editForms").window("close");
+        });
+        $("#efOK").bind("click",function(){
+            var row = {ADDTION:$("#wADDTION").val(),RECNO:$("#wRECNO").val()};
+            $.post("__ROOT__ /CoursePlan/TranStopCourses/makeupUpdate/hasJson/true", row, function(rsp) {
+                if(rsp){
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                    if(rsp.type=="info"){
+                        $("#editForms").window("close");
+                        datagrid.datagrid("reload");
+                    }
+                }
+            },"JSON");
+        });
+
+        function ddel(){
+            if("{$theacher.SCHOOL}"!="A1"){
+                msgShow("系统提示：","<br />您不是教务处管理人员，无法删除调课记录！","error");
+                return;
+            }
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+            });
+            $.messager.confirm('系统消息：','你真的确定要删除选中的项？',function(r){
+                if (r){
+                    $.post("__ROOT__ /CoursePlan/TranStopCourses/makeupDelete/hasJson/true", {ITEMS:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+        //删除记录
+        $("#btDelete").bind("click",ddel);
+        $('#admin_del').bind('click',ddel)
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+   <!-- <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" cellspacing="0" cellpadding="0" >
+            <tr><th align="left">
+                学年：<input type="text" id="YEAR" size="10" >&nbsp;&nbsp;
+                学期：<input type="text" id="TERM" size="2" >&nbsp;&nbsp;
+                课号：<input type="text" id="COURSENO" size="10"  value="%">&nbsp;&nbsp;
+                学院：<Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" file="school/schoolOptions.sql" />&nbsp;&nbsp;
+                教师姓名：<input type="text" id="TEACHERNAME" size="10"  value="%">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></th></tr>
+        </table>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" idField="RECNO"  >
+            <thead>
+            <tr><th data-options="field:'COURSENO',align:'center',width:100" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:200">课名</th>
+                <th data-options="field:'TEACHERNAME',align:'center',width:60">教师姓名</th>
+                <th data-options="field:'SCHOOLSNAME',align:'center',width:100">开课学院</th>
+                <th data-options="field:'TIME',align:'center',width:200">上课时间</th>
+                <th data-options="field:'ADDTION',align:'center',width:140">补课时间</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    学年：<input type="text" id="YEAR" size="10" >&nbsp;&nbsp;
+    学期：<input type="text" id="TERM" size="2" >&nbsp;&nbsp;
+    课号：<input type="text" id="COURSENO" size="10"  value="%">&nbsp;&nbsp;
+    学院：<Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" file="school/schoolOptions.sql" />&nbsp;&nbsp;
+    教师姓名：<input type="text" id="TEACHERNAME" size="10"  value="%">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#" id="btEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑补课记录</a>
+    <a href="#" id="btDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true">删除调停课信息</a>
+</div>
+
+<!-- 编辑界面 -->
+<div id="editForms" class="easyui-window" title="编辑补课记录" style="width:520px;height:160px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3 border="0" cellspacing="0" width="100%">
+                <tr><th align="right">课号：</th><td><div id="wCOURSENO" /></td>
+                    <th align="right">课名：</th><td><div id="wCOURSENAME" /></td></tr>
+                <tr><th align="right">上课时间：</th><td><div id="wTIME" /></td>
+                    <th align="right">补课时间：</th><td><input size="30" id="wADDTION" /></td></tr>
+            </table>
+            <input type="hidden" id="wRECNO" />
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="efOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="efCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑补课记录</div>
+    <div id='admin_del'>删除调停课信息</div>
+</div>
+</body>
+</html>
+

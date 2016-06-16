@@ -1,0 +1,154 @@
+<form action="#" id="addForm">
+	<table border="0" align="center" width="90%" style="border-collapse: collapse;">
+		<tr>
+			<th align="right" width="12%">ISBN：</th>
+			<td align="left" width="38%"><input name="isbn" class="checkNull" maxlength="50"   size="20"> <font color="red">*</font></td>
+			<th align="right" width="12%">教材名：</th>
+			<td align="left"><input name="bookname" class="checkNull" maxlength="100"   size="20"> <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<th align="right">作者：</th>
+			<td align="left"><input name="author" class="checkNull" maxlength="50"   size="20"> <font color="red">*</font></td>
+			<th align="right">出版社：</th>
+			<td align="left">
+			<input name="press" id="press"   class="easyui-combobox" data-options="valueField:'id',textField:'name',url:'__URL__/ajaxPress/',mode:'remote'"/>
+			 <font color="red" id="press_html">*</font></td>
+		</tr>
+		<tr>
+			<th align="right">出版年份：</th>
+			<td align="left"><input name="pubtime" size="6"   type="text" maxlength="4"></td>
+			<th align="right">教材性质：</th>
+			<td align="left">
+				<select name="booknature" class="easyui-combobox" data-options="editable:false">
+				    <option value="本科">本科</option>
+				    <option value="高职高专">高职高专</option>
+				    <option value="其他">其他</option>
+				    <option value="自编">自编</option>
+			    </select>
+			    <font color="red" id="booknature">*</font>
+			</td>
+		</tr>
+		<tr>
+			<th align="right">折扣率：</th>
+			<td align="left"><input name="dis_rate" value="0.795" class="checkNull price" maxlength="10" size="20"> <font color="red">*</font></td>
+			<th align="right">状态：</th>
+			<td align="left">
+			<input type="radio" name="status" value="0" checked="checked" style="vertical-align:sub;"> <span>启用</span>
+			<input type="radio" name="status" value="1" style="vertical-align:sub;"> <span>禁用</span>
+			</td>
+		</tr>
+		<tr height="20">
+			<td align="center" colspan="4"><a href="javascript:void(0)" id="savebut_1">新&nbsp;增</a></td>
+		</tr>
+	</table>
+</form>
+<script type="text/javascript">
+$(function(){
+	$(".checkNull").blur(function(){
+		if($(this).attr("name")=="isbn"){
+			if(ajaxCheck($(this))){
+				if($(this).val().length < 5){
+					$(this).next().html("格式不规范");
+					return;
+				}
+			}
+		}else{
+			check($(this),reg,"请输入数值类型");
+		}
+	});
+	
+	//提交按钮
+    $('#savebut_1').linkbutton({iconCls: 'icon-save'});
+	$('#savebut_1').click(function(){
+		var bool=true;
+		//验证非空字段
+		$(".checkNull").each(function(){
+			if($(this).attr("name")=="isbn"){
+				if(!ajaxCheck($(this))){
+					bool=false;
+				}else{
+					if($(this).val().length < 5){
+						$(this).next().html("格式不规范");
+						bool=false;
+					}
+				}
+			}else{
+				if(!check($(this),reg,"请输入数值类型"))bool=false;
+			}
+		});
+		//验证出版社是否选择
+		if($.trim($("#addForm [name='press']").val())==""){
+			$("#press_html").html("请选择出版社");
+			bool=false;
+		}else{
+            if(!/^\d+$/.test($.trim($("#addForm [name='press']").val()))){
+                $("#press_html").html("该出版社不存在，请联系相关管理人员添加到库中之后再进行申请");
+                bool=false;
+            }else $("#press_html").html("*");
+        }
+		//开始保存教材信息
+		if(bool){
+			//将信息封装到数组
+			var ary={isbn:$.trim($("#addForm [name='isbn']").val()),bookname:$.trim($("#addForm [name='bookname']").val()),
+					author:$.trim($("#addForm [name='author']").val()),press:$.trim($("#addForm [name='press']").val()),
+					pubtime:$.trim($("#addForm [name='pubtime']").val()),booknature:$.trim($("#addForm [name='booknature']").val()),
+					dis_rate:$.trim($("#addForm [name='dis_rate']").val()),status:$.trim($("#addForm [name='status']:checked").val())};
+			//Ajax方式提交数据
+			$.ajax({
+                url:"__URL__/updateBook/hasJson/1",
+                type:"POST",
+                data:ary,
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("提示","新增教材成功！","info",function(){
+                    		dat.datagrid('reload');
+                    		$("#press").combobox('reload');
+                    		$("#addForm")[0].reset();
+                    	});
+                    }else{
+						$.messager.alert("提示","数据提交失败！请检查您提交的数据是否合法");
+					}
+                }
+            });
+		}
+	});
+});
+//ajax验证
+function ajaxCheck(ele){
+	var bool=true;
+	if($.trim(ele.val())!=""){
+		$.ajax({
+            url:"__URL__/getIsbnCount/",
+            async:false,
+            type:"POST",
+            data:{VALUE:$.trim(ele.val())},
+            success: function(data){
+                if(data > 0){
+                	ele.next().html("该教材已存在");
+                	bool=false;
+                }else ele.next().html("*");
+            }
+        });
+	}else{
+		ele.next().html("不能为空");bool=false;
+	}
+	return bool;
+}
+//input验证
+function check(ele,reg,str){
+	var value=$.trim(ele.val());
+	if(value!=""){
+		if(ele.hasClass("price")){
+			if(!reg.test(value)){
+				ele.next().html(str);
+				return false;
+			}
+		}
+		ele.next().html("*");
+	}else{
+		ele.next().html("不能为空");
+		return false;
+	}
+	return true;
+}
+</script>

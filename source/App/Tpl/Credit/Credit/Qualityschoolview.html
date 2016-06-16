@@ -1,0 +1,171 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script src="__ROOT__/thirdparty/jquery/js/modules/credit.js"></script>
+<script>
+    var schoolname='{$schoolname.SCHOOL}'
+    var school_name='{$schoolname2.NAME}';       //todo:学院名称
+
+$(function(){
+    var username='{$schoolname.USERNAME}';
+    var apply_list=$('#apply_list').window(new wind(0,0,false,false,false,true,true));
+
+    $('#edit').bind('click',function(){
+        var row=$('#apply_dat').datagrid('getSelected')
+        $('#apply_dat').datagrid('beginEdit',$('#apply_dat').datagrid('getRowIndex',row))
+    })
+    $('#apply_dat').datagrid({
+        onDblClickRow:function(rowIndex, rowData){
+            $('#apply_dat').datagrid('beginEdit',rowIndex);
+        }});
+    //-- 保存 --//
+    $('#save').bind('click',function(){
+        saveChangeSingle('apply_dat','__URL__/updateSinge');
+    });
+
+    //-- 搜索 --//
+    function ssou(){
+        var zt=$('[name=zt]').val();
+        var v1,v2,v3;
+        switch(zt){
+            case '%':v1=1,v2=2,v3=3;break;//全部
+            case '1':v1=1,v2=1,v3=1;break;//通过
+            case '0':v1=3,v2=3,v3=3;break;//未审核
+        }
+        var sn = schoolname;
+        if($.trim(schoolname) == 'A1') sn = '%';
+        $('#apply_dat').datagrid('load',{'year':parent.$('#YEAR').val(),'term':parent.$('#TERM').val(),'studentno':$('[name=search_studentno]').val(),
+            'studentname':$('[name=search_name]').val(),'classno':$('[name=search_classno]').val(),'projectname':$('[name=search_projectname]').val(),
+            'cone':3,'ctwo':3,'v1':v1,'v2':v2,'v3':v3,'schoolname':sn});
+    }
+    $('#ss').click(ssou);
+
+});
+
+
+    //todo:通过不通过方法
+    function doProcess(num,id,deanstatus){
+        if('{$is_time}'=='false'){
+            return $.messager.alert('提示','现在不在提交的时间范围内,无法操作')
+        }
+//        if(num=='2'){
+//            $.messager.confirm('提示','不通过将直接删除该数据！确定要删除吗？',function(c){
+//                if(c){
+//                    $.post('__URL__/updateSinge/hasJson/1',{'id':id},
+//                        function(data){
+//                            $.messager.alert('提示',data);
+//                            $('#apply_dat').datagrid('reload');
+//                        });
+//                }
+//            })
+//            return;
+//        }
+        $.messager.confirm('提示','您要执行本次操作吗',function(rs){
+            if(rs){
+                $.post('__URL__/Qualityschoolview/tag/passsingle',
+                    {'schoolview':num,'deanview':deanstatus,'id':id},
+                    function(data){
+                        if(data == 'success'){
+                            $.messager.alert('提示','操作成功！')
+                            $('#apply_dat').datagrid('reload');
+                        }else{
+                            $.messager.alert('提示','操作失败了！')
+                        }
+                    });
+            }
+        });
+
+    }
+
+</script>
+
+<style>
+    #apply_info td{border:1px #95B8E7 solid;
+    }
+    #aplly_Details td{border:1px #95B8E7 solid;height:20px
+    }
+    #apply_info input{height:23px;vertical-align:middle;}
+    .bt{height:35px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+
+</style>
+<body >
+
+<div id="cc" class="easyui-layout" data-options="fit:true,border:false">
+    <div id="tdemo">
+        <b>学号:</b>
+        <input type="text" name="search_studentno" size="10" value="%">
+        &nbsp
+        <b>姓名:</b>
+        <input type="text" name="search_name" size="10" value="%">
+        &nbsp
+        <b>班级号:</b>
+        <input type="text" name="search_classno" size="10" value="%">
+        &nbsp
+        <b>项目名称:</b>
+        <input type="text" name="search_projectname" size="10" value="%">
+        &nbsp;&nbsp;&nbsp;
+        <b>审核状态:</b>
+        <select name="zt" class="easyui-combobox">
+            <option value="%">全部</option>
+            <option value="1">通过</option>
+            <option value="0">未审核</option>
+        </select>
+
+        &nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" id="ss" class="easyui-linkbutton" iconCls="icon-search" >搜索</a>
+        &nbsp;
+        <a href="javascript:void(0)" id="edit" iconCls="icon-edit" class="easyui-linkbutton" plain="true">编辑</a>
+        &nbsp;
+        <a href="javascript:void(0)" id="save" iconCls="icon-save" class="easyui-linkbutton" plain="true">保存</a>
+
+    </div>
+    <div data-options="region:'center',title:'',split:false,border:false" style="padding:0px;background:#eee;">
+        <div id="status_two_wd" class="easyui-panel"
+             data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+            <table id="apply_dat"  class="easyui-datagrid"
+                   data-options="url:'__URL__/Qualityschoolview/tag/getlist',fit:true,pagination:true,singleSelect:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th align="center" data-options="field:'Studentno',width:100">学号</th>
+                    <th align="center" data-options="field:'NAME',width:100">姓名</th>
+                    <th align="center" data-options="field:'projectname',width:200,editor:{type:'text'}">项目</th>
+                    <th align="center" data-options="field:'credit',width:100,align:'center',editor:{type:'text'}">学分</th>
+                    <th align="center" data-options="field:'certficatetime',width:100,editor:{type:'datebox'}">证书时间</th>
+                    <th align="center" data-options="field:'firmno',width:90">材料编号</th>
+                    <th align="center" data-options="field:'createdate',width:90">申请时间</th>
+                    <th align="center" data-options="field:'submitter',width:90">提交人</th>
+                    <th align="center" data-options="field:'schoolview',width:100,
+                            formatter:function(a,b,c){
+                           // alert(b.schoolview)
+                            if(b.schoolview=='1'){
+                                return '已通过'
+                            }else if(b.schoolview=='2'){
+                                return '不通过'
+                            }
+                            return '<span onclick='+'doProcess(1,'+b.applydate_id+',3)'+'><a href='+'javascript:void(0)'+'><b>通过</b></a></span> | <span onclick='+'doProcess(2,'+b.applydate_id+',3)'+'><a href='+'javascript:void(0)'+'><b>不通过</b></a></span>'}">院系状态</th>
+                    <th align="center" data-options="field:'deanview',width:100,formatter:function(a,b,c){
+
+                                if(a=='3'){
+                                    return '待审核'
+                                }else if(a=='0'){
+                                    return '待提交'
+                                }else if(a=='1'){
+                                    return '通过';
+                                }else if(a=='2'){
+                                    return '不通过';
+                                }
+                            }">终审状态</th>
+                    <th align="center" data-options="field:'ccc',width:100,formatter:function(a,b,c){return '<span onclick='+'lookDetail(&quot;__URL__&quot;,'+b.applydate_id+')'+'><a href='+'javascript:void(0)'+'><b>查看</b></a></span>' }">查看</th>
+
+                </tr>
+
+                </thead>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        //数据预处理
+        {
+            var year = $('#year');
+            year.validatebox({required: true, validType: 'equalLength[4]'});
+            var term = $('#term');
+            term.validatebox({required: true, validType: 'equalLength[1]'});
+            var roomno = $('#roomno');
+            roomno.validatebox({required: true, validType: 'maxLength[9]'});
+
+            var day = $('#day');
+            day.combobox({required: true, editable:false, url: '{$ROOT}/all/option/weekday', valueField: 'day', textField: 'name',panelHeight:'auto'});
+            var time= $('#time');
+            time.combobox({required: true, editable:false, url: '{$ROOT}/all/option/timesection', valueField: 'time', textField: 'name'});
+            var purpose = $('#purpose');
+            purpose.validatebox({required: true, validType: 'maxLength[25]'});
+        }
+        $("#update").click(function() {
+            var weekstring="";
+            $("input[id^='week']").each(function () {
+                weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
+            });
+            var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
+            if($("#myForm").form('validate')&&weeks>0){
+                var data=new Object();
+                data["year"]=year.val();
+                data["term"]=term.val();
+                data['roomno']=roomno.val();
+                data['day']=day.combobox('getValue');
+                data['time']=time.combobox('getValue');
+                data['purpose']=purpose.val();
+                data['weeks']=weeks;
+                $.post('{$ROOT}/base/room/roomapply',data,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容及周次！','error');
+            }
+        });
+        //当教室填写完成后。
+        roomno.blur(function(){
+            $.post('{$ROOT}/base/room/getroomname',{roomno:roomno.val()},function(result){
+                if (result.status==1){
+                    $('#roomname').text(result.info);
+                }
+            },'json');
+        });
+
+        var queryString=getQueryString('roomno');
+        if(queryString!=null){
+            roomno.val(queryString);
+            roomno.blur();
+        }
+        $("#myForm").form('validate');
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">教室借用申请单</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="year">学年</label></th>
+            <td><input id="year" value="{$YEARTERM.year}" size="4"/></td>
+            <th><label for="term">学期</label></th>
+            <td><input id="term" value="{$YEARTERM.term}" size="1"/></td>
+        </tr>
+        <tr>
+            <th><label for="roomno">教室号</label></th>
+            <td><input id="roomno" /></td>
+            <th>教室名</th>
+            <td><label id="roomname"></label></td>
+        </tr>
+        <tr>
+            <th><label for="day">星期</label></th>
+            <td><input id="day" /></td>
+            <th><label for="time">节次</label></th>
+            <td><input id="time" /></td>
+        </tr>
+        <tr>
+            <th>周次</th>
+            <td colspan="3">
+                <label for="week1">1</label> <input type="checkbox" id="week1">
+                <label for="week2">2</label> <input type="checkbox" id="week2">
+                <label for="week3">3</label> <input type="checkbox" id="week3">
+                <label for="week4">4</label> <input type="checkbox" id="week4">
+                <label for="week5">5</label> <input type="checkbox" id="week5">
+                <label for="week6">6</label> <input type="checkbox" id="week6">
+                <label for="week7">7</label> <input type="checkbox" id="week7">
+                <label for="week8">8</label> <input type="checkbox" id="week8">
+                <label for="week9">9</label> <input type="checkbox" id="week9">
+                <label for="week10">10</label> <input type="checkbox" id="week10">
+                <label for="week11">11</label> <input type="checkbox" id="week11">
+                <label for="week12">12</label> <input type="checkbox" id="week12">
+                <label for="week13">13</label> <input type="checkbox" id="week13">
+                <label for="week14">14</label> <input type="checkbox" id="week14">
+                <label for="week15">15</label> <input type="checkbox" id="week15">
+                <label for="week16">16</label> <input type="checkbox" id="week16">
+                <label for="week17">17</label> <input type="checkbox" id="week17">
+                <label for="week18">18</label> <input type="checkbox" id="week18">
+                <label for="week19">19</label> <input type="checkbox" id="week19">
+                <label for="week20">20</label> <input type="checkbox" id="week20">
+            </td>
+        </tr>
+        <tr>
+            <th><label for="purpose">用途</label></th>
+            <td colspan="3" ><input id="purpose" size="60"/>(不超过25字）</td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="update">提交申请</a>
+    </div>
+</div>

@@ -1,0 +1,152 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var e_courseno=''
+    $(function(){
+
+        $('#demoHTML').datagrid({ onLoadSuccess:function(data){
+
+            $('#RS').html(data.total)
+        }})
+        //todo:课程情况的窗口
+      //  var wd3 = $('#wd3').window({fit:true,maximizable:false,minimizable:false,closed:true,modal:true})
+        var arr=[];
+        var dat=$('#daaa').datagrid({
+        fit:true,
+        singleSelect:true,
+        pagination:true,
+        pageList:[10,20,30,40],
+        pageSize:20,
+        columns:[[
+            {field:'kh',title:'课号',width:80,align:'center'},
+            {field:'km',title:'课名',width:100,align:'center'},
+            {field:'xf',title:'学分',width:80,align:'center'},
+            {field:'zxs',title:'周学时',width:80,align:'center'},
+            {field:'zsy',title:'周实验',width:150,align:'center'},
+            {field:'xk',title:'修课',width:80,align:'center'},
+            {field:'kh2',title:'考核',width:80,align:'center'},
+            {field:'class',title:'班级',width:150,align:'center'},
+            {field:'kkxy',title:'开课学院',width:80,align:'center'}
+        ]],
+        toolbar:[{
+            text:'查看课程情况',
+            iconCls:'icon-search',
+            handler: function(){
+                    var obj={},obj2={};
+                    var row=dat.datagrid('getSelected');
+                if(row==null){
+                    return $.messager.alert('提示','您没有选择要查看的数据')
+                }
+
+                e_courseno=row.kh
+                obj[':YEAR']='{$year}';obj[':TERM']='{$term}';obj[':COURSENO']=row.kh
+                $('#demoHTML').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                $('#demoHTML').datagrid('load',{'Sqlpath':{'count':'Userinfo/Six_courseSituation_count.SQL','select':'Userinfo/Six_courseSituation_select.SQL'},'bind':obj})
+
+                    obj2['year']='{$year}';obj2['term']='{$term}';obj2['courseno']=row.kh;
+                    ajiakesi('__URL__/teachercourse2',obj2,function(c){
+                       var one=eval(c);
+                      var str='<center>课号：<SPAN STYLE="font-size=10pt" datasrc="#dsoCOURSE" datafld=COURSENOGROUP id="tone">'+one['COURSENOGROUP']+'</SPAN>；课名：<SPAN STYLE="font-size=10pt" datasrc="#dsoCOURSE" datafld=COURSENAME id="ttwo">'+one['COURSENAME']+'</SPAN>；学分：<SPAN STYLE="font-size=10pt" datasrc="#dsoCOURSE" datafld=CREDITS id="tthree">'+one['CREDITS']+'</SPAN>；<a datasrc="#dsoCOURSE" datafld=SYLLABUS target="_blank">教学大纲</a>；开课学院:<SPAN STYLE="font-size=10pt" datasrc="#dsoCOURSE" datafld=SCHOOLNAME>'+one['SCHOOLNAME']+'</SPAN>；选课人数<LABEL id=RS>;</LABEL><LABEL id=STUDENTNOS>'+one['TASK']+'</LABEL><span id="tfour">教师:'+one['TEACHERNAME']+'</span></center>'
+
+
+                        $('#daaa').css('display','none')
+                        $('#title').html(str);
+                    })
+                $('#wd3').panel({
+                    closed:false
+                })
+                $('#wd2').panel({
+                    closed:true
+                })
+
+            }
+        },{
+            text:'查看教师周课表',
+            iconCls:'icon-search',
+            handler:function(){
+                open('__URL__/teacherWeekCourse/teacherno/{$teacherno}/year/{$year}/term/{$term}');
+            }
+        }],
+
+        view: detailview,
+        detailFormatter: function(rowIndex, rowData){
+            arr[rowData.row]=rowData;
+            return "<div id=a"+rowData.row+" style='width:500px;height:91px'>"+rowData.row+"</div>"
+        },
+        onExpandRow:function(index,row){
+           $('#a'+row.row).html('<table width="500" border="0"><tr><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">班级</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['class']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">教师</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['js']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">备注</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['rem']+'</font></td></tr><tr id=SLAVE><td  align="center" bgcolor="#E0ECFF" nowrap ><font size="2">课程安排</font></td><td align="left" colspan="12"><font size="2">'+arr[row.row]['kcap']+'</font></td></tr></table>')
+        }
+    });
+        setTimeout(function(){ dat.datagrid('options').url='__URL__/teachercourse/hasJson/1';
+            var obj={}
+            obj['year']='{$year}';obj['term']='{$term}';obj['teacherno']='{$teacherno}';
+            dat.datagrid('load',obj)},200)
+
+    })
+
+</script>
+
+<body>
+<form action="__APP__/CourseManager/Excel/TeacherCourse_Excel" method="POST" id="excel">
+    <input type="hidden" value="{$year}" name="e_year">
+    <input type="hidden" value="{$term}" name="e_term">
+    <input type="hidden" value="{$courseno}" name="e_courseno">
+
+    <input type="hidden" value="" name="e_teachername">
+    <input type="hidden" value="" name="e_coursename">
+    <input type="hidden" value="" name="e_credit">
+</form>
+<div id="wd2" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:false,fit:true,closed:false,border:false,
+                collapsible:false,minimizable:false,maximizable:false">
+<div id="daaa" >
+</div>
+</div>
+<!--todo:课程情况的datagrid-->
+<div id="wd3" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:false,fit:true,closed:true,border:false,
+                collapsible:false,minimizable:false,maximizable:false">
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',title:'',split:false,border:false" style="height:30px;">
+            <span id="title"></span>
+        </div>
+        <div data-options="region:'center',title:'',split:false,border:false" style="padding:0px;background:#eee;">
+            <table id="demoHTML" class="easyui-datagrid" data-options="pagination:true,pageList:[20,50,100,200],pageSize:20,fit:true,fitColumns:true,singleSelect:true,toolbar:
+            [{text:'导出Excel',
+              iconCls:'icon-excel',
+              handler:function(){
+                    $('[name=e_coursename]').val($('#ttwo').html())
+                    $('[name=e_teachername]').val($('#tfour').html())
+                    $('[name=e_credit]').val($('#tthree').html())
+                    $('[name=e_courseno]').val(e_courseno)
+
+                    $('[name=e_classname]').val($('#demoHTML').datagrid('getRows')[($('#demoHTML').datagrid('getRows').length-1)].studentclass)
+                    $('#excel').submit();
+                }
+            },
+            {
+                text:'关闭',
+                iconCls:'icon-stop',
+                handler:function(){
+                    $('#wd2').panel({closed:false});
+                    $('#wd3').panel({closed:true});
+                }
+            }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'studentno',width:100,align:'center'">学号</th>
+                    <th data-options="field:'studentname',width:100,align:'center'">姓名</th>
+                    <th data-options="field:'tkfs',width:100,align:'center'">听课方式</th>
+                    <th data-options="field:'cx',width:100,align:'center'">重修</th>
+                    <th data-options="field:'coursetype',width:100,align:'center'">修课方式</th>
+                    <th data-options="field:'kh',width:100,align:'center'">考核</th>
+                    <th data-options="field:'studentclass',width:100,align:'center'">学生班级</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

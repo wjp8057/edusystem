@@ -1,0 +1,154 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+.cls{color:#CCC;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div class="query" data-options="region:'north',split:false,border:false" style="background:#f2f2f2;overflow:hidden;padding-bottom: 2px;height:50px">
+			<div>
+			   <label>学年：</label><input class="isNotNull" value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input class="isNotNull" value="{$yearTerm.TERM}" name="TERM" size="2">
+			    <label>学生所在学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">全部</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <label>总旷课时数：</label>在<input name="STARTDATA" value="0" size="2" max="3">和
+			   <input name="ENDDATA" value="50" size="2" max="3">之间（迟到、早退每三节折合一节旷课）
+                <label>该学期周数：</label><input value="17" name="WEEK" size="2">
+			   <br/>
+                <a href="javascript:void(0)" id="statis_but1" style="margin-left: 20px;">缺勤统计</a>
+			   <a href="javascript:void(0)" id="statis_but2" style="margin-left: 20px;">缺勤超过1/3的课程学生名单</a>
+			</div>
+    </div>
+	<div data-options="region:'center',border:false" style="background:#eee;">
+	    <table id="content" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:100" >学号</th>
+                <th data-options="field:'STUDENTNAME',align:'center',width:100">姓名</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:150">班级</th>
+                <th data-options="field:'SUM',align:'center',width:30">总旷课学时</th>
+                <th data-options="field:'SCHOOLSNAME',align:'center',width:120">所在学院</th></tr>
+            </thead>
+        </table>
+        
+        <table id="content_2" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:40" >学号</th>
+                <th data-options="field:'STUDENTNAME',align:'center',width:30">姓名</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:40">班级</th>
+                <th data-options="field:'SCHOOLSNAME',align:'center',width:100">所在学院</th>
+                <th data-options="field:'COURSENAME',align:'center',width:100">课程名称</th>
+                <th data-options="field:'WEEKHOURS',align:'center',width:30">每周总时数</th>
+                <th data-options="field:'HOURS',align:'center',width:30">课程总时数</th>
+                <th data-options="field:'SUM',align:'center',width:30">旷课总学时</th></tr>
+            </thead>
+        </table>
+	</div>
+</div>
+</body>
+<script type="text/javascript">
+$(function(){
+    //缺勤统计
+    var dat=$('#content').datagrid({});
+    
+    //缺勤超过1/3的课程学生名单
+    var dat2=$('#content_2').datagrid({});
+    
+    $('#statis_but1').linkbutton({});//缺勤统计按钮
+    $('#statis_but2').linkbutton({});//缺勤超过1/3的课程学生名单统计按钮
+    //数据控件父元素
+    var ele=$("[class='panel-body panel-body-noheader panel-body-noborder layout-body panel-noscroll'] div:eq(0)");
+    /*
+     * 缺勤统计
+     */
+    $('#statis_but1').click(function(){
+    	var reg=/^\d{4}$/;
+    	if(!check($("[name='YEAR']"),"输入只能是四位数字","学年",reg))return;
+    	reg=/^[1-2]$/;
+    	if(!check($("[name='TERM']"),"输入只能是1或2","学期",reg))return;
+    	reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+    	if(!check($("[name='STARTDATA']"),"输入只能是数字类型","时数",reg))return;
+    	if(!check($("[name='ENDDATA']"),"输入只能是数字类型","时数",reg))return;
+    	if(Number($.trim($("[name='STARTDATA']").val())) > Number($.trim($("[name='ENDDATA']").val()))){
+    		$.messager.alert("提示","时数起始值不能大于时数最大值！","?");
+    		return;
+    	}
+    	dat.datagrid("options").url = "__URL__/statis/hasJson/1";
+    	dat.datagrid('load',{
+    		YEAR:$.trim($("[name='YEAR']").val()),
+    		TERM:$.trim($("[name='TERM']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val()),
+    		STARTDATA:$.trim($("[name='STARTDATA']").val()),
+    		ENDDATA:$.trim($("[name='ENDDATA']").val())
+        });
+    	ele.show();
+    });
+    
+    /**
+     * 必填项焦点获取事件
+     */
+    $(".isNotNull").focus(function(){
+    	if($.trim($(this).val())=="必填"){
+    		$(this).val("");
+    		$(this).removeClass("cls");
+    	}
+    });
+    /**
+     * 必填项鼠标离开事件
+     */
+    $(".isNotNull").blur(function(){
+    	if($.trim($(this).val())==""){
+    		$(this).val("必填");
+    		$(this).addClass("cls");
+    	}
+    });
+    
+    /*
+     * 缺勤超过1/3的课程学生名单统计
+     */
+    $('#statis_but2').click(function(){
+    	var reg=/^\d{4}$/;
+    	if(!check($("[name='YEAR']"),"输入只能是四位数字","学年",reg))return;
+    	reg=/^[1-2]$/;
+    	if(!check($("[name='TERM']"),"输入只能是1或2","学期",reg))return;
+    	reg=/^\d{1,2}$/;
+    	if(!check($("[name='WEEK']"),"输入范围只能是1~20之间的整数","周数",reg))return;
+    	var week=Number($.trim($("[name='WEEK']").val()));
+    	if(week > 20 || week <= 0){
+    		$.messager.alert("提示","周数输入范围只能是1~20之间的整数","?");
+    		return;
+    	}
+    	dat2.datagrid("options").url = "__URL__/statisTimeout/";
+    	dat2.datagrid('load',{
+    		YEAR:$.trim($("[name='YEAR']").val()),
+    		TERM:$.trim($("[name='TERM']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val()),
+    		WEEK:$.trim($("[name='WEEK']").val())
+        });
+    	ele.hide();
+    });
+});
+//输入参数验证
+function check(ele,str,name,reg){
+	var value=$.trim(ele.val());
+	if(value!="" && value!="必填" && reg!=null){
+		if(!reg.test(value)){
+			$.messager.alert("提示",name+str,"?");
+			return false;
+		}
+	}else if(value=="必填" || value==""){
+		$.messager.alert("提示","必须输入"+name+"才能进行统计","?");
+		return false;
+	}
+	return true;
+}
+</script>
+</html>

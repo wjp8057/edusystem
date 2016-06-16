@@ -1,0 +1,1 @@
+delete from Creditbatchfirm where batchfirm_id=:id

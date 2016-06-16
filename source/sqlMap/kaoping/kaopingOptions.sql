@@ -1,0 +1,1 @@
+SELECT name as name ,code as code FROM 教学质量评估OPTIONS where type='学生评' order by code desc

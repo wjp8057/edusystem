@@ -1,0 +1,1 @@
+select count(*) as ROWS from CreditCertficate  where cert_name like :cert_name and (status=:yes or status=:no)

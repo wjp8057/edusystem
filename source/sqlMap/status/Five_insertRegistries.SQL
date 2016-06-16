@@ -1,0 +1,5 @@
+INSERT INTO REGISTRIES
+(INFOTYPE,DATE,FILENO,REM,STUDENTNO)
+VALUES
+(:infotype,:date,:fileno,:rem,:studentno)
+

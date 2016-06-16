@@ -1,0 +1,204 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+
+    <script>
+        //todo:权限判断函数
+        function qxpanduan(id,url){
+            var quanxianpd=false;
+            //todo:false代表     按学号注册      ⑵
+            ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+                eval('var o='+c)
+                for(var i=0;i<o[0]['rl'].length;i++){
+                    var zz=new RegExp(o[0]['rl'][i])
+                    var bool=zz.test(quanxian)
+
+                    if(bool){
+                        quanxianpd=true
+                        return;
+                    }
+                }
+            })
+
+            return quanxianpd;
+        }
+        //todo:权限判断函数
+        var quanxian='{$quanxian}'
+
+       $(function(){
+           $('#B1').bind('click',function(){
+
+               var boo=qxpanduan('US01','__APP__/Book/Book/Bexecute')
+               if(!boo){
+                   return $.messager.alert('提示','您没有足够的权限')
+               }
+             var obj={}
+             obj['bind']={}
+               var textList=$(':text')
+             for(var i=0;i<textList.length;i++){
+                   obj['bind'][':'+textList[i].name]=textList[i].value
+             }
+             obj['bind'][':SEX']=$('[name=SEX]').val()
+             obj['bind'][':NATIONALITY']=$('[name=NATIONALITY]').val()
+             obj['bind'][':PROFESSION']=$('[name=PROFESSION]').val()
+             obj['bind'][':EDULEVEL']=$('[name=EDULEVEL]').val()
+             obj['bind'][':DEGREE']=$('[name=DEGREE]').val()
+             obj['bind'][':PARTY']=$('[name=PARTY]').val()
+               obj['bind'][':TEACHERNO']='{$teacherno}'
+             obj['order']={':SEX':'',':BIRTH':'',':ID':'',':NATIONALITY':'',':PARTY':'',':DEPARTMENT':'',':HEADSHIP':'',':HDATE':'',':PROFESSION':'',':PDATE':'',':PSUBJECT':'',':EDULEVEL':'',':ESCHOOL':'',':DEGREE':'',':DSCHOOL':'',':TEL':'',':EMAIL':'',':TEACHERNO':''}
+               obj['exe']='Userinfo/one_updateBasicinfo.SQL'
+              ajiakesi('__URL__/Sexecute',obj,function(c){
+
+                if(c=='true'){
+                    $.messager.alert('提示','修改成功')
+
+                }
+                  setTimeout(function(){  window.location.href=window.location.href;},600)
+              })
+           })
+
+           $('[name=SEX]').val('{$info.SEX}')
+           $('[name=NATIONALITY]').val('{$info.NATIONALITY}')
+           $('[name=PROFESSION]').val('{$info.PROFESSION}')
+           $('[name=DEGREE]').val('{$info.DEGREE}')
+           $('[name=PARTY]').val('{$info.PARTY}')
+
+       })
+        function DateCheck(ThisDate){
+            if(!ThisDate.value.isDate()){
+                alert("对不起，您输入的日期格式有误！请重新输入。");
+                ThisDate.focus();
+                ThisDate.select();
+                return false
+            }
+            else
+                return true;
+
+        }
+        String.prototype.isDate = function()
+        {
+            var r = this.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+            if(r==null)return false;
+            var d = new Date(r[1], r[3]-1, r[4]);
+            return(d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+        }
+    </script>
+</head>
+
+<body style="background-color: #ffffff">
+<style>
+    td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<p align="center"><font color="#0000FF" face="隶书" size="5">个人基本信息</font></p>
+<form method="POST"  ID="UPDATEFORM">
+    <div >
+
+            <table border="0" cellspacing="1" width="60%"  align="center">
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF" ><font size="2">姓名：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><FONT SIZE="2">{$info.NAME}</FONT>　</td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">性别：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><font size="2"><select size="1" id='SEX' name="SEX">
+                        <if condition="($info.SEX eq 男)">
+                            <option value="M" selected>男</option>
+                            <option value="F">女</option>
+                            <else />
+                            <option value="M">男</option>
+                            <option value="F" selected>女</option>
+                        </if>
+
+                    </select></font></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">出生年月：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><font size="2"><input type="text" name="BIRTH" size="10" value="{$info.BIRTH}"></font></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">身份证号：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="ID" size="18" value="{$info.ID}" datafld="ID"></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">民族：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF">
+                    <select name="NATIONALITY">
+                        <volist name="nationalitycode" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+
+                    </select></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">政治面貌：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><select size="1" name="PARTY" datafld="PARTY">
+                        <volist name="partycode" id="v">
+                            <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                           <!-- <#OPTIONS SQL=PARTYCODE.SQL>-->
+                    </select></td>
+                </tr>
+
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">所在学院：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><FONT SIZE="2"><span>{$info.SCHOOLNAME}</span></FONT>　</td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">系：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="DEPARTMENT" size="20" value="{$info.DEPARTMENT}"></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">现任职务：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="HEADSHIP" size="20" value="{$info.HEADSHIP}"></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">任职时间：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="HDATE" size="10" value="{$info.HDATE}"><font size="2">(年/月/日)</font></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">现任职称：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><select size="1" name="PROFESSION" >
+                        <volist name="professioncode" id="v">
+                            <option value="{$v.Code}">{$v.Name}</option>
+                        </volist>
+
+                    </select></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">获得时间：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="PDATE" size="10" value="{$info.PDATE}" ><font size="2">(年/月/日)</font></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">职称学科：</font></td>
+                    <td width="80%" bgcolor="#FFFFFF" colspan="3"><input type="text" name="PSUBJECT" size="20" value="{$info.PSUBJECT}"></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">最高学历：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF">
+                    <select size="1" name="EDULEVEL" datafld="EDULEVEL">
+                        <volist name="edulevelcode" id="v">
+                            <option value="{$v.Code}">{$v.Name}</option>
+                        </volist>
+
+                    </select></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">获得学校：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="ESCHOOL" size="20" value="{$info.ESCHOOL}"></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">最高学位：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><select size="1" name="DEGREE" >
+                        <volist name="degreecode" id="v">
+                            <option value="{$v.Code}">{$v.Name}</option>
+                        </volist>
+                    </select></td>
+
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">获得学校：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="DSCHOOL" size="20" value="{$info.DSCHOOL}"></td>
+                </tr>
+                <tr>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">联系电话：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="TEL" size="20" value="{$info.TEL}"></td>
+                    <td width="20%" align="right" bgcolor="#E0ECFF"><font size="2">E-Mail：</font></td>
+                    <td width="30%" bgcolor="#FFFFFF"><input type="text" name="EMAIL" size="20" value="{$info.EMAIL}"></td>
+                </tr>
+            </table>
+
+    </div>
+    <p align="center"><input type="button" value="提交修改" id="B1" ></p>
+</form>
+<p align="center">　</p>
+
+</body>
+
+</html>

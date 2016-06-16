@@ -1,0 +1,201 @@
+<include file=":Include:jqueryHeader" />
+<script>
+    $(function(){
+        var panduan=false;                                  //判断用户的课号是否合法
+        var button=$('#bt').linkbutton({
+            text:'添加',
+            iconCls:'icon-add'
+        })
+
+        var button2=$('#bt2').linkbutton({
+            text:'重置',
+            iconCls:'icon-back'
+        })
+
+        button.bind('click',function(){
+            $('#COURSENO').blur()
+            var t = setTimeout(function(){
+                if(panduan){
+                    $('#biaodan').form('submit',{
+                        url:'__URL__/courseyz',
+                        onSubmit:function(){
+                            var pd=true;
+                            var one=$('#COURSENO').val().length;
+                            var numr=0;                             //todo:存放学分分的 判断是否超过总学时
+                            var zhouHours=$('#HOURS').val()          //todo:周总学时
+                            if(one!=7){
+                                pd=false;
+                                $.messager.alert('提示','<font color="red">课号需要7位数</font>');
+                            }
+                            if($('#COURSENAME').val()==""){
+                                pd=false;
+                                $.messager.alert('提示','<font color="red">课程名称不能为空！</font>')
+                            }
+
+                            if($('#CREDITS').val()<1){
+                                pd=false;
+                                $.messager.alert('提示','<font color="red">学分必须大于0！</font>')
+                            }
+                            var zz=/^\d{1,2}$/;
+                            var pd2=true;
+                            zz.test($('#HOURS').val())==false?pd2=false:                  //todo:周总学时
+                                    zz.test($('#Lhours').val())==false?pd2=false:                 //todo:周理论学时
+                                            zz.test($('#EXPERIMENTS').val())==false? pd2=false:numr+=parseFloat($('#EXPERIMENTS').val())
+                            zz.test($('#COMPUTING').val())==false? pd2=false:numr+=parseFloat($('#COMPUTING').val())
+                            zz.test($('#SHOURS').val())==false? pd2=false:numr+=parseFloat($('#SHOURS').val())
+                            zz.test($('#KHOURS').val())==false? pd2=false:numr+=parseFloat($('#KHOURS').val())
+                            zz.test($('#ZHOURS').val())==false? pd2=false:numr+=parseFloat($('#ZHOURS').val())
+
+                            if(!pd2){                              //todo:判断学分有不是数字的
+                                pd=false
+                                $.messager.alert('提示','<font color="red">学分请填写数字</font>')
+                            }
+
+                            if(numr>zhouHours){
+                                pd=false
+                                $.messager.alert('提示','<font color="red">周总学时少于各类学时之和</font>')
+                            }
+                            return pd
+                        },
+                        success:function(data){
+                            if(data!='false'){
+                                $.messager.alert('提示','添加成功')
+
+                                    location.href='__URL__/newcourse'
+
+
+                            }else{
+                                $.messager.alert('提示','添加失败,课号有重复')
+                            }
+                        }
+                    })
+                }
+                clearTimeout(t);
+            },300);
+
+
+
+
+        })
+
+        button2.bind('click',function(){               //≡≡≡≡重置≡≡≡≡≡
+            $('#COURSENO').val('');                 //课号
+            $('#COURSENAME').val('');                 //课名
+            $('#SCHOOL').val('01');                    //学院
+            $('#CREDITS').val('0');
+            $('#HOURS').val('0');
+            $('#Lhours').val('0')
+            $('#EXPERIMENTS').val('0')
+            $('#COMPUTING').val('0')
+            $('#SHOURS').val('0')
+            $('#KHOURS').val('0')
+            $('#ZHOURS').val('0')
+            $('#QUARTER').val('')
+            $('#TYPE').val('C')
+            $('#TYPE2').val('D')
+            $('#SYLLABUS').val('')
+            $('#REM').val('')
+            $('#INTRODUCE').val('');
+            $('#Limit').val('0')
+        })
+
+
+        $('#COURSENO').blur(function(){
+            $.ajax({
+                url:'__URL__/numberyz',
+                type:'POST',
+                data:{
+                    COURSENO:this.value
+                },
+                success:function(data){
+                    if(data=='false'){
+                        $.messager.alert('提示','课号已经存在')
+                        panduan=false;
+                    }else if(data=='sev'){
+                        $.messager.alert('提示','课号长度需要7位')
+                        panduan=false;
+                    }else{
+                        $('#ct').html('<font color="green">可以使用的课号√</font>')
+                        panduan=true;
+                    }
+                }
+
+            })
+
+        });
+        function demo(){
+            var inputnum=$('#biaodan :input');
+            var shuzu={};
+            for(var i=0;i<inputnum.length;i++){
+                shuzu.name=inputnum[i].value;
+            }
+        }
+        $('#SCHOOL').val('01');
+    })
+</script>
+<body>
+<div class="easyui-panel" title="" data-options="fit:true,closable:false">
+    <form action="__URL__/courseyz" method="POST" id="biaodan">
+        <table style="margin-left:15px;margin-top:10px" align="left" border="0" cellspacing="8">
+            <tr><td align="right" width="120">课号:</td><td><input type="text" name="COURSENO" size="7" maxlength="7" id="COURSENO">&nbsp&nbsp<b><font color="red">*</font></b><span id="ct">&nbsp&nbsp课号为7位</span></td></tr>
+            <tr><td align="right" width="120">课名:</td><td  colspan="3"><input type="text" name="COURSENAME" id="COURSENAME" size="30" maxlength="120"></td></tr>
+            <tr>
+                <td align="right" width="120">开课学院：</td>
+                <td>
+                    <if condition="$userSchool.SCHOOL eq 'A1'">
+                        <select name="SCHOOL" style="width:100px" id="SCHOOL" class="easyui-combobox">
+                            <option value="%">所有学院</option>
+                            <volist name="school" id="v">
+                                <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                            </volist>
+                        </select>
+                    <else/>
+                        {$userSchool.NAME}<input type="hidden" name="SCHOOL" value="{$userSchool.SCHOOL}" />
+                    </if>
+                </td>
+            </tr>
+            <tr><td align="right" width="120">学分：</td><td><input type="text" name="CREDITS" id="CREDITS" size="4" maxlength="4" value="0" /></td></tr>
+            <tr><td align="right" width="120">总学时:</td><td><input type="text" name="TOTAL" id="TOTAL" size="4" maxlength="4" value="0" /></td></tr>
+            <tr><td align="right" width="120">每周总学时:</td><td><input type="text" name="HOURS" id="HOURS" size="4" maxlength="4" value="0"><span id="hourspan"></span></td></tr>
+            <tr><td align="right" width="120">每周理论学时:</td><td><input type="text" name="Lhours" id="Lhours" size="4" maxlength="4" value="0"><span id="lhoursspan"></span></td></tr>
+            <tr><td align="right" width="120">每周实验学时:</td><td><input type="text" name="EXPERIMENTS" id="EXPERIMENTS" size="4" maxlength="4" value="0"><span id="exspan"></span></td></tr>
+            <tr><td align="right" width="120">每周上机学时:</td><td><input type="text" name="COMPUTING" id="COMPUTING" size="4" maxlength="4" value="0"><span id="comspan"></span></td></tr>
+            <tr><td align="right" width="120">每周实训学时:</td><td><input type="text" name="SHOURS" id="SHOURS" size="4" maxlength="4" value="0"><span id="shouspan"></span></td></tr>
+            <tr><td align="right" width="120">每周课堂讨论学时:</td><td><input type="text" name="KHOURS" id="KHOURS" size="4" maxlength="4" value="0"><span id="khouspan"></span></td></tr>
+            <tr><td align="right" width="120">每周自主学习学时：</td><td><input type="text" name="ZHOURS" id="ZHOURS" size="4" maxlength="4" value="0"><span id="zhouspan"></span></td></tr>
+            <tr><td align="right" width="120">限制人数：</td><td><input type="text" name="Limit" size="4" id="Limit" maxlength="3" value=0>只对公选课有意义</td></tr>
+            <tr><td align="right" width="120">开课学期：</td><td><input type="text" name="QUARTER" size="4" id="QUARTER" maxlength="1" value="">只对公选课有意义,1为第一学期（秋)2为第二学期（春）</td></tr>
+            <tr>
+                <td width="120" align="right" height="23">课程类别：</td>
+                <td>
+                    <select name="TYPE" style="width:100px" id="TYPE" class="easyui-combobox">
+                        <volist name="coursetype" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="120" align="right" height="23">课程类型：</td>
+                <td>
+                    <select name="TYPE2"style="width:100px" id="TYPE2" class="easyui-combobox">
+                        <volist name="coursetype2" id="v2">
+                            <option value="{$v2.NAME}">{$v2.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr><td align="right">教学大纲网址：</td><td><input type="text" id="SYLLABUS" name="SYLLABUS" size="30" maxlength='99' value=""></td></tr>
+            <tr><td align="right">备注：</td><td><input type="text" name="REM" id="REM" size="30" maxlength="40" maxlength='99' value=""></td></tr>
+            <tr><td colspan="2" align="center" height="80"><a href="javascript:void(0)" id="bt"></a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt2"></a></td>
+            </tr>
+        </table>
+        <table style="margin-top:10px" align="left"  width='200' border="0" cellspacing="8">
+            <tr><td align="left">课程介绍:</td></tr>
+            <tr><td><textarea rows="30" name="INTRODUCE" id="INTRODUCE" cols="40" maxlength='750' style="resize:none;overflow: hidden"> </textarea></td></tr>
+            <tr><td colspan="2"height="60">注：课号应该为7位，最后一位表示相同课程，但教学大纲或学分不同。</td></tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

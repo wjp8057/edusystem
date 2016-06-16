@@ -1,0 +1,1 @@
+update work set [work_CF]=:work where totalwork_id=:totalwork_id

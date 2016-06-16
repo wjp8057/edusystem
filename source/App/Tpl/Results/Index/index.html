@@ -1,0 +1,164 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-search2","menuname": "成绩查询",
+            "menus": [
+                {"menuid": "11","menuname": "查询学生个人成绩","icon": "icon-personal","url": "__ROOT__/index.php?g=Results&m=Results&a=Results_personal"},
+                {"menuid": "12","menuname": "不及格名单汇总","icon": "icon-personalList","url": "__ROOT__/index.php?g=Results&m=Results&a=Fail"},
+                {"menuid": "13","menuname": "班级学期成绩汇总表","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=summary"},
+                {"menuid": "14","menuname": "班级学期积点分汇总表","icon": "icon-book2","url": "__ROOT__/index.php?g=Results&m=Results&a=JDF_summary"},
+                {"menuid": "15","menuname": "省级以上统考成绩查询","icon": "icon-tongyi1","url": "__ROOT__/index.php?g=Results&m=Results&a=CET4"},
+                {"menuid": "16","menuname": "辅修成绩查询","icon": "icon-search2","url": "__ROOT__/index.php?g=Results&m=Results&a=one_six"},
+                {"menuid": "17","menuname": "班级素质能力学分排名","icon": "icon-workload","url": "__ROOT__/index.php?g=Results&m=Results&a=class_Quality_Credit"},
+                {"menuid": "18","menuname": "毕业前补考成绩查询","icon": "icon-search","url": "__ROOT__/index.php?g=Results&m=Results&a=biye_bukao"},
+                {"menuid": "19","menuname": "查询课程成绩","icon": "icon-kongbai","url": "__ROOT__/index.php?g=Results&m=Results&a=Course_score"},
+                /*{"menuid": "20","menuname": "<font color='red'>学生总学分查询(老系统无法查)</font>","icon": "","url": ""},
+                {"menuid": "21","menuname": "班级学绩分排名表(专科)","icon": "icon-shuru","url": "__ROOT__/index.php?g=Results&m=Results&a=XJF_order"},*/
+                {"menuid": "22","menuname": "班级积点分排名表","icon": "icon-xuchaxun","url": "__ROOT__/index.php?g=Results&m=Results&a=jidianfen_order"},
+                {"menuid": "23","menuname": "体质健康测试查询","icon": "icon-tongji","url": "__ROOT__/index.php?g=Results&m=Results&a=health"},
+                {"menuid": "24","menuname": "班级素质类学分汇总","icon": "icon-bookList","url": "__ROOT__/index.php?g=Results&m=Results&a=suzhi_gather"},
+                {"menuid": "25","menuname": "自主实践成绩查询","icon": "icon-plan","url": "__ROOT__/index.php?g=Results&m=Results&a=practice"}
+            ]
+        },
+        {"menuid": "2","icon": "icon-fenxi","menuname": "成绩分析",
+            "menus": [
+                {"menuid": "21","menuname": "必修课不及格人数列表","icon": "icon-personalList","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Fail"},
+                {"menuid": "22","menuname": "课程成绩分析","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Course_CJFX"},
+                {"menuid": "23","menuname": "班级成绩分析","icon": "icon-room","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_Class_CJFX"},
+                {"menuid": "24","menuname": "学生必修课不及格列表","icon": "icon-personal","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_bujige"},
+                {"menuid": "25","menuname": "退学警告名单(仅供参考)","icon": "icon-personal2","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_tuixue"},
+                {"menuid": "26","menuname": "各类统考成绩分析(按每次考试统计)","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_analyse_ci"},
+                {"menuid": "27","menuname": "各类统考成绩分析(分专业累计通过率)","icon": "icon-classTable","url": "__ROOT__/index.php?g=Results&m=Results&a=Two_analyse_major"},
+                {"menuid": "28","menuname": "毕业生CET-4考试成绩统计","icon": "icon-classTable","url": "__ROOT__/index.php?g=Results&m=Results&a=cetFourAnalyse"}
+              ]
+        },
+        {"menuid": "3","icon": "icon-shuru","menuname": "成绩输入",
+            "menus": [
+            /*    {"menuid": "31","menuname": "成绩输入","icon": "icon-edit","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_CJSR"},*/
+                {"menuid": "32","menuname": "开放与查看课程","icon": "icon-search2","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_one"},
+                {"menuid": "33","menuname": "补考成绩输入","icon": "icon-edit","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_two"},
+                {"menuid": "34","menuname": "任课教师期末成绩输入","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_three"},
+                {"menuid": "34","menuname": "还没有输入的课程","icon": "icon-book2","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_four"},
+                {"menuid": "35","menuname": "毕业重修成绩输入","icon": "icon-bookList","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_five"},
+                {"menuid": "36","menuname": "免于体侧名单输入","icon": "icon-personal","url": "__ROOT__/index.php?g=Results&m=Results&a=Three_six"}
+
+            ]
+        },{"menuid": "4","icon": "icon-kongbai","menuname": "打印成绩单",
+            "menus": [
+                {"menuid": "41","menuname": "学期初补考","icon": "icon-book","url": "__ROOT__/index.php?g=Results&m=Results&a=Four_one"},
+                {"menuid": "42","menuname": "学期末期终成绩","icon": "icon-book2","url": "__ROOT__/index.php?g=Results&m=Results&a=Four_two"},
+                {"menuid": "43","menuname": "学生成绩总表打印(含毕业生)","icon": "icon-excel","url": "__ROOT__/index.php?g=Results&m=Results&a=Four_three_daying"},
+                {"menuid": "44","menuname": "毕业前补考成绩","icon": "icon-bookList","url": "__ROOT__/index.php?g=Results&m=Results&a=Four_four"}
+            ]
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="成绩管理" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">成绩管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">成绩管理：统考成绩导入、校内成绩输入以及成绩查询与分析，成绩表打印等功能。包含成绩查询、成绩分析、成绩输入、成绩单打印等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、成绩查询:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、查询学生个人成绩</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学号查询该学生在校期间所有成绩的信息，自动统计积点和、获得的学分。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、不及格名单汇总</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、课号进行查询全校不及格学生的名单。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、班级学期成绩汇总表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、班号进行查看当前学期该班所有学生参加考试所获得的学分情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、班级学期积点分汇总表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、班号进行查看当前学期该班所有学生详细的获得学分情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、省级以上统考成绩查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学号进行单个学生查询省级以上统考科目的成绩，或者根据班号进行查询全班学生的省级以上统考成绩。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、辅修成绩查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学号查询某学生或者全校所有学生的辅修成绩信息。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、班级素质能力学分排名</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、班号进行查询该班所有学生总学分。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>8、毕业前补考成绩查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院进行查询该学院所有参与补考学生的成绩分数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>9、查询课程成绩</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年。学期。课号。学号进行查询参与该门课程考试的所有学生的成绩信息。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>10、学生总学分查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px"></p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>11、班级学分排名表（专科）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可根据学年、班号查看该班级学生在该学年的成绩全班排名情况；可根据学年、学期、班号查看该班级学生在该学期的成绩全班排名情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>12、班级积点分排名表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px"></p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>13、体质健康测试查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可根据学年、班号查看该班级学生在该学年的成绩全班排名情况；可根据学年、学期、班号查看该班级学生在该学期的成绩全班排名情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>14、班级素质类学分汇总</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px"></p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>15、自主实践成绩查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可根据学年、班号查看该班级学生在该学年的成绩全班排名情况；可根据学年、学期、班号查看该班级学生在该学期的成绩全班排名情况。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、成绩分析:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、必修课不及格人数列表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、人数查看该学期各门课程不及格的人数</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、课程成绩分析</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、课号查询该门课程的选课、成绩情况的统计人数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、班级成绩分析</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、班号查询该班级所有课程的选课、成绩情况的统计人数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、学生必修课不及格列表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学院、学号进行查询学生各门不及格的课程成绩情况和门次统计。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、退学警告名单（仅供参考）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院查询该学院在该学期里退学和受警告的学生名单。（仅供参考）</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、各类统考成绩分析（按每次考试统计）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看各学年的计算机一级、应用能力A级、应用能力B级、三级、四级、六级的成绩统计人数、比例情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、各类统考成绩分析（分专业累计通过率）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可查看各年级计算机一级、应用能力B级的参加人数、通过人数、通过率。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>8、毕业生CET-4考试成绩统计（老系统无法打开）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;color:red">老系统无法打开未做</p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">三、成绩输入:</font></b><br>
+           <p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+               1、根据学年、学期、学院进行查看该学院各门课程的成绩登记表。
+               <br>2、可以对学生的补考成绩进行登记，并开放课程。
+               <br>3、任课教师可以对本人所教的课程学生进行成绩登记。
+               <br>4、可统计查看还未输入成绩的课程情况。
+               <br>5、可对毕业前补考的课程学生进行成绩登记。
+
+           </p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">四、打印成绩单:</font></b>
+            <p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+                1、学期初补考：根据学年、学期、课号、学院查询打印该课程学生的临时成绩登陆单或者成绩单。临时成绩登陆单里面没有成绩统计，成绩单里面有成绩统计。
+                <br>2、学期末期终成绩：根据教师进行查看该教师的周课表，并查看课程学生检索并打印成绩临时登陆单；根据学年、学期、课号、学院查询打印学生临时登陆单和成绩单（内含成绩）。
+                <br>3、学生成绩总表打印（含毕业生）：根据学号、班号打印该学生或该班级所有学生的毕业生成绩总表、平时学生成绩总表。
+                <br>4、毕业前补考成绩：根据学年、学期、课号、学院进行查询课程并打印参加毕业前补
+
+            </p>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

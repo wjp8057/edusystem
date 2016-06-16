@@ -1,0 +1,1 @@
+update Creditbatchfirm set Final_status = 1,Final_time=getdate() where project_id=:pid

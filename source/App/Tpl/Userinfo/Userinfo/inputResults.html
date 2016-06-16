@@ -1,0 +1,95 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$school.SCHOOL}'
+
+    var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+    $('[name=SCHOOL]').val(school)
+    var arr=[];
+    $(function(){
+        // var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#search_two').linkbutton({
+            'text':'查询',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    $('#yingyu_teacher').datagrid('load',{'Sqlpath':{'select':'Results/Three_three_select.SQL','count':'Results/Three_three_count.SQL'},
+                        'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':TEACHERNO':teacherno}})
+                    $('#wd_teacher2').panel({closed:false})
+                    $('#wd').panel({closed:true})
+
+                })
+
+
+
+
+    })
+
+
+
+
+</script>
+<body style="background: #fff">
+    <div id="cccccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:130px"><br>
+            <center>
+            学年：<input type="text" name="YEAR" value="2014" size="4">&nbsp&nbsp
+            学期：<input type="text" name="TERM" value="1" size="1">
+         <!--   所在学院：<select name="SCHOOL">
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>-->
+            <a id="search_two">查询</a>
+
+                <p>计 分 制:<input type="radio" value="two" name="R13"  >二级制（合格与不合格）
+                    <input type="radio" value="five" name="R13" >五级制（优、良、中、及、不及）
+                    <input type="radio" value="ten" name="R13" checked >百分制（总分为100分）
+            </center>
+            <p style="line-height: 150%; margin: 0"><font size="3" color="#0000FF"><span>注：纯实践课程中集中实训环节、毕业论文、毕业实习采用五级制；自主实践训练、形势与政策、军训、社会实践与其他分散进行的实践环节采用二级制；纯理论课程与理实一体化课程可以采用百分制或者五级制，但是不能采用二级制，本科学位课程必须采用百分制。</span></font></p>
+
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="yingyu_teacher"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pagination:true,singleSelect:true,fit:true,toolbar:[
+                  {
+                     text:'进行成绩输入',
+                     iconCls:'icon-edit',
+                     handler:function(){
+                        var row=$('#yingyu_teacher').datagrid('getSelected')
+                        if(!row==''){
+                            window.open('__URL__/Three_three_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh+'/R1/'+$('[name=R13]:checked').val())
+                        }else{
+                            $.messager.alert('提示','您还没有选择数据')
+                        }
+                     }
+                     }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'km',width:380" align="center">课名</th>
+                    <th data-options="field:'js',width:250" align="center">教师</th>
+                    <th data-options="field:'xf',width:100" align="center">学分</th>
+                    <th data-options="field:'zxs',width:100" align="center">周学时</th>
+                    <th data-options="field:'zsy',width:100" align="center">周实验</th>
+                    <th data-options="field:'xk',width:100" align="center">修课</th>
+                    <th data-options="field:'kh2',width:100" align="center">考核</th>
+                    <th data-options="field:'kkxy',width:100" align="center">开课学院</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+

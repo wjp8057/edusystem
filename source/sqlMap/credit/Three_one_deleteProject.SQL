@@ -1,0 +1,1 @@
+delete from Creditbatchproject where batchproject_id=:id

@@ -1,0 +1,505 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //var wd=$('#wd').window(new wind(700,500,false,false,false,false,false))
+
+
+        var wd_one=$('#wd_one').window(new wind(0,0,false,false,true,false,true))      //todo:跟班重修学生统计的窗口
+
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,false,true))      //todo:重修班选课学生统计的窗口
+        var wd_three=$('#wd_three').window(new wind(0,0,false,false,true,false,true))   //todo:申请免听、免修学生名单统计
+        var wd_four=$('#wd_four').window(new wind(0,0,false,false,true,false,true))     //todo:预计人数小于教室座位数 20 人以上的课程
+        var wd_five_one=$('#wd_five_one').window(new wind(700,500,false,false,true,false,true))     //todo:预计人数小于教室座位数 20 人以上的课程
+        var wd_five=$('#wd_five').window(new wind(0,0,false,false,true,false,true))
+        var wd_six_one=$('#wd_six_one').window(new wind(700,500,false,false,true,false,true))
+        var wd_six=$('#wd_six').window(new wind(0,0,false,false,true,false,true))
+
+
+        var wd_seven_one=$('#wd_seven_one').window(new wind(500,200,false,false,true,false,false))          //todo:各类课程选课总人数统计的窗口
+        var wd_seven=$('#wd_seven').window(new wind(0,0,false,false,true,false,true))
+
+        var dat_two=$('#dat_two')
+        var dat_one=$('#dat_one')
+        var dat_three=$('#dat_three')
+        var dat_four=$('#dat_four')
+        var dat_five=$('#dat_five')
+        var dat_six=$('#dat_six')
+
+        $('#search_one').linkbutton(newobj('跟班重修学生统计','icon-search')).bind('click',function(){
+             dat_one.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+
+         $('#dat_one').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_one_select.SQL',
+                'count':'CourseManager/Five_one_count.SQL'},'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':courseschool':$('[name=SCHOOL_ONE]').val(),
+                ':studentSCHOOL':$('[name=SCHOOL_TWO]').val()}})
+            $('#title_one_y').html($('[name=YEAR]').val())
+            $('#title_one_t').html($('[name=TERM]').val())
+
+            wd_one.window({closed:false})
+
+        })
+        $('#search_two').linkbutton(newobj('重修班选课学生统计','icon-search')).bind('click',function(){
+            dat_two.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+
+            $('#dat_two').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_two_select.SQL',
+                'count':'CourseManager/Five_two_count.SQL'},'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':courseschool':$('[name=SCHOOL_ONE]').val(),
+                ':studentschool':$('[name=SCHOOL_TWO]').val()}});
+            $('#title_two_y').html($('[name=YEAR]').val())
+            $('#title_two_t').html($('[name=TERM]').val())
+
+            wd_two.window({closed:false})
+        })
+        $('#search_three').linkbutton(newobj('申请免听、免修学生名单统计','icon-search')).bind('click',function(){
+            dat_three.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_three').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_three_select.SQL',
+                'count':'CourseManager/Five_three_count.SQL'},'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':courseschool':$('[name=SCHOOL_ONE]').val(),
+                ':studentschool':$('[name=SCHOOL_TWO]').val()}})
+
+
+
+            $('#title_three_y').html($('[name=YEAR]').val())
+            $('#title_three_t').html($('[name=TERM]').val())
+
+            wd_three.window({closed:false})
+        })
+
+
+
+        $('#search_four').linkbutton(newobj('检索','icon-search')).bind('click',function(){
+            dat_four.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+
+            $('#dat_four').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_four_select.SQL',
+                'count':'CourseManager/Five_four_count.SQL'},'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),
+                ':RS':$('[name=numbers]').val()}});
+
+
+
+            $('#num').html($('[name=numbers]').val())
+            wd_four.window({closed:false})
+        })
+
+
+
+
+        //todo:各门课程选课人数统计
+        $('#search_five').linkbutton(newobj('各门课程选课人数统计','icon-search')).bind('click',function(){
+            wd_five_one.window({closed:false})
+        })
+        $('#bt').linkbutton({
+            text:'检索'
+        }).bind('click',function(){
+
+
+            $('#dat_fivewww').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+             $('#dat_fivewww').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_five_select.SQL',
+                    'count':'CourseManager/Five_five_count.SQL'},bind:{':YONE':$('[name=five_year]').val(),':TONE':$('[name=five_term]').val(),
+                    ':YTWO':$('[name=five_year]').val(),':TTWO':$('[name=five_term]').val()}})
+
+            $('#title_five_y').html($('[name=five_year]').val())
+            $('#title_five_t').html($('[name=five_term]').val())
+                wd_five.window({closed:false})
+        })
+
+        //todo:查看选课人数小于座位数的课程
+        $('#search_six').linkbutton(newobj('查看选课人数小于座位数的课程','icon-search')).bind('click',function(){
+            wd_six_one.window({closed:false})
+        })
+
+        $('#back').linkbutton({
+            text:'返回'
+        }).bind('click',function(){
+            $('#wd_five_one').window({closed:true})
+        })
+        $('#back2').linkbutton({
+            text:'返回'
+        }).bind('click',function(){
+            $('#wd_six_one').window({closed:true})
+        })
+        $('#bt2').linkbutton({
+            text:'检索'
+        }).bind('click',function(){
+
+                    $('#dat_six').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                $('#dat_six').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_six_select.SQL',
+                    'count':'CourseManager/Five_six_count.SQL'},bind:{':YONE':$('[name=six_year]').val(),':TONE':$('[name=six_term]').val(),
+                    ':YTWO':$('[name=six_year]').val(),':TTWO':$('[name=six_term]').val()}})
+
+
+            $('#title_six_y').html($('[name=six_year]').val())
+            $('#title_six_t').html($('[name=six_term]').val())
+            wd_six.window({closed:false})
+        })
+
+
+        //todo:各类课程总人数统计
+        $('#search_seven').linkbutton(newobj('各类课程选课总人数统计','icon-search')).bind('click',function(){
+            wd_seven_one.window({closed:false})
+
+        })
+
+
+
+        //todo:各类课程选课总人数统计
+        $('#seven_search').bind('click',function(){
+            //todo:上面的
+            $('#dat_seven_top').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_seven_bottom').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_seven_top').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_seven_top_select.SQL','count':'CourseManager/Five_seven_top_count.SQL'},
+                    'bind':{':YEAR':$('[name=seven_year]').val(),':TERM':$('[name=seven_term]').val(),':SCHOOL':$('[name=seven_school]').val()}})
+
+                $('#dat_seven_bottom').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_seven_bottom_select.SQL','count':'CourseManager/Five_seven_bottom_count.SQL'},
+                    'bind':{':YEAR':$('[name=seven_year]').val(),':TERM':$('[name=seven_term]').val()}})
+                wd_seven.window({closed:false})
+        })
+
+
+
+
+        //todo:班级选课汇总表
+        $('#seven_eight').linkbutton('班级选课汇总表','icon-search').bind('click',function(){
+
+        })
+
+
+        //todo:查看班级周课表
+        $('#search_nine').linkbutton(newobj('查看班级周课表','icon-search')).bind('click',function(){
+            if($('[name=quesheng_year]').val()==""||$('[name=quesheng_term]').val()==""){
+                return $.messager.alert('提示','请填写学年或者学期')
+            }
+            if($('[name=quesheng_CLASSNO]').val()==""){
+                return $.messager.alert('提示','班号必须填写')
+            }
+            openTabsWindows('课程的情况',"__URL__/Class_week_course/year/"+$('[name=quesheng_year]').val()+'/term/'+$('[name=quesheng_term]').val()+'/CLASSNO/'+$('[name=quesheng_CLASSNO]').val());
+
+        })
+    })
+
+
+    function newobj(title,icon){
+        return {'text':title}
+    }
+
+
+</script>
+
+
+<body style="background-color: #ffffff">
+
+<style>
+    .query{border: solid 1px #ccc;margin:50px 20px 20px 20px;padding:10px;}
+    legend{margin-left: 20px;margin-bottom: 10px;}
+    .query span{line-height: 25px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    .query a{margin-left: 20px;}
+</style>
+
+<fieldset class="query">
+    <legend>选课统计</legend>
+    <a href="javascript:void(0) " id="search_one"></a><br /><br />
+    <a href="javascript:void(0) " id="search_two" ></a><br /><br />
+    <a href="javascript:void(0) " id="search_three"></a><br /><br />
+    <a href="javascript:void(0) " id="search_four"></a>预计人数小于教室座位数<input type="text" size="6" name="numbers" value="20">人以上的课程<br /><br />
+    &nbsp&nbsp&nbsp&nbsp以上操作设定 学年:<input type="text" name="YEAR" value="2012" size="4">学期: <input type="text" name="TERM" value="2" size="1">
+    开课学院:<select name="SCHOOL_ONE" class="easyui-combobox">
+    <option value="%">所有学院</option>
+    <volist name="schools" id="s">
+        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+    </volist>
+</select>
+    学生所在学院:<select name="SCHOOL_TWO" class="easyui-combobox">
+    <option value="%">所有学院</option>
+    <volist name="schools" id="s">
+        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+    </volist>
+</select><br /><br />
+    <a href="javascript:void(0) " id="search_five"></a><br /><br />
+    <a href="javascript:void(0) " id="search_six"></a><br /><br />
+    <a href="javascript:void(0) " id="search_seven"></a>
+    以下设定缺省学年:<input type="text" size="4" name="quesheng_year" value="2011">
+    缺省学期:<input type="text" size="1" name="quesheng_term" value="2">
+    设定班号:<input type="text" size="9" name="quesheng_CLASSNO" value="1120101"><br /><br />
+    <a href="javascript:void(0) " id="search_eight"></a><br /><br />
+    <a href="javascript:void(0) " id="search_nine"></a>
+
+</fieldset>
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--todo:申请免听、免修学生名单统计-->
+
+
+
+
+
+<style>
+    #wd_five_one td,#wd_six_one td{border:1px #95B8E7 solid;
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+    <!--todo:各门课程选课人数统计搜索的(条件界面)-->
+    <div id="wd_five_one" title="">
+        <br><br><br><br>
+        <b> <center><span style="font-size: 25px">检索选课结果</span></center></b>
+        <table border="0"  width="80%" style="margin-top: 10px" align="center">
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课号：</b></td>
+                <td width="209" height="25"><input name="five_courseno" type="text" size='10' value="%"></td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课程类型：</b>
+                </td>
+                <td>
+                <select name="kclx">
+                    <option  value="%" selected>全部</option>
+                    <option value="选修">选修</option>
+                    <option value="必修">必修</option>
+                    <option value="限修">限修</option>
+                    <option value="模块">模块</option>
+                </select></td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>班号：</b></td>
+                <td width="209" height="25"><input type="text" name="five_classno" size="7" value="%"></td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>开课学院：</b></td>
+                <td width="209" height="25">
+                    <select name="five_school">
+                        <volist name="schools" id="s">
+                            <option name="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课程类别：</b></td>
+                <td width="209" height="25">
+                        <select name="kclb">
+                            <option  value="%" selected>全部</option>
+                            <option value="公共基础课">公共基础课</option>
+                            <option value="公共体育课">公共体育课</option>
+                            <option value="公共外语课">公共外语课</option>
+                            <option value="公共选修课">公共选修课</option>
+                            <option value="公共实验课">公共实验课</option>
+                            <option value="公共计算机课">公共计算机课</option>
+                            <option value="普通课">普通课</option>
+                            <option value="实习或设计">实习或设计</option>
+                            <option value="创新学分">创新学分</option>
+                        </select>
+                </td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>考核方式：</b></td>
+                <td width="209" height="25">
+                    <select name="khfs">
+                        <option  value="%" selected>全部</option>
+                        <option value="考试">考试</option>
+                        <option value="考查">考查</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>学年：</b></td>
+                <td width="209" height="25">
+                    <input type="text" name="five_year" size="4" value="2010">
+                </td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>学期：</b></td>
+                <td width="209" height="25">
+                    <input type="text" name="five_term" size="1" value="1">
+                </td>
+            </tr>
+           <tr>
+               <td colspan="4" align="center" style="border:0px">
+                   <a href="javascript:void(0)" id="back">返回</a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt">检索</a></td>
+               </td>
+           </tr>
+        </table>
+        <center>要想快速获得结果，请设定检索条件
+        </center>
+    </div>
+
+
+
+    <div id="wd_five" title="">
+        <div id="cccccc" class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'north',split:false,border:true" style="height:50px;background-color: #e0ecff">
+                <b><center><p style="font-size: 14px;color:blue">
+                    <span id="title_five_y"></span>学年第<span id="title_five_t"></span>学期 选课结果统计
+                </p></center></b>
+            </div>
+            <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="dat_fivewww"
+                       data-options="fit:true,pagination:true,toolbar:[
+                   {'text':'返回上一页',
+                   'iconCls':'icon-goleft',
+                   handler:function(){
+                        $('#wd_five').window({closed:true})
+                        }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',checkbox:true">选择</th>
+                        <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                        <th data-options="field:'km',width:300,align:'right'" align="center">课名</th>
+                        <th data-options="field:'xf',width:50,align:'right'" align="center">学分</th>
+                        <th data-options="field:'xk',width:50,align:'right'" align="center">修课</th>
+                        <th data-options="field:'kh2',width:50,align:'right'" align="center">考核</th>
+                        <th data-options="field:'yjrs',width:100,align:'right'" align="center">预计人数</th>
+                        <th data-options="field:'yxrs',width:100,align:'right'" align="center">已选人数</th>
+                        <th data-options="field:'zws',width:100,align:'right'" align="center">座位数</th>
+                        <th data-options="field:'kclb',width:100,align:'right'" align="center">课程类别</th>
+                        <th data-options="field:'kkxy',width:100,align:'right'" align="center">开课学院</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="wd_six_one" title="">
+        <br><br><br><br>
+        <b> <center><span style="font-size: 25px">检索还可增选的课程</span></center></b>
+        <table border="0"  width="80%" style="margin-top: 10px" align="center">
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课号：</b></td>
+                <td width="209" height="25"><input name="five_courseno" type="text" size='10' value="%"></td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课程类型：</b>
+                </td>
+                <td>
+                    <select name="kclx">
+                        <option  value="%" selected>全部</option>
+                        <option value="选修">选修</option>
+                        <option value="必修">必修</option>
+                        <option value="限修">限修</option>
+                        <option value="模块">模块</option>
+                    </select></td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>班号：</b></td>
+                <td width="209" height="25"><input type="text" name="five_classno" size="7" value="%"></td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>开课学院：</b></td>
+                <td width="209" height="25">
+                    <select name="five_school">
+                        <volist name="schools" id="s">
+                            <option name="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>课程类别：</b></td>
+                <td width="209" height="25">
+                    <select name="kclb">
+                        <option  value="%" selected>全部</option>
+                        <option value="公共基础课">公共基础课</option>
+                        <option value="公共体育课">公共体育课</option>
+                        <option value="公共外语课">公共外语课</option>
+                        <option value="公共选修课">公共选修课</option>
+                        <option value="公共实验课">公共实验课</option>
+                        <option value="公共计算机课">公共计算机课</option>
+                        <option value="普通课">普通课</option>
+                        <option value="实习或设计">实习或设计</option>
+                        <option value="创新学分">创新学分</option>
+                    </select>
+                </td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>考核方式：</b></td>
+                <td width="209" height="25">
+                    <select name="khfs">
+                        <option  value="%" selected>全部</option>
+                        <option value="考试">考试</option>
+                        <option value="考查">考查</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>学年：</b></td>
+                <td width="209" height="25">
+                    <input type="text" name="six_year" size="4" value="2010">
+                </td>
+                <td width="107" bgcolor="#E0ECFF" height="25">
+                    <p align="right"><b>学期：</b></td>
+                <td width="209" height="25">
+                    <input type="text" name="six_term" size="1" value="1">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" align="center" style="border:0px">
+                    <a href="javascript:void(0)" id="back2" onclick="javascript:$('#wd_six_one').window({closed:true})">返回</a>&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt2">检索</a> </td>
+                </td>
+            </tr>
+        </table>
+        <center>要想快速获得结果，请设定检索条件
+        </center>
+    </div>
+
+
+
+    <div id="wd_six" title="">
+        <div id="ccccccc" class="easyui-layout" data-options="fit:true">
+            <div data-options="region:'north',split:false,border:false" style="height:50px;">
+                <b><center><p style="font-size: 14px;color:blue">
+                    <span id="title_six_y"></span>学年第<span id="title_six_t"></span>学期 选课结果统计
+                </p></center></b>
+            </div>
+            <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="dat_six"
+                       data-options="fit:true,pagination:true,toolbar:[
+                   {'text':'返回上一页',
+                   'iconCls':'icon-goleft',
+                   handler:function(){
+                        $('#wd_six').window({closed:true})
+                        }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',checkbox:true">选择</th>
+                        <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                        <th data-options="field:'km',width:100,align:'right'" align="center">课名</th>
+                        <th data-options="field:'xf',width:150,align:'right'" align="center">学分</th>
+                        <th data-options="field:'xk',width:220,align:'right'" align="center">修课</th>
+                        <th data-options="field:'kh2',width:150,align:'right'" align="center">考核</th>
+                        <th data-options="field:'yjrs',width:100,align:'right'" align="center">预计人数</th>
+                        <th data-options="field:'yxrs',width:100,align:'right'" align="center">已选人数</th>
+                        <th data-options="field:'kclb',width:100,align:'right'" align="center">课程类别</th>
+                        <th data-options="field:'kkxy',width:100,align:'right'" align="center">开课学院</th>
+                        <th data-options="field:'sksj',width:100,align:'right'" align="center">上课时间</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <script>
+        $('#seven_top').css('height',$(window).height()/2)
+    </script>
+</body>
+</html>

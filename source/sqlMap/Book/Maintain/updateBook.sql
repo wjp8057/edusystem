@@ -1,0 +1,1 @@
+update book set isbn=:isbn,bookname=:bookname,author=:author,pubtime=:pubtime,booknature=:booknature,dis_rate=:dis_rate,createdate=getdate()

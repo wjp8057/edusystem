@@ -1,0 +1,73 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>		   
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<table id="datagrid" fitColumns="true" width="100%" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" singleSelect="true">
+            <thead>
+            <tr><th data-options="field:'studentno',align:'center',width:60">学号</th>
+                <th data-options="field:'name',align:'center',width:60">姓名</th>
+                <th data-options="field:'classname',align:'center',width:80">班级名称</th>
+                <th data-options="field:'price',align:'center',width:40">原价（总价）</th>
+                <th data-options="field:'dis_price',align:'center',width:40">折扣价（总价）</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm"  method="post">
+        <label>班号：</label>{$class.classno}<input type="hidden" name="classno" value="{$class.classno}">
+        <label>班级名称：</label>{$class.classname}
+        <p style="height:4px;padding:0px;margin: 0px;"></p>
+        <label>学年：</label><input name="year" value="{$year}" size="4" maxlength="4">
+        <label>学期：</label><input name="term" value="{$term}" size="1" maxlength="1">
+        <label>学号：</label><input name="studentno" value='%'  size="10" maxlength="9">
+        <label>姓名：</label><input name="name" value='%' size="10"  maxlength="20">
+        <a href="javascript:void(0)" id="searcher">检 索</a>
+        <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">学生发放总汇表</a>
+    </form>
+</div>
+<script type="text/javascript">
+var list=null;
+var datagrid=null;
+$(function(){
+    //搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+	//学生发放信息
+	datagrid = $('#datagrid').datagrid({toolbar:'#toobar',url:"__URL__/studentByClassNo/hasJson/1",queryParams:getData()});
+    // 条件查询
+    $("#searcher").click(function(){
+        var year=$.trim($("#toobar [name='year']").val());
+        var term=$.trim($("#toobar [name='term']").val());
+        if(year=="" || term==""){
+            msgShow("系统提示：","请输入要检索的学年与学期！","error");
+            return;
+        }
+        datagrid.datagrid("load",getData());
+    });
+    //导出
+    $("#ExportBut").click(function(){
+        list=datagrid.datagrid('getRows');
+        if(list.length){
+            $("#queryForm").attr("action","__ROOT__/Book/Excel/studentByClassNo/");
+            $("#queryForm").submit();
+        }else{
+            msgShow("系统提示：","请先检索出您要导出的数据","info");
+        }
+    });
+});
+//获取检索条件信息
+function getData(){
+    var data={
+        year:$.trim($("#toobar [name='year']").val()),
+        term:$.trim($("#toobar [name='term']").val()),
+        studentno:$.trim($("#toobar [name='studentno']").val()),
+        name:$.trim($("#toobar [name='name']").val()),
+        classno:$.trim($("#toobar [name='classno']").val())
+    };
+    return data;
+}
+</script>
+</body>
+</html>

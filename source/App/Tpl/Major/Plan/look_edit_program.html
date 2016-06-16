@@ -1,0 +1,251 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function quzhi(name,fuhao,attr){
+        var obj={};
+        obj['arr']={}
+        var inputList=$('#'+name+' input')
+        for(var i=0;i<inputList.length;i++){
+            if(inputList[i][attr]==''){
+                continue;
+            }
+            if(fuhao)
+                obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)     //todo:LIKE
+            else
+                obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)              //todo:=
+        }
+        return obj;
+    }
+    var majorplanrowid='{$info}'
+    var schoolno='{$school}'
+    $(function(){
+       var wd2=$('#wd2')
+       var wd3=$(new wind(0,0,false,false,true,true,true))
+        var peiyangprogram=$('#zhuanyeprogram').datagrid({
+            url:'__URL__/chaxun',
+            fit:true,onRowContextMenu:function(e,rowindex,row){
+                peiyangprogram.datagrid('rejectChanges')
+                var tt=$('#zhuanyeprogram');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            columns:[[{checkbox:true},{field:'PROGNO',title:'教学计划号', width:70,align:'center'},
+                {field:'PROGNAME',title:'教学计划名称', width:200,align:'center'},
+                {field:'value',title:'教学计划类别', width:130,align:'center'},
+                {field:'CREDITS',title:'选课学分', width:70,align:'center'},
+                {field:'MCREDITS',title:'须通过学分', width:80,align:'center'}
+            ]],
+            toolbar:[
+                {text:'删除选中培养计划',
+                    iconCls:'icon-cut',
+                    handler:function(){
+                        var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条删除','请选择一条要删除的数据')
+                        if(yi){
+                            var row=peiyangprogram.datagrid('getSelected')
+                            ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:schoolno},function(c){
+
+                                if(c=='true'){
+                                    $.messager.confirm('提示','您确定要删除吗',function(c){
+                                        if(c){
+                                            var obj={}
+                                            obj['arr']={':rowid':row.MAJORPLAN_ROWID,':programno':row.PROGNO}
+                                            obj['paixu']={':rowid':'',':programno':''}
+                                            obj['sqlpath']={'edit':'major/delete_peiyang_R30_one.SQL'}
+                                            ajiakesi('__URL__/xiugai/hasJson/1',obj,function(c){
+                                                $.messager.alert('提示','删除成功')
+                                                peiyangprogram.datagrid('load')
+
+                                            })
+                                        }
+                                    })
+                                }else{
+                                    $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                                }
+                            })
+                        }
+                    }},
+                {text:'修改教学计划',
+                    iconCls:'icon-edit',
+                    handler:function(){
+                        var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+                        if(yi){
+                            var row=peiyangprogram.datagrid('getSelected')
+
+                            ajiakesi('__URL__/programEdit',{PROGNO:row.PROGNO,ROWID:row.MAJORPLAN_ROWID},function(cc){
+                                wd2.window({
+                                    closed:false
+                                })
+
+                                eval("var one="+cc)
+
+                                var inputList=$('#wd2 :input')
+
+                                for(var i=0;i<inputList.length;i++){
+                                    inputList[i].value=one[inputList[i].id]
+                                }
+
+                                $('#TYPE').val(one['name'])
+                                $('#wd2 [name="PROGNAME"]').val(one['PROGNAME']);
+                            })
+                        }
+                    }
+                },
+                {text:'添加教学计划',
+                    iconCls:'icon-add',
+                    handler:function(){
+                        /*wd3.window({
+                            closed:false
+                        })*/
+                        openTabsWindows('添加教学计划','__URL__/add_program/rowid/'+majorplanrowid,'',true)
+                    }
+                }/*,{text:'返回',
+                    iconCls:'icon-back',
+                    handler:function(){
+                        ziback(wd)
+                    }
+                }*/
+            ]
+        })
+        $('#admin_del').bind('click',function(){
+            var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条删除','请选择一条要删除的数据')
+            if(yi){
+                var row=peiyangprogram.datagrid('getSelected')
+                ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:schoolno},function(c){
+
+                    if(c=='true'){
+                        $.messager.confirm('提示','您确定要删除吗',function(c){
+                            if(c){
+                                var obj={}
+                                obj['arr']={':rowid':row.MAJORPLAN_ROWID,':programno':row.PROGNO}
+                                obj['paixu']={':rowid':'',':programno':''}
+                                obj['sqlpath']={'edit':'major/delete_peiyang_R30_one.SQL'}
+                                ajiakesi('__URL__/xiugai/hasJson/1',obj,function(c){
+                                    $.messager.alert('提示','删除成功')
+                                    peiyangprogram.datagrid('load')
+
+                                })
+                            }
+                        })
+                    }else{
+                        $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                    }
+                })
+            }
+        })
+
+
+
+        $('#admin_edit').bind('click',function(){
+            var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+            if(yi){
+                var row=peiyangprogram.datagrid('getSelected')
+
+                ajiakesi('__URL__/programEdit',{PROGNO:row.PROGNO,ROWID:row.MAJORPLAN_ROWID},function(cc){
+                    wd2.window({
+                        closed:false
+                    })
+
+                    eval("var one="+cc)
+
+                    var inputList=$('#wd2 :input')
+
+                    for(var i=0;i<inputList.length;i++){
+                        inputList[i].value=one[inputList[i].id]
+                    }
+
+                    $('#TYPE').val(one['name'])
+                    $('#wd2 [name="PROGNAME"]').val(one['PROGNAME']);
+                })
+            }
+        })
+        //alert(majorplanrowid)
+        var obj={}
+        obj.sqlpath={count:'major/major_countprogram.SQL',select:'major/major_selectprogram.SQL'}
+        obj.arr={':rowid':majorplanrowid}
+       // planNo=row.majorplanrowid;          //todo:给培养计划号赋值
+       // schoolno=row.school;
+     //   peiyangprogarm.datagrid('options').url='__URL__/chaxun'
+      setTimeout(function(){
+          peiyangprogram.datagrid('load',obj);
+
+      },500)
+        $('#programEdit').linkbutton({
+            text:'<b>修改教学计划信息</b>',
+            iconCls:'icon-edit'
+        }).bind('click',function(){
+                    var obj=quzhi('wd2',false,'id');
+                    if(isNaN($('#CREDITS').val())){
+                        return $.messager.alert('提示','选课学分必须是数字')
+                    };
+                    if(isNaN($('#MCREDITS').val())){
+                        return $.messager.alert('提示','须通过学分必须是数字')
+                    }
+                    obj['paixu']={':TYPE':'123',':MCREDITS':'123',':CREDITS':'123',':MAJORPLAN_ROWID':'123',':PROGRAMNO':'123'};
+                    obj['arr'][':TYPE']=$('#TYPE').val();
+                    obj['sqlpath']={}
+                    obj['sqlpath']['edit']='major/programUpdate.SQL';
+                    ajiakesi('__URL__/xiugai',obj,function(c){$.messager.alert('提示',c)})
+                    wd2.window({
+                        closed:true
+                    })
+                    peiyangprogram.datagrid('load')
+                })
+
+    })
+</script>
+<style>
+    #wd2 td{border:1px solid rgb(224,224,224)}
+</style>
+<body style="background-color: #fff">
+    <div id="zhuanyeprogram">
+    </div>
+
+    <div id="wd2" title="编辑教学计划" closable="true" class="easyui-window" style="width:450px;height:300px"  minimizable="false" maximizable="false" closed="true" collapsible="false">
+        <table border="0" width="100%" align="center" cellspacing="1" style="margin-top:10px;">
+            <tr>
+                <td width="43%" align="right" >教学计划号：</td>
+                <td width="57%"><input type="text" id="PROGRAMNO" value="" readonly   style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none;"  ></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right" >教学计划名称：</td>
+                <td width="57%"><input type="text" size="50" name="PROGNAME" value="" readonly   style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none;"  ></td>
+                <input type="hidden" id="MAJORPLAN_ROWID">
+            </tr>
+
+            <tr>
+                <td width="43%" align="right">教学计划类别：</td>
+                <td width="57%"><select name="TYPE" id="TYPE" size="1" >
+                    <volist name="codett2" id="v">
+                        <option value="{$v.name}">{$v.value}</option>
+                    </volist>
+                </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">选课学分：</td>
+                <td width="57%"><input type="text" id="CREDITS" size="5" value=""></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">须通过学分：</td>
+                <td width="57%"><input type="text" name="XTGXF" size="5"  id="MCREDITS" value=""></td>
+            </tr>
+
+        </table>
+        <br>
+               <center> <a href="javascript:void(0)" id="programEdit"><!--todo:修改某个教学计划信息的BUTTON--></a></center>
+
+
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_del'>删除选中培养计划</div>
+        <div id='admin_edit'>修改教学计划</div>
+    </div>
+
+
+</body>
+</html>

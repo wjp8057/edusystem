@@ -1,0 +1,78 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+
+
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#search').linkbutton({
+            text:'查看成绩单',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    var str=0
+                    var count=''
+                    var select=''
+                    if($('[name=YEAR]').val()=='0'){
+                        str=undefined
+                        count='Results/One_thirteen_count2.SQL'
+                        select='Results/One_thirteen_select2.SQL'
+                    }else{
+                        str=$('[name=YEAR]').val()
+                        count='Results/One_thirteen_count.SQL'
+                        select='Results/One_thirteen_select.SQL'
+                    }
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':select,'count':count
+                    },'bind':{
+                        ':YEAR':str,':CLASSNO':$('[name=classno]').val(),':STUDENTNO':$('[name=studentno]').val()}})
+                    wd_two.window({closed:false})
+                })
+
+
+
+
+
+    })
+</script>
+<body>
+<div id="wd" title="体质健康测试成绩查询" data-options="closable:false,collapsible:false">
+
+</div>
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+            <label for="yyear">学年：</label><input type="text" name="YEAR" id='yyear'  size="4"  >  查总评填0&nbsp;&nbsp;
+
+            <label for="sstudentno">学号：</label><input type="text" name="studentno" id='sstudentno' value="%" size="9">&nbsp;&nbsp;
+
+            <label for="cclassno">班号：</label><input type="text" name="classno" value="%" id="cclassno" size=9>&nbsp;&nbsp;
+
+                        <a id="search">查询</a> &nbsp;
+
+        </div>
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',toolbar:'#tdemo',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[60,80,100]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xn',width:120" align="center">学年</th>
+                        <th data-options="field:'xh',width:120" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'dj',width:150,align:'right'" align="center">等级</th>
+                        <th data-options="field:'fs',width:100,align:'right'" align="center">分数</th>
+                        <th data-options="field:'bj',width:100,align:'right'" align="center">班级</th>
+
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

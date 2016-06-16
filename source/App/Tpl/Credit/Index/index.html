@@ -1,0 +1,195 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-canshu","menuname": "参数设置",
+            "menus": [
+//                {"menuid": "11","menuname": "常用证书设置","icon": "icon-log","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Parameters"},
+                {"menuid": "12","menuname": "认定时间设置","icon": "icon-shijian","url":" __ROOT__/index.php?g=Credit&m=Credit&a=applydate"},
+                {"menuid": "13","menuname": "认定归档","icon": "icon-guidang","url":" __ROOT__/index.php?g=Credit&m=Credit&a=file"}
+             ]
+        },{"menuid": "2","icon": "icon-xuadmin","menuname": "创新技能学分单个认定",
+            "menus": [
+            /*    {"menuid": "21","menuname": "创新技能学分申请","icon": "icon-log","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Single"},
+             */   {"menuid": "22","menuname": "院系审核(创新)","icon": "icon-room","url":" __ROOT__/index.php?g=Credit&m=Credit&a=Skillschoolview"},
+                {"menuid": "23","menuname": "教务处终审(创新)","icon": "icon-jiaowuchu","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Skilldeanview"}
+             ]
+        },{"menuid": "3","icon": "icon-xuadmin2","menuname": "素质学分单个认定",
+            "menus": [
+               /* {"menuid": "31","menuname": "素质学分申请","icon": "icon-log","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Quality"},
+               */ {"menuid": "32","menuname": "院系审核(素质)","icon": "icon-room","url":" __ROOT__/index.php?g=Credit&m=Credit&a=Qualityschoolview"},
+                {"menuid": "33","menuname": "教务处终审(素质)","icon": "icon-jiaowuchu","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Qualitydeanview"}
+                ]
+        },{"menuid": "4","icon": "icon-tongyi1","menuname": "创新技能学分统一认定",
+            "menus": [
+                /*{"menuid": "41","menuname": "项目创建(创新)","icon": "icon-log","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Skillcreateproject"},
+               */ {"menuid": "42","menuname": "学生添加(创新)","icon": "icon-personal","url":" __ROOT__/index.php?g=Credit&m=Credit&a=SkillcountSchool"},
+                {"menuid": "43","menuname": "认定终审(创新)","icon": "icon-jiaowuchu","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Skillcountdean"}/*,
+                {"menuid": "44","menuname": "查看以往认定","icon": "icon-jiaowuchu","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Skillyiwang"}*/
+            ]
+        },{"menuid": "5","icon": "icon-tongyi2","menuname": "素质学分统一认定",
+            "menus": [
+               /* {"menuid": "51","menuname": "项目创建(素质)","icon": "icon-log","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Qualitycreateproject"},
+               */ {"menuid": "52","menuname": "学生添加(素质)","icon": "icon-personal","url":" __ROOT__/index.php?g=Credit&m=Credit&a=QualitycountSchool"},
+                {"menuid": "53","menuname": "认定终审(素质)","icon": "icon-jiaowuchu","url": "__ROOT__/index.php?g=Credit&m=Credit&a=Qualitycountdean"}
+            ]
+        },
+        {"menuid": "6","icon": "icon-search","menuname": "信息查询",
+            "menus": [
+                {"menuid": "61","menuname": "查看认定结果","icon": "icon-search","url": "__ROOT__/index.php?g=Credit&m=Credit&a=select_file"}
+            ]
+        }
+    ]
+};
+var menuTabs = null;
+
+
+$(function()
+{
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Teacher/Login/logout';
+            }
+        });
+    });
+
+
+    //开课计划的学年学期保存
+    $("#handlerConfig").bind("click",function(){
+        $.post("__ROOT__/Credit/Index/config/hasJson/true", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()}, function(rsp) {
+            if(rsp){
+                msgShow("系统消息：", rsp.message, rsp.type);
+            }
+        },"JSON");
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="创新技能素质学分认定" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">创新技能学分认定功能简介</span>
+            <b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">
+                创新技能学分认定：实现创新技能和素质学分的申报、审核、认定功能。主要模块如下：<br />
+                1、参数设置： 常用证书设置、认定时间设置、认定归档确认<br />
+                2、创新技能学分单个认定：学分申请、院系审核、教务处终审，其中学分申请是由学生自己提出申请，在学生端进行操作。<br />
+                3、素质学分单个认定：学分申请、院系审核、教务处终审，其中学分申请是由学生自己提出申请，在学生端进行操作。<br />
+                4、创新技能学分统一认定：学生添加（创新）、 认定终审（创新）<br />
+                5、素质学分统一认定：学生添加（素质）、 认定终审（素质）<br />
+                6、信息查询：认定结果查询<br />
+            </p></b>
+
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、参数设置</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp<b>1、常用证书设置</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">管理员可添加常用证书，并设定学分、证书状态。也可对已添加的证书进行修改、删除管理操作。</p>
+            &nbsp&nbsp&nbsp&nbsp<b>2、认定时间设置</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">管理员可设置学年、学期的认定起止时间和开启状态，若是在认定时间期限外或关闭状态的，则将无法进行学分认定操作。</p>
+            &nbsp&nbsp&nbsp&nbsp<b>3、认定归档</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">把本学期的认定通过的学分统一进行归档，1学期可多次进行归档。</p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、创新技能学分单个认定:<p style="font-size: 13px;padding-left:45px;margin-top: 0px;margin-bottom: 0px">学院只能对本学院的学生进行学分申请和管理，院系负责人只能查看到本学院提交上来的学分申请信息并对此进行审核，教务处可以对所有分院提交上来的申请信息进行终审。</p></font></b><br>
+            &nbsp&nbsp&nbsp&nbsp<b>1、创新技能学分申请</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、各院系教学秘书可对本学院学生填写“创新、技能学分认定表”提交给本院系负责人进行审核。
+            &nbsp&nbsp&nbsp&nbsp<br>ｂ、可查看本院系已提交审核和未提交审核的学分申请记录，并可对未提交的申请记录进行删除、修改、提交操作；已提交的申请记录只能进行查看；若是院系审核不通过的数据，则还可以继续删除、修改、提交操作。
+            &nbsp&nbsp&nbsp&nbsp<br>ｃ、同一个学号同一本证书并且同一证书时间的学生只可提交一次学分认定申请。
+            &nbsp&nbsp&nbsp&nbsp<br>ｄ、若当前时间不在学分认定时间期限内，则无法进行提交学分认定申请。
+
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b>2、创新技能院系审核</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、各个院系负责人可对本院提交上来的学分申请信息进行查看，并对此进行审核操作，若审核通过则提交到教务处进行终审；若审核不通过，则退回给各院系教学秘书，可由院系教学秘书修改之后重新进行提交审核。
+            &nbsp&nbsp&nbsp&nbsp<br>ｂ、若当前时间不在学分认定时间期限内，则无法进行提交学分认定审核。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b>3、创新技能教务处终审</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、模块授权用户（教务处）可查看所有学院负责人审核通过的学分认定申请，并对此进行最终的审核，若审核通过，则学分认定完成；若审核不通过，则可由各院系教学秘书修改此条申请之后重新进行提交审核。
+            <br>ｂ、若当前时间不在学分认定时间期限内，则无法进行提交学分认定审核。
+            <br>ｃ、可以打印汇总表目录
+        </p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">三、素质学分单个认定:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp<b>1、学分申请（学生）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、学生在学生端对创新技能学分提出认定申请并提交给院系教学秘书进行审核。
+            &nbsp&nbsp&nbsp&nbsp<br />ｂ、同一个学号同一本证书并且同一证书时间的学生只可提交一次学分认定申请。
+            &nbsp&nbsp&nbsp&nbsp<br />ｃ、若当前时间不在学分认定时间期限内，则无法进行提交学分认定申请。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b>2、素质学分院系审核</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+             ａ、教学秘书可查看本院系已提交审核和未提交审核的学分申请记录，并可对未提交的申请记录进行删除、修改、提交操作；若审核通过则提交到教务处进行终审；若是院系审核不通过的数据，则删除此条申请。
+            &nbsp&nbsp&nbsp&nbsp<br>ｂ、若当前时间不在学分认定时间期限内，则无法进行提交学分认定申请。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b>3、素质学分教务处终审</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、模块授权用户（教务处）可查看所有学院负责人审核通过的素质学分认定申请，并对此进行最终的审核，若审核通过，则学分认定完成；若审核不通过，则删除此条申请。
+            &nbsp&nbsp&nbsp&nbsp<br>ｂ、若当前时间不在学分认定时间期限内，则无法进行提交素质学分认定审核。
+            &nbsp&nbsp&nbsp&nbsp<br>ｃ、可以打印汇总表目录
+        </p>
+
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">四、创新技能学分统一认定:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp<b>1、学生添加（创新）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、各认定学院的授权用户，只能查看到本院系添加的认定学生信息，可添加学生，输入学号即可，完善学生的项目信息。若有学生认定项目是类似的，则可复制某个学生的认定信息。学生添加之后，教务处可同时进行项目认定终审。
+            &nbsp&nbsp&nbsp&nbsp<br>ｂ、同一个学号、同一个项目且同一个证书时间只能进行一次添加。
+            &nbsp&nbsp&nbsp&nbsp<br>ｃ、若当前时间不在学分认定时间期限内，则无法添加学分认定。
+            &nbsp&nbsp&nbsp&nbsp<br>ｄ、同一个学生同一个项目，不同学年学期可以多次认定。
+            &nbsp&nbsp&nbsp&nbsp<br>ｅ、可查看最终的审核结果
+
+        </p>
+        </p>
+            <b>2、认定终审（创新技能）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">
+            a、模块授权用户（教务处）可查看所有认定学院添加的各个创新技能学分项目认定情况，可对学生进行审核。若审核通过，则表示认定完成；若审核不通过，则表示不通过。审核之后可直接删除该学生的创新技能学分认定信息。
+            <br>ｂ、若当前时间不在学分认定时间期限内，则无法进行学分认定。
+        </p>
+
+         <br>
+            <b><font style="font-size: 15px">五、素质学分统一认定</font></b><br>
+            <b>1、学生添加（素质） </b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">
+            ａ、各认定学院的授权用户，只能查看到本院系添加的认定学生信息，可添加学生，输入学号即可，完善学生的项目信息。若有学生认定项目是类似的，则可复制某个学生的认定信息。学生添加之后，团委可同时进行项目认定终审。
+            <br>ｂ、同一个学号、同一个项目且同一个证书时间只能进行一次审核不可重复提交。
+            <br>ｃ、若当前时间不在学分认定时间期限内，则无法添加学分认定。
+            <br>ｄ、同一个学生同一个项目，不同学年学期可以多次提交认定。
+            <br>ｅ、可查看最终的审核结果
+        </p>
+            <b>2、认定终审（素质）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">
+            a、模块授权用户（团委）可查看所有认定学院添加的各个素质学分项目认定情况，可对学生进行审核。若审核通过，则表示认定完成；若审核不通过，则表示不通过。审核之后可直接删除该学生的创新技能学分认定信息。
+            <br>ｂ、若当前时间不在学分认定时间期限内，则无法进行学分认定。
+        </p>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>		   
+	<div class="easyui-layout"  data-options="border:false,fit:true" >
+       <div data-options="region:'west',split:true" style="width:600px;">
+           <table id="datagrid" fitColumns="true" width="100%" fit="true" pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+	          <thead>
+	            <tr><th data-options="field:'book_id',checkbox:true" ></th>
+	                <th data-options="field:'isbn',align:'center',width:50">ISBN</th>
+	                <th data-options="field:'bookname',align:'center',width:60">教材名称</th>
+	                <th data-options="field:'press',align:'center',width:50">出版社</th>
+	                <th data-options="field:'author',align:'center',width:60">主编</th>
+	                <th data-options="field:'classname',align:'center',width:60">班级</th></tr>
+	          </thead>
+           </table>
+        </div>
+        <div data-options="region:'center'">
+	        <div class="easyui-layout" data-options="fit:true,border:false"  style="height: 100%">
+	            <div data-options="region:'north',split:false,border:false" style="height:75px;background:#FFF;overflow: hidden">
+	                <style type="text/css">.title label{padding-right:15px;}</style>
+	                <div class="title" align="center" style="padding:5px;margin:0px;line-height:22px;">
+		                {$year}学年第{$term}学期领用教材列表<br/>
+		                <label>学号：{$studentno}</label><label>姓名：{$stu.name}</label><label>班级：{$stu.classname}</label><label>学院：{$stu.schoolname}</label><br/>
+		                <label>征订总数：<span name="number">{$data.number}</span>本</label><label>总金额：<span name="price">{$data.price}</span>元</label><label>折扣总金额：<span name="dis_price">{$data.dis_price}</span>元</label><br/>
+	                </div>
+	            </div>
+	            <div data-options="region:'center',border:false" >
+	                <table id="dataSelect" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="book_id" pagination="true" pageSize="20" pageList="[20,40,60]" striped="true">
+			          <thead>
+			            <tr><th data-options="field:'book_id',checkbox:true" ></th>
+			                <th data-options="field:'bookname',align:'center',width:80">教材名称</th>
+			                <th data-options="field:'price',align:'center'">原价</th>
+			                <th data-options="field:'dis_price',align:'center'">折扣价</th>
+			                <th data-options="field:'dis_rate',align:'center'">折扣率</th>
+			                <th data-options="field:'number',align:'center'">数量</th>
+			                <th data-options="field:'author',align:'center',width:50">主编</th>
+			                <th data-options="field:'press',align:'center',width:50">出版社</th></tr>
+			          </thead>
+		           </table>
+	            </div>
+	        </div>
+        </div>
+	</div>
+<div id="toobar">
+	<label>教材名称：</label><input name="bookname" value='%'  size="20" maxlength="100">
+	<label>ISBN：</label><input name="isbn" size="20" value='%'  maxlength="50">
+	<label>班号：</label><input name="classno" value="{$stu.classno}" size="10" maxlength="10">
+	<p style="height:4px;padding:0px;margin: 0px;"></p>
+	<a href="javascript:void(0)" id="searcher">检索</a>
+    <a href="javascript:void(0)" id="addBook" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true">将选中教材添加到右边</a>
+</div>
+<div id="toobarSelect">
+    <a href="javascript:void(0)" id="delbook" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >将选中教材从列表中取消</a>
+    <a href="javascript:void(0)" id="addDataBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" >将列表提交数据库</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var year="{$year}";
+var term="{$term}";
+var studentno="{$studentno}";
+var stuname="{$stu.name}";
+var bookAry={$list};
+var classno="{$stu.classno}";
+$(function(){
+	//搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+	var datagrid = $('#datagrid').datagrid({toolbar:'#toobar',url:"__URL__/studentBuy/hasJson/1",queryParams:{classno:classno,year:year,term:term}});
+	//教材查询
+    $("#searcher").click(function(){
+        datagrid.datagrid("load",{bookname:$.trim($("#toobar [name='bookname']").val()),
+        	isbn:$.trim($("#toobar [name='isbn']").val()),
+        	classno:$.trim($("#toobar [name='classno']").val()),
+        	year:year,term:term
+        });
+    });
+	//学生教材列表
+    var dataSelect = $('#dataSelect').datagrid({toolbar:'#toobarSelect',url:"__URL__/getStuBook/",queryParams:{year:year,term:term,studentno:studentno}});
+    //将选中教材添加到右边
+    var ary={};
+	$("#addBook").click(function(){
+    	list=datagrid.datagrid('getSelections');
+    	if(list==null || list.length==0){
+            msgShow("系统提示：","请选择您要添加的教材","error");
+            return;
+        }
+        var count = 0;
+        var num=0;
+        $.each(list,function(index,row){
+        	var bool=true;
+        	for(var i=0;i<bookAry.length;i++){
+        		if(bookAry[i].book_id==row.book_id){
+        			bool=false;
+        			break;
+        		}
+        	}
+            if(ary[row.book_id]!=row.book_id && bool){
+                if(row.price==null || row.price==""){
+                	msgShow("系统提示：","您选择的教材“"+row.bookname+"”暂时没有价格信息，不执行添加发放操作","error");
+                }else{
+                	ary[row.book_id]=row.book_id;
+                	dataSelect.datagrid("insertRow",{row:{book_id:row.book_id,
+                    	bookname:row.bookname,price:row.price,dis_price:row.dis_price,
+                    	dis_rate:row.dis_rate,number:1,author:row.author,press:row.press}});
+                }
+            }
+        })
+        $('#dataSelect').datagrid("clearSelections");
+    });
+	//删除学生列表里的教材
+	var delId="";
+	$("#delbook").click(function(){
+		list = dataSelect.datagrid("getSelections");
+		if(list==null || list.length==0){
+            msgShow("系统提示：","请选择您要取消添加的教材","error");
+            return;
+        }
+        for(var i = list.length - 1; i >= 0; i--){
+            var row = list[i];
+            var bool=true;
+            for(var j=0;j<bookAry.length;j++){
+        		if(bookAry[j].book_id==row.book_id){
+        			delId+=row.book_id+",";
+        			bool=false;
+        			break;
+        		}
+        	}
+            if(bool){
+            	ary[row.book_id] = null;
+            }
+            dataSelect.datagrid('deleteRow', dataSelect.datagrid('getRowIndex',row));
+        }
+	});
+	//提交数据
+	$("#addDataBut").click(function(){
+		$.ajax({
+            url:'__URL__/savebooklist/hasJson/1',
+            data:{ids:ary,year:year,term:term,studentno:studentno,name:stuname,delId:delId},
+            type:'POST',
+            success:function(d){
+                if(d=="1"){
+                	$.messager.alert("系统提示：","数据保存成功","info",function(){
+                		location.reload();
+                	});
+                }else{
+                    msgShow("系统提示：","没有可更新的数据！","info");
+                }
+            }
+        });		
+	});
+});
+</script>
+</body>
+</html>

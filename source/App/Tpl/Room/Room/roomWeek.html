@@ -1,0 +1,14 @@
+<include file=":Include:jqueryHeader" />
+ <script>
+     $(function(){
+         $('#print').bind('click',function(){
+             print();
+         })
+     })
+ </script>
+<body style="background: #fff">
+{$str}
+
+<div style="text-align: center"><a href="javascript:void(0)" class="easyui-linkbutton" plain="true" iconCls="icon-print" id="print"></a></div>
+</body>
+</html>

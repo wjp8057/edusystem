@@ -1,0 +1,85 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:  window窗口
+
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+        $('#e_look').bind('click',function(){
+                        var rowList=$('#List_dat').datagrid('getChecked')
+                        if(rowList==''){
+                            return $.messager.alert('提示','请选择应该要查看的课程')
+                        }
+                        openTabsWindows('课程的情况','__ROOT__/CourseManager/CourseManager/StudentList/YEAR/'+parent.$('[NAME=YEAR]').val()+'/TERM/'+parent.$('[name=TERM]').val()+'/COURSENO/'+rowList[0]['kh']);
+
+        })
+
+        $('#bt').linkbutton({
+            text:'检索'
+        }).bind('click',function(){
+            $('#List_dat').datagrid('load',{
+                'Sqlpath':{'select':'CourseManager/One_eight_select.SQL','count':'CourseManager/One_eight_count.SQL'},
+                'bind':{':YONE':parent.$('[name=YEAR]').val(),':TONE':parent.$('[name=TERM]').val(),
+                    ':YTWO':parent.$('[name=YEAR]').val(),':TTWO':parent.$('[name=TERM]').val(),
+                    ':ENTERYEAR':$('[name=year]').val(),':ENTERMONTH':$('[name=month]').val(),
+                    ':YTHREE':parent.$('[name=YEAR]').val(),':TTHREE':parent.$('[name=TERM]').val()}
+            })
+            $('#title_name').html(parent.$('[name=YEAR]').val()+'学年'+parent.$('[name=TERM]').val()+'学期可能超过教室座位数的新生课程列表');
+            $('#title_name').css({'font-size':'20px'
+
+            })
+
+        })
+    })
+
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #ffffff">
+
+
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            &nbsp;&nbsp;<label for="yyear"> 新生班级入学年份:</label>
+            <input type="text" name="year" id='yyear' value="2011" size="4">&nbsp;&nbsp;&nbsp;&nbsp;
+            <label for="mmonth">新生班级入学月份:</label><input type="text" name="month" id="mmonth" value="9" size="1">&nbsp;&nbsp;&nbsp;&nbsp;
+            (课程的开课学年学期由上面缺省学年学期指定，新生班级在这定义)
+                   <a href="javascript:void(0)" id="bt">检索</a>
+            &nbsp&nbsp&nbsp&nbsp
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"  id="e_look" plain=true>查看课程的情况</a>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List_dat"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',singleSelect:true,fit:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                    <th data-options="field:'km',width:100,align:'right'" align="center">课名</th>
+                    <th data-options="field:'jsh',width:100,align:'right'" align="center">教室号</th>
+                    <th data-options="field:'jsjc',width:200,align:'right'" align="center">教室简称</th>
+                    <th data-options="field:'zws',width:100,align:'right'" align="center">座位数</th>
+
+                    <th data-options="field:'yxkrs',width:100,align:'right'" align="center">已选课人数</th>
+                    <th data-options="field:'gskbyjrszj',width:200,align:'right'" align="center">各上课班预计人数总计</th>
+                    <th data-options="field:'gjsyzws',width:100,align:'right',formatter:function(a,b,c){
+
+                        return b.zws-(b.gskbyjrszj+b.yxkrs)
+                    }" align="center">估计剩余座位数</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,260 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+
+    function openwd(){
+
+        open('__URL__/zuoweianpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/COURSENO/'+arguments[0]+'/KC/'+arguments[1]);
+    }
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+
+        $('#lici_student_wd').window(new wind(370,280,false,false,true,false,false))   //todo:检索考位安排的页面
+
+        var dat=$('#daaa').datagrid({
+
+            fit:true,
+            singleSelect:true,
+            pagination:true,
+            pageList:[10,20,30,40],
+            pageSize:20,
+            columns:[[
+                {field:'kh',title:'课号',width:80,formatter:function(aa,b,c){
+                    return "<a href='javascript:openwd(\""+aa+"&quot,1)'>"+aa+"</a>";
+                }},
+                {field:'km',title:'课名',width:100},
+                {field:'xkrs',title:'选课人数',width:80},
+                {field:'kcc1',title:'考场1',width:80,formatter:function(aa,b,c){
+                    return "<a href='javascript:openwd(\""+ b.kh+"&quot,1)'>"+aa+"</a>";
+                }},
+                {field:'kw1',title:'考位1',width:80},
+                {field:'kcc2',title:'考场2',width:80,formatter:function(aa,b,c){
+                    return "<a href='javascript:openwd(\""+b.kh+"&quot,2)'>"+aa+"</a>";
+                }},
+                {field:'kw2',title:'考位2',width:80},
+                {field:'kcc3',title:'考场3',width:80,formatter:function(aa,b,c){
+                    return "<a href='javascript:openwd(\""+b.kh+"&quot,3)'>"+aa+"</a>";
+                }},
+                {field:'kw3',title:'考位3',width:80}
+            ]],
+            toolbar:'#tdemo',
+            view: detailview,
+            detailFormatter: function(rowIndex, rowData){
+                arr[rowData.row]=rowData;
+                return "<div id=a"+rowData.row+" style='width:600px;height:106px'>"+rowData.row+"</div>"
+            },
+            onExpandRow:function(index,row){
+                $('#a'+row.row).html('<table width="580" cellspacing="0" style="border:1px solid #eee"><tr><td  align="center"  style="border:1px solid #aaa;height:25px" width="100" bgcolor="#E0ECFF" ><font size="2">考试时间</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['kssj']+'</font></td></tr><tr id=SLAVE><td  align="center"  rowspan="4" bgcolor="#E0ECFF" style="border:1px solid #aaa"><font size="2">监考老师</font></td><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场1:'+arr[row.row]['ST1']+'</font></td></tr><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场2:'+arr[row.row]['ST2']+'</font></td></tr><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场3:'+arr[row.row]['ST3']+'</font></td></tr><tr><td  align="center" style="border:1px solid #aaa;height:25px"  bgcolor="#E0ECFF"><font size="2">备注</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['rem']+'</font></td></tr></table>')
+            },onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                })
+        },rowStyler: function(index,row){
+                return 'background-color:rgb(243, 243, 243);color:black;';
+            }
+        });
+
+
+
+
+
+
+        var daaa=$('#daaa')
+        $('#bt').linkbutton({
+            'text':'提交检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    dat.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+               dat.datagrid('load',{'Sqlpath':{'select':'exam/FinalExamQuery_select.SQL','count':'exam/FinalExamQuery_count.SQL'},
+                   bind:{':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val(),':CLASSNO':$('[name=classno]').val(),':CHANGCI':'%',
+                       ':TONE':$('[name=teacherno]').val(),
+                       ':TTWO':$('[name=teacherno]').val(),
+                       ':TTHREE':$('[name=teacherno]').val(),
+                       ':TFOUR':$('[name=teacherno]').val(),
+                       ':TFIVE':$('[name=teacherno]').val(),
+                       ':TSIX':$('[name=teacherno]').val(),
+                       ':TSEVEN':$('[name=teacherno]').val(),
+                       ':TEIGHT':$('[name=teacherno]').val(),
+                       ':TNINE':$('[name=teacherno]').val(),
+                   ':SONE':$('[name=school_one]').val(),':STWO':$('[name=school_one]').val(),':STHREE':$('[name=school_one]').val()
+                   ,':SFOUR':$('[name=school_one]').val(),':SFIVE':$('[name=school_one]').val(),':SSIX':$('[name=school_one]').val(),
+                   ':SSEVEN':$('[name=school_one]').val(),':SEIGHT':$('[name=school_one]').val(),':SNINE':$('[name=school_one]').val(),
+                       ':COURSESCHOOL':$('[name=school_two]').val()}},function(c){
+               })
+        })
+
+        //todo:点击弹出 检索考位安排窗口的  按钮
+        $('#kwap').linkbutton({
+            'text':'检索考位安排',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    $('#lici_student_wd').window({closed:false})
+                })
+
+        $('#e_excel').bind('click',function(){
+            $('[name=e_YEAR]').val($('[name=year]').val());
+            $('[name=e_TERM]').val($('[name=term]').val());
+            $('[name=e_CLASSNO]').val($('[name=classno]').val());
+            $('[name=e_TEACHERNO]').val($('[name=teacherno]').val());
+            $('[name=e_SCHOOL]').val($('[name=school_one]').val());
+            $('[name=e_SCHOOLTWO]').val($('[name=school_two]').val());
+            $('#examexcel').submit();
+        })
+
+        $('#e_daying').bind('click',function(){
+            $('[name=n_YEAR]').val($('[name=year]').val());
+            $('[name=n_TERM]').val($('[name=term]').val());
+            $('[name=n_CLASSNO]').val($('[name=classno]').val());
+            $('[name=n_TEACHERNO]').val($('[name=teacherno]').val());
+            $('[name=n_SCHOOL]').val($('[name=school_one]').val());
+            $('[name=n_SCHOOLTWO]').val($('[name=school_two]').val());
+            $('#examprint').submit();
+        });
+
+
+
+        $('[name=bt1]').linkbutton({
+            'text':'检索考位安排',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                   window.open('__URL__/zuoweianpai2/YEAR/'+$('[name=YEAR2]').val()+'/TERM/'+$('[name=TERM2]').val()+'/COURSENO/'+$('[name=COURSENO]').val());
+      })
+
+
+
+        $('[name=bt2]').linkbutton({
+            'text':'关闭',
+            'iconCls':'icon-stop'
+        }).bind('click',function(){
+
+                   $('#lici_student_wd').window({closed:true})
+         })
+    })
+</script>
+
+
+<style>
+
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+                 <b>学年:</b>
+              <input name="year" type="text" size='4' value="2011">
+                &nbsp &nbsp
+                   <b>学期:</b>
+               <input type="text" name="term" size="1" value="1">
+
+            &nbsp &nbsp
+                <b>监考教师学院:</b>
+                    <select name="school_one" class="easyui-combobox">
+                            <option value="%">全部</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+            &nbsp &nbsp
+
+            <b>考试场次:</b>
+
+            <select name="kscc" class="easyui-combobox">
+                <option value="%">全部</option>
+            </select>
+            &nbsp &nbsp     <br>
+                    <b>听课学院:</b>
+                    <select name="school_two" class="easyui-combobox">
+                        <option value="%">全部</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+
+
+
+            &nbsp &nbsp
+
+                 <b>上课班号:</b>
+                 <input type="text" name="classno" value="%">
+            &nbsp &nbsp
+
+            <b>监考教师:</b>
+            <input type="text" name="teacherno" value="%">
+
+            &nbsp &nbsp
+                <a href='javascript:void(0)' id="bt">提交检索</a>
+
+            &nbsp &nbsp
+            <a href='javascript:void(0)' id="kwap">提交检索</a>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel"  id="e_excel" plain=true>导出Excel</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-tanchu"  id="e_daying" plain=true>打印</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <div id="daaa" >
+        </div>
+    </div>
+
+</div>
+<style>
+   #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+<!--todo:检索考位安排-->
+<div id="lici_student_wd" title="检索考位安排 ">
+    <div >
+        <table border="0" cellspacing="1" width="90%" align="center" style="margin-top: 20px">
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">学年：</font></td>
+                    <td width="70%"><font size="2"><input type="text" name="YEAR2" size="4" value="2011"></font></td>
+            </tr>
+            </center>
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">学期：</font></td>
+                <td width="70%"><font size="2"><input type="text" name="TERM2" size="1" value="1"></font></td>
+            </tr>
+            <tr>
+                <td width="30%" bgcolor="#E0ECFF">
+                    <p align="right"><font size="2">课号：</font></td>
+                    <td width="70%"><input type="text" name="COURSENO" size="9" value="070A15B1F"><font size="2" color="#FF0000">(9位课号)</font></td>
+            </tr>
+        </table>
+    </div>
+    <p align="center"><a href="javascript:void(0)" name="bt1">检索考位安排</a>&nbsp&nbsp<a href="javascript:void(0)" name="bt2"></a></p>
+    <input type="hidden" name="pagename" value="ExamLocation.htm">
+</div>
+<form id="examexcel" action="__APP__/CourseManager/Excel/examExcel" method="POST">
+    <input type="hidden" name="e_YEAR" VALUE="">
+    <input type="hidden" name="e_TERM" VALUE="">
+    <input type="hidden" name="e_CLASSNO" VALUE="">
+    <input type="hidden" name="e_CHANGCI" VALUE="%">
+    <input type="hidden" name="e_TEACHERNO" VALUE="">
+    <input type="hidden" name="e_SCHOOL" VALUE="">
+    <input type="hidden" name="e_SCHOOLTWO" VALUE="">
+</form>
+
+<form id="examprint" action="__URL__/FinalExamQuery/tag/print" target="_blank" method="POST">
+    <input type="hidden" name="n_YEAR" VALUE="">
+    <input type="hidden" name="n_TERM" VALUE="">
+    <input type="hidden" name="n_CLASSNO" VALUE="">
+    <input type="hidden" name="n_CHANGCI" VALUE="%">
+    <input type="hidden" name="n_TEACHERNO" VALUE="">
+    <input type="hidden" name="n_SCHOOL" VALUE="">
+    <input type="hidden" name="n_SCHOOLTWO" VALUE="">
+</form>
+</body>
+</html>

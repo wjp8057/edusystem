@@ -1,0 +1,116 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+
+
+        var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+        var wd_er=$('#wd_one').window(new wind(0,0,false,false,true,true,true))
+
+        $('#search_one').linkbutton({
+            text:'查询课程明细',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Two_four_one_select.SQL','count':'Results/Two_four_one_count.SQL'
+                    },'bind':{':STUDENTNO':$('[name=STUDENTNO]').val(),':SCHOOL':$('[name=SCHOOL]').val()
+                        }})
+                    wd_yi.window({closed:false})
+                //    wd_two.window({closed:false})
+                    //wd_er.window({closed:true})
+                })
+
+        $('#search_two').linkbutton({
+            text:'查询门次统计',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Two_four_two_select.SQL','count':'Results/Two_four_two_count.SQL'
+                    },'bind':{':STUDENTNO':$('[name=STUDENTNO]').val(),':SCHOOL':$('[name=SCHOOL]').val()
+                    }})
+                    wd_er.window({closed:false})
+                   // wd_two.window({closed:false})
+                 //   wd_yi.window({closed:true})
+                })
+
+
+
+
+
+    })
+</script>
+<body>
+
+
+
+
+
+<!--<div id="wd2" title="">-->
+    <div id="cc" class="easyui-layout" data-options="fit:true,border:false">
+        <div id="tdemo">
+            &nbsp&nbsp <label for="sschool">学院：</label><select name="SCHOOL" id="sschool">&nbsp&nbsp
+            <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+
+            &nbsp&nbsp&nbsp&nbsp
+            <label for="sstudentno">请输入学号或学号的前若干位：</label><input type="text" name="STUDENTNO" id="sstudentno" value="%" size="9">
+            &nbsp&nbsp&nbsp&nbsp
+            <a id="search_one">查询</a> &nbsp;
+            &nbsp&nbsp&nbsp&nbsp
+            <a id="search_two"></a>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <div id="wd_TWO" data-options="inline:true" title=""><!--todo:英语能力系列-->
+               <!-- <table class="easyui-datagrid" id="yingyuB"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,toolbar:[{
+                     text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                        $('#wd2').window({
+                        closed:true})
+                     }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xh',width:100" align="center">学号</th>
+                        <th data-options="field:'xm',width:100" align="center">姓名</th>
+                        <th data-options="field:'mc',width:100,align:'right'" align="center">课号</th>
+
+
+                    </tr>
+                    </thead>
+                </table>-->
+            </div>
+
+            <!--<div id="wd_one" data-options="inline:true" title="">todo:英语能力系列-->
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,toolbar:'#tdemo',singleSelect:true,fit:true,pagination:true">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xn',width:230" align="center">学年</th>
+                        <th data-options="field:'xq',width:450" align="center">学期</th>
+                        <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                        <th data-options="field:'kcmc',width:150,align:'right'" align="center">课程名称</th>
+                        <th data-options="field:'kscj',width:100,align:'right'" align="center">考试成绩</th>
+                        <th data-options="field:'kccj',width:100,align:'right'" align="center">考查成绩</th>
+                        <th data-options="field:'cxcj',width:100,align:'right'" align="center">重修成绩</th>
+                        <th data-options="field:'xkxz',width:100,align:'right'" align="center">选课性质</th>
+                        <th data-options="field:'xh',width:100,align:'right'" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'bh',width:100,align:'right'" align="center">班号</th>
+                        <th data-options="field:'xydh',width:100,align:'right'" align="center">学院代号</th>
+
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+       <!-- </div>
+
+</div>-->
+    </div>
+</body>
+</html>

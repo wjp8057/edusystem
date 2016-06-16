@@ -1,0 +1,221 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    var classNoArr = {}; //已经选择的班级
+    var datagrid = $('#datagrid').datagrid({
+        toolbar: '#toobar',
+        frozenColumns:[[{field:'ck',checkbox:true}]],
+        url : "__ROOT__ /Programs/StudentsPlan/alist/hasJson/true/STUDENTNO/{$Think.request.STUDENTNO}",
+        onBeforeLoad:function(){
+            $(this).datagrid("clearSelections");
+            $(this).datagrid("unselectAll");
+        },onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#datagrid');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
+    var _dataSearch = null;
+    var _dataSelect = null;
+
+    //初始化
+    function initDataSearch(){
+        if(_dataSearch==null){
+            _dataSearch = $('#dataSearch').datagrid({
+                toolbar:'#toobarSearch',
+                frozenColumns:[[{field:'ck',checkbox:true}]],
+                onBeforeLoad:function(){
+                    $(this).datagrid("clearSelections");
+                    $(this).datagrid("unselectAll");
+                }
+            });
+        }else{
+            _dataSearch.datagrid('loadData',{total:0,rows:[]});
+        }
+    }
+    function initDataSelect(){
+        if(_dataSelect==null){
+            _dataSelect = $('#dataSelect').datagrid({toolbar:'#toobarSelect',frozenColumns:[[{field:'ck',checkbox:true}]]});
+        }else{
+            _dataSelect.datagrid('loadData',{total:0,rows:[]});
+        }
+    }
+
+
+    function ddel(){
+        if("{$student.SCHOOL}"!="{$theacher.SCHOOL}"){
+            msgShow("系统提示：","<br />这个学生的班级不属于你们学院，你不能对其修课计划作删除！","error");
+            return;
+        }
+
+        var rows = datagrid.datagrid("getSelections");
+        if(rows == null || rows.length==0){
+            msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+            return;
+        }
+        var arr = new Array();
+        if(rows!=null && rows.length>0){
+            $.each(rows, function(index,row){
+                arr.push(row.PROGRAMNO);
+            });
+        }
+
+        $.messager.confirm('系统消息：','你真的确定要删除选中的顶？',function(r){
+            if (r){
+                $.post("__ROOT__/Programs/StudentsPlan/delete/hasJson/true/STUDENTNO/{$student.STUDENTNO}", {PROGRAMNO:arr}, function(rsp) {
+                    if(rsp){
+                        $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        datagrid.datagrid("reload");
+                    }
+                },"JSON");
+            }
+        });
+    }
+    //删除教学计划
+    $("#handlerDelete").bind("click",ddel);
+    $('#admin_del').bind('click',ddel)
+
+    //打开添加修学班级界面
+    $("#handlerAdd").bind("click",function(){
+        if("{$student.SCHOOL}"!="{$theacher.SCHOOL}"){
+            msgShow("系统提示：","<br />这个学生的班级不属于你们学院，你不能对其修课计划作改动！","error");
+            return;
+        }
+        classNoArr = {}; //重置已经选择的班级
+        $('#win').window('open');
+        $('#win').window('maximize');
+        initDataSearch();
+        initDataSelect();
+    });
+    //添加修学班级 - 班级搜索
+    $("#searcher").bind("click",function(){
+        _dataSearch.datagrid("options").url = "__ROOT__/Programs/StudentsPlan/add/hasJson/true";
+        _dataSearch.datagrid("load", {PROGRAMNO:$("#wProgramno").val(), PROGRAMNAME:$("#wProgramname").val(), SCHOOL:$("#wSchool").val()})
+    });
+    //添加修学班级 - 从左边到右边
+    $('#AddToRight').bind("click",function(){
+        var rows = _dataSearch.datagrid("getSelections");
+        if(rows==null || rows.length==0){
+            msgShow("系统提示：","没有选择任何数据进行操作！","error");
+            return;
+        }
+
+        var count = 0;
+        $.each(rows,function(index,row){
+            if(classNoArr[row.PROGRAMNO]!=row.PROGRAMNO){
+                classNoArr[row.PROGRAMNO]=row.PROGRAMNO;
+                _dataSelect.datagrid("insertRow",{row:{PROGRAMNO:row.PROGRAMNO,PROGRAMNAME:row.PROGRAMNAME,SCHOOLNAME:row.SCHOOLNAME}});
+            }
+        })
+        $('#dataSelect').datagrid("clearSelections");
+    });
+    //添加修学班级 - 从右边删除
+    $('#DeleteToRight').bind("click",function(){
+        var rows = _dataSelect.datagrid("getSelections");
+        for(var i = rows.length - 1; i >= 0; i--){
+            var row = rows[i];
+            classNoArr[row.PROGRAMNO] = null;
+            _dataSelect.datagrid('deleteRow', _dataSelect.datagrid('getRowIndex', row));
+        }
+    });
+    //添加修学班级 - 把记录添加到数据表
+    $('#listToDb').bind("click",function(){
+        $.post("__ROOT__/Programs/StudentsPlan/save/hasJson/true/STUDENTNO/{$student.STUDENTNO}", {PROGRAMNO:classNoArr}, function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+                datagrid.datagrid("reload");
+            }
+        },"JSON");
+        $('#win').window('close');
+    })
+ });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+ <!--   <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" width="100%" >
+        <tr><th><b><if condition="$student">[{$student.STUDENTNO}]{$student.NAME}的修读计划列表<else />[{$Think.request.STUDENTNO}]学生班级未知</if></b></th></tr>
+        </table>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table title='<center><if condition="$student">[{$student.STUDENTNO}]{$student.NAME}的修读计划列表<else />[{$Think.request.STUDENTNO}]学生班级未知</if></center>' id="datagrid" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="PROGRAMNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'PROGRAMNO',align:'center',width:100" >教学计划号</th>
+                <th data-options="field:'PROGRAMNAME',align:'center',width:300">教学计划名称</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:200">制订学院</th>
+                <th data-options="field:'PROGRAMTYPEVALUE',align:'center',width:100">计划类别</th>
+                <th data-options="field:'REM',align:'center',width:100">计划备注</th></tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+<div id="toobar">
+    <a href="#" id="handlerDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >删除选定的班级修课计划</a>
+    <a href="#" id="handlerAdd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加修读计划</a>
+</div>
+
+<!-- 添加界面 -->
+<div id="win" class="easyui-window" style="width:600px;height:400px" title="添加班级修课计划" data-options="minimizable:false,collapsible:false,modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true">
+            <div class="easyui-layout" data-options="fit:true,border:false"  style="height: 100%">
+            <div data-options="region:'north',split:false,border:false" style="height:60px;background:#E0ECFF;overflow: hidden">
+                <table style="margin-left:20px" height="60">
+                    <tr><th>教学计划名称：</th><td><input type="text" name="PROGRAMNAME" id="wProgramname" value="%" size="20" /></td>
+                        <th>教学计划编号：</th><td><input type="text" name="PROGRAMNO" id="wProgramno" value="%" size="20" /></td></tr>
+                    <tr><th align="left">制订学院：</th><td><Cwebs:sqlselect id="wSchool" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" /></td>
+                        <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+                    </tr>
+                </table>
+            </div>
+            <div data-options="region:'center',border:false" >
+                <table id="dataSearch" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="PROGRAMNO"
+                       pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+                    <thead>
+                    <tr><th data-options="field:'PROGRAMNO',align:'center',width:100" >教学计划号</th>
+                        <th data-options="field:'PROGRAMNAME',align:'center',width:200">教学计划名</th>
+                        <th data-options="field:'SCHOOLNAME',align:'center',width:150">制订学院</th>
+                        <th data-options="field:'PROGRAMTYPEVALUE',align:'center',width:100">计划类别</th>
+                        <th data-options="field:'REM',align:'center',width:100">计划备注</th></tr>
+                    </thead>
+                </table>
+            </div>
+            </div>
+        </div>
+        <div data-options="region:'center'">
+            <table id="dataSelect" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="PROGRAMNO" striped="true" >
+                <thead>
+                <tr><th data-options="field:'PROGRAMNO',align:'center',width:100" >教学计划号</th>
+                    <th data-options="field:'PROGRAMNAME',align:'center',width:200">教学计划名</th>
+                    <th data-options="field:'SCHOOLNAME',align:'center',width:150">制订学院</th></tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="toobarSearch">
+    <a href="#" id="AddToRight" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true" >将选中教学计划添加到右边</a>
+</div>
+<div id="toobarSelect">
+    <a href="#" id="DeleteToRight" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >将选中教学计划从列表中取消</a>
+    <a href="#" id="listToDb" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" >将列表提交数据库</a>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除选定的班级修课计划</div>
+</div>
+</body>
+
+</html>
+

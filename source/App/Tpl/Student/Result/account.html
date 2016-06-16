@@ -1,0 +1,62 @@
+<include file=":Include:jqueryHeader" />
+<style type="text/css">
+table{border:solid 1px #ddd; border-collapse:collapse;margin: 0px auto;}
+table td,table th{border:dotted 1px #ccc;color: #000000;}
+</style>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <p align="center"><font color="#0000FF" face="隶书" style="font-size: 24pt">素质类学分共获得<Cwebs:sqllist id="list" file="result/l_jDF_sum_studentno_shuzi.sql" bind="':F_STUDENTNO'@session('S_USER_NAME'),':S_STUDENTNO'@session('S_USER_NAME')" delimiter="@">{$list.0.credits}</Cwebs:sqllist>分</font></p>
+    <p>&nbsp;</p>
+    <p align="center"><font color="#0000FF" face="隶书" style="font-size: 16pt">素质课程学分</font></p>
+    <div align="center">
+        <table cellspacing="0" cellpadding="4" width="98%">
+            <tr class="datagrid-header" height="25">
+                <th>学年</th><th>学期</th><th>课号</th><th>课名</th><th>学分</th><th>课程类型</th>
+                <th>考试方式</th><th>总评</th><th>补考</th><th>积点分</th><th>听课方式</th><th>考试备注</th>
+            </tr>
+            <Cwebs:sqllist id="list1" file="result/myScore_shuzi.sql" bind="':STUDENTNO'@session('S_USER_NAME')" delimiter="@">
+                <volist name="list1" id="data1">
+                    <tr>
+                        <td  align="center">{$data1.YEAR}</td>
+                        <td  align="center">{$data1.TERM}</td>
+                        <td  align="center">{$data1.COURSENO}</td>
+                        <td  align="center">{$data1.COURSENAME}</td>
+                        <td  align="center">{$data1.CREDITS}</td>
+                        <td  align="center">{$data1.APPROACHES}</td>
+                        <td  align="center">{$data1.EXAMTYPE}</td>
+                        <td  align="center">{$data1.EXAMSCORE}</td>
+                        <td  align="center">{$data1.EXAMSCORE2}</td>
+                        <td  align="center">{$data1.POINT}</td>
+                        <td  align="center">{$data1.APPROACHNAME}</td>
+                        <td  align="center">{$data1.REM}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+   <p>&nbsp;</p>
+    <p align="center"><font face="隶书" style="font-size: 16pt" color="#0000FF">创新、技能学分</font></p>
+    <div align="center">
+        <table cellspacing="0" cellpadding="4" width="80%">
+            <tr class="datagrid-header" height="25">
+                <th>获得原因</th><th>学分</th><th>认定时间</th><th>申请学年</th>
+            </tr>
+            <Cwebs:sqllist id="list2" file="result/addCredit.sql" bind="':STUDENTNO'@session('S_USER_NAME')" delimiter="@">
+                <volist name="list2" id="data2">
+                    <tr>
+                        <td  align="center">{$data2.reason}</td>
+                        <td  align="center">{$data2.credit}</td>
+                        <td  align="center">{$data2.sdate}</td>
+                        <td  align="center">{$data2.year}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+   <p>&nbsp;</p>
+</div>
+
+</body>
+</html>

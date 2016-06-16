@@ -1,0 +1,1 @@
+select * from bookpress b where b.name like :name and b.status like :status order by b.id desc

@@ -1,0 +1,116 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function openwd(){
+        openTabsWindows('座位安排','__URL__/zuoweianpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/COURSENO/'+arguments[0]+'/KC/'+arguments[1],'',true);
+    }
+    $(function(){
+
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+
+        $('#lici_student_wd').window(new wind(370,280,false,false,true,false,false))   //todo:检索考位安排的页面
+
+        var dat=$('#listDat').datagrid({
+            toolbar:'#tdemo'
+        });
+
+        if(parent.$('#TERM').val()>1){
+            var year=parent.$('#YEAR').val()
+            var term=1
+        }else{
+            var year=parent.$('#YEAR').val()-1
+            var term=2
+        }
+
+        var daaa=$('#daaa')
+        $('#bt').linkbutton({
+            'text':'提交检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    dat.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+                    dat.datagrid('load',{'Sqlpath':{'select':'exam/XQC_examQuery_select.SQL','count':'exam/XQC_examQuery_count.SQL'},
+                   bind:{':YEAR':year,':TERM':term,':COURSENO':$('[name=COURSENO]').val(),':STUDENTNO':$('[name=STUDENTNO]').val(),':SCHOOL':$('#sschool').val()}
+                })
+
+                })
+
+
+
+        $('[name=bt1]').linkbutton({
+            'text':'检索考位安排',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    openTabsWindows('考位安排','__URL__/zuoweianpai2/YEAR/'+$('[name=YEAR2]').val()+'/TERM/'+$('[name=TERM2]').val()+'/COURSENO/'+$('[name=COURSENO]').val(),'',true);
+                })
+
+
+
+        $('[name=bt2]').linkbutton({
+            'text':'关闭',
+            'iconCls':'icon-stop'
+        }).bind('click',function(){
+
+                    $('#lici_student_wd').window({closed:true})
+                })
+    })
+</script>
+
+
+<style>
+
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+
+
+            <b>学号:</b>
+            <input type="text" name="STUDENTNO" value="%">
+            &nbsp &nbsp
+            <b>课号:</b>
+            <input type="text" name="COURSENO" value="%">
+            &nbsp &nbsp
+        <label for="sschool">学院</label>
+        <select id="sschool">
+            <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+            <a href='javascript:void(0)' id="bt">提交检索</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid"
+               data-options="fit:true,fitColumns:true,singleSelect:true,pagination:true" id="listDat">
+            <thead>
+            <tr>
+                <th data-options="field:'xsszxy',width:100,align:'center'">学生所在学院</th>
+                <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                <th data-options="field:'kcmc',width:300,align:'center'">课程名称</th>
+                <th data-options="field:'cj',width:100,align:'center'">成绩</th>
+                <th data-options="field:'kccj',width:100,align:'center'">考查成绩</th>
+                <th data-options="field:'bkcj',width:100,align:'center'">补考成绩</th>
+                <th data-options="field:'bkkc',width:100,align:'center'">成绩</th>
+
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+<style>
+    #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,137 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function yitiao(obj){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            alert('请选择一条,不能选多条');                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            alert('请选择一条要编辑的数据');                         //用户没选择行
+        }else{
+            return true;
+        }
+        return false;
+    }
+    var ClassNo='{$info.classno}';         //todo:存放 添加修读计划时候 要用到的CLASSNO
+    //:todo:添加到右边的方法
+    function Gotoright(obj,dataobj){
+        var index=dataobj.datagrid('getRowIndex',obj);
+        if(index!=-1)
+            return
+        dataobj.datagrid('appendRow',obj);
+    }
+
+    $(function(){
+        //todo:添加学生时候 搜索所用到的方法
+        $('#BSubmit2').bind('click',function(){
+            var obj={}
+            //alert($('#STUDENTNO').val());
+            obj['STUDENTNO']=$('#STUDENTNO').val();
+            obj['CLASSNO']=$('#CLASSNO').val();
+            obj['SCHOOL']=$('#SCHOOL2').val();
+            obj['NAME']=$('#NAME').val();
+            $('#tianjiaxuesheng').datagrid('load',obj)
+        })
+
+        //todo:右边的datagrid____添加学生≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡start≡≡≡≡≡≡≡≡≡≡
+        var Goright_Student=$('#Goright1_ADDSTUDENT').datagrid({
+            url:'',
+            fit:true,
+            columns:[[{field:'StudentNo',title:'学号', width:70},
+                {field:'Name',title:'姓名', width:70},
+                {field:'SEXNAME',title:'性别', width:30},
+                {field:'ClassName',title:'班级', width:120},
+                {field:'SchoolName',title:'学院', width:120}
+            ]],
+            toolbar:[{
+                text:'将选中的学生保存到数据库',                                  //todo:删除班级的修课计划的操作
+                iconCls: 'icon-save',
+                handler:function(){
+                    var one={}
+                    one['data']=Goright_Student.datagrid('getRows');
+                    one['CLASSNO']=ClassNo;                                //todo:班级号
+                    var fangfa=function(c){
+                        $.messager.alert('提示',c);
+                    }
+                    ajiakesi('__URL__/addStudent/hasJson/1',one,fangfa)             //todo:添加教学计划
+                }
+            },'-',{
+                text:'取消所选择的学生',
+                iconCls:'icon-goleft',
+                handler:function(){
+                    var yi=yitiao(Goright_Student)
+                    if(yi){
+                        var xuanzhong=Goright_Student.datagrid('getRowIndex',Goright_Student.datagrid('getSelected'));
+                        Goright_Student.datagrid('deleteRow',xuanzhong)
+                    }
+                }
+            }
+            ],
+            pageList:[10,20,30,40,50],
+            pageSize:20
+        })
+        //todo:≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡end≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
+
+//todo:添加学生的  datgrid≡≡≡≡≡≡≡≡≡内层内层内层≡≡≡≡≡≡≡≡≡≡start≡≡≡≡≡≡≡内层内层内层≡≡≡≡≡≡≡≡≡≡≡≡
+        var tianjiaxuesheng1=$('#tianjiaxuesheng').datagrid({
+            url:'__URL__/selectxuesheng',
+            fit:true,
+            columns:[[{field:'CLASSNO',checkbox:true},{field:'StudentNo',title:'学号', width:70},
+                {field:'Name',title:'姓名', width:70},
+                {field:'SEXNAME',title:'性别', width:30},
+                {field:'ClassName',title:'班级', width:120},
+                {field:'SchoolName',title:'学院', width:120}
+            ]],
+            toolbar:[{
+                text:'将选择的学生添加到右边',                                  //todo:删除班级的修课计划的操作
+                iconCls: 'icon-goright',
+                handler:function(){
+                    var xueshengList=tianjiaxuesheng1.datagrid('getSelections')        //获得所有选中的元素
+                    for(var i=0;i<xueshengList.length;i++){
+                        Gotoright(xueshengList[i],Goright_Student);                        //每次循环都是一个对象
+                    }
+                }
+            }
+            ],
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20
+        })
+
+    })
+</script>
+<body>
+    <div id="cc2" class="easyui-layout" data-options="fit:true,border:false" >
+        <div data-options="region:'north',title:'搜索',split:false,border:false,noheader:true" style="height:60px;">
+            <p style="margin:10px" align="left"><font size="2">学号：
+                <input type="text" name="StudentNo"  iD=STUDENTNO size="9" value="%" maxlength="9">&nbsp;
+                姓名：
+                <input type="text" name="Name" id="NAME" size="10" value="%">&nbsp; 所属学院：
+                <select name="School" id=SCHOOL2 size="1">
+                    <option value="%" selected>所有</option>
+                    <volist name="school" id="v">
+                        <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                    </volist>
+                </select>&nbsp; 班号：<input type="text" name="ClassNo" id="CLASSNO" size="7" value="%">
+                <input type="submit" value="检索" id="BSubmit2">
+                <input type="hidden" name="pagename" value="ClassStudentSelectTemplate.htm">
+            </font>
+        </div>
+        <div id="right_ADDSTUDENT" data-options="region:'east',iconCls:'icon-reload',title:'右边',split:false,border:false,noheader:true" >
+            <div id="Goright1_ADDSTUDENT">
+
+            </div>
+        </div>
+        <div data-options="region:'center',title:'datgrid内容',border:false,noheader:true" style="background:#eee;">
+            <div id="tianjiaxuesheng"> <!--todo:添加学生的datagrid-->
+            </div>
+        </div>
+    </div>
+<script>
+    var wi=$(document.body).width()
+    $('#right1').css('width',parseInt(wi)/2);
+    $('#right_ADDSTUDENT').css('width',parseInt(wi)/2);
+
+</script>
+</body>
+</html>

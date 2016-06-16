@@ -1,0 +1,3 @@
+delete
+from R30
+where MAJORPLAN_ROWID =:ROWID and PROGNO =:PROGNO

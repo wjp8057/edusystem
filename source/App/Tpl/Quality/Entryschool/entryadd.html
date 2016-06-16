@@ -1,0 +1,54 @@
+<script>
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item.field);
+                e.editor = item.editor;
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param.field);
+            e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item);
+                e.editor = {};
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param);
+            e.editor = {};
+        }
+    }
+});
+</script>
+<div id="cc" class="easyui-layout"  data-options="fit:true">
+    <div data-options="region:'north',title:'',split:false,border:false" style="padding:10px;">
+        <p align="left"><font face="宋体" size="2">使用说明：</font></p>
+        <p align="left"><font face="宋体" size="2">
+            1、同行评分：总分为100分，允许范围为0~100的数字，保留小数点后两位，如不采取同行评分，请输入0；</font></p>
+        <p align="left"><font face="宋体" size="2">2、学院评分：总分为20分，允许范围为0~20的数字，保留小数点后两位；</font></p>
+        <p align="left"><font face="宋体" size="2">3、其它评分：-10~10分。此项目为奖励或者教学事故等的加减分。</font></p>
+        <p align="left"><font face="宋体" size="2">
+            4、最后总评成绩=学评教成绩*学评教比例+学院评分*学院评分比例*100*/20+同行评分*同行评分比例+其他评分</font></p>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="slinfo"></div>
+    </div>
+</div>
+
+
+
+</div>

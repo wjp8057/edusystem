@@ -1,0 +1,97 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var school='{$school}';
+    var teacherno='{$teacherno}';
+
+    function gotoFinalsInput(){
+        if(Datagrid.selectSingle('courselist')){
+            var row = Datagrid.getSelected('courselist');
+            window.open('__URL__/Three_three_StudentList/year/'+
+            $("#year").val()+'/term/'+$("#term").val()+'/coursegroupno/'+row.coursenogroup+
+            '/scoretype/'+$('.scoretype:checked').val());
+        }
+    }
+
+    $(function(){
+        var year_input = $("#year");
+        var term_input = $("#term");
+        var dgrid = $('#courselist');
+
+        year_input.val(GenKits.getParentYear());
+        term_input.val(GenKits.getParentTerm());
+
+
+        function loadCourseList(){
+            $.post('__URL__/Three_three',{'year':year_input.val(),'term':term_input.val(),'teacherno':teacherno}, function (data) {
+                if(Ajaxor.isMessage(data)){
+                    return Messager.showMessage(data);
+                }
+                dgrid.datagrid('loadData',data);
+            });
+        }
+
+        loadCourseList();
+
+        $("#search").click(loadCourseList);
+    });
+
+
+
+
+</script>
+<body style="background: #fff">
+    <div  class="easyui-layout" data-options="fit:true">
+        <!-- 查询栏 -->
+        <div data-options="region:'north',split:false,border:false" style="height:130px"><br />
+            <div align="center">
+                学年：<input type="text" name="YEAR" id="year" size="4">&nbsp;&nbsp;
+                学期：<input type="text" name="TERM" id="term" size="1">
+                <a id="search" class="easyui-linkbutton" data-options="iconCls:'icon-search'" >查询</a>
+                <p>计 分 制:
+                    <input type="radio" value="two" class="scoretype" name="R13"  />二级制（合格与不合格）
+                    <input type="radio" value="five" class="scoretype" name="R13" />五级制（优、良、中、及、不及）
+                    <input type="radio" value="ten" class="scoretype" name="R13" checked />百分制（总分为100分）
+                </p>
+            </div>
+            <p style="line-height: 150%; margin: 0">
+                <span style="font-size: 10pt;color: #0000ff" >
+                    注：纯实践课程中集中实训环节、毕业论文、毕业实习采用五级制；自主实践训练、形势与政策、军训、社会实践与其他分散进行的实践环节采用二级制；纯理论课程与理实一体化课程可以采用百分制或者五级制，但是不能采用二级制，本科学位课程必须采用百分制。
+                </span>
+            </p>
+        </div>
+        <!-- 列表栏 -->
+        <div data-options="region:'center',border:false" style="padding:0;background:#eee;">
+            <table class="easyui-datagrid" id="courselist"
+                   data-options="pagination:false,singleSelect:true,fit:true,toolbar:[{
+                     text:'进行成绩输入',
+                     iconCls:'icon-edit',
+                     handler:gotoFinalsInput
+                     }]">
+                <thead>
+                <tr>
+                    <th data-options="field:'coursenogroup',width:100" align="center">课号</th>
+                    <th data-options="field:'coursename',width:300" align="center">课名</th>
+                    <th data-options="field:'teachernoname',width:200" align="center">教师</th>
+                    <th data-options="field:'credits',width:50" align="center">学分</th>
+                    <th data-options="field:'weekhours',width:50" align="center">周学时</th>
+                    <th data-options="field:'weekexpehours',width:50" align="center">周实验</th>
+                    <th data-options="field:'coursetype',width:50" align="center">修课</th>
+                    <th data-options="field:'examtype',width:50" align="center">考核</th>
+                    <th data-options="field:'schoolname',width:100" align="center">开课学院</th>
+                    <th data-options="field:'classnoname',width:100" align="center">班级</th>
+                    <th data-options="field:'dayntime',width:200" align="center">时间</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</body>
+
+
+
+
+
+
+

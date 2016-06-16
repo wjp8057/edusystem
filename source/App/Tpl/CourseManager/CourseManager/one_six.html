@@ -1,0 +1,35 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var wd=$('#wd').window(new wind(600,300,false,false,false,false,false));
+        $('#bt').bind('click',function(){
+
+            $.messager.confirm('提示','您确定要同步'+parent.$('[name=YEAR]').val()+'学年第'+parent.$('[name=TERM]').val()+'的课程总表吗',function(c){
+                if(c){
+                    ajiakesi('__URL__/tongbu',{'YEAR':parent.$('[name=YEAR]').val(),'TERM':parent.$('[name=TERM]').val()},function(c1c){
+                        $.messager.alert('提示',c1c)
+                    })
+                }
+
+            })
+
+        })
+
+
+    })
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background: #fff">
+
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="bt">同步课程总表</a>&nbsp;&nbsp;<br><br>可以对设置的学年学期里的所有课程，进行同步操作。如果对课程总表作了更改，需要运行此方法以获得更新后的课程总表。  </td>
+
+</div>
+</body>
+</html>

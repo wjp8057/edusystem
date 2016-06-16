@@ -1,0 +1,53 @@
+<html>
+<script>
+    var time='{$value.TIME}';
+
+    if(time==""){
+        time='全天'
+    }
+
+
+</script>
+<head>
+    <META name=VI60_defaultClientScript content=JavaScript>
+    <meta http-equiv="Content-Language" content="zh-cn">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+    <meta name="ProgId" content="FrontPage.Editor.Document">
+    <title>教 室 借 用 申 请 批 复</title>
+</head>
+
+<body >
+<div align="center">
+    <center>
+        <table border="1" cellpadding="0" cellspacing="0" width="57%" height="350" datasrc=#dsoLEASE>
+            <tr>
+                <td width="100%" height="348" valign="top">
+                    <P> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</P>
+                    <p align="center"><b><font size="3"><LABEL> {$value.YEAR}</LABEL>学年第<LABEL >{$value.TERM}</LABEL>学期教室借用申请 </font></b></p>
+                    <p align="center"><b><font size="3">批 准 单</font></b></p>
+                    <P align="center">  </P>
+                    <p>&nbsp;<SPAN> {$value.BUILDING}</SPAN> 亲爱的门卫：</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 现有<SPAN >{$value.SCHOOL}</SPAN>需借用本楼教室<SPAN >{$value.JSN}</SPAN>(<SPAN> {$value.ROOMNO}</SPAN>)，</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 使用时间是：</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 星期<SPAN >{$value.DAY}</SPAN>；<SPAN ><script>document.write(time)</script></SPAN>；<SPAN >{$value.OEW}</SPAN>；</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 周次：<SPAN >{$value.WEEKS}</SPAN></p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 用途：<SPAN >{$value.PURPOSE}</SPAN></p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 借用设备：___________________________</p>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp; 联系人及电话：_______________________</p>
+                    <p>&nbsp;&nbsp;希望给予协助。若有疑问，请拨打教务处电话:88122243查询。</p>
+                    <p>&nbsp;&nbsp;注意事项：在借用多媒体教室时，所有的教学设备必须保持完好无损，话筒、摇控器等物品袋用完之后要及时归还门卫师傅，以免影响正常教学使用。对于使用不当影响到正常教学，学校将追责。</p>
+                    <p>　</p>
+                    <p>　</p>
+                    <p align="right"><SPAN>教务处</SPAN>&nbsp;&nbsp;</p>
+                    <p align="right"><SPAN> {$value.ISSUEDATE}</SPAN>　&nbsp;&nbsp;</p>
+                    <p></p>
+                </td>
+            </tr>
+        </table>
+    </center>
+</div>
+
+</body>
+
+</html>

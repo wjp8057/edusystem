@@ -1,0 +1,148 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+var eqno=09321;
+$(function(){
+
+    //todo:piliang
+    $('#sd').bind('click',function(){
+        if($.trim($('[name=ccourse]').val())==''){
+            return $.messager.alert('提示','等价课号不能为空')
+        }else if($.trim($('[name=ccourse]').val()).length!=9){
+            return $.messager.alert('提示','请填写9位数等价课号')
+        }
+
+        var bool=false;     //todo:判断是否存在于选中中的课号
+        var list=$('#dat').datagrid('getSelections');
+        for(var i=0;i<list.length;i++){
+            if($.trim(list[i].kh)==$.trim($('[name=ccourse]').val()))bool=true;
+        }
+        if(!bool)
+            return $.messager.alert('提示','所设的等价课号必须存在于选中的课号中!');
+        $.post('__URL__/equalCourses2',{'bind':list,'eqcourseno':$('[name=ccourse]').val()},function(c){
+            $.messager.alert('提示',c);
+        });
+    });
+
+    $('#bt').linkbutton({
+        'text':'检索',
+        'iconCls':'icon-search'
+    }).bind('click',function(){
+        $('#dat').datagrid('options').url='__APP__/Status/Status/Squery';
+        $('#dat').datagrid('load',{'Sqlpath':{'select':'exam/equalCourses_select.SQL','count':'exam/equalCourses_count.SQL'},
+            'bind':{':COURSENO':$('[name=Courseno]').val().trim()}});
+    });
+
+
+    var daat=$('#dat').datagrid({
+        onLoadSuccess:function(data){
+            eqno=09321;
+        },
+        onDblClickRow:function(index,row){
+        },
+        onRowContextMenu:function(e,rowindex,row){
+            daat.datagrid('rejectChanges');
+            var tt=$('#dat');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
+
+    function eedit(){
+        var index=$('#dat').datagrid('getRowIndex',$('#dat').datagrid('getSelected'));
+        if(eqno!=09321&&eqno!=index){
+            $.messager.confirm('提示','您还有正在编辑的未保存,点击&quot确定&quot结束编辑吗(不做保存)',function(c){
+                if(c){
+                    $('#dat').datagrid('rejectChanges');
+                    $('#dat').datagrid('beginEdit',index);
+                    $('#dat').datagrid('selectRow',index);
+                    eqno=index;
+                }else{
+                    $('#dat').datagrid('unselectAll');
+                    $('#dat').datagrid('selectRow',eqno);
+                }
+            });
+            return;
+        }
+        $('#dat').datagrid('beginEdit',index);
+        eqno=index;
+    }
+    $('#e_edit').bind('click',eedit);
+    $('#admin_edit').bind('click',eedit);
+
+   $('#e_back').bind('click',function(){
+       eqno=09321
+       $('#dat').datagrid('acceptChanges')
+   })
+
+    $('#e_save').bind('click',function(){
+        if(eqno==09321){
+            return $.messager.alert('提示','您还未编辑过数据呢')
+        }
+        $('#dat').datagrid('endEdit',eqno);
+        var row=$('#dat').datagrid('getRows')[eqno];
+        $.post('__URL__/equalCourses/hasJson/1',{':ID':'EXE','exe':'exam/equalCourses_update.SQL',bind:{':EQCOURSENO':row.djkh,':COURSENO':row.kh}},function(c){
+            if(c=='true'){
+                $('#dat').datagrid('load',{'Sqlpath':{'select':'exam/equalCourses_select.SQL','count':'exam/equalCourses_count.SQL'},
+                    'bind':{':COURSENO':$('[name=Courseno]').val().trim()}});
+                $.messager.alert('提示','保存成功')
+
+            }else{
+                $('#dat').datagrid('rejectChanges');
+                $.messager.alert('提示','等价课号不存在')
+            }
+            eqno=09321
+            $('#dat').datagrid('acceptChanges')
+        })
+    })
+})
+</script>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+                  <b>课号：</b>
+                    <input type="text" name="Courseno" size="7" value="%">
+                 <a href="javascript:void(0)" id="bt">检索</a>
+        &nbsp;&nbsp;&nbsp;
+                        <a href="javascript:void(0)" id="sd" class="easyui-linkbutton">将选中课程设为</a>
+        <input type="text" name="ccourse" size="9">
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+        <b>注:</b>:等价课号为红色的表示修改过的
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="dat"
+               data-options="fit:true,pagination:true,striped:true,pageList:[20,50,100,500,1000],toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'row',checkbox:true">选择</th>
+                <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                <th data-options="field:'kcmc',width:320,align:'right'" align="center">课程名称</th>
+                <th data-options="field:'cc',width:100,align:'right'" align="center">场次</th>
+                <th data-options="field:'djkh',width:120,editor:{type:'text'},align:'right',formatter:function(a,b,c){
+                    if(b.kh!=a){
+                        return '<font color=red>'+a+'</font>'
+                    }
+                        return a;
+
+                }" align="center">等价课程号</th>
+                <th data-options="field:'djkcm',width:320,align:'right',formatter:function(a,b,c){
+                   if(b.kh!=b.djkh){
+                        return '<font color=red>'+a+'</font>'
+                    }
+                        return a;
+
+                }" align="center">等价课程名</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_edit'>编辑本条目</div>
+    </div>
+</div>

@@ -1,0 +1,116 @@
+<include file=":Include:jqueryHeader" />
+
+<script>
+    $(function(){
+
+        //检查教室号是否可以使用
+        $('#ROOMNO').bind('blur', function () {
+            $.post('__URL__/roomyz',{'roomno':this.value}, function (data) {
+                if(data.type === 'error'){
+                    return $.messager.alert('提示',data.message,data.type);
+                }
+            });
+        });
+        $('#add').bind('click',function(){
+            $('#ROOMNO').blur();
+            var value = $("#addroom").serialize();
+            if(parseInt($('#TESTERS').val())>parseInt($('#SEATS').val()))
+                return Messager.showWarning('考位数不能大于座位数');
+
+            $.post('__URL__/insertroom',{data:value}, function (data) {
+                return Messager.showInfo(data.message,data.type);
+            });
+        });
+    });
+
+</script>
+<body style="background-color: #fff" >
+    <!--<div id="wd2" title="添加教室" data-options="closable:false,collapsible:false">-->
+        <form method="POST" id="addroom" >
+            <table border="0" style="margin-top:20px;margin-left:30px" width="630" align="center" cellspacing="12">
+                <tr>
+                    <td width="16%" align="right"><font size="2">教室代号：</font><font color="red">*</font></td>
+                    <td width="25%"><input type="text" id="ROOMNO" name="ROOMNO" size="9" maxlength="9" value=""><span id="ct2">&nbsp<b>长度为9位</b></span></td>
+                    <td width="24%" align="right"><font size="2">房间号：</font></td>
+                    <td width="41%"><input type="text" name="NO" size="4" maxlength="15" value=""></td>
+                </tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">楼名：</font></td>
+                    <td width="21%"><input type="text" name="BUILDING" size="20" maxlength="30" value=""></td>
+                    <td width="24%" align="right"><font size="2">校区：</font></td>
+                    <td width="45%">
+                        <select name="AREA">
+                            <volist name="area" id="v">
+                                <option value="{$v.NAME}">{$v.VALUE}</option>
+                            </volist>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">座位数：</font></td>
+                    <td width="21%"><input type="text" name="SEATS" id="SEATS" size="4" maxlength="3"><span id="zw2">&nbsp<b>需要3位数字</b></span></td>
+                    <td width="14%" align="right"><font size="2">考位数：</font></td>
+                    <td width="55%"><input type="text" name="TESTERS" id="TESTERS" size="4" maxlength="3"><span id="kw2">&nbsp<b>需要3位数字</b></span></td>
+                </tr>
+                <tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">设施：</font></td>
+                    <td width="21%">
+                        <select name="EQUIPMENT">
+                            <volist name="roomoption" id="v">
+                                <option value="{$v.NAME}">{$v.VALUE}</option>
+                            </volist>
+                        </select>
+                    </td>
+                    <td width="24%" align="right"><font size="2">可用不可用：</font></td>
+                    <td width="45%"><select size="1" name="STATUS">
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+
+                    </select></td>
+                </tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">优先学院：</font></td>
+                    <td width="21%"><select name="PRIORITY">
+                        <volist name="school" id="v">
+                            <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                        </volist>
+                    </select></td>
+                    <td width="24%" align="right"><font size="2">排课约束：</font></td>
+                    <td width="45%"><select size="1" name="USAGE">
+                        <option value="P">人数限制  </option>
+                        <option value="C">授课限制  </option>
+                        <option value="N">无限制    </option>
+
+                    </select></td>
+                </tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">是否保留：</font></td>
+                    <td width="21%"><select size="1" name="RESERVED">
+                        <option value="1">是</option>
+                        <option value="0">否</option>
+
+                    </select></td>
+                    <td width="14%" align="right"><font size="2">备注：</font></td>
+                    <td width="55%"><input type="text" name="REM" size="20" maxlength="20" value=" "></td>
+                </tr>
+                <tr>
+                    <td width="16%" align="right"><font size="2">简称：</font></td>
+                    <td width="21%"><input type="text" name="JSN" size="20" value="" maxlength="20"></td>
+                    <td width="69%" align="right" colspan="2">　</td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <font color="red"><b>注：考位数不能大于座位数</b></font>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" align="center" height="120">
+                        <a href="javascript:void(0)" id="add" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                    </td>
+                </tr>
+            </table>
+        </form>
+    <!--</div>-->
+    </body>
+</html>

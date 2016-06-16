@@ -1,0 +1,79 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var studentnoInput = $('#STUDENT');
+        var newStudentnoInput = $("#NEWSTUDENT");
+        var classnoInput = $('#class');
+        var newStudentExamnoInput = $("#EXAM");
+        //按照学号注册
+        $('#registerStudentBySingle').bind('click',function(){
+            var studentno = studentnoInput.val().trim();
+            if(studentno == '') return Messager.showWarning('请填写学生号');
+            openTabsWindows('学生注册信息','__URL__/xueshengzhuce/studentno/'+studentno,'',true)
+        });
+        //按班级注册
+        $('#registerStudentByClass').bind('click',function(){
+            var classno = classnoInput.val().trim();
+            if(classno === '') return Messager.showWarning('请填写班级号');
+            $.post('__URL__/regesClass/hasJson/1',{classno:classno},function(c){
+                return Messager.showMessage(c, function () {});
+            })
+        });
+        //新生报到-按照学号
+        $('#checkinByStudentno').bind('click',function(){
+            var newstudentno = $.trim(newStudentnoInput.val());
+            if(newstudentno === ''){
+                return Messager.showWarning("请填写学生号");
+            }
+            openTabsWindows('新生报到','__URL__/xinshengbaodao/newstudentno/'+newstudentno,'',true)
+        });
+        //新生报到-按照准考证号
+        $('#checkinByExamno').bind('click',function(){
+            var examno = $.trim(newStudentExamnoInput.val());
+            if(examno === '') {
+                return Messager.showWarning("请填写准考证号");
+            }
+            openTabsWindows('新生报到','__URL__/xinshengbaodao/examno/'+examno,'',true);
+        });
+    });
+
+</script>
+
+
+<body style="background-color: #fff">
+    <table border="0" cellspacing="2" width="560" style="margin-top:50px" align="center">
+        <tr><td><b>新生注册：</b></td></tr>
+        <tr>
+            <td width="30%">按学号：</td>
+            <td>
+               <input type="text" name="STUDENT" id="STUDENT" size="9" maxlength="9" />
+               <input type="button" value="注册" name="B2" id="registerStudentBySingle" />
+                仅注册单个学生。
+            </td>
+        </tr>
+        <tr>
+            <td width="30%">按班级号：</td>
+            <td>
+                <input type="text" name="CLASS" id="class" size="9" maxlength="7" />
+                <input type="button" value="注册" name="B2" id="registerStudentByClass" />
+                班上所有学生都被正常注册。
+            </td>
+        </tr>
+        <tr><td><b>&nbsp;</b></td></tr>
+        <tr><td><b>新生报到：</b></td></tr>
+        <tr>
+            <td width="30%">按学号：</td>
+            <td>
+                <input type="text" name="NEWSTUDENT" id="NEWSTUDENT" size="9" maxlength="9" />
+                <input type="button" value="报到" id="checkinByStudentno" />
+            </td>
+        </tr>
+        <tr>
+            <td width="30%">按准考证号：</td>
+            <td>
+                <input type="text" name="EXAM" id="EXAM" size="9" />
+                <input type="button" value="报到"  id="checkinByExamno" />
+        </tr>
+    </table>
+</body>

@@ -1,0 +1,201 @@
+<include file=":Include:jqueryHeader" xmlns="http://www.w3.org/1999/html"/>
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/datagrid-bufferview.js'> </script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/common.js"></script>
+<script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/modules/results.js"></script>
+<script>
+    var year = parseInt("{$params.year}");
+    var term = parseInt("{$params.term}");
+    var courseno = "{$params.courseno}";
+    var scoretype = "{$params.scoretype}";
+    var lock = parseInt("{$params.lock}");
+    var Currentrow = {};
+
+    function checkLock(){
+//        return false;//测试
+        if(parseInt(lock) > 0){
+            Messager.showWarning("课程已被锁定，请先联系开课学院开放,开发后请刷新本页面！");
+            return true;
+        }
+        return false;
+    }
+
+
+    $(function(){
+        var dgrid = $("#dgrid");
+        var dateboxer = $("#dateboxer");
+
+        initDataGridEditor(dgrid,"resitscore",checkLock);
+
+
+        //获取表格数据
+        $.post('__URL__/Three_BKCJSR_StudentList/hasJson/1/tag/bkcjsource',{year:year,term:term,courseno:courseno},function(c){
+            if(Messager.isMessage(c)){
+                return MessageEvent.showMessage(c, function () {})
+            }else{
+                if(c.total){
+                    dgrid.datagrid('loadData',c);
+                    Formor.setDateBox(dateboxer,c['rows'][0]['examdate']);
+                    checkLock();
+                }
+            }
+        });
+
+
+
+        //提交
+        $('#submit').bind('click',function(){
+            if(checkLock()){
+                return ;
+            }
+            var rowList = Datagrid.getRows(dgrid);
+
+            var subdata={};
+
+            //检查非空
+            for(var i=0;i<rowList.length;i++){
+                var result = {};
+                dgrid.datagrid('endEdit',i);
+                var cj = $.trim(rowList[i].resitscore);
+                if(cj === ''){
+                    return $.messager.alert('提示','还有成绩没有填完！不能提交');
+                }
+                var vitualval = edit2visual(cj,scoretype);
+                if(!doWithVitualVal(vitualval)){
+                    return;
+                }
+                if(scoretype == 'ten'){
+                    if(isNaN(cj) /* || inObj(cj)*/){
+                        /* 中文 (或者 qhw中的值 )可缺少 */
+                        result.examscore = 0;
+                        result.testscore = vitualval;
+                    }else{
+                        result.examscore = parseInt(vitualval);
+                        result.testscore = '';
+                    }
+                }else{
+                    result.examscore = 0;
+                    result.testscore = vitualval;
+                }
+                result.studentno = rowList[i]['studentno'];
+                subdata[$.trim(rowList[i]['scorerecno'])]=result;
+            }
+            var examdate = $.trim(Formor.getDateBox(dateboxer));
+            if(!examdate){
+                return $.messager.alert('提示','请填写日期！');
+            }
+            $.post('__URL__/Three_two_sub/tag/bkcjsr',{
+                'rows':subdata ,
+                'year':year,
+                'term':term,
+                'examdate':examdate,
+                'courseno':courseno},
+                function(c){
+                    return Messager.showMessage(c,function(){
+                        dgrid.datagrid('reload');
+                    });
+                });
+        });
+
+        //todo:打印成绩单
+        $('#daying').bind('click',function(){
+            open('__URL__/Three_BKCJSR_StudentList/reqtag/Four_one_daying_youbian/year/'+year+'/term/'+term+'/courseno/'+courseno);
+        });
+
+    });
+</script>
+
+<style>
+    body {background-color: #ffffff}
+    span.general {font-size: 10pt;font-family: '宋体';color: #0000ff}
+    span.important {font-size: 10pt;font-family: '宋体';color: red}
+    p.general {line-height: 150%; word-spacing: 0; margin-top: 0; margin-bottom: 0;text-align: left}
+</style>
+
+<body >
+<div class="easyui-layout" data-options="" style="height:850px">
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:260px;">
+            <p align="center" style="font-weight: bold">
+                <span size="5" face="隶书" color="#000">
+                    宁波城市学院 {$year_a}--{$year_b} 学年第 {$term} 学期 学期初补考成绩输入单
+                </span>
+            </p>
+            <p align="center" style="line-height: 5%">
+                <span class="general" >
+                    课号：<span style="font-size:10pt"  >{$detail.courseno}</span>&nbsp;
+                    课名:<span style="font-size:10pt" >{$detail.coursename}</span>&nbsp;
+                    开课学院:<span style="font-size:10pt" >{$detail.schoolname}</span>&nbsp;
+                    选课人数:<label datasrc="#dsocourse">{$detail.num}</label>
+                </span>
+            </p>
+            <p class="general">
+                <span class="general">说明：1、平时、期末成绩</span>
+                <span class="important">必须使用相同的计分制</span>
+                <span class="general">，总评成绩由电脑根据平时成绩所占比例自动计算；</span>
+            </p>
+            <p class="general">
+                <span class="general">2、百分制输入时平时成绩数值在0-100之间，期末成绩0-100之间或者使用字母（q、h、w)；</span>
+            </p>
+            <p class="general">
+                <span class="general">3、五级制输入时平时成绩数值在1-5之间，期末成绩1-5之间或者使用字母（q、h、w)，数字对应成绩如下：</span><span class="important">1-优秀，2-良好，3-中等，4-及格，5-不及格</span><span class="general">；</span></p>
+            <p class="general">
+                <span class="general">4、二级制输入时仅输入期末成绩，数值0-1或者使用字母（q、h、w)，</span><span class="important">1-合格，0-不合格</span><span class="general">；</span></p>
+            <p class="general">
+                <span color="#0000ff" size="2">5、</span><span class="general">字母对应字符如下:</span>
+                <span color="#FF0000"><span face="宋体" size="2"> q-</span><span face="宋体" size="2">缺考，</span>
+                    <span face="宋体" size="2">h-缓考，w-违纪</span></span>
+                <span class="important"></span>
+                <span class="general">；</span>
+            </p>
+            <p class="general">
+                <span class="general">6、如期末考核缺考，则总评成绩记为缺考，缓考者在成绩单课程状态中注明。</span>
+            </p>
+            <p class="general">
+                <span class="general">7、按Tab键移动光标到下一个输入框，</span>
+                <span class="important">如有“平时成绩”，必须首先输入，然后输入“期末成绩”，否则程序将无法正常计算总评成绩。</span>
+            </p>
+            <p class="general">
+                <span class="general">8、本课程总评成绩中平时成绩所占比例&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="text" id="BiLi" name="BiLi" size="3"  tabindex="1" value="0" readonly>%，一般平时所占比例在20%-40%之间。</span>
+            </p>
+            <p class="general">
+                <span class="general">9、本课程考试日期为：</span>
+                <span class="general">
+                    <input id="dateboxer" name="dateboxer" type="text" class="easyui-datebox" />（格式为：2006-07-03）<br>
+                </span>
+            </p>
+        </div>
+
+        <div data-options="region:'center',split:false,border:false" style="padding:0;background:#FFF;">
+            <div align="center">
+                <table  id="dgrid" style="width:500px;height:500px"
+                        data-options="view:bufferview,rownumbers:true,singleSelect:true,autoRowHeight:false,pageSize:800,pagination:false">
+                    <thead>
+                        <tr>
+                            <th data-options="field:'studentno',width:100,align:'center'">学号</th>
+                            <th data-options="field:'studentname',width:100,align:'center'">姓名</th>
+                            <th data-options="field:'scorerecno',width:100,align:'center',hidden:true">recno</th>
+                            <th data-options="field:'resitscore',width:70,align:'center',editor:{type:'text'}">补考成绩</th>
+                            <th data-options="field:'makeuplock',width:80,align:'center',formatter:function(a,b,c){
+                                    return parseInt(a) > 0? '锁定':'-';
+                                }">锁定</th>
+                            <th data-options="field:'examdate',width:100,align:'center'">考试日期</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div data-options="region:'south',split:false,border:false" style="height:50px;">
+            <p style="text-align: center">
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="submit"  iconCls="icon-save">提交数据</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" id="daying" iconCls="icon-print">打印成绩单</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+</body>

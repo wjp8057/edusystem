@@ -1,0 +1,19 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:修改学生密码
+        $('[name=setpass]').bind('click',function(){
+            ajiakesi('__URL__/update_password',{'STUDENTNO':$('[name=up_STUDENTNO]').val(),'PASSWORD':$('[name=PASSWORD]').val()},function(c){
+                alert(c)
+            })
+        })
+
+    })
+</script>
+<body style="background-color: #fff">
+学号：</label><input type="text" name="up_STUDENTNO" value="">
+<label>密码：</label><input type=password name="PASSWORD" size="10" value="">
+<a href="javascript:void(0)" name="setpass" class="easyui-linkbutton">提&nbsp;交</a><span> 密码长度在10位以内。</span><br/><br/>
+</body>
+</html>

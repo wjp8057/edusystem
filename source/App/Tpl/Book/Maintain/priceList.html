@@ -1,0 +1,284 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar">
+	<label>学年：</label><input name="year" size="4" maxlength="4">
+	<label>学期：</label><input name="term" size="1" maxlength="1">
+	<label>ISBN：</label><input name="isbn" size="15" value='%'  maxlength="10">
+    <label>教材名：</label><input name="bookname" size="15" value='%'  maxlength="8">
+    <label>教材性质：</label>
+    <select name="booknature" class="easyui-combobox" data-options="editable:false">
+		<option value="%">全部</option>
+		<option value="本科">本科</option>
+		<option value="高职高专">高职高专</option>
+		<option value="其他">其他</option>
+		<option value="自编">自编</option>
+	</select>
+    <label>单价状态：</label>
+    <input type="radio" name="status" value="%" checked="checked"> <span>全部</span>
+    <input type="radio" name="status" value="0"> <span>有</span>
+    <input type="radio" name="status" value="1"> <span>无</span>
+    <a href="javascript:void(0)" id="searcher">检索</a>
+    <p style="height:2px;padding:0px;margin: 0px;"></p>
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增</a>
+</div>
+<script type="text/javascript">
+var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+var dat=null;
+$(function(){
+    $("#toobar [name='year']").val(parent.$("#YEAR").val());
+    $("#toobar [name='term']").val(parent.$("#TERM").val());
+	//教材信息列表加载
+    var indexrow=undefined;
+    dat=$('#content').datagrid({
+        fit:true,
+        fitColumns:true,
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#content');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        striped:true,
+        columns:[[{field:'id',checkbox:true},
+                  {field:'year',title:'学年',align:'center',width:40},
+                  {field:'term',title:'学期',align:'center',width:40},
+                  {field:'isbn',title:'ISBN',align:'center',width:90},
+                  {field:'bookname',title:'教材名',align:'center',width:160},
+                  {field:'author',title:'作者',align:'center',width:160},
+                  {field:'press',title:'出版社',align:'center',width:100},
+                  {field:'booknature',title:'教材性质',align:'center',width:70},
+                  {field:'price',title:'单价',align:'center',width:40,formatter:function(value,row,index){
+                	  if(value==0) return "暂无";
+                	  else return value;
+  		          },editor:{type:'validatebox',options:{required:true}} },
+                  {field:'dis_rate',title:'折扣率',align:'center',width:40,editor:{
+                      	type:'validatebox',options:{required:true}} },
+                  {field:'dis_price',title:'折扣价',align:'center',width:40}
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar',
+		onAfterEdit:function(index,dataRow,changes){
+			if(!reg.test(dataRow.price) || !reg.test(dataRow.dis_rate)){
+        		msgShow("系统提示：","单价或折扣率格式错误","error");
+        		dat.datagrid('beginEdit', index);
+        		return;
+        	}
+        	var updated=dat.datagrid('getChanges','updated');
+            if(updated.length){
+            	var year=$.trim($("#toobar [name='year']").val());
+        		var term=$.trim($("#toobar [name='term']").val());
+            	if(dataRow.year==null) dataRow.year=year;
+            	if(dataRow.term==null) dataRow.term=term;
+                $.ajax({
+                    url:"__URL__/updatePrice/",
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                    	var index = dat.datagrid('getRowIndex', dat.datagrid('getSelected'));
+                    	if(content){
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            $.messager.alert('提示','更新成功！','?');
+                        }else{
+                        	$.messager.alert('提示','更新失败！','?');
+                        }
+                    }
+                });
+            }
+        }
+    });
+    //编辑教材
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');//获取所有被选中的
+        dat.datagrid('removeEditor','id');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行编辑,不能选多条','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要编辑的数据','?');//用户没选择行
+        }else{
+            if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+            var row = dat.datagrid('getSelected');//获得被选中的索引
+
+            var index = dat.datagrid('getRowIndex', row);
+            dat.datagrid('beginEdit', index);
+            indexrow=index;
+        }
+    }
+    //编辑
+    $("#editBut").click(eedit);
+    $('#admin_edit').bind('click',eedit)
+    //取消编辑
+    $("#cancelBut").click(function(){
+    	dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    });
+    //保存
+    $("#saveBut").click(function(){
+    	dat.datagrid('endEdit',indexrow);
+    });
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls: 'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	dat.datagrid("options").url = "__URL__/priceList/hasJson/1";
+    	dat.datagrid('load',{
+    		year:$.trim($("#toobar [name='year']").val()),
+    		term:$.trim($("#toobar [name='term']").val()),
+    		isbn:$.trim($("#toobar [name='isbn']").val()),
+    		bookname:$.trim($("#toobar [name='bookname']").val()),
+    		booknature:$.trim($("#toobar [name='booknature']").val()),
+    		status:$.trim($("#toobar [name='status']:checked").val())
+        });
+    });
+    //新增单价窗口
+	var wd=$('#wd').window({
+        modal:true,height:260,width:650,
+        minimizable:false,maximizable:false,collapsible:false,
+        draggable:false,resizable:false,closed:true
+    });
+	//新增
+	$(".savebut").linkbutton({iconCls: 'icon-add'});
+    $("#addBut").click(function(){
+    	$("#addForm")[0].reset();
+    	$("#addForm input").next("font").html("*");
+    	$("#queryBookname").html("输入ISBN之后自动检索");
+    	$("#queryBookname").attr("color","green");
+    	wd.window({closed:false});
+    });
+    //检索教材名称
+	$("#queryIsbn").blur(function(){
+		var isbn=$.trim($(this).val());
+		if(isbn!=""){
+			$.ajax({
+                url:'__URL__/ajaxGetBook/',
+                data:{'isbn':isbn},
+                type:'POST',
+                dataType:"JSON",
+                success:function(data){
+                    if(data!=null && data!=""){
+                    	$("#addForm [name='dis_rate']").val(data.dis_rate);
+                    	$("#addForm [name='bookId']").val(data.book_id);
+                        $("#queryBookname").html(data.bookname);
+                        $("#queryBookname").attr("color","#000");
+                    }else{
+                    	$("#addForm [name='dis_rate']").val("");
+                    	$("#addForm [name='bookId']").val("");
+                    	$("#queryBookname").html("无法检索，该教材不存在或未启用");
+                    	$("#queryBookname").attr("color","red");
+                    }
+                }
+            });
+		}else{
+			$("#queryBookname").html("输入ISBN之后自动检索");
+	    	$("#queryBookname").attr("color","green");
+		}
+	});
+    //保存
+    $(".savebut").click(function(){
+		var year=$("#addForm [name='year']");
+		var term=$("#addForm [name='term']");
+		var price=$("#addForm [name='price']");
+		var dis_rate=$("#addForm [name='dis_rate']");
+		var bookId=$.trim($("#addForm [name='bookId']").val());
+		
+		var bool=true;
+		if(!check(year)) bool=false;
+		if(!check(term)) bool=false;
+		if(!check(price)) bool=false;
+		if(!check(dis_rate)) bool=false;
+		if(!check($("#addForm [name='isbn']"))) bool=false;
+		if(!bool) return;
+		
+		if(!reg.test($.trim(price.val())) || !reg.test($.trim(dis_rate.val()))){
+    		msgShow("系统提示：","单价或折扣率格式错误","error");
+    		return;
+    	}
+		
+		if(bookId!=""){
+			$.ajax({
+	            url:'__URL__/addPrice/',
+	            data:{"year":$.trim(year.val()),"term":$.trim(term.val()),"book_id":bookId,"price":$.trim(price.val()),"dis_rate":$.trim(dis_rate.val())},
+	            type:'POST',
+	            success:function(data){
+	                if(data=="1"){
+	                	$.messager.alert('提示','新增教材价格成功！','info',function(){
+	                		dat.datagrid('reload');
+	                	});
+	                }else if(data=="-1"){
+	                	$.messager.alert('提示','该教材您所添加的学年学期已存在价格信息，请勿重复添加！','info');
+	                }else{
+	                	$.messager.alert('提示','教材价格新增失败','info');
+	                }
+	            }
+	        });
+		}
+	});
+});
+//input验证
+function check(ele){
+	var value=$.trim(ele.val());
+	if(value!=""){
+		ele.next("font").html("*");
+	}else{
+		ele.next("font").html("不能为空");
+		return false;
+	}
+	return true;
+}
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+<!-- 新增单价 -->
+<div id="wd" title="新增学年学期单价">
+<div style="padding:10px">
+<form action="#" id="addForm">
+	<table border="0" align="center" width="90%" style="border-collapse: collapse;">
+		<tr>
+			<th align="right" width="12%">ISBN：</th>
+			<td align="left" width="38%">
+				<input id="queryIsbn" name="isbn" maxlength="20" size="20"> <font color="red">*</font>
+				<input type="hidden" name="bookId">
+			</td>
+			<th align="right" width="12%">教材名：</th>
+			<td align="left"><font color="green" id="queryBookname">输入ISBN之后自动检索</font></td>
+		</tr>
+		<tr>
+			<th align="right">学年：</th>
+			<td align="left"><input name="year" value="{$yearTerm.YEAR}" maxlength="4" size="10">  <font color="red">*</font></td>
+			<th align="right">学期：</th>
+			<td align="left"><input name="term" value="{$yearTerm.TERM}" maxlength="1" size="5">  <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<th align="right">单价：</th>
+			<td align="left"><input name="price" maxlength="10" size="10">  <font color="red">*</font></td>
+			<th align="right">折扣率：</th>
+			<td align="left"><input name="dis_rate"  maxlength="10" size="10">  <font color="red">*</font></td>
+		</tr>
+	</table>
+	<p align="center"><a href="javascript:void(0)" class="savebut">新 增</a></p>
+</form>
+ </div>
+</div>
+<include file="./methods" />
+</body>
+</html>

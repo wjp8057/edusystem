@@ -1,0 +1,191 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+
+.info{color:#555;border:solid 1px #95B8E7;display:none;position:absolute;right:5px;top:30px;width: 130px;background:#FFFFFF;}
+.info p{padding:6px 0px 6px 5px;margin:0px;line-height:18px;}
+.info p span{color:#000}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<div>
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="2">
+			   <label>课号：</label><input name="COURSENO" size="18" value='%' >（9位课号）
+			   <a href="javascript:void(0)" id="searcher">检索</a>
+			</div>
+    </div>
+    <div data-options="region:'center',border:false" style="background:#eee;position:relative;">
+        <div id="content_1"></div>
+        <div id="content_2"></div>
+        <div class="info"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+//数据表格父元素class
+var cls="[class='panel-body panel-body-noheader panel-body-noborder layout-body panel-noscroll']";
+$(function(){
+	//考勤记录查询按钮
+	$('#searcher').linkbutton({iconCls:'icon-search'});
+	
+	/**
+     * 课程考勤查询 --根据课号查询
+     */
+    $('#content_1').datagrid({
+        fit:true,
+        striped:true,
+        singleSelect:true,
+        toolbar:'#tdemo',
+        columns:[[{field:"STUDENTNO",title:"学号",width:100,align:"center",formatter:function(value,row,index){
+		        	return "<a href=\"javascript:void(0)\" YEAR=\""+row.YEAR+"\" TERM=\""+
+		        	row.TERM+"\" onClick=\"studentNo($(this))\">"+value+"</a>";
+		          }},
+                  {field:"NAME",title:"姓名",width:80,align:"center"},
+                  <assign name="start" value="{"/>
+                  <assign name="end" value="}"/>
+                  <for start="1" end="18" name="i" step="1" comparison="lt">
+                  {$start}field:"WEEK{$i}",title:"第{$i}周",align:"center",formatter:function(value,row,index){
+                	  if(value==0){
+                		  return "";
+                	  }else{
+                		  return value;
+                	  }
+                  }{$end}<if condition="$i lt 17">,</if>
+                  </for>]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20
+    });
+	
+	/**
+     * 考勤记录查询 --学号
+     */
+    $('#content_2').datagrid({
+    	fit:true,
+		striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"YEAR",title:"学年",width:20,align:"center"},
+                  {field:"TERM",title:"学期",width:20,align:"center"},
+                  {field:"COURSENO",title:"课号",width:40,align:"center",formatter:function(value,row,index){
+                	return "<a href=\"javascript:void(0)\" YEAR=\""+row.YEAR+"\" TERM=\""+
+                	row.TERM+"\" onClick=\"courseNo($(this))\">"+value+"</a>";
+                  }},
+                  {field:"COURSENAME",title:"课名",width:100,align:"center"},
+                  {field:"STUDENTNO",title:"学号",width:40,align:"center"},
+                  {field:"NAME",title:"姓名",width:20,align:"center"},
+                  {field:"WEEK",title:"周次",width:20,align:"center"},
+                  {field:"DAY",title:"星期",width:20,align:"center"},
+                  {field:"TIME",title:"节次",width:40,align:"center"},
+                  {field:"DATE",title:"日期",width:40,align:"center"},
+                  {field:"TYPE",title:"缺到课",width:20,align:"center"}]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20
+    });
+    /*
+     * 刷卡考勤记录查询按钮事件
+     */
+    $('#searcher').click(function(){
+    	//隐藏课号、课名、教师及选课人数
+    	$(".info").hide();
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	var courseNo=$.trim($("[name='COURSENO']").val());
+    	if(year==""){
+    		$.messager.alert('提示','请输入检索学年','?');
+    		return;
+    	}
+    	if(term==""){
+    		$.messager.alert('提示','请输入检索学期','?');
+    		return;
+    	}
+    	if(courseNo==""){
+    		$.messager.alert('提示','请输入检索课号','?');
+    		return;
+    	}
+    	//清空数据
+    	//$('#content_1').datagrid('loadData',{total:0,rows:[]});
+    	//传参数组
+    	var ary={YEAR:year,TERM:term,COURSENO:courseNo};
+    	//查询课号、课名、教师及选课人数
+    	$.ajax({
+            url:"__URL__/queryCourse/",
+            type:"POST",
+            data:ary,
+            dataType:"json",
+            success:function(data){
+            	if(data!=null){
+            		var name=data.NAME==null?"— —":data.NAME;
+                	var count=data.COUNT==0?"— —":data.COUNT;
+                	var txt="<p><span>课号：</span>"+data.COURSENO+"</p>";
+                	txt+="<p><span>课名：</span>"+data.COURSENAME+"</p>";
+                	txt+="<p><span>教师：</span>"+name+"</p>";
+                	txt+="<p><span>选课人数：</span>"+count+"</p>";
+                	$(".info").show();
+                	$(".info").html(txt);
+            	}
+            }
+        });
+    	$('#content_1').datagrid("options").url = "__URL__/queryByCourseNo/";
+    	$('#content_1').datagrid('load',ary);
+    	$(cls+" > div:eq(0)").show();
+    });
+});
+//课号查询
+function courseNo(ele){
+	//清空数据
+	//$('#content_1').datagrid('loadData',{total:0,rows:[]});
+	//传参数组
+	var ary={YEAR:$.trim(ele.attr("YEAR")),
+			TERM:$.trim(ele.attr("TERM")),
+			COURSENO:$.trim(ele.html())};
+	//查询课号、课名、教师及选课人数
+	$.ajax({
+        url:"__URL__/queryCourse/",
+        type:"POST",
+        data:ary,
+        dataType:"json",
+        success:function(data){
+        	if(data){
+        		var name=data.NAME==null?"— —":data.NAME;
+            	var count=data.COUNT==0?"— —":data.COUNT;
+            	var txt="<p><span>课号：</span>"+data.COURSENO+"</p>";
+            	txt+="<p><span>课名：</span>"+data.COURSENAME+"</p>";
+            	txt+="<p><span>教师：</span>"+name+"</p>";
+            	txt+="<p><span>选课人数：</span>"+count+"</p>";
+            	$(".info").show();
+            	$(".info").html(txt);
+        	}
+        }
+    });
+	//数据表格重新加载
+	$('#content_1').datagrid("options").url = "__URL__/queryByCourseNo/";
+	$('#content_1').datagrid('load',ary);
+	//隐藏当前数据datagrid控件
+	$(cls+" > div:eq(0)").show();
+}
+//学号查询
+function studentNo(ele){
+	//隐藏课号、课名、教师及选课人数
+	$(".info").hide();
+	//清空数据
+	//$('#content_2').datagrid('loadData',{total:0,rows:[]});
+	//传参数组
+	var ary={YEAR:$.trim(ele.attr("YEAR")),
+			TERM:$.trim(ele.attr("TERM")),
+			TYPE:"A",
+			STUDENTNO:$.trim(ele.html())};
+	//数据表格重新加载
+	$('#content_2').datagrid("options").url = "__URL__/query/hasJson/1";
+	$('#content_2').datagrid('load',ary);
+	//显示相应的datagrid控件
+	$(cls+" > div:eq(0)").hide();
+}
+</script>
+</html>

@@ -1,0 +1,92 @@
+<include file=":Include:jqueryHeader" />
+
+<body bgcolor="#FFFFFF" style="background: #ffffff">
+
+<SCRIPT>
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+        $("#COURSETYPE").val("M");
+        $("#EXAMTYPE").val("T");
+
+        <if condition="$hashPost eq true">
+        <if condition="$message.type eq 'error'">
+        $("#YEAR").val("{$Think.request.YEAR}");
+        $("#TERM").val("{$Think.request.TERM}");
+        $("#COURSENO").val("{$Think.request.COURSENO}");
+        $("#CLASSNO").val("{$Think.request.CLASSNO}");
+        </if>
+        msgShow("系统提示：","{$message.message}","{$message.type}");
+        </if>
+    });
+    function NewForm_onsubmit() {
+        if($.trim($("#YEAR").val())=="" || ($.trim($("#TERM").val())=="")){
+            msgShow("系统提示：","学年、学期必须填入！","error");
+            return false;
+        }
+        if($("#COURSENO").val().length!=7){
+            msgShow("系统提示：","课号必须是7位！","error");
+            return false;
+        }
+        if($("#CLASSNO").val().length!=6 && $("#CLASSNO").val().length!=7){
+            msgShow("系统提示：","班号必须是6位或7位！","error");
+            return false;
+        }
+        return true;
+    }
+</SCRIPT>
+
+<table border="0" width="73%">
+<tr><td align="center"><p><b>添加开课计划条目:</b></p></td></tr>
+</table>
+<form method="POST" name="MyForm" id=MyForm action="/CoursePlan/Commencement/save" LANGUAGE=javascript onsubmit="return NewForm_onsubmit()">
+<table border="1" width="73%">
+<tr><td width="17%" align="right">学年：</td>
+    <td width="83%"><input type="text" name="YEAR" id="YEAR" size="4" maxlength="4"></td></tr>
+<tr><td align="right">学期：</td>
+    <td><input type="text" name="TERM" id="TERM" size="1" maxlength="1"></td></tr>
+<tr><td align="right">课号：</td>
+    <td><input type="text" name="COURSENO" id="COURSENO" size="7" value=""></td></tr>
+<tr><td align="right">组号：</td>
+    <td><input type="text" name="GROUP" size="2" value="00" maxlength="2"></td></tr>
+<tr><td align="right">班号：</td>
+    <td><input type="text" id="CLASSNO" name="CLASSNO" size="7" value="000000"></td></tr>
+<tr><td align="right">课程类型：</td>
+    <td><Cwebs:sqlselect id="COURSETYPE" name="COURSETYPE" value="CODE" title="NAME" file="common/approaches.sql" /></td></tr>
+<tr><td align="right">考试类型：</td>
+    <td><Cwebs:sqlselect id="EXAMTYPE" name="EXAMTYPE" value="CODE" title="NAME" file="common/examOptions.sql" /></td></tr>
+<tr><td align="right">上课周次：</td>
+    <td>
+        第01周 <input type="checkbox" name="Week[1]" checked value="1">
+        第02周 <input type="checkbox" name="Week[2]" checked value="2">
+        第03周 <input type="checkbox" name="Week[3]" checked value="3">
+        第04周 <input type="checkbox" name="Week[4]" checked value="4">
+        第05周 <input type="checkbox" name="Week[5]" checked value="5">
+        第06周 <input type="checkbox" name="Week[6]" checked value="6"><br>
+        第07周 <input type="checkbox" name="Week[7]" checked value="7">
+        第08周 <input type="checkbox" name="Week[8]" checked value="8">
+        第09周 <input type="checkbox" name="Week[9]" checked value="9">
+        第10周 <input type="checkbox" name="Week[10]" checked value="10">
+        第11周 <input type="checkbox" name="Week[11]" checked value="11">
+        第12周 <input type="checkbox" name="Week[12]" checked value="12"><br>
+        第13周 <input type="checkbox" name="Week[13]" checked value="13">
+        第14周 <input type="checkbox" name="Week[14]" checked value="14">
+        第15周 <input type="checkbox" name="Week[15]" checked value="15">
+        第16周 <input type="checkbox" name="Week[16]" checked value="16">
+        第17周 <input type="checkbox" name="Week[17]" checked value="17">
+        第18周 <input type="checkbox" name="Week[18]" checked value="18"></td></tr>
+<tr><td align="right">人数：</td>
+    <td><input type="text" name="ATTENDENTS" id="ATTENDENTS" size="6" value="" maxlength="3"></td></tr>
+<tr><td align="right">备注：</td>
+    <td><input type="text" name="REM" size="50" value=""></td></tr>
+</table>
+<table border="0" width="73%">
+<tr><td align="center"><input type="submit" value="添加开课计划" name="PlanInsert"></td></tr>
+</table>
+</form>
+
+</body>
+</html>                    
+       
+       
+

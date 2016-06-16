@@ -1,0 +1,136 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+
+        var wd2=$('#wd2').window(new wind(0,0,false,false,true,true,true));         //todo:列表datagrid的window
+
+        //todo:提交检索
+        $('#search').linkbutton({
+            text:'提交检索'
+        }).bind('click',function(){
+            var year=$('[name=YEAR]').val()
+            var term=$('[name=TERM]').val()
+            var select,count
+            if(year==""||term==""){
+                return $.messager.alert('提示','请填写学年学期,不能为空')
+            }
+
+            if($('[name=SORT]:checked').val()=='1'){
+                select='SemesterTimetable/Two_selectList.SQL'
+                count='SemesterTimetable/Two_countList.SQL'
+            }else if($('[name=SORT]:checked').val()=='2'){
+                select='SemesterTimetable/Two_selectList_date.SQL'
+                count='SemesterTimetable/Two_countList_date.SQL'
+            }
+            $('#List').datagrid('load',{'Sqlpath':{'select':select,'count':count},'bind':{
+                ':YONE':year,':TONE':term,':YTWO':year,':TTWO':term,':ROOMNO':$('[name=ROOMNO]').val().trim(),':DAY':$('[name=DAY]').val().trim(),':SCHOOL':$('[name=SCHOOL]').val()}})
+
+                $('#title_year').html(year);
+                $('#title_term').html(term);
+                wd2.window({closed:false})
+
+        })
+
+    })
+</script>
+<style>
+#wd td{border:1px #95B8E7 solid;height:30px
+}
+#ttt{font-size: 30px}
+span{border:0px solid red;;vertical-align:middle;}
+</style>
+<body style="background-color: #ffffff">
+
+
+    <div id="cc" class="easyui-layout" style="" data-options="fit:true">
+ <!--       <div data-options="region:'north',title:'',split:false,border:false" style="height:90px;background:#E0ECFF;"><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;<font size="2"><b>学年:</b></font><input type="text" name="YEAR" size="4" value="2013">*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+           <font size="2"><b>学期:</b></font><input type="text" name="TERM" size="1" value="1">&nbsp;&nbsp;&nbsp;&nbsp;
+                <font size="2"><b>开课学院:</b></font>
+                    <select size="1" name="SCHOOL" class="easyui-combobox">
+                        <option value="">全部</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>&nbsp;&nbsp;&nbsp;&nbsp;
+              <font size="2"><b>教室:</b></font><input type="text" name="ROOMNO" size="10" value=""><br><br>&nbsp;&nbsp;&nbsp;&nbsp;
+             <font size="2"><b>日期:</b></font><select size="1" name="DAY" class="easyui-combobox">&nbsp;&nbsp;&nbsp;&nbsp;
+                        <option selected value="">全部</option>
+                        <option value="1">星期一</option>
+                        <option value="2">星期二</option>
+                        <option value="3">星期三</option>
+                        <option value="4">星期四</option>
+                        <option value="5">星期五</option>
+                        <option value="6">星期六</option>
+                        <option value="7">星期日</option>
+                    </select>&nbsp;&nbsp;&nbsp;&nbsp;
+               <font size="2"><b>排序:</b></font></td>
+            <font size="2">教室：<input type="radio" value="1" checked NAME="SORT">日期：<input type="radio" NAME="SORT" value="2"></font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+                        <a href="javascript:void(0)" id="search">提交检索</a>
+
+        </div>-->
+        <div id="tdemo">
+            <label for="yyear">学年:</label><input type="text" id='yyear' name="YEAR" size="4" value="2013">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <label for="tterm">学期:</label><input type="text" name="TERM" id='tterm' size="1" value="1">&nbsp;&nbsp;&nbsp;&nbsp;
+            <label for="sschool">开课学院:</label>
+            <select size="1" name="SCHOOL" id='sschool' class="easyui-combobox">
+                <option value="%">全部</option>
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>&nbsp;&nbsp;&nbsp;&nbsp;
+            <label for="rroomno">教室:</label><input type="text" id="rroomno" name="ROOMNO" size="10" value="%">&nbsp;&nbsp;&nbsp;&nbsp;
+            <label for="dday">日期:</label><select size="1" name="DAY" id="dday" class="easyui-combobox">&nbsp;&nbsp;&nbsp;&nbsp;
+            <option selected value="%">全部</option>
+            <option value="1">星期一</option>
+            <option value="2">星期二</option>
+            <option value="3">星期三</option>
+            <option value="4">星期四</option>
+            <option value="5">星期五</option>
+            <option value="6">星期六</option>
+            <option value="7">星期日</option>
+        </select>&nbsp;&nbsp;&nbsp;&nbsp;
+            <label>排序:</label>
+            <font size="2">教室：<input type="radio" value="1" checked NAME="SORT">日期：<input type="radio" NAME="SORT" value="2"></font>&nbsp;&nbsp;&nbsp;&nbsp;
+
+            <a href="javascript:void(0)" id="search">提交检索</a>
+        </div>
+        <div data-options="region:'center',title:'',border:false,splist:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List" toolbar="#tdemo"
+                   data-options="url:'__APP__/Status/Status/Squery',fitColumns:false,singleSelect:true,fit:true,pagination:true,pageList:[20,50,100,200,500],pageSize:20
+                  ">
+                <thead>
+                <tr>
+
+                    <th data-options="field:'COURSENO',width:100" align="center">课号</th>
+                    <th data-options="field:'COURSENAME',width:400" align="center">课程</th>
+                    <th data-options="field:'ROOMNAME',width:180" align="center">教室</th>
+                    <th data-options="field:'DAY',width:35,align:'right'" align="center">日期</th>
+                    <th data-options="field:'TIMESECTION',width:80,align:'right'" align="center">时段</th>
+                    <th data-options="field:'OEW',width:50,align:'right'" align="center">单双周</th>
+                    <th data-options="field:'TEACHERNAME',width:70,align:'right'" align="center">教师</th>
+                    <th data-options="field:'SCHOOL',width:100" align="center">开课学院</th>
+                    <th data-options="field:'WEEKS',width:130,align:'center',formatter:function(a,b,c){
+                       var str=parseInt(a,10).toString(2).split('').reverse().join('')
+                        if(str.length<18){
+                        var len=str.length
+                            while(18-len){
+                                str+='0'
+                                len++
+                            }
+                        }
+                        return str;
+
+                    }">周次</th>
+                    <th data-options="field:'CLASSNAME',width:100,align:'center'">班级</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

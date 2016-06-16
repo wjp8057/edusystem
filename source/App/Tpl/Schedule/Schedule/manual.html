@@ -1,0 +1,768 @@
+<include file=":Include:jqueryHeader" />
+<script type="text/javascript" src='/thirdparty/jquery/js/cwebsSchedule.js'> </script>
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+    td,th {text-align:center}
+    .LISTCAPTION th,.LISTCAPTION td {background:#0000FF; color:#FFFFFF; border-color:#ffffff}
+    #LISTTIMES td {background:#FF00FF; color:#FFFFFF; border-color:#ffffff;}
+    .schedule-room th {background:#000080; color:#FFFFFF; border-color:#ffffff}
+    .schedule-class th {background:#000080; color:#FFFFFF; border-color:#ffffff}
+    .schedule-teacher th {background:#000080; color:#FFFFFF; border-color:#ffffff}
+    .schedule-course th {background:#000080; color:#FFFFFF; border-color:#ffffff}
+    .LISTCURRENT td {background:#0000FF; color:#FFFFFF; border-color:#ffffff;cursor:pointer}
+    .cell-time {width:10px;}
+    .cell-time .scheduleTime0 {background:#FFFFFF; color:#000000;}
+    .scheduleTime1 {background:#FFFF00; color:#000000;}
+    .scheduleTime2 {background:#800000; color:#FFFFFF;}
+    .scheduleTime3 {background:#FF0000; color:#FFFFFF;}
+    .scheduleTime4 {background:#000000; color:#FFFFFF;}
+    .lstScheduleSelect {background:#00EE00; color:#000000;}
+    .lstSchedule-r {cursor:pointer}
+</style>
+<php>
+    $listCaptions = array(1=>"星期一","星期二","星期三","星期四","星期五","星期六","星期天");
+</php>
+<script type="text/javascript">
+    var year='{$content.YEAR}';
+    var term='{$content.TERM}';
+    var danshuang={'B1':'O','O1':'E','E1':'B'};
+    var yanse={'0':'#FF0','E':'#800000','B':'#F00'};
+    $(function() {
+        /**
+         * 获得需要提交到数据库的数据
+         **/
+        function getPostData(){
+            var postData = {YEAR:getYear(),TERM:getTerm(),lists:[],times:{},forcible:getForcible()};
+            $(".lstSchedule-r").each(function(index,data){
+                var classNoList=$(this).attr('classNo').split(',');
+                for(var j=0;j<classNoList.length;j++){
+                    var _list = {};
+                    _list.RECNO = $(this).attr("recno");
+                    _list.COURSENO = $(this).attr("courseNo");
+                    _list.TIMES = $(this).attr("times");
+                    _list.DAY = $(this).attr("day");
+                    _list.TIME = $($(this).find(".lstSchedule-r-times")).attr("time");
+                    _list.ROOMNO = $($(this).find(".lstSchedule-r-room")).html();
+                    _list.CLASSNO = classNoList[j];
+                    _list.TEACHNO = $(this).attr("teacherNo");
+                    _list.UNIT = $($(this).find(".lstSchedule-r-unit")).attr("unit");
+                    _list.OEW = $($(this).find(".lstSchedule-r-oew")).attr("oew");
+                    postData["lists"].push(_list);
+                }
+            });
+            //教室
+            postData["times"]["ROOMNO"] = {};
+            $("#TimeLists .schedule-room").each(function(index,data){
+//                var _roomNo = ""+$.trim($(this).attr('roomno'));
+                var _roomNo = undefined;
+                var thfirst = $(this).find('th:first');
+                if(thfirst.find('a').length){
+                    _roomNo = $.trim(thfirst.find('a').html());
+                }else{
+                    _roomNo = $.trim(thfirst.html());
+                }
+
+                postData["times"]["ROOMNO"][_roomNo] = [];
+                for(var j=1; j<8; j++){
+                    $(this).find("[class*='cell-time-"+j+"-']").each(function(i,d){
+                        postData["times"]["ROOMNO"][_roomNo].push({WEEK:$(this).attr("weekIndex"), ORTIMES:$(this).attr("orTimes"), XORTIMES:$(this).attr("xorTimes"),
+                            TIMES:$(this).attr("times"), INITTIMES:$(this).attr("initTimes")});
+                        return false;
+                    });
+                }
+            });
+            postData["times"]["CLASSNO"] = {};
+            $("#TimeLists .schedule-class").each(function(index,data){
+                var _classNo = $(this).find("th").first().attr("title");
+                postData["times"]["CLASSNO"][_classNo] = [];
+                for(var j=1; j<8; j++){
+                    $(this).find("[class*='cell-time-"+j+"-']").each(function(i,d){
+                        postData["times"]["CLASSNO"][_classNo].push({WEEK:$(this).attr("weekIndex"), ORTIMES:$(this).attr("orTimes"), XORTIMES:$(this).attr("xorTimes"),
+                            TIMES:$(this).attr("times"), INITTIMES:$(this).attr("initTimes")});
+                        return false;
+                    })
+                }
+            });
+            postData["times"]["TEACHNO"] = {};
+            $("#TimeLists .schedule-teacher").each(function(index,data){
+                var _teacher = $(this).find("th").first().attr("title");
+                postData["times"]["TEACHNO"][_teacher] = [];
+                for(var j=1; j<8; j++){
+                    $(this).find("[class*='cell-time-"+j+"-']").each(function(i,d){
+                        postData["times"]["TEACHNO"][_teacher].push({WEEK:$(this).attr("weekIndex"), ORTIMES:$(this).attr("orTimes"), XORTIMES:$(this).attr("xorTimes"),
+                            TIMES:$(this).attr("times"), INITTIMES:$(this).attr("initTimes")});
+                        return false;
+                    })
+                }
+            });
+            postData["times"]["COURSENO"] = {};
+            $("#TimeLists .schedule-course").each(function(index,data){
+                var _course = $.trim($(this).find("th").first().html());
+                postData["times"]["COURSENO"][_course] = [];
+                for(var j=1; j<8; j++){
+                    $(this).find("[class*='cell-time-"+j+"-']").each(function(i,d){
+                        postData["times"]["COURSENO"][_course].push({WEEK:$(this).attr("weekIndex"), ORTIMES:$(this).attr("orTimes"), XORTIMES:$(this).attr("xorTimes"),
+                            TIMES:$(this).attr("times"), INITTIMES:$(this).attr("initTimes")});
+                        return false;
+                    })
+                }
+            });
+            return postData;
+        }
+
+        function xorLesson(weekIndex, hexIndexs, oewType, xorType){
+            //假设定义所有加课为 orTimes, 所有退课为 xorTimes
+            //初始时间为：initTimes
+            if(typeof(xorType)=="undefined") xorType="course,class,room,teacher";
+            var _xorTypes = xorType.split(",");
+
+            var xorTimes = $.cwebsSchedule.lesson2Time($.cwebsSchedule.getLesson(hexIndexs),oewType)
+            $.each(_xorTypes,function(i, name){
+                if(name=='class'){
+                    var classno=getCurrValByName(name);
+                    var classarr=classno.split(',')
+                    $.each(classarr,function(i,nm){
+                        $("[class*='"+name+"-r"+nm+"'] [class*='cell-time-"+weekIndex+"-']").each(function(index,data){
+                            setRemoveTimes($(this), 0, xorTimes);
+                        });
+                    });
+                }else{
+                    $("[class*='"+name+"-r"+getCurrValByName(name)+"'] [class*='cell-time-"+weekIndex+"-']").each(function(index,data){
+                        setRemoveTimes($(this), 0, xorTimes);
+                    });
+                }
+            })
+        }
+
+        function orLesson(weekIndex, hexIndexs, oewType, xorType){
+            //假设定义所有加课为 orTimes, 所有退课为 xorTimes
+            //初始时间为：initTimes
+            if(typeof(xorType)=="undefined") xorType="course,class,room,teacher";
+            var _xorTypes = xorType.split(",");
+            var orTimes = $.cwebsSchedule.lesson2Time($.cwebsSchedule.getLesson(hexIndexs),oewType);
+            $.each(_xorTypes,function(i, name){
+                if(name=='class'){
+                    var classno=getCurrValByName(name);
+                    var classarr=classno.split(',')
+                    $.each(classarr,function(i,nm){
+                        $("[class*='"+name+"-r"+nm+"'] [class*='cell-time-"+weekIndex+"-']").each(function(index,data){
+                            setAddTimes($(this), orTimes, 0);
+                        });
+                    })
+                    //alert($("[class*='"+name+"-r"+getCurrValByName(name)+"']").attr('zname'))
+                }else{
+                    $("[class*='"+name+"-r"+getCurrValByName(name)+"'] [class*='cell-time-"+weekIndex+"-']").each(function(index,data){
+                        setAddTimes($(this), orTimes, 0);
+                    });
+                }
+            })
+        }
+
+        function setOEW(val, mod){
+            mod = mod | 1;
+            if(mod==2 || mod==3) $("#wOEW").val(val);
+            if(mod==1 || mod==3){
+                var tds = $(".lstScheduleSelect").find("td");
+                $(tds[6]).attr("oew",val);
+                $(tds[6]).html($.cwebsSchedule.oewName[val]);
+            }
+        }
+
+
+
+
+
+        //todo:点击检索其他教室
+        $('[name=searchRoom]').bind('click',function(){
+            open('__URL__/shiyong');
+        });
+
+        //todo:点击复制一条记录
+        $('[name=COPY]').bind('click',function(){
+            //获取当前选中行
+            var row = $('.lstSchedule-r.lstScheduleSelect');
+            if(row.length === 0){
+                return $.messager.alert('提示','请选择一条数据');
+            }
+            var tds = row.eq(0).children('td');
+//            var classno = row.attr('classNo');
+//            var teacherno = row.attr('teacherNo');
+            var roomr = row.attr('roomr2');
+            var map = row.attr('map');
+            var recno = row.attr('recno');
+            var obj = {};
+            for(var j=0;j<tds.length;j++){
+                obj[j]= $.trim($(tds[j]).html())
+            }
+            $.post('__URL__/COPY',{'roomr':roomr,
+                'map':map,'recno':recno,'year':year,'term':term,'td':obj},function(c){
+                $.messager.alert('提示',c,'info',function(){
+                    window.location.reload();
+                });
+
+            });
+
+//            var list=$('[name=d_tr]');
+//            for(var i=0;i<list.length;i++){
+//               if($(list[i]).css('background-color')!='transparent'){
+//                   var tdlist=$(list[i]).find('td')
+//                   var tdobj=new Array();
+//                   for(var j=0;j<tdlist.length;j++){
+//                       tdobj[j]= $.trim($(tdlist[j]).html())
+//                   }
+//                $.post('__URL__/COPY',{'roomr':$(list[i]).attr('roomr2'),'map':$(list[i]).attr('map'),'recno':$(list[i]).attr('recno'),'year':year,'term':term,'td':tdobj},function(c){
+//                    $.messager.alert('提示',c,'info', function () {
+//                        location.reload();
+//                    });
+//                });
+//                   return;
+//               }
+//           }
+//            $.messager.alert('提示','请选择一条数据')
+        });
+
+
+        //todo:点击删除一条记录
+        $('[name=DELETE]').bind('click',function(){
+            //获取当前选中行
+            var row = $('.lstSchedule-r.lstScheduleSelect');
+            if(row.length == 0){
+                return $.messager.alert('提示','请选择一条数据');
+            }
+            var tds = row.eq(0).children('td');
+            var classno = row.attr('classNo');
+            var teacherno = row.attr('teacherNo');
+            var roomr = row.attr('roomr2');
+            var map = row.attr('map');
+            var recno = row.attr('recno');
+            var obj = {};
+            for(var j=0;j<tds.length;j++){
+                obj[j]= $.trim($(tds[j]).html())
+            }
+            $.post('__URL__/delete',{'classno':classno,'teacherno':teacherno,'roomr':roomr,
+                'map':map,'recno':recno,'year':year,'term':term,'td':obj},function(c){
+                $.messager.alert('提示',c,'info',function(){
+                    window.location.reload();
+                });
+
+            });
+//            console.log(row,tds);return;
+//            var list=$('[name=d_tr]');
+//            for(var i=0;i<list.length;i++){
+//                if($(list[i]).css('background-color')!='transparent'){
+//                    var tdlist=$(list[i]).find('td')
+//                    var tdobj=new Array();
+//                    for(var j=0;j<tdlist.length;j++){
+//                        tdobj[j]= $.trim($(tdlist[j]).html())
+//                    }
+//                    $.post('__URL__/delete',{'classno':$(list[i]).attr('classNo'),'teacherno':$(list[i]).attr('teacherNo'),'roomr':$(list[i]).attr('roomr2'),
+//                        'map':$(list[i]).attr('map'),'recno':$(list[i]).attr('recno'),'year':year,'term':term,'td':tdobj},function(c){
+//                        $.messager.alert('提示',c,'info',function(){
+//                            window.location.reload();
+//                        });
+//
+//                    });
+//                    return;
+//                }
+//            }
+//            $.messager.alert('提示','您还没有选择要删除的记录')
+        });
+
+        //排课列选中事件
+        $(".lstSchedule-r").bind("click",function(){
+            $(".lstSchedule-r").removeClass("lstScheduleSelect");
+            $(this).addClass("lstScheduleSelect");
+            scheduleSelectToCurrForm();
+            setCurrentWorkColor("#FF0000",getCurrWeek(),$.cwebsSchedule.getLessonIndex(getCurrTimes()));
+        });
+
+
+        //单双周点击事件
+        $('.lstSchedule-r td.lstSchedule-r-oew').bind('click',function(){
+            var rowIndex = $(this).parent().attr("indexNo");
+            if(getCurrIndexNo()!= rowIndex) return;
+
+            var oldIndexs = $.cwebsSchedule.getLessonIndex($(".lstSchedule-index-"+rowIndex).attr("times")); //当前数据一共几节课
+            var oldWeekIndex = $(".lstSchedule-index-"+rowIndex+" .lstSchedule-r-day").attr("day"); //当前数据的星期
+            var oldOew = $(".lstSchedule-index-"+rowIndex+" .lstSchedule-r-oew").attr("oew"); //当前数据的单双周
+
+            xorLesson(oldWeekIndex, oldIndexs, oldOew);
+            var OEB=danshuang[$(this).attr('oew')+'1'];
+            setOEW(OEB,3);
+
+            orLesson(oldWeekIndex, oldIndexs,getCurrOEW());
+            resetTimeColor(oldWeekIndex);
+            clearCurrentWorkColor();
+            setCurrentWorkColor(yanse[getCurrOEW()],getCurrWeek(),$.cwebsSchedule.getLessonIndex(getCurrTimes()));
+        });
+
+
+        //节数单元点击事件
+        $(".lstSchedule-r td.lstSchedule-r-unit").bind("click",function(){
+            var rowIndex = $(this).parent().attr("indexNo");
+            if(getCurrIndexNo()!= rowIndex) return;
+            var oldIndexs = $.cwebsSchedule.getLessonIndex($(".lstSchedule-index-"+rowIndex).attr("times")); //当前数据一共几节课
+            var oldWeekIndex = $(".lstSchedule-index-"+rowIndex+" .lstSchedule-r-day").attr("day"); //当前数据的星期
+            var oldOew = $(".lstSchedule-index-"+rowIndex+" .lstSchedule-r-oew").attr("oew"); //当前数据的单双周
+            //移除原来的选课
+            xorLesson(oldWeekIndex, oldIndexs, oldOew);
+            resetTimeColor(oldWeekIndex);
+            clearCurrentWorkColor();
+            var currLen = (parseInt($(this).attr("unit"))+1) % 4;
+            currLen = currLen==0 ? 4 : currLen;
+            setUnit(currLen,3);
+            setWeek(0,3);
+            setTimes(0,3);
+        });
+
+        //教室新增
+        $(".lstSchedule-r td.lstSchedule-r-room").bind("click",function(e){
+            var rowIndex = $(this).parent().attr("indexNo");
+            if(getCurrIndexNo()!= rowIndex) return;
+            //alert(e.clientY);
+            openSearch();
+        });
+        //教室新增_添加并选定
+        $("#efOK").bind("click",function(){
+            var roomNo = $.trim($("#sROOMNO").val());
+            var year = '{$Think.request.YEAR}';
+            var term =  '{$Think.request.TERM}';
+            var area = getArea();
+            var roomr = getRoomr();
+            if(roomNo=="")  return $.messager.alert("提示","请输入教室号，进行教室添加操作！");
+
+            if(getCurrRoomNo()==roomNo){
+                return $.messager.alert("提示","教室号与当前条目相同!");
+            }else if($(".room-r"+roomNo).size()==1){
+                //检测冲突
+                var returnVal = checkLessonByRoom(roomNo,getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW());
+                if(getForcible()==0 && returnVal.right==false){
+                    if(window.confirm(returnVal.msg+"\n\n是否取消排课？如果点“取消”则采用强制模式排课")){
+                        return false;
+                    }else{
+                        setForcible(1);
+                    }
+                }
+                //去掉原有教室的选择
+                xorLesson(getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW(), "room");
+                //颜色重填
+                resetTimeColorByRowId("room",getCurrRoomNo());
+                //更改教室
+                setRoomNo(roomNo,3);
+                //添加新教室选课
+                orLesson(getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW(), "room");
+                //颜色重填
+                resetTimeColorByRowId("room",roomNo);
+                $("#efCancel").trigger("click");
+                return false;
+            }
+
+            $.post("__ROOT__ /Schedule/Schedule/room/hasJson/true", {YEAR:year,TERM:term,ROOMNO:roomNo}, function(rsp) {
+                if(rsp){
+                    if(rsp.type=="info"){
+                        if(area>0 && parseInt(rsp.room.AREA)!=area){
+                            alert("当前课程指定校区为"+area+"，此教室在"+rsp.room.AREA+"校区，为不可用！");
+                            return false;
+                        }else if(roomr!="" && roomr!="0" && rsp.room.ROOMR!=roomr){
+                            //alert("当前课程指定教室类型为"+roomr+"，此教室类型为"+rsp.room.ROOMR+"，为不可用！");
+                            //return false;
+                        }
+                        //检测冲突
+                        var returnVal = checkLessonByRoom(rsp.room.WHO,getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW());
+                        if(getForcible()==0 && returnVal.right==false){
+                            if(window.confirm(returnVal.msg+"\n\n是否取消排课？如果点“取消”则采用强制模式排课")){
+                                return false;
+                            }else{
+                                setForcible(1);
+                            }
+                        }
+
+                        //去掉原有教室的选择
+                        xorLesson(getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW(), "room");
+                        //颜色重填
+                        resetTimeColorByRowId("room",getCurrRoomNo());
+
+                        //追加教室
+                        addRoom(rsp.room);
+                        setRoomNo(rsp.room.WHO,3);
+
+                        //添加新教室选课
+                        orLesson(getCurrWeek(), $.cwebsSchedule.getLessonIndex(getCurrTimes()), getCurrOEW(), "room");
+                        //颜色重填
+                        resetTimeColorByRowId("room",rsp.room.WHO);
+
+                        $("#efCancel").trigger("click")
+                    }
+                    else alert(rsp.message);
+                }
+            },"JSON");
+        });
+        //教室新增_取消
+        $("#efCancel").bind("click",function(){
+            $("#searchForms").window("close");
+        });
+
+        /**
+         * 当前工作条目点击事件
+         */
+        $(".LISTCURRENT .cell-time").bind("click",function(){
+            if($.trim($("#wCOURSE").val())==""){
+                return $.messager.alert("提示","请先从课程列表中选择要排课的课程！");
+            }
+
+            var newIndexs = $.cwebsSchedule.getLessons($(this).html(),$("#wUNIT").val()); //计算出新点击一共几节课
+            if(newIndexs.length==0) return;
+
+            var newWeekIndex = $(this).attr("weekIndex"); //新点击的星期
+            var oldIndexs = $.cwebsSchedule.getLessonIndex(getCurrTimes()); //当前数据一共几节课
+            var oldWeekIndex = getCurrWeek(); //当前数据的星期
+
+            //如果二者相同表示没有改变
+            if(newWeekIndex==oldWeekIndex && newIndexs.join("")==oldIndexs.join("")) {
+                if($(this).css("background").toUpperCase()=="#FF0000"){ //原来是点中的现在则移除
+                    //移除原来的选课
+                    xorLesson(oldWeekIndex, oldIndexs, getCurrOEW());
+                    setWeek(0,3); //设置星期
+                    setTimes($.cwebsSchedule.getLesson(0),3); //设置时间表
+                    setCurrentWorkColor("#0000FF",oldWeekIndex,oldIndexs);
+                    resetTimeColor(oldWeekIndex);
+                }
+                return;
+            }
+
+            var returnVal = checkLesson(newWeekIndex, newIndexs, getCurrOEW());
+            if(getForcible()==0 && returnVal.right==false){
+                if(window.confirm(returnVal.msg+"\n\n是否取消排课？如果点“取消”则采用强制模式排课")){
+                    return false;
+                }else{
+                    setForcible(1);
+                }
+            }
+
+            //移除原来的选课
+            xorLesson(oldWeekIndex, oldIndexs, getCurrOEW());
+            orLesson(newWeekIndex, newIndexs, getCurrOEW());
+            setWeek(newWeekIndex,3); //设置星期
+            setTimes($.cwebsSchedule.getLesson(newIndexs),3); //设置时间表
+
+            resetTimeColor(oldWeekIndex,newWeekIndex);
+            setCurrentWorkColor("#0000FF",oldWeekIndex,oldIndexs);
+            return;
+            setCurrentWorkColor("#FF0000",newWeekIndex,newIndexs);
+        });
+
+
+        function resetTimeColor(){
+            if(arguments.length>0){
+                $.each(arguments, function(index,data){
+                    $(".schedule [class*='cell-time-"+data+"-']").each(function(index,data){
+                        _setTimeColor($(this),$.cwebsSchedule.getLessonStatus($(this).html(),$(this).attr("times")));
+                    });
+                });
+                return;
+            }
+            $(".schedule .cell-time").each(function(index,data){
+                _setTimeColor($(this),$.cwebsSchedule.getLessonStatus($(this).html(),$(this).attr("times")));
+            });
+        }
+
+        //提交保存
+        $("#UpdateEntries").bind("click",function(){
+            $.post("__ROOT__ /Schedule/Schedule/domanual/hasJson/true", getPostData(), function(rsp) {
+                if(rsp){
+                    alert(rsp.message);
+                }
+            });
+        });
+
+        //搜索班级
+        $("#efSearch").bind("click",function(){
+            var params = {};
+            if($.trim($("#sYEAR").val())=="" || $.trim($("#sTERM").val())==""){
+                alert("学年学期不能为空！");
+                return false;
+            }
+            params.YEAR = $("#sYEAR").val();
+            params.SCHOOL = $("#sSCHOOL").val();
+            params.AREA = $("#sAREA").val();
+            params.TERM = $("#sTERM").val();
+            params.EQUIPMENT = $("#sROOMTYPE").val();
+            params.ESTIMATE = $("#sESTIMATE").val();
+            params.ROOMNO = $.trim($("#sROOMNO").val())=="" ? "%" : $("#sROOMNO").val();
+
+            $("#datagrid").datagrid("options").url = "__ROOT__ /Schedule/Schedule/search/hasJson/true";
+            $("#datagrid").datagrid("load", params);
+        });
+
+        resetTimeColor(); //排课表颜色
+        setListSchedule(); //格式化课表
+        setCurrentWorkLesson();
+        $("#datagrid").datagrid({
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },
+            onSelect:function(rowIndex, rowData){
+                $("#sROOMNO").val(rowData.ROOMNO);
+            }
+        });
+
+
+        setTimeout(function(){
+            //点教室的tr
+            $('[name=rname]').bind('click',function(){
+                $('#weekSchedule').css({color:'blue','text-decoration':'underline'})
+                $('#weekSchedule').attr('href','__APP__/Room/Room/roomWeek/roomno/'+this.roomno+'/year/'+year+'/term/'+term);
+                $('#weekSchedule').html($('this').attr('zname'))
+            })
+
+            $('[name=rname]').bind('mouseover',function(){
+
+            })
+
+            //点班级的tr
+            $('[name=cname]').bind('click',function(){
+
+                $('#weekSchedule').css({color:'blue','text-decoration':'underline'})
+                $('#weekSchedule').attr('href','__APP__/CourseManager/Class_admin/Class_week_course/CLASSNO/'+this.classno+'/year/'+year+'/term/'+term);
+                $('#weekSchedule').html($(this).attr('zname'))
+            })
+
+
+            //点教师的tr
+            $('[name=tname]').bind('click',function(){
+                $('#weekSchedule').css({color:'blue','text-decoration':'underline'})
+                $('#weekSchedule').attr('href','__APP__/Userinfo/Userinfo/teacherWeekCourse/teacherno/'+this.teacherno+'/year/'+year+'/term/'+term);
+                $('#weekSchedule').html($(this).attr('zname'))
+            })
+
+        },1000)
+
+        $('[name=aaname]').bind('click',function(){
+           open('__APP__/Room/Room/roomWeek/roomno/'+$(this).attr('roomno')+'/year/'+year+'/term/'+term)
+        })
+
+
+        $('[name=acaname]').bind('click',function(){
+            open('__APP__/CourseManager/Class_admin/Class_week_course/CLASSNO/'+$(this).attr('classno')+'/year/'+year+'/term/'+term);
+        })
+
+        $('[name=ataname]').bind('click',function(){
+            open('__APP__/Userinfo/Userinfo/teacherWeekCourse/teacherno/'+$(this).attr('teacherno')+'/year/'+year+'/term/'+term);
+        })
+
+    });
+
+    function blank(roomno){
+        open('__APP__/Room/Room/roomWeek/roomno/'+roomno+'/year/'+year+'/term/'+term)
+    }
+</script>
+
+
+<body bgcolor="#FFFFFF" style="background: #ffffff" scroll="auto">
+    <div id="LIST" align="center" style="width: 980">
+        <p align=center style="font-size: 18pt;font-family:'隶书'">所有相关资源的时间表</p>
+
+        <table id="TimeLists" name="TimeLists" border="1" cellpadding="0" cellspacing="0" width="100%">
+            <tr class="LISTCAPTION">
+                <th width="93" colspan="2">相关条目</th>
+                <php>
+                    foreach($listCaptions as $caption){
+                        echo '<th width="144" colspan="12">'.$caption.'</th>';
+                    }
+                </php>
+            </tr>
+            <tr id="LISTTIMES">
+                <td width="132" colspan="2">节次</td>
+                <php>
+                    foreach($listCaptions as $caption){
+                        for($i=1; $i<13; $i++){
+                            echo '<td class="cell-time cell-time-'.$i.'">'.strtoupper(dechex($i)).'</td>';
+                        }
+                    }
+                </php>
+            </tr>
+            <php>
+                if($lstRoom){
+                    foreach($lstRoom as $rows){
+                        echo '<tr name="rname" class="schedule schedule-room room-r'.trim($rows["WHO"]).'"  zname="'.trim($rows["WHOSNAME"]).'" roomno="'.trim($rows["WHO"]).'")>
+                                <th title="'.trim($rows["WHOSNAME"]).'"><a href="javascript:void(0)" style="color:#FFF" name="aaname" roomno='.$rows["WHO"].'>'.$rows["WHO"].'</a></th><th>可用</th>';
+                        foreach($listCaptions as $index=>$caption){
+                            for($i=1; $i<13; $i++){
+                                echo '<td class="cell-time cell-time-'.$index.'-'.$i.'" weekIndex="'.$index.'"  title="'.trim($rows["WHOSNAME"]).
+                                        '"  times="'.$rows["TIMES"][$index].'" initTimes="'.$rows["TIMES"][$index].'">'.strtoupper(dechex($i)).'</td>';
+                            }
+                        }
+                    }
+                    echo '</tr>';
+                }
+                if($lstClass){
+                    foreach($lstClass as $rows){
+                        echo '<tr name="cname" class="schedule schedule-class class-r'.trim($rows["WHO"]).'"  zname="'.trim($rows["WHOSNAME"]).'" classno="'.trim($rows["WHO"]).'">
+                                <th title="'.trim($rows["WHO"]).'"><a href="javascript:void(0)" style="color:#FFF" name="acaname" classno='.$rows["WHO"].'>'.$rows["WHOSNAME"].'</a></th><th>班级</th>';
+                        foreach($listCaptions as $index=>$caption){
+                            for($i=1; $i<13; $i++){
+                                echo '<td class="cell-time cell-time-'.$index.'-'.$i.'" weekIndex="'.$index.'" title="'.trim($rows["WHOSNAME"]).
+                                        '"  times="'.$rows["TIMES"][$index].'" initTimes="'.$rows["TIMES"][$index].'">'.strtoupper(dechex($i)).'</td>';
+                            }
+                        }
+                    }
+                    echo '</tr>';
+                }
+                if($lstTeacher){
+                    foreach($lstTeacher as $rows){
+                        echo '<tr name="tname" class="schedule schedule-teacher teacher-r'.trim($rows["WHO"]).'"  zname="'.trim($rows["WHOSNAME"]).'" teacherno="'.trim($rows["WHO"]).'">
+                                <th title="'.trim($rows["WHO"]).'"><a href="javascript:void(0)" style="color:#FFF" name="ataname" teacherno='.$rows["WHO"].'>'.trim($rows["WHOSNAME"]).'</a></th><th>教师</th>';
+                        foreach($listCaptions as $index=>$caption){
+                            for($i=1; $i<13; $i++){
+                                echo '<td class="cell-time cell-time-'.$index.'-'.$i.'" weekIndex="'.$index.'"  title="'.trim($rows["WHOSNAME"]).
+                                        '"  times="'.$rows["TIMES"][$index].'" initTimes="'.$rows["TIMES"][$index].'">'.strtoupper(dechex($i)).'</td>';
+                            }
+                        }
+                    }
+                }
+                if($lstCourse){
+                    foreach($lstCourse as $rows){
+                        echo '<tr class="schedule schedule-course course-r'.trim($rows["WHO"]).'"><th title="'.trim($rows["WHOSNAME"]).'">'.$rows["WHO"].'</th><th>课程</th>';
+                        foreach($listCaptions as $index=>$caption){
+                            for($i=1; $i<13; $i++){
+                                echo '<td class="cell-time cell-time-'.$index.'-'.$i.'" weekIndex="'.$index.'" times="'.$rows["TIMES"][$index].
+                                        '" initTimes="'.$rows["TIMES"][$index].'">'.strtoupper(dechex($i)).'</td>';
+                            }
+                        }
+                    }
+                }
+            </php>
+            <tr class="LISTCURRENT">
+                <td width="144" colspan="2">当前工作条目</td>
+                <php>
+                    foreach($listCaptions as $index=>$caption){
+                        for($i=1; $i<13; $i++){
+                            echo '<td class="cell-time cell-time-'.$index.'-'.$i.'" weekIndex="'.$index.'">'.strtoupper(dechex($i)).'</td>';
+                        }
+                    }
+                </php>
+            </tr>
+            <tr class="LISTCAPTION">
+                <th width="144" colspan="2">相关条目</th>
+                <php>
+                    foreach($listCaptions as $caption){
+                        echo '<th width="144" colspan="12">'.$caption.'</th>';
+                    }
+                </php>
+            </tr>
+            <tr id="COLORLEGEND">
+                <td width="93" align="center" bgcolor="#000080" colspan="2" style="color:#FFFFFF">颜色</td>
+                <td width="24" align="center" bgcolor="#FFFFFF" colspan="2">　</td>
+                <td width="99" align="center" bgcolor="#FFFFFF" colspan="8">空闲</td>
+                <td width="24" align="center" bgcolor="#FFFF00" colspan="2">　</td>
+                <td width="99" align="center" bgcolor="#FFFF00" colspan="8">单周忙</td>
+                <td width="22" align="center" bgcolor="#800000" colspan="2">　</td>
+                <td width="102" align="center" bgcolor="#800000" colspan="8" style="color:#FFFFFF">双周忙</td>
+                <td width="24" align="center" bgcolor="#FF0000" colspan="2">　</td>
+                <td width="100" align="center" bgcolor="#FF0000" colspan="8" style="color:#FFFFFF">全忙</td>
+                <td width="24" align="center" bgcolor="#000000" colspan="2">　</td>
+                <td width="100" align="center" bgcolor="#000000" colspan="8" style="color:#FFFFFF">冲突</td>
+                <td width="347" align="center" bgcolor="#808080" colspan="34">　</td>
+            </tr>
+        </table>
+
+        <table border="1" name="Entries" id="Entries" cellpadding="0" cellspacing="0" width="100%">
+            <tr class="LISTCAPTION">
+                <td width="7%">课号</td><td width="11%">课名</td><td width="5%">星期</td><td width="7%">时段</td><td width="7%">教师</td>
+                <td width="7%">教室</td><td width="6%">单双</td><td width="9%">教室要求</td><td width="7%">周时</td><td width="9%">时段要求</td>
+                <td width="9%">单元</td><td width="12%">上课周次</td><td width="5%">人数</td>
+            </tr>
+            <volist name="lstSchedule" id="vo">
+                <tr class="lstSchedule-r lstSchedule-index-{$i}" name='d_tr' teacherNo="{$vo.TEACHERNO|trim}" roomr2='{$vo.ROOMR2}' indexNo="{$i}" recno="{$vo.RECNO}" classNo="{$vo.CLASSNO|trim}" day="{$vo.DAY}" courseNo="{$vo.COURSE|trim}" times="{$vo.TIMES}" map="{$vo.MAP}">
+                    <td bgcolor="#00FFFF">{$vo.COURSE}</td><td>{$vo.COURSENAME}</td>
+                    <td class="lstSchedule-r-day" day="{$vo.DAY}">{$vo.DAY}</td>
+                    <td class="lstSchedule-r-times" time="{$vo.TIME}" times="{$vo.TIMES}">{$vo.TIMENAME}</td>
+                    <td>{$vo.TEACHERNAME}</td><td class="lstSchedule-r-room" roomr="{$vo.ROOMR|trim}" area="{$vo.AREA|trim}" school="{$vo.SCHOOL|trim}">{$vo.ROOMNO}</td>
+                    <td class="lstSchedule-r-oew" oew="{$vo.OEW}">{$vo.OEW}</td>
+                    <td>{$vo.ROOMEQUIPMENT}</td><td>{$vo.HOURS}</td><td>{$vo.TIMEREQUEST}</td>
+                    <td class="lstSchedule-r-unit" unit="{$vo.UNIT}">{$vo.UNIT}</td>
+                    <td class="lstSchedule-r-weeks" weeks="{$vo.WEEKS}">{$vo.WEEKS}</td><td>{$vo.ESTIMATE}</td>
+                </tr>
+                <tr>
+                    <td bgcolor="#00FFFF">上课班级：</td>
+                    <td colspan="12" style="text-align:left">{$vo.CLASSNAME}</td>
+                </tr>
+            </volist>
+        </table>
+
+    </div>
+
+    <form name="wCurrentData" id="wCurrentData">
+        <input type="hidden" name="wYEAR" id="wYEAR" value="{$Think.request.YEAR}" size="2" />
+        <input type="hidden" name="wTERM" id="wTERM" value="{$Think.request.TERM}" size="2" />
+        <input type="hidden" name="wINDEXNO" id="wINDEXNO" size="9" />
+        <input type="hidden" name="wCOURSE" id="wCOURSE" size="9" />
+        <input type="hidden" name="wROOMNO" id="wROOMNO" size="7" />
+        <input type="hidden" name="wCLASSNO" id="wCLASSNO" size="7" />
+        <input type="hidden" name="wTEACHERNO" id="wTEACHERNO" size="7" />
+        <input type="hidden" name="wDAY" id="wDAY" size="2" />
+        <input type="hidden" name="wOEW" id="wOEW" size="2" />
+        <input type="hidden" name="wTIMES" id="wTIMES" size="9" />
+        <input type="hidden" name="wUNIT" id="wUNIT" size="2" />
+
+        <p align="center">
+            强制：<input type="radio" name="forcible" value="1">
+            非强制：<input type="radio" name="forcible" value="0" checked>
+            <input type="button" value="修改完毕后提交到数据库" id="UpdateEntries">
+            <input type="button" value="复制一条记录" name="COPY" >
+            <input type="button" value="删除一条记录" name="DELETE" >
+            <input type="button" value="检索其它教室" name="searchRoom" >
+            <br />
+            查看周课程表：<a href="#" id="weekSchedule" name="WeekSchedule" target=_blank >未选定</a>
+        </p>
+    </form>
+
+    <!-- 教室新增 -->
+    <div id="searchForms" class="easyui-window" title="教室搜索" style="width:520px;height:350px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+        <div class="easyui-layout" fit="true">
+            <div region="north" border="false" style="height:60px;overflow: hidden;padding: 0px; background: #fff; border: 1px solid #ccc;">
+                <table cellpadding=3 border="0" cellspacing="0">
+                    <tr>
+                        <th align="right">学年：</th><td align="left"><input type="text" id="sYEAR" size="7" value="{$Think.request.YEAR}" style="width:60px" /></td>
+                        <th align="right">所在校院：</th><td align="left"><Cwebs:sqlselect id="sSCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="无要求" file="school/schoolOptions.sql" style="width:120px" /></td>
+                        <th align="right">所属校区：</th><td align="left"><Cwebs:sqlselect id="sAREA" value="CODE" title="NAME" headerKey="%" headerTitle="无要求" file="common/areaOptions.sql" style="width:100px" /></td>
+                    </tr>
+                    <tr>
+                        <th align="right">学期：</th><td align="left"><input type="text" id="sTERM" size="7" style="width:60px" value="{$Think.request.TERM}" /></td>
+                        <th align="right">教室要求：</th><td align="left"><Cwebs:sqlselect id="sROOMTYPE" value="CODE" title="NAME" headerKey="%" headerTitle="无要求" file="common/roomTypeOptions.sql" style="width:120px" /></td>
+                        <th align="right">容纳人数：</th><td align="left"><input type="text" id="sESTIMATE" size="7" style="width:100px" /></td>
+                    </tr>
+                </table>
+                <input type="hidden" id="wRECNO" />
+            </div>
+            <div data-options="region:'center',border:false" style=";background:#eee;">
+                <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true" idField="ROOMNO"
+                                        pagination="true" pageSize="5" pageList="[5,10,20]" striped="true" >
+                <thead>
+                <tr><th data-options="field:'ROOMNO',align:'center',width:80">班号</th>
+                    <th data-options="field:'JSN',align:'center',width:100">班名</th>
+                    <th data-options="field:'SEATS',align:'center',width:60">人数</th>
+                    <th data-options="field:'TESTERS',align:'center',width:60">仪器数</th>
+                    <th data-options="field:'RESERVED',align:'center',width:60">预留</th></tr>
+                </thead>
+                </table>
+            </div>
+            <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+                教室号：<input size="9" id="sROOMNO" style="width:70px" />
+                <a id="efSearch" class="easyui-linkbutton" icon="icon-search" >搜索</a>
+                <a id="efOK" class="easyui-linkbutton" icon="icon-ok" >添加并选定</a>
+                <a id="efCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+
+
+
+
+

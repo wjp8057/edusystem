@@ -1,0 +1,286 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<div id="datagrid"></div>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+	    <div>
+		    <label>学年：</label><input name="year" size="8" maxlength="4">
+		    <label>学期：</label><input name="term" size="4" maxlength="1">
+		    <label>课号：</label><input value='%'  name="courseno" size="14" maxlength="9">
+		    <label>课名：</label><input value='%'  name="coursename" size="16">
+		    <label>开课学院：</label>
+		    <select class="easyui-combobox" name="school" data-options="editable:false">
+			    <option value="%">全部</option>
+			    <volist name="school" id="s">
+			    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+			    </volist>
+		    </select>
+            <p style="height:4px;padding:0px;margin: 0px;"></p>
+		    <label>班号：</label><input  value='%' name="classno" size="14" maxlength="10">
+            <label>发放状态：</label>
+            <select class="easyui-combobox" name="status" data-options="editable:false">
+                <option value="0">全部</option>
+                <option value="1">未发放</option>
+                <option value="3">已发放</option>
+            </select>
+		    <a href="javascript:void(0)" id="searcher">检索</a>
+	    </div>
+    </form>
+    <a href="javascript:void(0)" id="issueBut" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">统一发放</a>
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出发放表</a>
+    <a href="javascript:void(0)" id="initBut" class="easyui-linkbutton" data-options="iconCls:'icon-file',plain:true">发放初始化</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+var indexrow=undefined;
+var datagrid=null;
+$(function(){
+    $("[name='year']").val(parent.$("#YEAR").val());
+    $("[name='term']").val(parent.$("#TERM").val());
+	//征订教材发放信息
+	datagrid = $('#datagrid').datagrid({
+		fitColumns:true,
+        fit:true,
+        striped:true,
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges');
+            var tt=$('#datagrid');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{field:'apply_id',checkbox:true},
+                  {field:'courseno',title:'课号',align:'center',width:40},
+                  {field:'coursename',title:'课名',align:'center',width:65},
+                  {field:'value',title:'修课',align:'center',width:20},
+                  {field:'attendents',title:'预计人数',align:'center',width:35},
+                  {field:'schoolname',title:'开课学院',align:'center',width:40},
+                  {field:'isbn',title:'ISBN',align:'center',width:55},
+                  {field:'bookname',title:'教材名称',align:'center',width:110},
+                  {field:'author',title:'作者',align:'center',width:80},
+                  {field:'stu_quantity',title:'学生订数',align:'center',width:35},
+                  {field:'price',title:'单价',align:'center',width:25,editor:{type:'validatebox',options:{required:true}} },
+                  {field:'dis_rate',title:'折扣率',align:'center',width:30,editor:{type:'validatebox',options:{required:true}} },
+  		          {field:'issue_nym',title:'发放数',align:'center',width:30},
+  		          {field:'操作',title:'操作',align:'center',width:35,formatter:function(value,row,index){
+                	   return "<a href=\"javascript:void(0)\" onclick=\"issue("+row.apply_id+",'"+row.courseno+"',"+row.issue_nym+")\">发放查看</a>";
+  		          }} ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar',
+		onAfterEdit:function(index,dataRow,changes){
+			if(!reg.test(dataRow.price) || !reg.test(dataRow.dis_rate)){
+        		msgShow("系统提示：","单价或折扣率格式错误","error");
+        		datagrid.datagrid('beginEdit', index);
+        		return;
+        	}
+			var updated=datagrid.datagrid('getChanges','updated');
+            if(updated.length){
+            	updatePeice(dataRow,true);
+            }
+		}});
+	//搜索按钮
+    $('#searcher').linkbutton({iconCls: 'icon-search'});
+    // 条件查询
+    $("#searcher").click(function(){
+    	//验证学年学期是否输入
+    	var year=$.trim($("[name='year']").val());
+    	var term=$.trim($("[name='term']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+        datagrid.datagrid("options").url = "__URL__/orderIssue/hasJson/1";
+        datagrid.datagrid("load",getData());
+    });
+    //编辑
+    function eedit(){
+        list=datagrid.datagrid('getSelections');//获取所有被选中的
+        datagrid.datagrid('removeEditor','apply_id');
+        if(list.length>1){
+            msgShow("系统提示：","请选择一条进行编辑,不能选多条","info");
+        }else if(list.length<1){
+            msgShow("系统提示：","请选择要编辑的数据","info");
+        }else{
+            if(indexrow!=undefined){
+                //datagrid.datagrid('endEdit',indexrow);
+                return;
+            }
+            var row = datagrid.datagrid('getSelected');
+            var index = datagrid.datagrid('getRowIndex', row);
+            datagrid.datagrid('beginEdit', index);
+            indexrow=index;
+        }
+    }
+    //编辑
+    $("#editBut").bind('click',eedit);
+    $('#admin_edit').bind('click',eedit);
+    //取消编辑
+    $("#cancelBut").click(function(){
+    	datagrid.datagrid('rejectChanges');
+        indexrow=undefined;
+    });
+    //保存
+    $("#saveBut").click(function(){
+    	datagrid.datagrid('endEdit',indexrow);
+    });
+    //统一发放
+    function tty(){
+        list=datagrid.datagrid('getSelections');//获取所有被选中的
+        if(list.length < 1){
+            msgShow("系统提示：","请选择要统一发放的征订记录","info");
+        }else{
+            $.messager.confirm('提示','您确定统一发放吗？',function(b){
+                if(b){
+                    var ary=[];                      //存储发放信息的数组
+                    for(var i=0;i<list.length;i++){
+                        /*if(list[i].status == 3){
+                            msgShow("系统提示：","您指定的发放订单含有已发放信息，不能再次统一发放","error");
+                            return;
+                        }*/
+                        if(list[i].price==null){
+                        	msgShow("系统提示：","您指定的发放订单含有教材价格未定义信息，请先编辑价格再进行统一发放","info");
+                    		return;
+                        }
+                        ary[i]={apply_id:list[i].apply_id,year:list[i].year,term:list[i].term,price:list[i].price,
+                            dis_rate:list[i].dis_rate,dis_price:list[i].dis_price,book_id:list[i].book_id};
+                    }
+                    Load();
+                    $.ajax({
+                        url:'__URL__/issue/',
+                        data:{'ary':ary},
+                        type:'POST',
+                        success:function(data){
+                            if(data){
+                                dispalyLoad();
+                                msgShow("系统提示：","发放成功！","info");
+                                datagrid.datagrid('reload');
+                            }else{
+                                dispalyLoad();
+                                msgShow("系统提示：","发放失败,未检索到需要发放该教材的学生信息，暂时不能发放","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+    //统一发放
+    $("#issueBut").bind('click',tty);
+    $('#admin_ty').bind('click',tty)
+    //导出
+	$("#ExportBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		$("#queryForm").attr("action","__ROOT__/Book/Excel/orderExport/");
+    		$("#queryForm").submit();
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的数据","info");
+    	}
+	});
+    //初始化发放
+    $("#initBut").click(function(){
+        $.messager.confirm('提示','请谨慎操作，此操作将发放给所有选课学生',function(b){
+            if(b){
+                //验证学年学期是否输入
+                var year=$.trim($("[name='year']").val());
+                var term=$.trim($("[name='term']").val());
+                if(year=="" || term==""){
+                    msgShow("系统提示：","请输入要发放的学年与学期！","error");
+                    return;
+                }
+                Load();
+                $.ajax({
+                    url:'__URL__/initIssue/',
+                    data:{"year":year,"term":term},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            dispalyLoad();
+                            msgShow("系统提示：","初始化发放成功！","info");
+                            datagrid.datagrid('reload');
+                        }else{
+                            dispalyLoad();
+                            msgShow("系统提示：","未检索到可初始化发放信息，暂时不予初始化；请检查订单教材是否设定了价格或查看要发放课程的学生是否通过其他路径已发放同一教材","info");
+                        }
+                    }
+                });
+            }
+        });
+    });
+});
+
+//获取检索条件信息
+function getData(){
+	var data={
+        	year:$.trim($("[name='year']").val()),
+        	term:$.trim($("[name='term']").val()),
+        	courseno:$.trim($("[name='courseno']").val()),
+        	coursename:$.trim($("[name='coursename']").val()),
+        	school:$.trim($("[name='school']").val()),
+        	classno:$.trim($("[name='classno']").val()),
+            status:$.trim($("[name='status']").val())
+        };
+	return data;
+}
+//发放查看
+function issue(apply_id,courseno,issue_nym){
+	if(issue_nym==0){
+		msgShow("系统提示：","暂无发放记录！","info");
+		return;
+	}
+	var url="__ROOT__/Book/Issue/issueByApplyId/apply_id/"+apply_id+"/courseno/"+courseno;
+	openTabsWindows("发放清单",url);
+}
+//更新价格
+function updatePeice(dataRow,bool){
+	$.ajax({
+        url:"__URL__/updatePeice/",
+        type:'POST',
+        data:dataRow,
+        success:function(data){
+        	var index = datagrid.datagrid('getRowIndex', datagrid.datagrid('getSelected'));
+        	if(data){
+                if(bool){
+                	indexrow=undefined;
+                    datagrid.datagrid('reload');
+                	msgShow("系统提示：","更新成功！","info");
+                }
+            }else{
+            	if(bool) msgShow("系统提示：","更新失败！","info");
+            }
+        }
+    });
+}
+function Load() {
+    $("<div class=\"datagrid-mask\"></div>").css({ display: "block", width: "100%", height: $(window).height() }).appendTo("body");
+    $("<div class=\"datagrid-mask-msg\"></div>").html("正在运行，请稍候。。。").appendTo("body").css({ display: "block", left: ($(document.body).outerWidth(true) - 190) / 2, top: ($(window).height() - 45) / 2 });
+}
+
+function dispalyLoad() {
+    $(".datagrid-mask").remove();
+    $(".datagrid-mask-msg").remove();
+}
+</script>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_ty'>统一发放</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+
+<include file="./methods" />
+</body>
+</html>

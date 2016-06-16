@@ -1,0 +1,1 @@
+update creditcount set status=:status where recno=:recno

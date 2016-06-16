@@ -1,0 +1,906 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+var quanxian='{$quanxian}'
+
+
+function qxpanduan(id,url){
+    var quanxianpd=false;
+    ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+
+        eval('var o='+c)
+        for(var i=0;i<o[0]['rl'].length;i++){
+
+            var zz=new RegExp(o[0]['rl'].charAt(i))
+            var bool=zz.test(quanxian)
+
+            if(bool){
+                quanxianpd=true
+                return;
+            }
+        }
+    })
+
+    return quanxianpd;
+}
+eval('type=\'{$codetype}\'')
+
+$(function(){
+	
+    //搜索方法
+    $('#searcher').click(function(){
+        $('#scinfo').datagrid('load',{MAJOR:$('#MAJOR').val(),YEARS:$('#YEARS').val()+'%',GRADE:$('#GRADE').val(),SCHOOL:$('#SCHOOL').val()}) 
+    });
+	
+    //todo:先修课程按钮
+    $('#xxkc').bind('click',function(){
+        openTabsWindows('先修课程','__URL__/xianxiu/courseno/'+$('#xxCOURSENO').html(),'',true)
+    })
+
+    //todo:等价课程按钮
+    $('#djkc').bind('click',function(){
+        openTabsWindows('等价课程','__URL__/dengjia/courseno/'+$('#xxCOURSENO').html(),'',true)
+    })
+    var chuang={
+        modal:true,
+        fit:true,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+    var chuang2={
+        modal:true,
+        width:450,
+        height:400,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+    var chuang3={
+        modal:true,
+        width:470,
+        height:250,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+    var wd=$('#wd').window(chuang)                  //window弹窗之    显示某个专业的培养计划的窗口
+    var wd2=$('#wd2').window(chuang2)               //window弹窗之    修改某个教学计划的时候
+    var wd3=$('#wd3').window(chuang);               //window弹窗之   给某个培养计划添加教学计划的窗口
+    var wd4=$('#wd4').window(chuang2);              //window弹窗之    修改某个培养计划的时候
+
+    var counse_wd=$('#course_wd').window({modal:true,
+        width:420,
+        height:450,
+        minimizable:false,
+        maximizable:false,
+        closed:true})    //window弹窗之   显示某个课程详细信息的时候
+    var wd5=$('#wd5').window(chuang3)                //window弹窗之     审核该方向生时候的弹出窗口
+    var wd6=$('#wd6').window(chuang)                //window弹窗之     审核完毕显示的窗口
+    var wd7=$('#wd7').window(chuang3)                //window弹窗之      审核重修学分的弹出窗口
+    $('#wd').css('display','')
+    $('#wd2').css('display','')
+    $('#wd3').css('display','')
+    $('#wd4').css('display','')
+    $('#wd5').css('display','')
+    $('#wd6').css('display','')
+    $('#wd7').css('display','')
+    $('#course_wd').css('display','')
+    $('#dm').css('display','')
+    var schoolno=''                          //todo:保存培养计划的所在学院号
+    var planNo=''                           //todo:保存培养计划号
+    var planobj=null                        //todo:毕业审核用
+    var indexrow=undefined;             //保存索引键的变量
+    var  dat=$('#scinfo').datagrid({
+        url:'__URL__/plans/hasJson/1',
+        fit:true,onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#scinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{field:'majorsrowid',checkbox:true},
+            {field:'YEAR',title:'年级',width:60,sortable:true,align:'center',editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+                }},
+            {field:'MAJORCODENAME',title:'专业名称',width:200,sortable:true,align:'center'
+               },
+            {field:'SPECIALS',title:'专业方向',width:150,sortable:true,align:'center'},
+            {field:'MAJORSYEARS',title:'学制(年)',width:60,sortable:true,align:'center'},
+            {field:'MAJORPLANMCREDITS',title:'必修总学分',width:60,sortable:true,align:'center'},
+            {field:'MAJORPLANCREDITS',title:'总学分',width:60,sortable:true,align:'center',editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+            }},
+            {field:'SCHOOLSNAME',title:'学院名称',width:200,sortable:true,align:'center'},
+            {field:'MAJORPLANREM',title:'专业培养计划备注',width:100,sortable:true,align:'center',
+                editor:{type:'validatebox',options:{
+                }
+                }}]],
+
+        sortName:'YEAR',                      //排序用的
+        sortOrder:'asc',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:'#tdemo'
+    });
+
+
+    function ddel(){
+        var yi=yitiao(dat,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+        if(yi){
+            var row=dat.datagrid('getSelected')
+            ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:row.school},function(c){
+                if(c=='true'){
+                    $.messager.confirm('提示','您确定要删除吗',function(c){
+                        if(c){
+                            ajiakesi('__URL__/delete_plan',{rowid:row.majorplanrowid},function(c){
+                                $.messager.alert('提示',c)
+                            })
+                        }
+                    })
+
+                }else{
+                    $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                }
+            })
+
+
+        }
+    }
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+
+
+    function eedit(){
+        var yi=yitiao(dat,'请选择一条培养计划,不能选多条修改','请选择一条要修改的数据')
+        if(yi){
+            var row=dat.datagrid('getSelected')
+            ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:row.school},function(c){
+                if(c=='true'){
+                    var obj={};
+                    obj['arr']={':rowid':row.majorplanrowid};
+                    obj['paixu']={':rowid':''}
+                    obj['sqlpath']={edit2:'major/select_Edit_plan.SQL'}
+                    ajiakesi('__URL__/editInfo',obj,function(c){
+                        eval('var one='+c)
+                        fuzhi('wd4',one);
+                        wd4.window({
+                            closed:false
+                        })
+                        $('#ROWID').val(row.majorplanrowid);        //todo:赋值rowid
+                    })
+                }else{
+                    $.messager.alert('提示','不好意思,您不能修改其他学院的')
+                }
+            })
+
+
+        }
+    }
+    $('#e_edit').bind('click',eedit)
+    $('#admin_edit').bind('click',eedit)
+
+
+    function llook(){
+        var yi=yitiao(dat,'请选择一条教学计划,不能选多条查看','请选择一条要查看的数据');
+        if(yi){
+            var row=dat.datagrid('getSelected')
+            var obj={}                  //声明保存传递数据 的对象
+            openTabsWindows(row.MAJORCODENAME+' 教学计划列表','__URL__/look_edit_program/rowid/'+row.majorplanrowid+'/schoolno/'+row.school,'',true)
+        }
+    }
+    $('#e_look').bind('click',llook);
+    $('#admin_look').bind('click',llook);
+
+
+    function sshenhe(){
+        var yi=yitiao(dat,'请选择一条培养计划审核,不能选多条','请选择一条要审核的数据');
+        if(yi){
+            var row=dat.datagrid('getSelected');
+            planobj=row
+            wd5.window({closed:false,title:row.SPECIALS+'的毕业审核' })
+        }
+    }
+
+    $('#e_shenhe').bind('click',sshenhe)
+    $('#admin_shenhe').bind('click',sshenhe)
+
+    $('#dtnfo').layout({})
+
+
+
+//todo:显示某个培养计划的教学计划的========================================start===================================================================
+       var peiyangprogram=$('#zhuanyeprogram').datagrid({
+           url:'__URL__/chaxun',
+           fit:true,
+           columns:[[{checkbox:true},{field:'PROGNO',title:'教学计划号', width:70},
+               {field:'PROGNAME',title:'教学计划名称', width:200},
+               {field:'value',title:'教学计划类别', width:130},
+               {field:'CREDITS',title:'选课学分', width:70},
+               {field:'MCREDITS',title:'须通过学分', width:80}
+           ]],
+           toolbar:[
+               {text:'删除选中培养计划',
+                   iconCls:'icon-edit',
+                   handler:function(){
+                       var boo=qxpanduan('MJ31','__APP__/Book/Book/Bexecute')
+                       if(!boo){
+                           dat.datagrid('reload');
+                           return $.messager.alert('提示','MJ31 您没有足够的权限')
+                       }
+                       var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条删除','请选择一条要删除的数据')
+                       if(yi){
+                           var row=peiyangprogram.datagrid('getSelected')
+                           ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:schoolno},function(c){
+
+                               if(c=='true'){
+                                   $.messager.confirm('提示','您确定要删除吗',function(c){
+                                       if(c){
+                                           var obj={}
+                                           obj['arr']={':rowid':row.MAJORPLAN_ROWID,':programno':row.PROGNO}
+                                           obj['paixu']={':rowid':'',':programno':''}
+                                           obj['sqlpath']={'edit':'major/delete_peiyang_R30_one.SQL'}
+                                           ajiakesi('__URL__/xiugai',obj,function(c){
+                                               $.messager.alert('提示','删除成功')
+                                               peiyangprogram.datagrid('load')
+
+                                           })
+                                       }
+                                   })
+                               }else{
+                                   $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                               }
+                           })
+                   }
+               }},
+               {text:'修改教学计划',
+                   iconCls:'icon-edit',
+                   handler:function(){
+                       var boo=qxpanduan('MJ31','__APP__/Book/Book/Bexecute')
+                       if(!boo){
+                           dat.datagrid('reload');
+                           return $.messager.alert('提示','MJ31 您没有足够的权限')
+                       }
+                        var yi=yitiao(peiyangprogram,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+                        if(yi){
+                            var row=peiyangprogram.datagrid('getSelected')
+
+                       ajiakesi('__URL__/programEdit',{PROGNO:row.PROGNO,ROWID:row.MAJORPLAN_ROWID},function(cc){
+                            wd2.window({
+                                closed:false
+                            })
+
+                           eval("var one="+cc)
+
+                            var inputList=$('#wd2 :input')
+
+                            for(var i=0;i<inputList.length;i++){
+                                inputList[i].value=one[inputList[i].id]
+                            }
+
+                           $('#TYPE').val(one['name'])
+                           $('#wd2 [name="PROGNAME"]').val(one['PROGNAME']);
+                        })
+                        }
+                   }
+               },
+               {text:'添加教学计划',
+                   iconCls:'icon-add',
+                   handler:function(){
+                       var boo=qxpanduan('MJ31','__APP__/Book/Book/Bexecute')
+                       if(!boo){
+                           dat.datagrid('reload');
+                           return $.messager.alert('提示','MJ31 您没有足够的权限')
+                       }
+                         wd3.window({
+                             closed:false
+                         })
+                   }
+               },{text:'返回',
+                   iconCls:'icon-back',
+                   handler:function(){
+                       ziback(wd)
+                   }
+               }
+           ]
+       })
+
+//todo:提交修改后的教学计划的按钮============================================start================================================================
+    $('#programEdit').linkbutton({
+        text:'<b>修改教学计划信息</b>',
+        iconCls:'icon-edit'
+    }).bind('click',function(){
+               var obj=quzhi('wd2',false,'id');
+                if(isNaN($('#CREDITS').val())){
+                    return $.messager.alert('提示','选课学分必须是数字')
+                };
+                if(isNaN($('#MCREDITS').val())){
+                    return $.messager.alert('提示','须通过学分必须是数字')
+                }
+                obj['paixu']={':TYPE':'123',':MCREDITS':'123',':CREDITS':'123',':MAJORPLAN_ROWID':'123',':PROGRAMNO':'123'};
+                obj['arr'][':TYPE']=$('#TYPE').val();
+                obj['sqlpath']={}
+                obj['sqlpath']['edit']='major/programUpdate.SQL';
+                ajiakesi('__URL__/xiugai',obj,function(c){$.messager.alert('提示',c)})
+                wd2.window({
+                    closed:true
+                })
+                peiyangprogram.datagrid('load')
+            })
+//todo:============================================================================end========================================================
+
+
+    var PRONO=[]            //保存教学计划号的数组
+  //todo:给右边的培养计划 添加教学计划的datagrid=========================================start============================================
+    var Goright_program=$('#tianjiaprogram').datagrid({
+        url:'__URL__/chaxun',
+        fit:true,
+        columns:[[{checkbox:true},{field:'PROGRAMNO',title:'教学计划号', width:70},
+            {field:'PROGNAME',title:'教学计划名称', width:200},
+            {field:'TYPENAME',title:'类型', width:110},
+            {field:'SchoolName',title:'学院', width:120},
+            {field:'REM',title:'备注', width:120}
+        ]],
+
+        toolbar:[{
+            text:'将选中的教学计划添加到右边',                                  //todo:删除班级的修课计划的操作
+            iconCls: 'icon-edit',
+            handler:function(){
+               var programList=Goright_program.datagrid('getSelections')        //获得所有选中的元素
+                for(var i=0;i<programList.length;i++){          //todo:判断右边是不是已经添加了
+                    var pd=true;
+                    var num=0;
+                    var str='';
+
+                    while(PRONO[num]){
+                         if(PRONO[num]==programList[i].PROGRAMNO.replace(/(\s*$)/g,""))
+                            pd=false
+                        num++;
+                    }
+
+                    if(!pd)continue
+
+                        str+='<tr name="TrList1" id=Have'+programList[i].PROGRAMNO.replace(/(\s*$)/g,"")+'><td align="center"><input type="checkbox" name="cK" value='+programList[i].PROGRAMNO.replace(/(\s*$)/g,"")+'></td><td width="11%" align="center"><span name="PROGRAMNO">'+programList[i].PROGRAMNO+'</span></td><td width="18%" align="center"><span name="PROGNAME">'+programList[i].PROGNAME+'</span></td><td width="5%" align="center"><span name="TYPENAME">'+programList[i].TYPENAME+'</span></td><td width="12%" align="center"><span name="SCHOOLNAME">'+programList[i].SchoolName+'</span></td><td width="22%" align="center"><span >{$codett}</span></td><td width="7%" align="center"><input type=text name="XF" size=3 ></font></td><td width="11%" align="center"><input type=text   name="MXF" size="3" ></font></td></tr>'
+                         $('#MyTable').append(str);
+                        PRONO.push(programList[i].PROGRAMNO.replace(/(\s*$)/g,""))
+
+                    }
+
+              }
+
+
+
+        },'-',{
+            text:'查看课程详细信息',
+            iconCls:'',
+            handler:function(){
+                var yi=yitiao(Goright_program,'请选择一条信息,不能选择多条','请选择一条信息')
+                if(yi){
+                    var row=Goright_program.datagrid('getSelected')
+                   ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'major/select_xxinfo.SQL',bind:{':COURSENO':row.PROGRAMNO}},function(c){
+
+                   })
+                    counse_wd.window({closed:false})
+                }
+            }
+        },{
+            'text':'返回',
+            'iconCls':'icon-goleft',
+            handler:function(){
+                wd3.window({
+                    closed:true
+                })
+            }
+        }
+        ],
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        pagination:true
+    })
+//todo:===========================================================================end=====================================================
+
+
+
+
+//todo:===============================================================end===============================================================
+
+//todo:“检索教学计划的按钮”-------------》给某个培养计划添加教学计划时候的那个窗口里面的搜索按钮
+    $('#seacherProgram').linkbutton({
+            text:'检索教学计划'}
+    ).bind('click',function(){
+
+        var obj=quzhi('j_wd3',true,'id')
+        obj['arr'][':SC']=$.trim($('#SC').val());
+
+        obj['paixu']={':P_NO':'',':P_NAME':'',':SC':''}
+        obj['sqlpath']={}
+
+        obj['sqlpath']={'select':'major/select_program.SQL','count':'major/count_program.SQL'}
+
+                Goright_program.datagrid('load',obj);
+    })
+
+
+
+
+
+    //:todo:添加到右边的方法
+    function Gotoright(obj,dataobj){
+        var index=dataobj.datagrid('getRowIndex',obj);
+        if(index!=-1)
+            return
+        dataobj.datagrid('insertRow',{index:0,row:obj});
+        dataobj.datagrid('beginEdit',0);
+    }
+//todo:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    function Gotoright2(obj,dataobj){
+        var index=dataobj.datagrid('getRowIndex',obj);
+        if(index!=-1)
+            return
+        dataobj.datagrid('appendRow',obj);
+
+    }
+
+    //todo:“提交修改后的培养计划内容 的按钮”
+    $('#editPlanButton').linkbutton({
+        text:'修改培养计划',
+        iconCls:"icon-edit"
+    }).bind('click',function(){
+                var obj=quzhi('wd4',false,'name')
+                obj['arr'][':ROWID']=$('#ROWID').val();
+                obj['paixu']={':YEAR':'',':REM':'',':MCREDITS':'',':CREDITS':'',":zyfx":'',':ROWID':''}
+                obj['sqlpath']={edit:'major/Update_Edit_plan.SQL'}
+                ajiakesi('__URL__/xiugai',obj,function(c){
+                    if(c=='false'){
+                        return $.messager.alert('提示','<font color="red">学分请填写数字</font>')
+                    }
+                        $.messager.alert('提示',c);
+
+
+                    wd4.window({
+                        closed:true
+                    })
+                    dat.datagrid('reload');
+                })
+            })
+
+
+    $('#reverse_PROGRAM').linkbutton({
+        text:'取消选中的'                                                        //todo:取消选中按钮的方法（）（）（）（）
+    }).bind('click',function(){
+            var checkeList=$("input:checkbox[name=cK]:checked")
+            for(var i=0;i<checkeList.length;i++){
+               $('#Have'+checkeList[i].value).detach();               //todo:删除选中元素
+                for(var j=0;j<PRONO.length;j++){
+                    if(PRONO[j]==checkeList[i].value){
+
+                       PRONO.splice(j,1)                                 //todo:去除PRONO的元素
+
+                        break;
+                    }
+                }
+            }
+
+
+            })
+
+
+    $('#add_PROGRAM').linkbutton({
+        text:'添加到数据库',
+        iconCls:"icon-add"
+    }).bind('click',function(){
+                var obj={}
+                obj['arr']=[]
+
+                var TrList=$('[name="TrList1"]')
+                if(TrList.length==0){
+                    return $.messager.alert('提示','列表为空哦')
+                };
+
+                for(var i=0;i<TrList.length;i++){
+                   var arrOBJ={}
+                    arrOBJ[':PROGRAMNO']=$('#'+TrList[i].id+' [name="PROGRAMNO"]').html();           //todo:教学计划号
+                    if($('#'+TrList[i].id+' [name="MXF"]').val()==""||$('#'+TrList[i].id+' [name="XF"]').val()==""){
+                        $.messager.alert('提示','<font color="red">学分不能为空</font>')
+                        return
+                    };
+                    if(isNaN(Number($('#'+TrList[i].id+' [name="MXF"]').val()))||isNaN(Number($('#'+TrList[i].id+' [name="XF"]').val()))){
+                        $.messager.alert('提示','<font color="red">学分需要是数值</font>')
+                        return
+                    }
+                    arrOBJ[':MCREDITS']=$('#'+TrList[i].id+' [name="MXF"]').val()                            //todo:学分
+                    arrOBJ[':CREDITS']=$('#'+TrList[i].id+' [name="XF"]').val();                             //todo:学分
+                    arrOBJ[':type2']=$('#'+TrList[i].id+' [name="type2"]').val();                       //todo:教学计划类型
+                    arrOBJ[':MAJORPLAN_ROWID']=planNo;
+                    obj['arr'].push(arrOBJ);
+                    arrOBJ=null
+                }
+
+                obj['sqlpath']={'insert':'major/insertR30.SQL'}
+                obj['paixu']={':MAJORPLAN_ROWID':'',':PROGRAMNO':'',':type2':'',':CREDITS':'',':MCREDITS':''}
+                ajiakesi('__URL__/jihuaADD',obj,function(c){
+                    $.messager.alert('提示',c)
+                })
+                obj=null
+            })
+
+
+
+
+   $('#CK2').bind('click',function(){
+
+      var ckList= $('#MyTable [name="cK"]')
+        for(var i=0;i<ckList.length;i++){
+            ckList[i].checked=this.checked
+        }
+   })
+
+    $('#shenhe').linkbutton({
+        text:'提交审核',
+        iconCls:'icon-edit'
+    }).bind('click',function(){
+                if($('#shenheStudentNo').val().length<5&&$('#shenheClassNo').val().length<5){
+                    return $.messager.alert('提示','<font color="red">学号长度不够，为了节省服务器资源，请输入正确的学号！</font>')
+                }
+                openTabsWindows('毕业审核结果','__URL__/shenhe/rowid/'+planobj['majorplanrowid']+'/studentno/'+ $.trim($('#shenheStudentNo').val()) +'_/classno/'+ $.trim($('#shenheClassNo').val()),'',true)
+
+            })
+
+
+    $('#chongxiuxuefen').linkbutton({
+        text:'提交审核',
+        iconCls:'icon-edit'
+    }).bind('click',function(){
+
+            })
+
+
+
+})
+
+//todo:赋value值
+function fuvalue(){
+    alert(this);
+}
+
+//todo:赋值
+function fuzhi(tablename,one){
+    for(var i in one){
+        $('#'+tablename+' [name='+i+']').val(one[i]);
+    }
+}
+
+
+//todo:取input值
+function quzhi(name,fuhao,attr){
+    var obj={};
+    obj['arr']={}
+    var inputList=$('#'+name+' input')
+    for(var i=0;i<inputList.length;i++){
+            if(inputList[i][attr]==''){
+                continue;
+            }
+        if(fuhao)
+            obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)     //todo:LIKE
+        else
+            obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)              //todo:=
+    }
+    return obj;
+}
+
+
+
+//todo:ajax请求的方法
+function ajiakesi(url,data,func){
+    $.ajax({
+        type:'post',
+        url:url,
+        data:data,
+        error:function(a,b,c){
+            $.messager.alert('系统提示','服务器异常,请求失效')
+        },
+        success:function(c){
+            func(c);
+        }
+    })
+}
+
+//todo:判断是否是选择了一条的函数
+function yitiao(obj,str1,str2){
+    var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+    if(rowList.length>1){
+        $.messager.alert('提示',str1);                         //用户选了多行编辑
+    }else if(rowList.length<1){
+        $.messager.alert('提示',str2);                         //用户没选择行
+    }else{
+        return true;
+    }
+    return false;
+}
+
+
+
+function ziback(name){
+    name.window({
+        closed:true
+    })
+}
+
+</script>
+
+<body>
+<!--todo:审核重修学分-->
+<div id="wd7" title="毕业审核结果" style="display: none">
+
+    <p align="center"><font color="#FF0000">设定条件：</font><font color="#000000">列出</font>重修学分超过必修总学分比例为<input type="text" name="BL" size="3" value="0.2">&nbsp;&nbsp;&nbsp;
+        或重修最低学分为<input type="text" name="MIN_XF" size="3" value="25"></p>
+
+    <p align="center">　</p>
+
+    <p align="center">请输入待审核的学号&nbsp; <input type="text" name="STUDENTNO" size="9" value="">&nbsp;&nbsp;&nbsp;&nbsp;
+        班号&nbsp; <input type="text" name="CLASSNO" size="8" value="">
+
+    </p>
+    <p align="center">
+        <a id="chongxiuxuefen" >查询</a>
+    </p>
+</div>
+<!--todo:审核某个培养计划-->
+<div id="wd6" title="毕业审核结果" style="display: none">
+    <p align=center><font color=#0000FF face=黑体 size=4><span id="majorname"></span>&nbsp;&nbsp;<span id="planname"></span> &nbsp;&nbsp; 毕业审核报告</font></p>
+    <p align=center><font color=#000000 size=3>要求总学分:<span id="zxf"></span>&nbsp;&nbsp;必修学分：<span id="xf"></span>&nbsp;&nbsp;审核时间：<span id="shenheshijian"></span></font></p><p align=center><b><font size=4>@_@(:终于审核结束了！:) @_@ 本次共审核了0人</font></b></p>
+</div>
+<!--todo:修改某个培养计划的时候所用到的窗口-->
+<div id="wd5" title="毕业审核" style="display: none">
+    <table border="0" cellspacing="10" align="center" style="margin-top:50px">
+        <tr><td align="right"> 请输入待审核的学号:</td><td><input type="text" name="STUDENTNO" id="shenheStudentNo"size="9" value=""></td></tr>
+        <tr><td align="right">班号:</td> <td><input type="text" name="CLASSNO" id="shenheClassNo"size="8" value=""></td></tr>
+        <tr><td align="center" colspan="2"><a  id="shenhe" href="javascript:void(0)">开始审核</a></td></tr>
+    </table>
+</div>
+<!--todo:修改某个培养计划的时候所用到的窗口-->
+<div id="wd4" title="修改培养计划" style="display: none">
+    <table border="1" width="100%">
+        <tr>
+            <td width="43%">年级：</td>
+            <td width="57%"><input type="text" name="YEAR" size="4" maxlength="4" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%">专业方向：</td>
+            <td width="57%"><input type="text" name="zyfx" size="30" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%">总学分：</td>
+            <td width="57%"><input type="text" name="CREDITS" size="6" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%">必修总学分：</td>
+            <td width="57%"><input type="text" name="MCREDITS" size="6" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%">备注：</td>
+            <td width="57%"><input type="text" name="REM" size="30"  value="">
+                              <input type="hidden" id="ROWID">
+            </td>
+        </tr>
+
+        <tr><td colspan="2" align="center"><a href="javascript:void(0)" id="editPlanButton">修改培养计划</a></td></tr>
+    </table>
+</div>
+<!--todo:给某个培养计划 添加教学计划的时候 所用到的窗口-->
+<div id="wd3" title="添加计划" style="display: none">
+    <div id="cc2" class="easyui-layout" data-options="fit:true,border:false" >
+        <div data-options="region:'north',title:'搜索',split:true,noheader:true" id="j_wd3" style="height:60px;">
+               <div style="margin-top:10px">
+                教学计划编号：
+                <input type="text" name="ProgramNo" id="P_NO" size="10" maxlength="10" value="">
+                教学计划名称：
+                <input type="text" name="ProgramName" id="P_NAME" size="20" maxlength="20" value="">
+                    学院：
+                    <select name="SCHOOL" size="1" id="SC">
+                        <option value="%">所有学院</option>
+                        <volist name="schools" id="v">
+                            <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                        </volist>
+                    </select>
+                <a href="javascript:void(0)" id="seacherProgram"></a>
+                </div>
+          </div>
+        <div id="right_ADDSTUDENT" data-options="region:'east',iconCls:'icon-reload',title:'右边',split:true,border:false,noheader:true" >
+            <div id="course_wd" style="display: none" title=" "><!--todo:课程详细信息的窗口-->
+                <table border="1" width="77%" style="border-collapse:collapse;font-size:10pt;margin-top:20px" ALIGN=CENTER id="Goright_Studen">
+                    <tr>
+                        <td width="47%" align="right">课号：</td>
+                        <td width="66%"><SPAN id=xxCOURSENO></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">课名：</td>
+                        <td width="66%"><SPAN  id=xxCOURSENAME></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">开课学院：</td>
+                        <td width="66%"><SPAN  id=xxSCHOOL></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">学分：</td>
+                        <td width="66%"><SPAN  id=xxCREDITS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">每周总学时：</td>
+                        <td width="66%"><SPAN  id=xxHOURS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">每周实验学时：</td>
+                        <td width="66%"><SPAN  id=xxEXPERIMENTS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">每周上机学时：</td>
+                        <td width="66%"><SPAN  id=xxCOMPUTING></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right"><font size=2>每周实训学时：
+                        </font>
+                        </td>
+                        <td width="66%"><SPAN  id=xxSHOURS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">每周课堂讨论学时：</td>
+                        <td width="66%"><SPAN  id=xxKHOURS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right"><font size=2>每周自主学习学时：
+                        </font>
+                        </td>
+                        <td width="66%"><SPAN id=xxZHOURS></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">课程类别：</td>
+                        <td width="66%"><SPAN  id=xxTYPE></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">教学大纲网址：</td>
+                        <td width="66%"><A Name="Link"  name=SYLLABUS><SPAN  id=xxSYLLABUS></SPAN></A></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">旧课号：</td>
+                        <td width="66%"><SPAN  id=xxOBSELETE></SPAN></td>
+                    </tr>
+                    <tr>
+                        <td width="47%" align="right">备注：</td>
+                        <td width="66%"><SPAN  id=xxREM></SPAN></td>
+                    </tr>
+                    <tr >
+                        <td align="center" colspan="2">
+                        <a href="javascript:void(0)" id="xxkc" class="easyui-linkbutton">先修课程</a>
+                        <a href="javascript:void(0)" id="djkc" class="easyui-linkbutton">等价课程</a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <script>
+             $('#right_ADDSTUDENT').css('width',$(document.body).width());
+            </script>
+            <div id="xianshiprogram">
+                <table border="1" align=center id=MyTable DATASRC=#dsoDATASET style="border-color:#FFFFFF">
+                    <THEAD id=Caption>
+                    <TH width="11%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" ><input type="checkbox" id="CK2"></font></TH>
+                    <TH width="11%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >教学计划号</font></TH>
+                    <TH width="18%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >教学计划名称</font></TH>
+                    <TH width="5%" align="center"  bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >类型</font></TH>
+                    <TH width="12%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >学院</font></TH>
+                    <TH width="22%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >教学计划类别（须选择）</font></TH>
+                    <TH width="7%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >选课学分</font></TH>
+                    <TH width="11%" align="center" bgcolor="#F4F4F4" style="border-color:#FFFFFF"><font size="2" >须通过学分</font></TH>
+                    </THEAD>
+                </table>
+               <center> <a href="javascript:void(0)" id="add_PROGRAM"></a>&nbsp;&nbsp;&nbsp;<a href="javascript:void(0)" id="reverse_PROGRAM"></a></center>
+            </div>
+        </div>
+        <div data-options="region:'center',title:'datgrid内容',border:false,noheader:true" style="background:#eee;">
+            <div id="tianjiaprogram"> <!--todo:添加学生的datagrid-->
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var wi=$('#wd3').css('width')
+    $('#right1').css('width',parseInt(wi)/2);
+    $('#right_ADDSTUDENT').css('width',parseInt(wi)/2);
+
+</script>
+<div id="wd2" title="编辑教学计划" style="display: none">
+            <table border="1" width="100%" style="margin-top:10px">
+                <tr>
+                    <td width="43%" align="right" >教学计划号：</td>
+                    <td width="57%"><input type="text" id="PROGRAMNO" value="" readonly   style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none;"  ></td>
+                </tr>
+                <tr>
+                    <td width="43%" align="right" >教学计划名称：</td>
+                    <td width="57%"><input type="text" size="50" name="PROGNAME" value="" readonly   style="border:0px;border-bottom-style:none;border-top-style:none;border-left-style:none;border-right-style:none;"  ></td>
+                        <input type="hidden" id="MAJORPLAN_ROWID">
+                </tr>
+
+                <tr>
+                    <td width="43%" align="right">教学计划类别：</td>
+                    <td width="57%"><select name="TYPE" id="TYPE" size="1" >
+                        <volist name="codett2" id="v">
+                            <option value="{$v.name}">{$v.value}</option>
+                        </volist>
+                    </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="43%" align="right">选课学分：</td>
+                    <td width="57%"><input type="text" id="CREDITS" size="5" value=""></td>
+                </tr>
+                <tr>
+                    <td width="43%" align="right">须通过学分：</td>
+                    <td width="57%"><input type="text" name="XTGXF" size="5"  id="MCREDITS" value=""></td>
+                </tr>
+                <tr>
+                    <td  align="center" colspan="2"><a href="javascript:void(0)" id="programEdit"><!--todo:修改某个教学计划信息的BUTTON--></a></td>
+                    </tr>
+            </table>
+</div>
+<!--todo:显示某个专业的 教学计划（培养计划？）列表的datagrid-->
+<div id="wd" style="display: none">
+    <div id="zhuanyeprogram">
+    </div>
+</div>
+<div  class="easyui-layout"  data-options="border:false,fit:true" id="dm" style="display: none">
+    <div id="tdemo">
+        <form action="" method="POST" id="biaodan">
+           学制:<select size="1" id="YEARS">
+                            <option value="%" selected>所有学制</option>
+                            <option value="2">二年制</option>
+                            <option value="3">三年制</option>
+                            <option value="4" >四年制</option>
+                            <option value="5">五年制</option>
+                        </select>&nbsp&nbsp&nbsp
+          专业名称:<select id="MAJOR">
+                            <option value="%">所有专业</option>
+                            <volist name="majorcode" id="v">
+                                <option value="{$v.CODE}">{$v.NAME}</option>
+                            </volist>
+                        </select>&nbsp&nbsp&nbsp
+          年级:<input type="text" name="GRADE" id="GRADE" size="4" value="1" class="easyui-validatebox">&nbsp&nbsp&nbsp
+          所在学院:<select id="SCHOOL" >
+                            <option value="%" selected>所有学院</option>
+                            <volist name="schools" id="s">
+                                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                            </volist>
+                        </select>&nbsp&nbsp&nbsp
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+            <br>
+
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel"  id="e_del" plain=true>删除选中培养计划</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>修改选中培养计划</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-lookfile"  id="e_look" plain=true>查看并修改教学计划</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-shenhe"  id="e_shenhe" plain=true>审核该方向学生</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-shenhe2"  id="e_save" plain=true>审核重修学分</a>
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true,fitColumns:true"></div>
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_del'>删除选中培养计划</div>
+        <div id='admin_edit'>修改选中培养计划</div>
+        <div id='admin_look'>查看并修改教学计划</div>
+        <div id='admin_shenhe'>审核该方向学生</div>
+    </div>
+</div>
+</body>
+</html>

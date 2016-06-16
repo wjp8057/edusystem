@@ -1,0 +1,74 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var rowid='{$content.ROWID}'
+        var school='{$content.SCHOOL}'
+        var teacherschool='{$teacherno}'
+
+        $('#add').bind('click',function(){
+            if($('[name=YEAR]').val()==''){
+                return $.messager.alert('提示','请填写年级')
+            }else if($('[name=ZYFX]').val()==''){
+                return $.messager.alert('提示','请填写专业方向')
+            }else if($('[name=ZXF]').val()==''){
+                return $.messager.alert('提示','请填写总学分')
+            }else if($('[name=BXXF]').val()==''){
+                return $.messager.alert('提示','请填写必须学分')
+            }
+
+            if(isNaN($('[name=ZXF]').val())||isNaN($('[name=BXXF]').val())){
+                return $.messager.alert('提示','学分必须是数字')
+            }
+            if(teacherschool!=school&&teacherschool!='A1')return $.messager.alert('提示','您不能为别的学院修改')
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'major/insert_majorplan.SQL',bind:{':YEAR':$('[name=YEAR]').val(),':REM':$('[name=BZ]').val(),':MAP':rowid,':MCREDITS':$('[name=BXXF]').val(),
+                ':CREDITS':$('[name=ZXF]').val(),':zyfx':$('[name=ZYFX]').val()}},function(c){
+                $.messager.alert('提示','添加成功')
+            })
+        })
+    })
+    //(:YEAR,:REM,:MAP,:MCREDITS,:CREDITS,:zyfx)
+</script>
+<body style="background-color: #fff">
+<style>
+    td{border:1px solid #000}
+</style>
+<br>
+<br>
+<br>
+<center><span style="font-size:20px">新建{$content['xy']}  {$content['zymc']}专业
+    的专业培养计划</span></center>
+<br>
+
+
+        <table border="0" width="56%" align="center">
+            <tr>
+                <td width="43%" align="right">年级：</td>
+                <td width="57%"><input type="text" name="YEAR" size="4"></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">专业方向：</td>
+                <td width="57%"><input type="text" name="ZYFX" size="30"></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">总学分：</td>
+                <td width="57%"><input type="text" name="ZXF" size="6"></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">必修总学分：</td>
+                <td width="57%"><input type="text" name="BXXF" size="6"></td>
+            </tr>
+            <tr>
+                <td width="43%" align="right">备注：</td>
+                <td width="57%"><input type="text" name="BZ" size="30" maxlength="30"></td>
+            </tr>
+            <tr>
+                <td colspan="2" align="center">
+                    <a href='javascript:void(0)' id="add" class="easyui-linkbutton">递交到数据库</a>
+                </td>
+            </tr>
+        </table>
+
+
+</body>
+</html>

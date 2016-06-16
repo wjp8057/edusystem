@@ -1,0 +1,89 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+
+        $("#SCHOOL").val("{$theacher.SCHOOL}");
+
+        var datagrid = $('#datagrid').datagrid({
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("clearSelections");
+                $(this).datagrid("unselectAll");
+            },
+            toolbar:'#tdemo'
+        });
+
+        //搜索事件
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__ /CoursePlan/TranStopCourses/progress/hasJson/true";
+            datagrid.datagrid("load", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val(),COURSENO:$("#COURSENO").val(),SCHOOL:$("#SCHOOL").val()});
+        })
+
+        var teachername='{$teachername}'
+        //删除
+        $('#del').bind('click',function(){
+            var rowList=$('#datagrid').datagrid('getSelections')
+            if(rowList==''){
+                return $.messager.alert('提示','您没有选中任何的数据');
+            }
+            for(var i=0;i<rowList.length;i++){
+                if($.trim(rowList[i].TEACHERNAME)!= $.trim(teachername)||rowList[i].ENABLE){
+                    return $.messager.alert('提示','不能删除非本人提交和已经审批过的数据')
+                }
+            }
+            ajiakesi('__URL__/progress_del/hasJson/true',{'bind':rowList},function(c){
+                $.messager.alert('提示',c)
+                datagrid.datagrid("load", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val(),COURSENO:$("#COURSENO").val(),SCHOOL:$("#SCHOOL").val()});
+            })
+
+        })
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+
+                学年：<input type="text" id="YEAR" size="10" >&nbsp;&nbsp;
+                学期：<input type="text" id="TERM" size="10" >&nbsp;&nbsp;
+                课号：<input type="text" id="COURSENO" size="10"  value="%">&nbsp;&nbsp;
+                学院：<Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" file="school/schoolOptions.sql" />
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut" id="del" plain="true">删除</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="false" border="0" width="100%" singleSelect="false" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" idField="RECNO"  >
+            <thead>
+            <tr><th data-options="field:'COURSENO',sortable:true,align:'center',width:100" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:200">课名</th>
+                <th data-options="field:'SCHOOLSNAME',align:'center',width:100">学院</th>
+                <th data-options="field:'TEACHERNAME4',sortable:true,align:'center',width:60">任课教师</th>
+                <th data-options="field:'TIME',sortable:true,align:'center',width:200">时间</th>
+                <th data-options="field:'REASON',sortable:true,align:'center',width:140">理由</th>
+                <th data-options="field:'TEACHERNAME',sortable:true,align:'center',width:60">提交人</th>
+                <th data-options="field:'SUBMITDATE',sortable:true,align:'center',width:120">提交时间</th>
+                <th data-options="field:'TEACHERNAME2',sortable:true,align:'center',width:60">审核人</th>
+                <th data-options="field:'VERIFYDATE',sortable:true,align:'center',width:120">审核时间</th>
+                <th data-options="field:'TEACHERNAME3',sortable:true,align:'center',width:60">审批人</th>
+                <th data-options="field:'APPROVEDATE',sortable:true,align:'center',width:120">审批时间</th>
+                <th data-options="field:'ENABLE',sortable:true,align:'center',width:50,formatter:function(a,b,c){
+                    if(a=='1'){
+                        return '已审批'
+                    }else{
+                        return '未审批'
+                    }
+
+                }">已审批</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
+

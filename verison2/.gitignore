@@ -1,0 +1,6 @@
+.idea
+composer.lock
+*.log
+/runtime/temp
+/database/gzip.exe
+/database/备份.bat

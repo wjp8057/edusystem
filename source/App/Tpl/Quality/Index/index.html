@@ -1,0 +1,121 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-office","menuname": "条目整理",
+                "menus": [
+                    {"menuid": "11","menuname": "创建考评总表","icon":"icon-classTable","url": "__ROOT__/Quality/Entry/entry"},
+                    {"menuid": "12","menuname": "添加考评条目","icon": "icon-add","url": "__ROOT__/Quality/Item/additem"},
+                    {"menuid": "13","menuname": "考评条目筛选","icon": "icon-search","url": "__ROOT__/Quality/Item/itemq"}
+                ]
+            },
+            {"menuid": "2","icon": "icon-quality","menuname": "学生评教",
+                "menus": [
+                    {"menuid": "21","menuname": "生成学生名单","icon":"icon-file","url": "__ROOT__/Quality/Entrystud/entry"},
+                    {"menuid": "22","menuname": "考评名单管理","icon": "icon-file2","url": "__ROOT__/Quality/Entryresult/entryq"},
+                    {"menuid": "23","menuname": "最终数据处理","icon": "icon-file3","url": "__ROOT__/Quality/Entryresult/entry"},
+                    {"menuid": "24","menuname": "考评结果查询","icon": "icon-search","url": "__ROOT__/Quality/Entryresult/resultq"},
+                    {"menuid": "25","menuname": "考评进度查询","icon": "icon-search2","url": "__ROOT__/Quality/Entryresult/jdquery"}
+                ]
+            },
+            {"menuid": "3","icon": "icon-sys","menuname": "校院评教",
+                "menus": [
+                    {"menuid": "31","menuname": "校院评教","icon":"icon-evaluate","url": "__ROOT__/Quality/Entryschool/entry"},
+                    {"menuid": "32","menuname": "督导评教","icon":"icon-weekTable","url": "#","child":[
+                        {"menuid": "33","menuname": "督导评教","icon":"icon-file3","url": "__ROOT__/Quality/Supervisor/evaluation"},
+                        {"menuid": "34","menuname": "督导名单管理","icon":"icon-users","url": "__ROOT__/Quality/Supervisor/superviserList"},
+                        {"menuid": "35","menuname": "教师得分","icon":"icon-file2","url": "__ROOT__/Quality/Supervisor/queryScore"}
+                    ]}
+                ]
+            },
+            {"menuid": "4","icon": "icon-plan","menuname": "合格课程",
+                "menus": [
+                    {"menuid": "41","menuname": "合格课程","icon":"icon-result","url": "__ROOT__/Quality/qualified/qualifiedCourse"}
+                ]
+            }
+        ]
+    };
+    var menuTabs = null;
+    $(function(){
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="教学质量评估" style="width:180px;" id="west"></div>
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">教学质量评估功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">教学质量评估：实现学院评教、学评教数据处理、合格课程评估等功能。包含条目整理、学生评教、校院评教、合格课程等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、条目整理:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、创建考评总表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可删除某学期考评记录，再按学期创建考评条目总表。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、添加考评条目</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可添加某教师在某学期的某门课程的考评条目。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、考评条目筛选</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、教师、课号、课程检索，可查看全校所有已添加的考评条目，并对此进行修改、删除操作。</p>
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">二、学生评教:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、生成学生名单</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">按学期同步生成参评学生，同步之前需删除该学期记录。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、考评名单管理</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、课号、课程、教师进行查询全校教师各门课程的参评学生名单，并可对参评学生进行添加、删除操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、最终数据处理</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可按设定的学年学期计算课程学评教成绩并进行成绩存档；先计算后存档，存档时会覆盖原有记录；存档后可在“考评结果查询”中查到结果
+        </p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、考评结果查询</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、课号、课程、教师进行查询已存档的全校教师各门课程的学评教成绩。</p>
+
+
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">三、校院评教:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、同步名单</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年同步参与院校评分的教师名单，此名单根据教师上课情况产生，需要在排课计划中有设定该教师。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、输入评分</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可对各分院教师的同行评分、学院评分、其它评分进行填写或修改。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、检索总评并打印</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学院检索设定的学生评分、学院评分、同行评分各占评分比例多少的该学院教师的评分成绩表，并可统计总评分。
+        </p>
+            <br>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">四、合格课程:</font></b><br>
+            <p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">1、根据学年、学期进行检索全校所有合格的课程，并可对该课程进行问卷调查平均分填写。
+            <br>2、点击详细可查看该课程每个上课学生的评分统计，并统计平均分，可删除学生的评分记录。
+        </p>
+         </p>
+            <br>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

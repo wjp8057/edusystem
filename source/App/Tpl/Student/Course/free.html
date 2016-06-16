@@ -1,0 +1,37 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    $(function() {
+        var editRow = undefined;
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url : "__ROOT__/index.php?g=Student&m=Course&a=free&hasJson=true",
+            queryParams: {YEAR:year,TERM:term}
+        });
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="{$Think.request.YEAR}学年{$Think.request.TERM}学期有空的公选课" iconCls="icon icon-leisure" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="COURSENO"
+           pagination="true" pageSize="15" pageList="[15,30,45]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENO',align:'center'" >课号</th>
+            <th data-options="field:'COURSENAME',align:'center'">课名</th>
+            <th data-options="field:'CREDITS',align:'center'">学分</th>
+            <th data-options="field:'COURSETYPE',align:'center'">修课</th>
+            <th data-options="field:'EXAMTYPE',align:'center'">考核</th>
+            <th data-options="field:'ESTIMATE',align:'center'">预计人数</th>
+            <th data-options="field:'ATTENDAMOUNT',align:'center'">已选人数</th>
+            <th data-options="field:'COURSETYPENAME',align:'center'">课程类别</th>
+            <th data-options="field:'SCHOOLNAME',align:'center'">开课学院</th>
+            <th data-options="field:'DAYNTIME',align:'center'">上课时间</th>
+            <th data-options="field:'REM',align:'center'">备注</th></tr>
+        </thead>
+    </table>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$user_info.SCHOOL}';
+    var teacherno='{$user_info.TEACHERNO}';
+
+    $(function(){
+        var year_input = $("#year_input");
+        var term_input = $("#term_input");
+        var school_input = $("#school_input");
+        var dgrid = $("#dgrid");
+
+        function getScoreType(){
+            return $(".scoretype:checked").val();
+        }
+
+        school_input.val(school);
+        year_input.val(GenKits.getParentYear());
+        term_input.val(GenKits.getParentTerm());
+
+        $('#goInput').bind('click',function(){
+            if(Datagrid.selectSingle(dgrid)){
+                var row = Datagrid.getSelected(dgrid);
+                var scoretype= getScoreType();
+                var lock = parseInt(row.lock);
+                if(lock > 0){
+                    return Messager.showWarning("课程已经锁定！");
+                }else{
+                    open('__URL__/Three_BYQBK_StudentList/year/'+year_input.val()+'/term/'+term_input.val()+
+                    '/coursegroupno/'+row.coursegroupno+'/schoolno/'+school_input.val()+'/scoretype/'+scoretype+"/lock/"+lock);
+                }
+            }
+        });
+
+
+
+        $('#openInput').bind('click',function(){
+            $.messager.confirm('提示','您确定要开放选中课程吗？',function(c){
+                if(c){
+                    var rowList = Datagrid.getSelections(dgrid);
+                    $.post('__URL__/kf_cs',{courses:rowList,year:year_input.val(),term:term_input.val()},function(c){
+                        Messager.showMessage(c, function () {
+                            dgrid.datagrid('reload');
+                        })
+                    });
+                }
+            })
+        })
+
+        //查询
+        $('#search').bind('click',function(){
+            dgrid.datagrid('load',
+                    {
+                        'year':year_input.val(),
+                        'term':term_input.val(),
+                        'school':school_input.val(),
+                        'coursegroupno':'%'
+                    }
+            );
+        });
+    });
+
+
+
+
+</script>
+<body style="background: #fff">
+<div class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+        
+        学年：<input type="text" name="YEAR" id="year_input" size="4" />&nbsp;&nbsp;
+        学期：<input type="text" name="TERM" id="term_input" size="1" />
+        所在学院：<select name="SCHOOL" id="school_input">
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+
+        <a id="search" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+        <span style="font-size: 10pt">
+            <input type="radio" value="five" class="scoretype" name="R12">五级制&nbsp;
+            <input type="radio" value="ten"  class="scoretype" name="R12" checked>百分制
+        </span>
+        <a href="javascript:void(0)" id="goInput"   class="easyui-linkbutton" iconCls="icon-edit" plain="true">成绩输入</a>
+        <a href="javascript:void(0)" id="openInput" class="easyui-linkbutton" iconCls="icon-cut"  plain="true">开放选中课程</a>
+
+    </div>
+
+    <div data-options="region:'center',split:false,border:false" style="padding:0;background:#eee;">
+        <table class="easyui-datagrid" id="dgrid"
+               data-options="url:'__URL__/Three_five/reqtag/getlist',pageList:[20,50,100,200,500],fitColumns:true,pagination:true,fit:true,toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'coursegroupno',width:100" align="center">课号</th>
+                <th data-options="field:'coursename',width:100" align="center">课程名称</th>
+                <th data-options="field:'num',width:100" align="center">人数</th>
+                <th data-options="field:'lock',width:100,formatter:function(a){
+                    return parseInt(a)>0?'锁定':'开放';}" align="center">状态</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+</body>
+
+
+
+
+
+
+

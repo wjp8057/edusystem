@@ -1,0 +1,125 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    var index = 1;
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url : "__ROOT__/index.php?g=Student&m=Exam&a=qlist&hasJson=true",
+            queryParams: {YEAR:year,TERM:term}
+        });
+
+        $('#datagrid2').datagrid({
+            toolbar: '#toobar2',
+            onLoadSuccess: function(data){
+                if(data.error){
+                    msgShow("系统提示",data.error,"error");
+                    return;
+                }
+                $("#COURSENAME").html(data.info.COURSENAME);
+                $("#COURSENO").html(data.info.COURSENO);
+                $("#RS").html(data.info["RS"+index]);
+                $("#EXAMTIME").html(data.info.EXAMTIME);
+                $("#ROOMNO").html(data.info["ROOMNO"+index]);
+                var t ="";
+                for(i=1; i<4; i++){
+                   if(data.info["TEACHERS"+index+i]) t += data.info["TEACHERS"+index+i]+" ";
+                }
+                $("#TEACHERS").html(t);
+                $("#REM").html(data.info.REM);
+            },
+            onLoadError : function(XMLHttpRequest, textStatus, errorThrown){
+                msgShow("系统提示","读取数据时发生错误","error");
+            },
+            onBeforeLoad : function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            }
+        });
+
+        $("#toobar .easyui-linkbutton").bind("click", function(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示","你没有选择任一条数据进行查看","error");
+                return;
+            }
+
+            index = $(this).attr("z-index");
+            if(index=="1" || index=="2" || index=="3"){
+                if(!row["ROOMNO"+index] || row["ROOMNO"+index]=="" || $.trim(row["ROOMNO"+index])=="/"){
+                    msgShow("系统提示","第"+index+"考场没有安排考试！","error");
+                    return;
+                }
+            }else{
+                msgShow("系统提示","大神你点哪里了？","error");
+                return;
+            }
+
+            $('#win').window('setTitle', "&nbsp;&nbsp;"+row.COURSENAME+" - " + $(this).text());
+            $('#win').window('open');
+            if($('#datagrid2').datagrid("options").url==null) $('#datagrid2').datagrid("options").url = "__ROOT__/index.php?g=CourseManager&m=Exam&a=seat&hasJson=true";
+            $('#datagrid2').datagrid("load", {COURSENO:row.COURSENO, YEAR:year, TERM:term, INDEX:index})
+        })
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="{$Think.request.YEAR}学年{$Think.request.TERM}学期期末考试课程" iconCls="icon icon-exam" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="COURSENO"
+           pagination="true" pageSize="15" pageList="[15,30,45]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENO',align:'center'" >课号</th>
+            <th data-options="field:'COURSENAME',align:'center'">课程名称</th>
+            <th data-options="field:'flag',align:'center'">考试场次</th>
+            <th data-options="field:'name',align:'center'">考试时间</th>
+            <th data-options="field:'ATTENDENTS',align:'center'">选课人数</th>
+            <th data-options="field:'ROOMNO1',align:'center'">考场1</th>
+            <th data-options="field:'ROOMNO2',align:'center'">考场2</th>
+            <th data-options="field:'ROOMNO3',align:'center'">考场3</th></tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar">
+    <a href="#" class="easyui-linkbutton" z-index="1" data-options="iconCls:'icon-edit',plain:true">查看考场一</a>
+    <a href="#" class="easyui-linkbutton" z-index="2" data-options="iconCls:'icon-edit',plain:true">查看考场二</a>
+    <a href="#" class="easyui-linkbutton" z-index="3" data-options="iconCls:'icon-edit',plain:true">查看考场三</a>
+</div>
+
+<div id="win" class="easyui-window" title="&nbsp;&nbsp;查看考场座位" style="width:600px;height:400px"
+     data-options="iconCls:'icon-help',modal:false,collapsible:false,minimizable:false,closed:true">
+    <table id="datagrid2" fitColumns="true"
+           width="100%" singleSelect="true" fit="true" idField="CODE"
+           pagination="false" pageSize="20" pageList="[20,40,60]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'S1',align:'center'" >学号</th>
+            <th data-options="field:'N1',align:'center'">姓名</th>
+            <th data-options="field:'Z1',align:'center'">座号</th>
+            <th data-options="field:'K1',align:'center'"></th>
+            <th data-options="field:'S2',align:'center'" >学号</th>
+            <th data-options="field:'N2',align:'center'">姓名</th>
+            <th data-options="field:'Z2',align:'center'">座号</th>
+            <th data-options="field:'K2',align:'center'"></th>
+            <th data-options="field:'S3',align:'center'" >学号</th>
+            <th data-options="field:'N3',align:'center'">姓名</th>
+            <th data-options="field:'Z3',align:'center'">座号</th>
+            <th data-options="field:'K3',align:'center'"></th></tr>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar2" style="padding:5px;">
+    <table width="100%">
+        <tr><th width="80" align="right">课程名：</th><td colspan="3" id="COURSENAME"></td></tr>
+        <tr><th align="right">课程号：</th><td id="COURSENO"></td><th width="80" align="right">考试人数：</th><td id="RS"></td></tr>
+        <tr><th align="right">考试时间：</th><td id="EXAMTIME"></td><th align="right">教室：</th><td id="ROOMNO"></td></tr>
+        <tr><th align="right">监考教师：</th><td id="TEACHERS"></td><th align="right">备注：</th><td id="REM"></td></tr>
+        <tr><td colspan="4" style="color: #ff0000">下面的座位号是随机生成的，考试时以教务处公布的座位号为准</td></tr>
+    </table>
+</div>
+
+</body>
+</html>

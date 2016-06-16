@@ -1,0 +1,277 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+$(function(){
+var studentno='{$content.STUDENTNO}';
+
+    var chuang={
+        modal:true,
+        fit:true,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+    var wd6=$('#wd6').window(chuang);               //                 学生个人的 教学计划
+    var wd7=$('#wd7').window(chuang);
+    var wd8=$('#wd8').window(chuang);
+    //todo:查看某个教学计划的课程的datagrid================================================start=============================================
+    var programcourse=$('#programCourse').datagrid({
+        url:'__APP__/Classes/Class/programcourse',
+        frozenColumns:[[{field:'courseno',title:'课号',width:100}]],
+        columns:[[
+            {field:'coursename',title:"课名",width:150},
+            {field:'xuefen',title:'学分',width:30},
+            {field:'StudyType',title:'修课类型',width:60},
+            {field:'astype',title:'考核类型',width:60},
+            {field:'zxs',title:'周学时',width:50},
+            {field:'zsy',title:'周实验',width:50,formatter:function(c){
+
+                var num= parseInt(c)
+
+                if(isNaN(num)){
+                    return 0
+                }
+                return num;
+            }},
+            {field:'zsj',title:'周上机',width:50,formatter:function(c){
+                var num= parseInt(c)
+                if(isNaN(num)){
+                    return 0
+                }
+                return num;
+            }},
+            {field:'xuenian',title:'学年',width:30},
+            {field:'xueqi',title:'学期',width:30},
+            {field:'WEEKS',title:'周次',width:150},
+            {field:'CourseType',title:'课程类型',width:100},
+            {field:'cengci',title:'考核层次',width:100},
+            {field:'dagang',title:'教学大纲',width:100}
+        ]],
+        pagination:true,
+        fit:true
+    })
+    //todo:================================================================================end=============================================
+
+    //todo:显示学生个人教学计划的datagrid===================================================start================================================================
+    var Student_jihua=$('#studentjihua').datagrid({
+        url:'__APP__/Classes/Class/studentProgram',
+        columns:[[
+            {field:'bianhao',title:'编号'},
+            {field:'name',title:"名称",width:250},
+            {field:'time',title:'定制日期'},
+            {field:'rem',title:'备注'},
+            {field:'programtype',title:'计划类别'},
+            {field:'school',title:'学院'}
+        ]],
+        toolbar:[{
+            text:'查看该教学计划的课程',
+            iconCls:'icon-edit',
+            handler:function(){
+                var yi=yitiao(Student_jihua,'不能选择多条查看','请选择一条要查看的数据');
+                if(yi){
+                    var row=Student_jihua.datagrid('getSelected');
+                    programcourse.datagrid('load',{PROGRAMNO:row.bianhao})
+                    wd7.window({
+                        title:row.name+' 的课程',
+                        closed:false})
+                }
+            }
+        },{
+            text:'查看全校各专业教学计划',
+            iconCls:'icon-edit',
+            handler:function(){
+                wd8.window({closed:false})
+            }
+        }
+        ],
+        pagination:true,
+        fit:true
+    })
+    //todo:=========================================================================================end==========================================================
+
+    //todo:专业的datagrid=========================================================start==========================================================
+    var zhuanyeprogram1=$('#zhuanyeprogram2').datagrid({
+        url:'__APP__/Classes/Class/zhuanyeprogram',
+        columns:[[
+            {field:'bianhao',title:'编号',width:150},
+            {field:'name',title:"名称",width:250},
+            {field:'time',title:'定制日期',width:150},
+            {field:'school',title:'制定学院',width:150},
+            {field:'programtype',title:'计划类别',width:150}
+        ]],
+        toolbar:[{
+            text:'查看该教学计划的课程',
+            handler:function(){
+                var yi=yitiao(zhuanyeprogram1);
+                if(yi){
+                    var row=zhuanyeprogram1.datagrid('getSelected');
+                    programcourse.datagrid('load',{PROGRAMNO:row.bianhao})
+                    wd7.window({
+                        title:row.name+'  的课程',
+                        closed:false})
+                }
+            }
+        }],
+        fit:true,
+        pageSize:20,
+        pagination:true
+    })
+    $('#program_school').val('01');
+
+
+//todo:==================================================================end===============================================
+
+    $('#lookxiuke').linkbutton({
+        text:'查看修课计划'
+    }).bind('click',function(){
+                openTabsWindows('{$content.NAME}'+'的教学计划信息','__APP__/Classes/Class/program_one/studentno/'+studentno,'',true)
+
+            })
+
+    //todo:各专业教学计划  里的搜索按钮 所触发的事件
+    $('#zhuanye_sousuo').bind('click',function(){
+        zhuanyeprogram1.datagrid('load',{SCHOOL:$('#program_school').val()})
+    })
+
+})
+</script>
+        <body style="background-color: #ffffff">
+<P ALIGN=CENTER><FONT SIZE=4 face="隶书">学生<LABEL datasrc=#dsoSTUDENT datafld=NAME></LABEL>注册信息</font></p>
+<table align="center" border="1" width="712" datasrc=#dsoSTUDENT cellspacing="0" style="font-size: 10pt; color: #000000; border-collapse: collapse; font-family: 宋体" bordercolor="#111111" cellpadding="0" height="243" >
+    <tr>
+        <td width="129" align="right" height="22" >学号：</td>
+        <td height="22" colspan="2" width="211">{$content.STUDENTNO}</td>
+        <td height="22" colspan="2" width="211"><a href="javascript:void(0)" id="lookxiuke">查看修课计划</a></td>
+        <td width="153" height="198" rowspan="9">
+            <img border="0"  id= "photo" width="150" height="200">
+        </td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">姓名：</td>
+        <td height="22" colspan="4" width="422">
+            {$content.NAME}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">性别：</td>
+        <td height="22" colspan="4" width="422">
+            {$content.SEX}
+        </td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">入学日期：</td>
+        <td height="22" colspan="4" width="422">
+            {$content.ENTERDATE}
+        </td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">学制：</td>
+        <td height="22" colspan="4" width="422">
+            {$content.YEARS}年</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">主修班级编号：</td>
+        <td height="22" width="88">
+            {$content.CLASSNO}</td>
+        <td height="22" width="125" colspan="2" nowrap>
+            <p align="right">班级名称：</td>
+        <td height="22" width="205">
+            {$content.CLASSNAME}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22"><span lang="en-us">&nbsp;</span>选课总学分<span lang="en-us">:&nbsp;</span></td>
+        <td height="22" colspan="4" width="422">
+            {$conent.TAKEN}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">完成学分：</td>
+        <td height="22" colspan="4" width="422">
+            {$content.PASSED}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">积点分和：<span lang="en-us">
+      </span></td>
+        <td height="22" colspan="4" width="422">
+            {$content.POINTS}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22"><font color="#FF0000">退学警告次数：</font></td>
+        <td height="22" colspan="5" width="577">
+            {$content.WARN}
+        </td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22"><font color="#FF0000">学籍状态：</font></td>
+        <td height="22" colspan="5" width="577">
+            {$content.STATUSVALUE}</td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22">联系方法：<span lang="en-us"> </span></td>
+        <td height="22" colspan="5" width="577">
+            {$content.CONTACT}
+        </td>
+    </tr>
+    <tr>
+        <td width="129" align="right">所在学院：</td>
+        <td height="22" colspan="5" width="577">
+            {$content.SCHOOLNAME}
+</table>
+<XML ID=dsoReg>
+
+</XML>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    注册信息：</p>
+<div align="center">
+    <center>
+        <table datasrc=#dsoReg border="1" cellspacing="0" width="709" bordercolor="#000000" cellpadding="0" height="44">
+            <thead>
+            <th width="189" align="right" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">学期</font></th>
+            <th width="514" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">注册状态</font></th>
+            </thead>
+            <volist name="regdate" id="v">
+                <tr>
+                    <td width="189" align="right" height="22"><font size="2"><span>{$v.YEAR}</SPAN>学年第<SPAN>{$v.TERM}</SPAN>学期:</font></td>
+                    <td width="514" height="22"><font size="2"><SPAN>{$v.CODE}</SPAN></font></td>
+                </tr>
+            </volist>
+        </table>
+    </center>
+</div>
+<!--todo:显示学生个人教学计划的窗口-->
+<div id="wd6" title="XX学生的教学计划信息">
+    <div id="studentjihua">     <!--todo:学生个人教学计划-->
+    </div>
+</div>
+<!--todo:某一个教学计划的课程-->
+<div id="wd7">
+    <div id="programCourse">
+    </div>
+</div>
+<div id="wd8" title="搜索教学计划">
+    <div id="cc1" class="easyui-layout" data-options="fit:true,border:false" >
+        <div data-options="region:'north',noheader:true,split:true" style="height:50px;">
+            <table border="0">
+                <tr>
+                    <td>学校:</td>
+                    <td><select id="program_school">
+                        <volist name="schools" id="v"><option value="{$v.SCHOOL}">{$v.NAME}</option></volist>
+                    </select></td>
+                    <td><button id="zhuanye_sousuo">搜索</button></td>
+                </tr></table>
+        </div>
+        <div data-options="region:'center',title:'内容'" style="padding:5px;background:#eee;">
+            <div id="zhuanyeprogram2">
+            </div>
+        </div>
+    </div>
+
+    <div class="layout" >
+        <div data-options="region:'north'" style="height:50px;">
+
+        </div>
+        <div data-options="region:'center',title:'center title'" style="padding:5px;background:#eee;">
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

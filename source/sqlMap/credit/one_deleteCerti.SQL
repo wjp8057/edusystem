@@ -1,0 +1,1 @@
+delete from CreditCertficate where cert_id=:id

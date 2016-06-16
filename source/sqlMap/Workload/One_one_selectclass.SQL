@@ -1,0 +1,1 @@
+select course_id from standard_class where course_id=:course_id

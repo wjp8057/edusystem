@@ -1,0 +1,92 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="year" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="term" size="4" maxlength="1">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="cSchool" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <label>学生所在学院：</label>
+			   <select class="easyui-combobox" name="school" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+               <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL报表</a>
+
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'sName',align:'center',width:30" >学生所在学院</th>
+                <th data-options="field:'studentno',align:'center',width:30">学号</th>
+                <th data-options="field:'name',align:'center',width:20">姓名</th>
+                <th data-options="field:'courseno',align:'center',width:40">课号</th>
+                <th data-options="field:'coursename',align:'center',width:80">课程名称</th>
+                <th data-options="field:'schoolname',align:'center',width:40" >开课学院</th>
+                <th data-options="field:'courseType',align:'center',width:20">课程类型</th>
+                <th data-options="field:'credits',align:'center',width:30">学分</th>
+                <th data-options="field:'testType',align:'center',width:20">考核方式</th>
+                <th data-options="field:'appType',align:'center',width:20">修课方式</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#datagrid').datagrid({toolbar:'#tdemo'});
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='year']").val());
+     	var term=$.trim($("[name='term']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/exemption/hasJson/1";
+     	datagrid.datagrid('load',{
+     		year:year,term:term,
+     		cSchool:$.trim($("[name='cSchool']").val()),
+     		school:$.trim($("[name='school']").val())
+     	});
+     });
+     //导出EXCEL
+   	 $("#ExportBut").click(function(){
+   		var list=datagrid.datagrid('getRows');
+       	if(list.length){
+       		var total = datagrid.datagrid('getPager').data("pagination").options.total;
+   			if(total > 2000){
+   				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+       			return;
+   			}
+   			$("#queryForm").attr("action","__URL__/exemptionExp/");
+       		$("#queryForm").submit();
+       	}else{
+       		msgShow("系统提示：","请先检索出您要导出的数据","info");
+       	}
+     });
+});
+</script>
+</body>
+</html>

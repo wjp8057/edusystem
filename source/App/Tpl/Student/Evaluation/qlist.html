@@ -1,0 +1,168 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    window.top["reload_Abnormal_Monitor"]=function(){
+
+        location.reload()
+
+    };
+    $(function() {
+        var year='{$year}'
+        var term='{$term}';
+        var editRow = undefined;
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onClickRow:function(index,row){
+                if(row.compelete==1){
+                   // alert(row.compelete)
+                   return
+               }
+                $('#datagrid').datagrid('beginEdit',index)
+            }/*onAfterEdit:function(index,row,changes){
+                $('#datagrid').datagrid('getUpdate')
+            }*/
+        });
+
+        //todo:保存
+        $('#save').bind('click',function(){
+            var rowsList=$('#datagrid').datagrid('getRows')
+            for(var i=0;i<rowsList.length;i++){
+                $('#datagrid').datagrid('endEdit',i)
+            }
+            var list=$('#datagrid').datagrid('getRows')
+                var bool=true;
+            for(var i=0;i<list.length;i++){
+                if(isNaN(list[i].rank)||parseInt(list[i].rank)==0){
+                    bool=false
+                    return $.messager.alert('提示','请填写大于0的数字')
+                }else if(list[i].rank>list.length){
+                    bool=false
+                    return $.messager.alert('提示','您设的数字'+list[i].rank+'不能大于当期可设条目数量'+list.length)
+                }
+
+            }
+            if(!bool)return;
+
+            ajiakesi('__URL__/save_rank',{bind:list},function(c){
+
+                $.messager.alert('提示',c)
+                if(c!='保存成功'){
+                    return
+                }
+                setTimeout(function(){location.reload()},1500)
+
+
+            })
+        })
+
+
+
+
+
+
+
+        $('#handlerSave').bind("click",function(){
+
+            $.post('__URL__/save_rank/hasJson/1',{year:year,term:term},function(c){
+                if(c=='true'){
+                    return $.messager.alert('提示','你还有未设置完的排名,请先设置完排名在进行考评 ！')
+                }
+                var bool=true;
+                var obj={}
+                var list=datagrid.datagrid('getRows');
+                if(!list.length){
+                    return $.messager.alert('提示','请选择课程进行查询！');
+                }
+                for(var i=0;i<list.length;i++){
+                    if(list[i].compelete=='1'){
+                        continue;
+                    }
+                    bool=false;
+                    obj=list[i];
+                    break;
+                }
+
+                if(bool){
+                    var obj=datagrid.datagrid('getSelected')
+                }
+             //   alert(obj.row)
+                var queryParams = "&teachername="+obj.TEACHERNAME+"&courseno="+obj.COURSENO+"&Recno="+obj.RECNO+'&RECNO2='+obj.RECNO2+'&rank='+obj.row+'&year='+year+'&term='+term+"&coursename="+encodeURIComponent(obj.COURSENAME);
+                if(obj.TYPE=="课堂教学"||obj.TYPE=='理论课') openTabsWindows('学评教打分','__ROOT__/index.php?g=Student&m=Evaluation&a=ketangList'+queryParams,'',true);
+                //"/scripts/general.exe/query?pagename=kaoping_ketang.htm&studentno="+studentno+"&teachername="+teachername+"&courseno="+courseno+"&Recno="+selected
+                else if(obj.TYPE=="实践教学"||obj.TYPE=='实践课') openTabsWindows('学评教打分','__ROOT__/index.php?g=Student&m=Evaluation&a=shijianList'+queryParams,'',true);
+                ///scripts/general.exe/query?pagename=kaoping_shijian.htm&studentno="+studentno+"&teachername="+teachername+"&courseno="+courseno+"&Recno="+selected
+                else if(obj.TYPE=="理实一体")openTabsWindows('学评教打分','__ROOT__/index.php?g=Student&m=Evaluation&a=lishi'+queryParams,'',true)
+                else if(obj.TYPE=='毕业实践')openTabsWindows('学评教打分','__ROOT__/index.php?g=Student&m=Evaluation&a=biyeshijian'+queryParams,'',true)
+                ///scripts/general.exe/query?pagename=kaoping_lunwen.htm&studentno="+studentno+"&teachername="+teachername+"&courseno="+courseno+"&Recno="+selected
+
+            })
+      /*      var checkedItems = datagrid.datagrid("getChecked");
+            var message=null;
+            if(checkedItems.length==0) message ="你没有选中任一的考评条目！";
+            else if(checkedItems.length>1) message ="只能选择1条考评条目，你选中2条以上的考评条目！";
+
+            if(message!=null){
+                $.messager.alert("系统消息：", message, "error");
+                return;
+            }*/
+            //alert(queryParams);
+          //  alert('321');
+            //return;
+
+        });
+
+        <notequal name="message" value=""> $.messager.alert("系统提示","{$message}","info");</notequal>
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:0px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+<div  region="north" border="1" style="background: #fff; padding:0px;height:63px " >
+    <b>操作说明:</b>
+            <p style="margin-bottom:10px;margin-top: 5px;margin-left: 20px">1:双击相应记录的排名,设定教师的名次并点击“保存排名”。(排名将决定教师得分,排名后的的得分不能高于排名前的得分)</p>
+    <p style="margin-top:0px;line-height: 5px;margin-left: 20px">2:排名完成后,点击“进入考评”开始对教师打分。</p>
+</div>
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:0px; " >
+    <table id="datagrid" title="你需要参加考评的课程" iconCls="icon icon-evaluate" fitColumns="false"
+           width="100%" singleSelect="true" fit="true" idField="TEACHERNAME"
+           pagination="false" pageSize="500" pageList="[500]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'TEACHERNAME',width:120" >教师姓名</th>
+            <th data-options="field:'COURSENO',width:80">课号</th>
+            <th data-options="field:'COURSENAME'">课程名称</th>
+            <th data-options="field:'TYPE',width:120,align:'center'">类型</th>
+            <th data-options="field:'RECNO',width:50,align:'center'">记录号</th>
+            <th data-options="field:'FRACTION',width:70,align:'center',formatter:function(a,b,c){
+               //     alert(b.compelete)
+                if(b.compelete==1){
+                    return a
+                }
+                    return '未评'
+            }">考评分数</th>
+            <th data-options="field:'YEAR',width:40,align:'center'">学年</th>
+            <th data-options="field:'TERM',width:40,align:'center'">学期</th>
+            <th data-options="field:'rank',width:40,align:'center',editor:{type:'text'}">排名</th>
+            <th data-options="field:'RECNO2',hidden:true">排名</th>
+            <th data-options="field:'compelete',hidden:true">评审</th>
+            <th data-options="field:'row',hidden:true">row</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        <volist name="list" id="data">
+        <tr><td></td></td><td>{$data.TEACHERNAME}</td><td>{$data.COURSENO}</td><td>{$data.COURSENAME}</td><td>{$data.TYPE}</td>
+            <td>{$data.RECNO}</td><td>{$data.FRACTION}</td><td>{$data.YEAR}</td><td>{$data.TERM}</td><td>{$data.rank}</td><td>{$data.RECNO2}</td>
+            <td>{$data.compelete}</td><td>{$data.row}</td>
+        </tr>
+        </volist>
+        </tbody>
+    </table>
+</div>
+
+<div id="toobar">
+    <a href="__ROOT__/index.php?g=Student&m=Evaluation&a=index" id="handlerAdd" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true" >返回</a>
+    <a href="#" id="handlerSave" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">进入考评</a>
+    <a href="#" id="save" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存排名</a>
+</div>
+
+</body>
+</html>

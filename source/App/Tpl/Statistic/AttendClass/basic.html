@@ -1,0 +1,169 @@
+<include file=":Include:jqueryHeader" />
+<style>
+body{background:#FFF;}
+.query{border: solid 1px #ccc;margin:5px;padding: 5px 5px 7px 5px;}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+#queryForm table{margin:140px auto 0px;border-collapse:collapse;}
+#queryForm td,#queryForm th{border-bottom:dotted 1px #CCC;height:40px;}
+#document{display:none;}
+</style>
+<body>
+<form id="queryForm" action="__URL__/basic/" method="post">
+	<table border="0" align="center" width="70%" style="border-collapse: collapse;">
+	 <tbody>
+	  <tr>
+		<th align="right">教师号：</th>
+		<td align="left"><input name="TEACHERNO" size="10" value="%"></td>
+		<th align="right">教师名：</th>
+		<td align="left"><input name="TEACHERNAME" size="10" value="%"></td>
+	  </tr>
+	  <tr>
+		<th align="right">所在学院：</th>
+		<td align="left">
+		<select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			<option value="%">全校</option>
+			<volist name="school" id="s">
+			<option value="{$s.SCHOOL}">{$s.NAME}</option>
+			</volist>
+		</select></td>
+		<th align="right">教师职称：</th>
+		<td align="left">
+		<select class="easyui-combobox" name="POSITIONS" data-options="editable:false">
+			<option value="%">所有</option>
+			<volist name="positions" id="p">
+			<option value="{$p.NAME}">{$p.VALUE}</option>
+			</volist>
+		</select></td>
+	  </tr>
+	  <tr>
+		<th align="right">职称级别：</th>
+		<td align="left">
+		<select class="easyui-combobox" name="JB" data-options="editable:false">
+			<option value="%">所有</option>
+			<volist name="jb" id="j">
+			<option value="{$j.code}">{$j.code}</option>
+			</volist>
+		</select></td>
+		<th align="right">主讲资格：</th>
+		<td align="left">
+		<select class="easyui-combobox" name="ZhuJiangZhiGe" data-options="editable:false">
+			<option value="%">所有</option>
+			<volist name="zjzg" id="z">
+			<option value="{$z.code}">{$z.code}</option>
+			</volist>
+		</select></td>
+	  </tr>
+	  <tr>
+		<th align="right">学年：</th>
+		<td align="left"><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4"></td>
+		<th align="right">学期：</th>
+		<td align="left"><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1"></td>
+	  </tr>
+	  <tr><td colspan="4" align="center"><a href="javascript:void(0)" id="searcher">检&nbsp;索</a></td></tr>
+	 </tbody>
+	</table>
+</form>
+
+<div class="easyui-layout" id="document" data-options="border:false,fit:true" >
+    <!--<div data-options="region:'north',split:false,border:false" style="overflow:hidden;height:40px;">
+		<h1 style="text-align: center;font-family:'隶书';font-size:16px;margin-top: 10px;">教师上课统计结果表</h1>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" title='<center>教师上课统计结果表</center>' striped="true" singleSelect="true" fit="true" width="100%"
+               pagination="true" pageSize="23" pageList="[23,43,63]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'YEAR',align:'center',width:15" >学年</th>
+                <th data-options="field:'TERM',align:'center',width:15">学期</th>
+                <th data-options="field:'SCHOOL',align:'center',width:20">学院代号</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:30">学院名称</th>
+                <th data-options="field:'TEACHERNO',align:'center',width:20">教师号</th>
+                <th data-options="field:'TEACHERNAME',align:'center',width:20" >教师名</th>
+                <th data-options="field:'VALUE',align:'center',width:25">职称</th>
+                <th data-options="field:'JB',align:'center',width:20">级别</th>
+                <th data-options="field:'ZhuJiangZhiGe',align:'center',width:20">主讲资格</th>
+                <th data-options="field:'COURSENO',align:'center',width:30">课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:60" >课程名称</th>
+                <th data-options="field:'TYPE',align:'center',width:25">课程类型</th>
+                <th data-options="field:'CREDITS',align:'center'">学分</th>
+                <th data-options="field:'HOURS',align:'center'">总学时</th>
+                <th data-options="field:'EXPERIMENTS',align:'center'">实验学时</th>
+                <th data-options="field:'COMPUTING',align:'center'">上机学时</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <a href="javascript:void(0)" id="printBut" class="easyui-linkbutton" data-options="iconCls:'icon-print',plain:true">打印</a>
+    <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">导出到EXCEL报表</a>
+    <a href="javascript:void(0)" id="queryBut" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">检索</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var datagrid = null;
+$(function(){
+	datagrid=$('#datagrid').datagrid({toolbar:'#toobar'});
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+    	datagrid.datagrid("options").url = "__URL__/basic/hasJson/1";
+    	datagrid.datagrid('load',{
+    		TEACHERNO:$.trim($("[name='TEACHERNO']").val()),
+    		TEACHERNAME:$.trim($("[name='TEACHERNAME']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val()),
+    		POSITIONS:$.trim($("[name='POSITIONS']").val()),
+    		JB:$.trim($("[name='JB']").val()),
+    		ZhuJiangZhiGe:$.trim($("[name='ZhuJiangZhiGe']").val()),
+    		YEAR:$.trim($("[name='YEAR']").val()),
+    		TERM:$.trim($("[name='TERM']").val())
+    	});
+    	$("#queryForm").hide();
+    	$("#document").show();
+    });
+    //弹出检索窗口
+    $("#queryBut").click(function(){
+    	datagrid.datagrid('loadData',{total:0,rows:[]});//清空原有数据
+    	$("#queryForm").show();
+    	$("#document").hide();
+    });
+    //打印
+    $("#printBut").click(function(){
+    	list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		$("#toobar").hide();
+        	$(".pagination").hide();
+        	window.print();
+        	$("#toobar").show();
+        	$(".pagination").show();
+    	}else{
+    		msgShow("系统提示：","请先检索出您要打印的数据","info");
+    	}
+    });
+    //导出EXCEL
+	$("#ExportBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		var total = datagrid.datagrid('getPager').data("pagination").options.total;
+			if(total > 2000){
+				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+    			return;
+			}
+			$("#queryForm").attr("action","__URL__/basicExport/");
+    		$("#queryForm").submit();
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的数据","info");
+    	}
+    });
+});
+</script>
+</body>
+</html>

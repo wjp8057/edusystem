@@ -1,0 +1,134 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var moren=$('#moren').window(new wind(500,350,false,false,false,false,false));//todo:默认进来的搜索弹窗
+        //var teacher_list_wd= $('#teacher_list_wd').window(new wind(0,0,false,false,true,true,true));//todo:教师列表的弹窗
+
+
+        //todo:搜索
+        $('#ss').bind('click',function(){
+            $('#teacher_list').datagrid('load',{'Sqlpath':{'select':'TeacherSchedule/select_teacherList.SQL','count':'TeacherSchedule/count_teacherList.SQL'},'bind':{
+                ':TEACHERNAME':$('[name=name]').val(),
+                ':SCHOOL':$('[name=school]').val(),
+                ':TEACHERNO':$('[name=username]').val()
+            }})
+            moren.window({closed:true})
+            $('#teacher_list_wd').panel({closed:false})
+        })
+
+
+
+        //todo:点击我的课表
+        $('#myss').bind('click',function(){
+            $('#teacher_list').datagrid('load',{'Sqlpath':{'select':'TeacherSchedule/select_teacherMy.SQL','count':'TeacherSchedule/count_teacherMy.SQL'},'bind':{
+                ':TEACHERNAME':$('[name=name]').val(),
+                ':SCHOOL':$('[name=school]').val(),
+                ':TEACHERNO':'{$teacherno}'
+            }})
+
+            moren.window({closed:true})
+            $('#teacher_list_wd').panel({closed:false})
+        })
+
+        $('[name=Search]').bind('click',function(){
+            var year=$('[name=year]').val()
+            var term=$('[name=term]').val()
+
+
+
+            if(year==""||term==''){
+                return $.messager.alert('提示','学年或者学期不能为空,请填写要检索的学年学期')
+            }
+
+            var teacherno=(function(){
+                var yi=yitiao($('#teacher_list'),'请选择一条,不能选择多条','请选择一条要查看的数据');
+                if(yi){
+                    var row=$('#teacher_list').datagrid('getSelected');
+                    return row.TEACHERNO;
+                }
+                })()
+
+         if(teacherno!=null)
+             openTabsWindows('教师课程','__ROOT__/Userinfo/Userinfo/teachercourse/year/'+year+'/term/' +term+'/teacherno/'+teacherno,'',true)
+
+
+        })
+    })
+
+
+</script>
+<style>
+#moren td{border:1px #95B8E7 solid;
+}
+#moren input{height:23px;vertical-align:middle;}
+span{border:0px solid red;;vertical-align:middle;}
+#bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<body style="background-color: #fff">
+<!--todo:默认进来的搜索页面-->
+<div id="moren" title="检索教师" data-options="draggable:false,resizable:false">
+    <table border="0"  width="456" style="margin-top: 50px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>用户名：</b></td>
+            <td width="209" height="25"><input type="text" name="username" value="%"></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>教师姓名：</b></td>
+            <td width="209" height="25"><input type="text" name="name" value="%"></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学院：</b></td>
+            <td width="209" height="25">
+                <select name="school">
+                        <option value="%">全部</option>
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+            </td>
+        </tr>
+        <tr><td style="border:0px;" height="5" align="center" colspan="2"></td></tr>
+        <tr>
+            <td style="border:0px;" height="25" align="center" colspan="2">
+                <a href="javascript:void(0)" id="ss" class="easyui-linkbutton">提交</a>&nbsp&nbsp<a href="javascript:void(0)" id="myss" class="easyui-linkbutton">我的课表</a></td>
+        </tr>
+    </table>
+</div>
+
+<!--todo:教师列表页的 window-->
+<div id="teacher_list_wd" class="easyui-panel" title=""
+     data-options="iconCls:'icon-save',closable:true,
+                collapsible:false,fit:true,minimizable:false,maximizable:false,closed:true">
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',title:'',split:false,border:false" style="height:50px;">
+        <br>
+        以下是检索到的教师列表，点中一个教师后，设定学年：<input type="text" name="year"  size="4" maxlength="4" value="{$yearTerm.YEAR}">&nbsp
+        学期<input type="text" name="term" size="1" maxlength="1" value="{$yearTerm.TERM}">&nbsp&nbsp
+        <button name="Search">检索分配给该教师的课程</button>
+    </div>
+    <div data-options="region:'center',title:'',splist:false,border:false" style="padding:0px;background:#eee;">
+        <table id="teacher_list" class="easyui-datagrid"
+               data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,fitColumns:true,singleSelect:true,pagination:true,toolbar:
+               [{text:'返回',iconCls:'icon-goleft',handler:function(){
+
+                $('#moren').window({closed:false})
+                $('#teacher_list_wd').panel({closed:true})
+               }}]">
+            <thead>
+            <tr>
+                <th data-options="field:'TEACHERNAME',width:100,align:'center'">教师</th>
+                <th data-options="field:'TEACHERNO',width:100,align:'center'">教师号</th>
+                <th data-options="field:'zc',width:100,align:'center'">职称</th>
+                <th data-options="field:'xy',width:100,align:'center'">学院</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+</div>
+</body>
+</html>

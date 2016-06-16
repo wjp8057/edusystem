@@ -1,0 +1,125 @@
+﻿*{font-size:12px; font-family:"Tahoma,Verdana,微软雅黑,新宋体"}
+body{background:#D2E0F2; }
+a{ color:Black; text-decoration:none;}
+a:hover{ color:Red; text-decoration:underline;}
+form{padding:0px;margin:0px;}
+.textbox03 {border: #878787 1px solid;padding: 4px 3px;font:Verdana, Geneva, sans-serif,"宋体";line-height: 14px; background-color: #fff;  height: auto; font-size: 14px;  font-weight: bold; width: 190px; }
+
+.txt01{font:Verdana, Geneva, sans-serif,"宋体";padding:3px 2px 2px 2px; border-width:1px; border-color:#ddd;  color:#000;}
+.txt {border: #878787 1px solid;padding: 4px 3px;font:Verdana, Geneva, sans-serif,"宋体";line-height: 14px; background-color: #fff;  height: auto; font-size: 14px;}
+.footer{text-align:center;color:#15428B; margin:0px; padding:0px;line-height:23px; font-weight:bold;}
+
+.datagrid-btn-separator-area {float: left;height: 24px;line-height:24px;}
+
+.head {color:#000000;}
+.head a{text-decoration:underline;}
+
+.cent-left{    padding-bottom:50px; padding-right:10px;}
+.cent-left h4{ line-height:20px; font-size:14px; font-weight:bold; text-align:center;}
+.cent-left p{ padding-top:0px; line-height:22px; margin-top:-10px;}
+.cent-left a{color:#6262FF;}
+.cent-right{    line-height:26px; padding-left:15px; }
+.cent-right h3{ font-size:14px; color:#F20006; font-weight:bold;}
+.cent-right a{color:#6262FF; font-size:12px;}
+.cent-right a:hover{color:#F20006; font-size:12px;}
+
+.navlist{list-style-type:none;margin:0px; padding:10px;}
+.navlist li{ padding:0px;}
+.navlist li a{line-height:24px;}
+.navlist li div{margin:2px 0px;padding-left:10px;padding-top:2px; border:1px dashed #ffffff;}
+.navlist li div.hover{border:1px dashed #99BBE8; background:#E0ECFF;cursor:pointer;}
+.navlist li div.hover a{color:#416AA3;}
+.navlist li div.selected{border:1px solid #99BBE8; background:#E0ECFF;cursor:default;}
+.navlist li div.selected a{color:#416AA3; font-weight:bold;}
+
+
+.third_ul{ list-style-type:none;margin:0px; padding:0px; display:none;}
+.third_ul li{ padding-left:20px;}
+
+.icon{ background:url(../images/tabicons.png) no-repeat;width:18px; line-height:18px; text-align: left; display:inline-block;}
+.icon-sys{ background-position:0px -200px;}
+.icon-set{ background-position:-380px -200px;}
+.icon-add{background-position: -20px 0px;}
+.icon-canshu{background-position: -20px -100px;}
+.icon-nav{background-position: -100px -20px; }
+.icon-users{background-position: -100px -480px;}
+.icon-role{background-position: -360px -200px;}
+.icon-set{background-position: -380px -200px;}
+.icon-log{background-position: -380px -80px;}
+.icon-xuefen{background-position: -40px -120px;}
+.icon-shijian{background-position: 0px -100px;}
+.icon-guidang{background-position: -240px -500px;}
+.icon-daying2{background-position: -80px -240px;}
+.icon-delete{ background-position:-140px -120px;}
+.icon-edit{ background-position:-380px -320px;}
+.icon-magic{ background-position:0px -500px;}
+.icon-database{ background-position:-20px -140px;}
+
+.icon-lock{ background-position:0px -260px;}
+.icon-search{ background-position:-340px -400px;}
+.icon-group{background-position: -360px -200px;}
+.icon-position{background-position: -360px -340px;}
+.icon-config{background-position: 0px -220px;}
+.icon-office{background-position: -360px -140px;}
+
+.icon-classTable{background-position: -100px -80px;}
+.icon-weekTable{background-position: -220px -60px;}
+.icon-result{background-position: -320px -340px;}
+.icon-book2{background-position: -100px -60px;}
+.icon-elective{background-position: 0px -40px;}
+.icon-retreat{background-position: -100px -40px;}
+.icon-exam{background-position: -100px -300px;}
+.icon-schoolRoll{background-position: -240px -60px;}
+.icon-level{background-position: -20px -320px;}
+.icon-plan{background-position: -380px -80px;}
+.icon-filter{background-position: -40px -40px;}
+.icon-leisure{background-position: -100px -260px;}
+.icon-evaluate{background-position: -200px -320px;}
+
+.icon-xupersonal{background-position: -80px -420px}
+.icon-xuadmin{background-position:-100px -480px }
+.icon-xuadmin2{background-position: -240px -480px}
+
+.icon-xuchaxun{background-position:-60px -260px }
+.icon-xuadd{background-position: -100px 0px}
+
+.icon-room{background-position: -200px -220px}
+.icon-room2{background-position: -200px -160px}
+.icon-addroom{background-position: -280px 0px}
+.icon-lookroom{background-position: -360px 0px}
+.icon-jiangbei{background-position: -220px -460px}
+.icon-book{background-position: -120px -60px}
+.icon-bookList{background-position: -20px -340px}
+.icon-cjiajia{background-position: -380px -280px}
+.icon-workload{background-position: -60px -60px}
+
+
+.icon-jiaowuchu{background-position: -300px -220px}
+.icon-tongyi1{background-position: -100px -80px}
+.icon-tongyi2{background-position: -120px -80px}
+.icon-excel{background-position: -260px -140px}
+.icon-refresh{background-position: -140px -40px}
+.icon-lock{background-position: 0px -260px}
+.icon-unlock{background-position: -20px -260px}
+.icon-date_List{background-position: -220px -420px}
+.icon-Excelr{background-position: -140px -300px}
+.icon-fenxi{background-position: -360px -420px}
+.icon-search2{background-position: -220px -200px}
+.icon-shuru{background-position: -260px -300px}
+.icon-kongbai{background-position: -160px -280px}
+.icon-personalList{background-position: -360px -200px}
+.icon-tongji{background-position: -260px -80px}
+.icon-kaifang{background-position: -100px -40px}
+.icon-zhongzhi{background-position: 0px -40px}
+.icon-admin{background-position: -20px -100px}
+.icon-huishouzhan{background-position: -340px -40px}
+.icon-anpai{background-position: -240px -20px}
+
+.icon-join{background-position: -180px -100px}
+.icon-disjoin{background-position: -140px -140px}
+.icon-calendar{background-position: -380px -120px}
+.icon-address{background-position: -120px -140px}
+.icon-hand{background-position: -20px -220px}
+.icon-search3{background-position: -60px -260px}
+
+.icon-arrow{ background:url('../images/arrow.gif') no-repeat right;}

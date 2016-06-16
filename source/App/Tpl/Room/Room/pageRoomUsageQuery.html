@@ -1,0 +1,122 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    #TB1 td{border:1px #95B8E7 solid;
+    }
+    #TB1 td{border:1px #95B8E7 solid;height:20px
+    }
+    #apply_info input{height:23px;vertical-align:middle;}
+
+</style>
+<script>
+    $(function(){
+
+        var chuang={
+            modal:true,
+            fit:true,
+            minimizable:false,
+            maximizable:false,
+            closed:true
+        };
+
+        var wd=$('#wd').window(chuang);
+        var wd3=$('#wd3').window(chuang);
+        //检索
+        $('#tijiao').click(function(){
+            window.open('__URL__/shiyong/reqtag/showWeeksContent?'+$("#search_form").serialize());
+        });
+        //刷新教室资源使用列表
+        $('#RefreshResource').bind('click',function(){
+            $.get(
+                    '__URL__/source',
+                    {
+                        year:$('[name=YEAR]').val(),
+                        term:$('[name=TERM]').val()
+                    },
+                    function (data) {
+                        return Messager.showMessage(data);
+                    }
+            );
+        });
+    });
+</script>
+
+<body style="background-color: #fff">
+<div id="wd3" title=""></div>
+<div id="wd" title="课程列表">
+</div>
+<p align="center"><font face="隶书" size="4">请提供检索条件</font></p>
+    <div >
+        <form id="search_form">
+        <table border="0" cellpadding="1" cellspacing="1" id="TB1" width="620" align="center">
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">教室号：</font></td>
+                <td width="148"><input type="text" size="10" name="ROOMNO" value="%"></td>
+                <td width="112" align="right" bgcolor="#E0ECFF"><font size="2">教室名：</font></td>
+                <td colspan="3" width="266"><input type="text" size="10" name="JSN" value="%"></td>
+            </tr>
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">优先学院：</font></td>
+                <td width="148"><select name="SCHOOL"><option value="%">全部</option><volist name="schools" id="v"><option value="{$v.SCHOOL}">{$v.NAME}</option></volist></select></td>
+                <td width="112" align="right" bgcolor="#E0ECFF"><font size="2">设施：</font></td>
+                <td colspan="3" width="266"><select name="EQUIPMENT"><option value="%">全部</option><volist name="roomoptions" id="v"><option value="{$v.NAME}">{$v.VALUE}</option></volist></select></td>
+            </tr>
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">所处校区：</font></td>
+                <td width="148">
+                <select name="AREA">
+                <volist name="areas" id="v"><option value="%">全部</option><option value="{$v.NAME}">{$v.VALUE}</option></volist></select></td>
+                <td width="112" align="right" bgcolor="#E0ECFF"><font size="2">座位数</font></td>
+                <td width="68"><input type="text" size="4" name="SEATSDOWN" value="0"></td>
+                <td width="71"><font size="2">到</font></td>
+                <td width="127"><input type="text" size="4" name="SEATSUP" value="400"></td>
+            </tr>
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">学年：</font></td>
+                <td width="148"><input type="text" size="4" name="YEAR" value="{$yearTerm.YEAR}"></td>
+                <td width="112" align="right" bgcolor="#E0ECFF"><font size="2">学期：</font></td>
+                <td colspan="3" width="266"><input type="text" size="2" name="TERM" value="{$yearTerm.TERM}"></td>
+            </tr>
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">空闲时段：</font></td>
+                <td width="148"><select name="TIME"><option value="%">全部</option><volist name="timesectors" id="v"><option value="{$v.NAME}">{$v.VALUE}</option></volist></select></td>
+                <td width="112" align="right" bgcolor="#E0ECFF"><font size="2">空闲日期：</font></td>
+                <td colspan="3" width="266"><select size="1" style="font-size: 10pt" name="DAY">
+                    <option value=":MON">星期一</option>
+                    <option value=":TUE">星期二</option>
+                    <option value=":WES">星期三</option>
+                    <option value=":THU">星期四</option>
+                    <option value=":FRI">星期五</option>
+                    <option value=":SAT">星期六</option>
+                    <option value=":SUN">星期日</option>
+                    <option selected value="-1">不设定</option>
+                </select></td>
+            </tr>
+
+            <tr>
+                <td width="80" align="right" bgcolor="#E0ECFF"><font size="2">单双周：</font></td>
+                <td width="526" colspan="5"><select size="1" name="OEW" style="font-size: 10pt">
+                    <option selected value="B">单双周</option>
+                    <option value="O">单周</option>
+                    <option value="E">双周</option>
+                </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="6" align="center">
+                    <input type="hidden" id="page1223" value=0>
+                    <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'" id="tijiao">检索</a>&nbsp;&nbsp
+                    <a href="javascript:void(0);" class="easyui-linkbutton" id="RefreshResource">刷新教室资源使用列表</a>
+                </td>
+            </tr>
+            </table>
+            </form>
+    </div>
+<p>单双周只对空闲时段和空闲日期设定的情况起作用，例如，空闲时段设定为第1，2节，空闲日期不设定，
+    单双周设定为单周，则检索结果为所有单周1，2节每天都空闲的教室。如果空闲日期进一步设定为星期一，
+    则检索结果是所有星期一单周第1，2节空闲的教室。空闲时段为全部等于不设定。</p>
+<p><font color="#FF0000"><b>注意：此处刷新教室资源使用列表的功能是将借用时间叠加到资源使用列表上，为了保证资源使用列表的数据一致性，
+    本项功能必须在使用了排课系统的“刷新资源时间表”后由教务处排课人员或教务管理人员使用！
+</b></font></p>
+</body>
+
+</html>

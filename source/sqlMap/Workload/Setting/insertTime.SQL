@@ -1,0 +1,1 @@
+insert into workload_applydate(year,term,begintime,endtime,status) values(:year,:term,:start,:end,:status)

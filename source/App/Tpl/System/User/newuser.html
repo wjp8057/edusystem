@@ -1,0 +1,305 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    #info {color:black;font-weight:800}
+</style>
+<body>
+    <script>
+        var content;                    //保存用户输入的所有信息
+        var create;                     //存layout对象
+        var dt;                         //存datagrid对象
+        var bt;                         //linkbutton按钮
+        var former;                     //存放form对象
+        var ct;                         //存放POST数据
+        $(function(){
+             var upanduan=false;                        //判断用户输入的信息
+             var tpanduan=false;                        //判断teacherno的输入信息
+            former=$('#form').form({
+                URL:'__URL__/userinserted',
+                success:function(data){
+                    alert(data);
+                }
+            })                                                                                      //form表单对象
+           create= $('#create').layout({ });
+           dt=$('#quanxian').datagrid({
+               url:'__URL__/newuser/hasJson/1',
+               columns:[[
+               {checkbox:true},
+               {field:'ROLE',title:'权限编号',width:100},
+               {field:'DESCRIPTION',title:'权限名称',width:250}
+               ]],
+               border:false
+           })
+
+            $('#register').linkbutton({
+                iconCls: 'icon-save'
+            });
+
+            //点击注册时候
+            $('#register').bind('click',function(){
+
+
+                    if(upanduan==false){                                //用户名不成立
+
+                        $.messager.alert('提示','用户名输入不规范')
+                        $('#USERNAME').focus();
+                        return;
+                    }
+                    if(tpanduan==false){
+                        $('#TEACHERNUM').focus();
+                        $.messager.alert('提示','教师号输入不规范')
+                        return;
+                    }
+                    if($('#info [name=PASSWORD]').val()==""){
+                        $.messager.alert('提示','请输入密码')
+                        return;
+                    }
+
+                ct={
+                    NAME:$('#info [name=TEACHERNAME]').val(),            //教师名称
+                    U_USERNAME:$('#info [name=USERNAME]').val(),
+                    TEACHERNO:$('#info [name=TEACHERNUM]').val(),
+                    U_TEACHERNO:$('#info [name=TEACHERNUM]').val(),
+                    POSITION:$('#info [name=TYPE]').val(),
+                    U_DAYSTOLIVE:$('#info [name=DAYSTOLIVE]').val(),
+                    U_PASSWORD:$('#info [name=PASSWORD]').val(),
+                   // REVISIONPWD:$('#info [name=REVISIONPWD]').val(),
+                    SCHOOL:$('#info [name=SCHOOL]').val(),
+                    SEX:$('#info [name=SEX]:checked').val()
+                    }
+                dt.datagrid('selectRow',21)
+                    wd.window({
+                        closed:false,
+                        height:490,
+                        width:365,
+                        minimizable:false,
+                        maximizable:false,
+                        collapsible:false,
+                        modal:true
+                    })
+            })
+
+            $('#USERNAME').blur(function(){
+                $.ajax({
+                    url:'__URL__/useryz',
+                    type:'POST',
+                    data:{
+                        NAME:this.value
+                    },
+                    success:function(data){
+                        if(data=='false'){
+                            $('#ct').html('<font color="red">账号已经存在</font>')
+                            upanduan=false;
+                        }else if(data=='sev'){
+                            $('#ct').html('<font color="red">不能为空！</font>')
+                            tpanduan=false;
+                        }else{
+                            $('#ct').html('<font color="green">可以使用的账号√</font>')
+                            upanduan=true;
+                        }
+                    }
+                })
+            })
+
+                $("#TEACHERNUM").blur(function(){
+                    $.ajax({
+                        url:'__URL__/useryz',
+                        type:'POST',
+                        data:{
+                            TEACHERNUM:this.value
+                        },
+                        success:function(data){
+                            if(data=='false'){
+                                $('#ct2').html('<font color="red">教师号已经存在</font>')
+                                tpanduan=false;
+                            }else if(data=='sev'){
+                                $('#ct2').html('<font color="red">教师号应该为6位！</font>')
+                                tpanduan=false;
+                            }else{
+                                $('#ct2').html('<font color="green">可以使用的教师√</font>')
+                                tpanduan=true;
+                            }
+                        }
+                    })
+                })
+
+           var wd= $('#wd').window({
+                closed:true,
+               height:490,                                                  //初始化window窗口
+               width:365,
+                modal:true
+            })
+            var internal= $('#internal').layout({ });
+            var tijiao=$('#tijiao').bind('click',function(){
+
+                var checked=dt.datagrid('getChecked');                   //选择的权限数据
+                ct.U_ROLES="";
+                if(checked.length){
+                    for(var i=0;i<checked.length;i++){
+                        ct.U_ROLES+=checked[i].ROLE;
+                    }
+                }else{
+                    ct.QUANXIAN='NULL';
+                }
+                $.ajax({
+                    url:'__URL__/uinserted',
+                    datatype:'json',
+                    type:'POST',
+                    data:ct,
+                    success:function(data){
+                        alert(data)
+                        if(data=='true'){
+                            $.messager.alert('提示','添加成功')
+                            $('#new_user').form('clear');
+                            $('#SCHOOL').combobox('setValue','01')
+                            $('[name=DAYSTOLIVE]').val('-1')
+                            $('#TYPE').combobox('setValue','A')
+                        }else{
+                            $.messager.alert('提示','添加失败,教师姓名重复了')
+                        }
+                         wd.window({
+                            closed:true
+                        })
+                    }
+                })
+                dt.datagrid('unselectAll');
+            })
+        })
+    </script>
+
+
+    <div id="wd" title="请选择权限">
+            <table width="350" border="0">
+                <tr>
+                    <td>
+
+                        <div  id="quanxian"  data-options="fitColumns:true,height:380" style="height:380px" ></div>
+
+                    </td>
+                </tr>
+                <tr><td><b>注：最多可选20个权限</b></td></tr>
+                <tr>
+                    <td align="center">
+                        <button id="tijiao" style="height:30px;width:100px">提交创建</button>
+                    </td>
+                </tr>
+               </table>
+    </div>
+    <div id="create" data-options="title:'创建用户',fit:true" >
+
+        <div data-options="region:'center',border:false" style="overflow:hidden;">
+            <form id="new_user">
+                <table  align="center" cellspacing=0  id="info" border="0" class="formtable" style="margin-top:50px">
+
+                    <tr>
+                        <td align="right">
+                            <u>用户账号</u>:
+                        </td>
+                        <td>
+                            <input type="text" name="USERNAME" id="USERNAME" value=""  style="width:200px" maxlength="10"  >
+                            &nbsp&nbsp<font color="red">*</font><span id="ct"></span>
+                            <input type="hidden" name="role" id="rl" value="">              <!--隐藏域存放权限-->
+                        </td>
+
+
+                    </tr>
+
+                    <tr>
+                        <td align="right">
+                           <u> 教师编号:</u>
+                        </td>
+                        <td>
+                            <input  name="TEACHERNUM" id="TEACHERNUM" value="" size="10"  maxlength="6" >&nbsp&nbsp<font color="red">*</font><span id="ct2"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            职称:
+                        </td>
+                        <td>
+
+                            <select class="easyui-combobox" name="TYPE" ID='TYPE' data-options="editable:false" style="width:150px;">
+                                <volist name="position" id="vo">
+                                    <option value="{$vo.NAME}">{$vo.VALUE}</option>
+                                </volist>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            密码:
+                        </td>
+                        <td>
+                            <input type="password" value="" name="PASSWORD"  style="width:200px" maxlength="7">&nbsp&nbsp<font color="red">*</font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            密码有效期:
+                        </td>
+                        <td>
+                            <input class="easyui-validatebox" name="DAYSTOLIVE" value="-1" size="10"  >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            下次登录必须改密码:
+                        </td>
+                        <td>
+                            <input type="checkbox" name="REVISIONPWD" value="1">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            教师姓名:
+                        </td>
+                        <td>
+                            <input class="easyui-validatebox" name="TEACHERNAME" style="width:200px" id="TEACHERNAME" value="" maxlength="4" size="35">&nbsp&nbsp<font color="red">*</font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            性别:
+                        </td>
+                        <td>
+                            男:<input type="radio" name="SEX" value="M" checked >&nbsp女:<input type="radio" name="SEX" value="F">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">
+                            学院:
+                        </td>
+                        <td>
+                            <select class="easyui-combobox" data-options="editable:false" name="SCHOOL" id='SCHOOL' style="width:150px;">
+                                <volist name="schools" id="vo">
+                                    <option value="{$vo.SCHOOL}">{$vo.NAME}</option>
+                                </volist>
+
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right" colspan="2">
+                            注：有下划线的是主键字段，不能为空，也不能重复。    口令有效天数为负，则意味着口令永不过期。
+                        </td>
+                    </tr>
+
+                    <tr style="height:50px" >
+
+                        <td align="center" colspan="2" >
+                            <a href="javascript:void(0)" id="register" data-options="">下一步</a>
+                        </td>
+                    </tr>
+                </table>
+        </form>
+
+
+
+
+        </div>
+
+    </div>
+
+
+</body>
+</html>

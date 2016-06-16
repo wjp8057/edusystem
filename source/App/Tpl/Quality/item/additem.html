@@ -1,0 +1,234 @@
+<include file=":Include:jqueryHeader" />
+
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<script>
+$(function(){
+
+
+    //todo:点搜索的时候
+    $('#ss').bind('click',function(){
+        $('#ddat').datagrid('options').url='__APP__/exam/FinalAdmin/Quality_teachers/hasJson/true';
+        $('#ddat').datagrid('load',{sqlpath:{'select':'exam/jiankaoanpai_select.SQL','count':'exam/jiankaoanpai_count.SQL'},
+            bind:{'teacherno':$('[name=tteacherno]').val(),'school':$('[name=sschool]').val(),'teachername':$('[name=tteachername]').val()}})
+
+    })
+
+    $('#sd').bind('click',function(){
+        var row=$('#ddat').datagrid('getSelected')
+        if(row==''){
+            return $.messager.alert('提示','请选择一条要操作的数据');
+        }
+        $('[name=TEACHERNO]').val($.trim(row.teacherno));
+        $('#teachername').html($.trim(row.name))
+        $('#teacherList').window({closed:true})
+
+    })
+
+
+    $('#qxz').bind('click',function(){
+
+        $('#teacherList').window({closed:false})
+    })
+	//点击创建
+    $('#btnCreate').bind('click',function(){
+
+        var courseno=itemadd.COURSENO.value;
+        var teacherno= $.trim(itemadd.TEACHERNO.value);
+
+        var year=itemadd.YEAR.value;
+        var term=itemadd.TERM.value;
+        if($('#itemadd [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');
+            return;
+        }
+        if($('#itemadd [name=TERM]').val()==""){
+            $.messager.alert('提示','请输入学期!');
+            return;
+        }
+        if($('#itemadd [name=COURSENO]').val()==""){
+            $.messager.alert('提示','请输入课号!');
+            return;
+        }
+        if($('#itemadd [name=TEACHERNO]').val()==""){
+            $.messager.alert('提示','请输入教师号!');
+            return;
+        }
+        if(year<2003||term>2){
+        	$.messager.alert('提示',"请输入正确的学年学期。");
+            return false;
+        }
+        if(courseno.length!=9){
+        	$.messager.alert('提示',"请输入正确的课号（9位）。");
+            return false;
+        }
+        if(teacherno.length!=6){
+        	$.messager.alert('提示',"请输入正确的教师号（6位）。");
+            return false;
+        }
+        $.ajax({
+            url:"__URL__/validation/hasJson/1",
+            async:false,
+            type:"POST",
+            data:{VALUE:$.trim($('#itemadd [name=COURSENO]').val())},
+            success: function(data){
+
+                if(data==0){
+                	$.messager.alert('提示',"该课号不存在！");
+                	return false;
+                }else{
+
+                	var ct={
+                			YEAR:$('#itemadd [name=YEAR]').val(),                   // 学年
+            	            TERM:$('#itemadd [name=TERM]').val(),                   // 学期
+            	            COURSENO:$('#itemadd [name=COURSENO]').val(),           // 课号
+            	            TEACHERNO:$('#itemadd [name=TEACHERNO]').val(),         // 教师号
+            	            TYPE:$('#itemadd [name=TYPE]').val()                    // 类型
+            	    };
+                	$.ajax({
+        	            url:'__URL__/addit/hasJson/1',
+        	            type:'POST',
+        	            data:ct,
+        	            success:function(C){
+
+        	                if(C=='true'){
+        	                	$.messager.alert("提示","信息添加成功！","?",function(){
+        	                		$('#itemadd [name=COURSENO]').val("");
+        	                		$('#itemadd [name=TEACHERNO]').val("");
+        	                		$("#itemadd [name='TEACHERNAME']").val("");
+        	                	});
+        	                }else  $.messager.alert('提示',C);
+        	            }
+        	        });   
+                }
+            }
+        });
+    });
+	//输入教师号时显示对应教师名称
+	$("#itemadd [name='TEACHERNO']").change(function(){
+		var value=$.trim($(this).val());
+		var ele=$("#itemadd [name='TEACHERNAME']");
+		ajiakesi('__URL__/validation/hasJson/1',{'teacherno':value},function(c){
+           if(c=='false'){
+               $('#teachername').html('不存在!')
+           }else{
+            eval("var one="+c)
+            $('#teachername').html(one['NAME'])
+           }
+
+
+        })
+		/*if(name!=""){
+			ele.val(value);
+		}else{
+			$.messager.alert("提示","教师号不存在！","?",function(){
+				$("#itemadd [name='TEACHERNO']").val("");
+				ele.val("");
+			});
+		}*/
+	});
+	//选择教师时显示教师号
+	$("#itemadd [name='TEACHERNAME']").change(function(){
+		var value=$.trim($(this).val());
+		if(value != ""){
+			$("#itemadd [name='TEACHERNO']").val(value);
+		}
+	});
+	//加载教师列表
+	$.ajax({
+        url:"__URL__/additem/hasJson/1",
+        type:"POST",
+        dataType:"JSON",
+        success:function(data){
+        	if(data){
+        		var html="";
+          	    for(var i=0;i<data.length;i++){
+          	    	html+="<option value=\""+data[i].code+"\">"+data[i].name+"</option>";
+        	    }
+          	    $("#itemadd [name='TEACHERNAME']").append(html);
+            }
+        }
+    });
+});
+</script>
+<style>
+#MyTable{margin:100px auto 0px;border-collapse:collapse;}
+#MyTable td,#MyTable th{border-bottom:dotted 1px #CCC;height:40px;}
+</style>
+<div id="teacherList" title=" " data-options="width:650,height:500,maximizable:false,minimizable:false,collapsible:false,closed:true">
+    <div id="tdemo">
+
+        教师号:<input type="text" name="tteacherno" size="6" maxlength="6" value='%' >&nbsp;&nbsp;
+        姓名:<input type="text" name="tteachername" size="6" maxlength="6" value='%' >&nbsp;&nbsp;
+        所在学院:<select name="sschool">
+
+        <option value="%">全部</option>
+        <volist name="schools" id="s">
+            <option value="{$s.SCHOOL}">
+                {$s.NAME}
+            </option>
+        </volist>
+    </select>&nbsp;&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" id='ss' iconCls="icon-search">检索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id='sd'  plain='true' iconCls="icon-add">设定</a>
+    </div>
+
+    <table class="easyui-datagrid"  id="ddat"
+           data-options="pagination:true,fitColumns:true,singleSelect:true,fit:true,toolbar:'#tdemo'">
+        <thead>
+        <tr>
+            <th data-options="field:'teacherno',width:100,align:'center'">教师号</th>
+            <th data-options="field:'name',width:100,align:'center'">姓名</th>
+            <th data-options="field:'school',width:100,align:'center'">所在学院</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <form method="POST" id="itemadd" action="__URL__">
+    <br><br>
+    <p align="center"><font style="font-size: 16pt" face="隶书">添加考评条目</font></p>
+    <br><br>
+    <table ID="MyTable" width="65%" align="center" style="border-collapse: collapse; font-size: 10pt">
+    <tr>
+        <th width="15%" align="right">学年：</th>
+        <td width="15%"><input type="text" name="YEAR" size="4" maxlength="4" value="{$yearTerm.YEAR}"></td>
+        <th width="15%" align="right">课号：</th>
+        <td width="20%" nowrap><input type="text" name="COURSENO" size="9" maxlength="9">（9位）组号不能与实际开课相同</td>
+    </tr>
+    <tr>
+    <th width="15%" align="right">学期：</th>
+    <td width="15%"><input  type="text" name="TERM" size="1" maxlength="1"  value="{$yearTerm.TERM}"></td>
+    <th width="15%" align="right">教师号：</th>
+    <td width="20%"><input type="text" name="TEACHERNO" size="6" maxlength="6">
+       <span id="teachername">&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</span>
+        <a href="javascript:void(0)" class="easyui-linkbutton" id="qxz">请选择</a>
+ <!--   <select size="1" name="TEACHERNAME">
+        <option value="">--请选择--</option>
+    </select>--></td>
+    </tr>
+    <tr>
+        <th width="15%" align="right">类型：</th>
+        <td width="15%">
+            <select name="TYPE">
+                <volist name="coursetypeoptions2" id="t">
+                    <option value="{$t.TYPE}">{$t.NAME}</option>
+                </volist>
+            </select>
+            <!--<select size="1" name="TYPE">
+            <option value="K">课堂教学</option>
+            <option value="S">实践教学</option>
+            <option value="B">毕业设计</option>
+        </select>--></td>
+        <th width="15%" align="right"></th>
+        <td width="20%"></td>
+    </tr>
+    </table>
+    <p align="center">注：教师可以在教师列表中查找，或者直接输入教师号。&nbsp;</p>
+        <p align="center">
+            <a id="btnCreate" class="easyui-linkbutton" icon="icon-add">添加条目</a>
+        </p>
+    </form>
+</div>
+</body>
+</html>

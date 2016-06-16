@@ -1,0 +1,1 @@
+update CreditSinglefirm set deanview=:deanview,deansubtime=:date where applydate_id=:id

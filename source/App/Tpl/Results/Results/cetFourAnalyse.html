@@ -1,0 +1,126 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var canjiarenshu=0;               //todo:参加人数
+    var tongguorenshu=0              //todo:通过人数
+    function zero(){
+        canjiarenshu=0;               //todo:参加人数
+        tongguorenshu=0;              //todo:通过人数
+    }
+    $(function(){
+
+        var datag = $('#tablegrid');
+        var grade = $('[name=NIANJI]');
+        var major = $("#major");
+        grade.val(parent.$("#YEAR").val().substr(2,2));
+
+
+        $('#dosearch').click(function () {
+            var obj = {grade:grade.val(),major:major.val()};
+            $.post('__APP__/Results/Results/cetFourAnalyse/tag/getlist',obj,function(data){
+//                if(typeof data.total === 'undefined'){
+//                    //total可能没有声明过，容错
+//                    $.messager.alert('提示','查询出错！');
+//                }else{
+//                console.log(data);
+                datag.datagrid('loadData',data);
+//                }
+
+            });
+        });
+
+
+//        $('#cpt_search').bind('click',function(){
+//                    zero();
+//                    datag.datagrid('options').onLoadSuccess=function(data){
+//                        var total=data.total;
+//                        var obj={'zy':'合计','cjrs':canjiarenshu,
+//                            'tgrs':tongguorenshu,
+//                            'tgl':formatFloat(canjiarenshu/tongguorenshu*100,2)}
+//                        datag.datagrid('appendRow',obj)
+//                    };
+//
+//
+////                    $('#title').html($('[name=NIANJI]').val()+'级各专业计算机统考累计通过率');
+//                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_seven_select.SQL','count':'Results/Two_seven_count.SQL'
+//                    },'bind':{':GONE':$('[name=NIANJI]').val(),':GTWO':$('[name=NIANJI]').val()}})
+//
+//
+//                });
+//
+//
+//        $('#applyB_search').bind('click',function(){
+//                    zero();
+//                    var datag=$('#tablegrid');
+//                    datag.datagrid('options').onLoadSuccess=function(data){
+//                        var total=data.total;
+//                        var obj={'zy':'合计','cjrs':canjiarenshu,
+//                            'tgrs':tongguorenshu,
+//                            'tgl':formatFloat(canjiarenshu/tongguorenshu*100,2)};
+//                        datag.datagrid('appendRow',obj)
+//                    };
+//
+////                    $('#title').html($('[name=NIANJI]').val()+'级各专业英语B级统考累计通过率  ');
+//                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_seven_two_select.SQL','count':'Results/Two_seven_two_count.SQL'
+//                    },'bind':{':GONE':$('[name=NIANJI]').val(),':GTWO':$('[name=NIANJI]').val()}});
+//
+//                });
+
+
+    });
+
+
+</script>
+<body>
+
+
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+        <label for="nnianji">年级：</label>
+        <input type="text" name="NIANJI" id='nnianji' value="" size="4">(填写04、05等,班号前两位) &nbsp;
+        <label for="nnianji">专业：</label>
+        <select id="major">
+            <option value="%">所有专业</option>
+            <volist name="majors" id="v">
+                <option value="{$v.CODE}">{$v.NAME}</option>
+            </volist>
+        </select>
+        <a id="dosearch"  class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>&nbsp;
+
+
+
+    </div>
+    <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="tablegrid"
+               data-options="toolbar:'#tdemo',pagination:false,fitColumns:true,singleSelect:true,fit:true">
+            <thead>
+            <tr>
+                <th data-options="field:'nj',width:40" align="center">年级</th>
+                <th data-options="field:'zy',width:100" align="center">专业</th>
+                <th data-options="field:'cjrs',width:100,formatter:function(a,b,c){
+                canjiarenshu+=parseInt(a)
+                return a
+            }" align="center">学生人数</th>
+                <th data-options="field:'tgrs',width:100,formatter:function(a,b,c){
+                tongguorenshu+=parseInt(a)
+                return a
+            }" align="center">通过人数</th>
+                <th data-options="field:'tgl',width:100,formatter:function(a,b,c){
+
+                       return formatFloat(b.tgrs/b.cjrs*100,2)
+
+            },align:'right'" align="center">通过率</th>
+
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+
+</body>
+</html>

@@ -1,0 +1,53 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+
+        $('#search').linkbutton({
+            text:'按课号查询不及格名单',
+            iconCls: 'icon-search'
+        }).bind('click',function(){
+
+            $('#wd2_dat').datagrid('load',{'Sqlpath':{'select':'Results/One_Two_select.SQL','count':'Results/One_Two_count.SQL'},'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),
+                ':COURSENO':$('[name=COURSENO]').val()}},function(c){
+                $.messager.alert('提示',c)
+            })
+
+        })
+    })
+</script>
+
+
+
+
+
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+<label for="yyear"> 学年：</label><input type="text" name="YEAR" id='yyear' size="4" >&nbsp&nbsp&nbsp 学期：<input type="text" name="TERM" size="2">
+            &nbsp&nbsp课号(最多九位)<input type="text" name="COURSENO" size="7" value="%">&nbsp&nbsp <a id="search">按课号查询不及格名单</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid" id="wd2_dat"
+               data-options="url:'__APP__/Status/Status/Squery',toolbar:'#tdemo',fitColumns:true,fit:true,pagination:true,pageList:[20,50,100,200,500]" >
+            <thead>
+            <tr>
+                <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                <th data-options="field:'kcmc',width:100,align:'center'">课程名称</th>
+                <th data-options="field:'xh',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                <th data-options="field:'bj',width:100,align:'center'">班级</th>
+                <th data-options="field:'xy',width:100,align:'center'">学院</th>
+                <th data-options="field:'xkfs',width:100,align:'center'">修课方式</th>
+                <th data-options="field:'zp',width:100,align:'center'">总评</th>
+                <th data-options="field:'bk',width:100,align:'center'">补考</th>
+                <th data-options="field:'bz',width:100,align:'center'">备注</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>

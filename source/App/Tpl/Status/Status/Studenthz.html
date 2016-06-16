@@ -1,0 +1,22 @@
+<html>
+<body>
+<p align="center"><font face="楷体_GB2312" size="4"><b>新生报到情况总览</b></font></p>
+<p align="center"><font face="楷体_GB2312">(第<#PARAMETER NAME=YEAR>学年第<#PARAMETER NAME=TERM>学期)：</font></p>
+<p align="center"><font face="楷体_GB2312">全校应报到新生：<LABEL DATASRC=#dsoTOTAL DATAFLD=TOTAL></LABEL>名；现在已报到：<LABEL DATASRC=#dsoSTOTAL DATAFLD=STOTAL></LABEL>名；其中本科应报到：<LABEL DATASRC=#dsoFYEARS datafld=TOTAL></LABEL>
+    名，实报到：<LABEL DATASRC=#dsoSFYEARS DATAFLD=STOTAL></LABEL>名；</font></p>
+<p align="center"><font face="楷体_GB2312">三年制应报到：<LABEL DATASRC=#dsoTYEARS datafld=TOTAL></LABEL>名；实报到：<LABEL DATASRC=#dsoSTYEARS datafld=STOTAL></LABEL>；其它应报到：<LABEL DATASRC=#dsoQT DATAFLD=TOTAL></LABEL>；实报到：<LABEL DATASRC=#dsoSQT datafld=STOTAL></LABEL>。</font></p>
+<p align="center"><font face="楷体_GB2312">各学院新生报到情况:</font></p>
+<table align=center border="1" cellspacing="1" width="60%" style="border-collapse:collapse;font-size:10pt" datasrc=#dsoSCHOOLALL>
+    <thead>
+    <td  align="center" bgcolor="#0000FF"><font size="2" color="#FFFFFF">学院</font></td>
+    <td  align="center" bgcolor="#0000FF"><font size="2" color="#FFFFFF">应报到人数</font></td>
+    <td  align="center" bgcolor="#0000FF"><font size="2" color="#FFFFFF">实到人数</font></td>
+    </thead>
+    <tr>
+        <td  align="center"><font size="2"><a datafld=SCHOOLLINK target="_blank"><SPAN datafld=NAME></SPAN></a></font></td>
+        <td  align="center"><font size="2"><SPAN datafld=TOTAL></SPAN></font></td>
+        <td  align="center"><font size="2"><SPAN datafld=STOTAL></SPAN></font></td>
+    </tr>
+</table>
+</body>
+</html>

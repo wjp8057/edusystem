@@ -1,0 +1,209 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno   = '{$studentno}';
+    var examno      = '{$examno}';
+
+    $(function(){
+        $.post('__URL__/studentNO/reqtag/personalinfo',{studentno:studentno,examno:examno},function(c){
+            Formor.autoTableFill('container',c);
+        });
+
+        $('#submitCheckin').bind('click',function(){
+            alert("");
+        });
+    });
+</script>
+<style>
+    #infotable{border:1px solid black}
+    #infotable td{border:1px solid black}
+    span.text {font-size: 2pt}
+    input {border: 0;margin-left: 5px;}
+</style>
+<body style="background-color: #fff" id="container">
+    <table id='infotable' align="center" border="0" style="border-bottom: 1px" width="82%" cellspacing="0"  cellpadding="0" >
+        <tr>
+            <td width=12% align="right" height="23"><span class="text"><b>准考证号：</b></span></td>
+            <td width=65%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="EXAMNO" />
+                </span>
+            </td>
+            <td  height="230" rowspan="10" colspan="2" width="25%">
+                <img border="0" src="/pictures/<#PARAMETER NAME=NEWSTUDENTNO>.jpg" width="20%" height="233">
+            </td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23" ><span class="text"><b>学号：</b></span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="STUDENTNO" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text"><b>姓名：</b></span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="studentname" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23"><span class="text">性别：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="sexname" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">出生日期：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="BIRTHDAY" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">民族：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="nationalityname" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">政治面貌：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">考生类别码：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="classcodename" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">考生特征码：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="featurename" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><span class="text">录取计划类别：</span></td>
+            <td width=65%  height="23">
+                <span class="text">
+                    <input type="text" readonly id="planclasscodename" />
+                </span>
+            </td>
+        </tr>
+    </table>
+    <table datasrc=#dsoSTUDENT align="center" border="1"  width="82%" cellspacing="0" bordercolor="#000000" cellpadding="0" style="border-top: 0;font-size: 10pt; color: #000000; ">
+        <tr>
+            <td  width=12% align="right" height="23"><span class="text">邮编：</span></td>
+            <td  width=40% height="23" >
+                <span class="text">
+                    <input type="text" readonly id="POSTCODE" />
+                </span>
+            </td>
+            <td  width=12% align="right" height="23"><span class="text">家庭住址：</span></td>
+            <td  width=40% height="23" >
+                <span class="text">
+                    <input type="text" readonly id="ADDRESS" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><span class="text">家庭电话：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="TEL" />
+                </span>
+            </td>
+            <td width=12%  align="right" height="23"><span class="text">原毕业院校：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="MIDSCHOOL" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><span class="text">录取学制：</span></td>
+            <td width=12%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="YEARS" />
+                </span>
+            </td>
+            <td width=12%  align="right" height="23"><span class="text">录取学院：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="schoolname" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><span class="text">录取专业：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="majorcodename" />
+                </span>
+            </td>
+            <td width=12%  align="right" height="23"><span class="text">高考总分：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="SCORE" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><span class="text">身份证：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="ID" />
+                </span>
+            </td>
+            <td width=12%  align="right" height="23"><span class="text">省份代码：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="provincecodename" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><span class="text">学科类别：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="branchcodename" />
+                </span>
+            </td>
+            <td width=12%  align="right" height="23"><span class="text">录取日期：</span></td>
+            <td width=40%  height="23" >
+                <span class="text">
+                    <input type="text" readonly id="enterdate" />
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td  align="right" height="23"><span class="text">备注：</span></td>
+            <td height="23" colspan="3">
+                <span size="3">
+                    <input type="text" readonly id="REM" />
+                </span>
+            </td>
+        </tr>
+
+    </table>
+    <br />
+    <br />
+
+    <p style="text-align: center;display:none;">
+        <a href="javascript:void(0);" id="submitCheckin"  class="easyui-linkbutton" data-options="iconCls:'icon-add'"  > 提交报到</a>
+    </p>
+</body>

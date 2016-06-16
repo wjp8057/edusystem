@@ -1,0 +1,76 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<body style="background-color: #ffffff">
+<p align=center style="font-size: 19px">记录学籍异动情况</p>
+<script>
+        $(function(){
+            $('#submitting').bind('click',function(){
+                var StudentNo=$('#StudentNo').val();
+                var FileNo=$('#FileNo').val();
+                if(StudentNo==""||FileNo==""){
+                    return $.messager.alert('提示','<font color="red">带*必须填</font>')
+                }
+                var zz=/((^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(10|12|0?[13578])([-\/\._])(3[01]|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(11|0?[469])([-\/\._])(30|[12][0-9]|0?[1-9])$)|(^((1[8-9]\d{2})|([2-9]\d{3}))([-\/\._])(0?2)([-\/\._])(2[0-8]|1[0-9]|0?[1-9])$)|(^([2468][048]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([3579][26]00)([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][0][48])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][2468][048])([-\/\._])(0?2)([-\/\._])(29)$)|(^([1][89][13579][26])([-\/\._])(0?2)([-\/\._])(29)$)|(^([2-9][0-9][13579][26])([-\/\._])(0?2)([-\/\._])(29)$))/ig
+                if(!zz.test($('#date').val())){
+                    return $.messager.alert('提示','时间格式不正确')
+                }
+                var obj={}
+                obj[':infotype']=$('#InfoType').val()
+                obj[':date']=$('#date').val()
+                obj[':fileno']=$('#FileNo').val()
+                obj[':rem']=$('#FILETEXT').val()
+                obj[':studentno']=$('#StudentNo').val()
+
+                ajiakesi('__URL__/insertRegisteries',obj,function(c){
+                    alert(c)
+                })
+            })
+
+        })
+
+
+</script>
+<table align=center border="2" bordercolor="#000000" style="border-collapse: collapse; font-size: 10pt" height="238" width="80%">
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                学号：</td>
+        <td width="50%" height="23"><input type="text" name="StudentNo" id="StudentNo" size="9" maxlength="9" value=""><span lang="en-us"><font color="red">*</font>
+  </span></td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">公文号：</td>
+        <td width="50%" height="23"><input type="text" id="FileNo" size="20" maxlength="20"><span lang="en-us"><font color="red">*</font></span></td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                异动属性：</td>
+        <td width="50%" height="23"><select size="1" id="InfoType">
+            <volist name="infotype" id="v">
+                <option value="{$v.CODE}">{$v.NAME}</option>
+            </volist>
+        </select></td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                发文日期：</td>
+        <td width="50%" height="23"><input id=date type="text" size="20"><font color="red">注：格式2014-01-01</font></td>
+    </tr>
+    <tr>
+        <td width="100%" height="116" colspan="2">
+            <p align="center"><font size="3"><b>文 件 概 要</b></font>
+            <p><center><!--<textarea rows="12" cols="124"  style="resize:none;overflow-x:hidden;overflow-y:hidden"  >--></textarea>
+
+            <textarea style="resize:none;overflow-x:hidden;overflow-y:hidden" rows=12  id=FILETEXT   cols=123   onpropertychange= "this.style.posHeight=this.scrollHeight "></textarea>
+
+
+        </center></td>
+    </tr>
+</table>
+<p align=center><input type=button value="提交存档" id=submitting ></p>
+</body>
+
+</html>

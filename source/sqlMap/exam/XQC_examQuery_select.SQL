@@ -1,0 +1,20 @@
+select * from(SELECT row_number() over(order by TestStudent.COURSENO) as row,students.school xydh,STUDENTS.STUDENTNO xh ,
+      STUDENTS.NAME xm, SCHOOLS1.NAME xsszxy,
+      TestStudent.COURSENO kh, COURSES.COURSENAME kcmc,
+      SCHOOLS.NAME kkxy,
+      SCORES.EXAMSCORE AS cj,
+      SCORES.TESTSCORE AS kccj,
+      SCORES.EXAMSCORE2 AS bkcj,
+      SCORES.TESTSCORE2 AS bkkc
+
+FROM TestStudent inner JOIN
+      COURSES ON
+      TestStudent.COURSENO = COURSES.COURSENO LEFT OUTER JOIN
+      SCHOOLS ON COURSES.SCHOOL = SCHOOLS.SCHOOL LEFT OUTER JOIN
+      STUDENTS ON TestStudent.STUDENTNO = STUDENTS.STUDENTNO left OUTER JOIN
+      SCHOOLS SCHOOLS1 ON
+      STUDENTS.SCHOOL = SCHOOLS1.SCHOOL
+      inner join SCORES on (SCORES.YEAR=:YEAR AND SCORES.TERM=:TERM AND SCORES.STUDENTNO=TestStudent.STUDENTNO AND SCORES.COURSENO=TestStudent.COURSENO)
+      where TestStudent.COURSENO LIKE :COURSENO and TestStudent.STUDENTNO LIKE :STUDENTNO
+
+) as b where b.row between :start and :end

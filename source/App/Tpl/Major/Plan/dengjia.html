@@ -1,0 +1,26 @@
+<include file=":Include:jqueryHeader" />
+<script>
+    var courseno='{$courseno}'
+    $(function(){
+        $('#dm').datagrid('load',{'Sqlpath':{'select':'major/R33.SQL','count':'major/R33.SQL'},bind:{':COURSENO':courseno}})
+
+    })
+</script>
+<body class="easyui-layout">
+<div data-options="region:'north',title:'',split:false,border:false" style="height:50px;background-color: #e0ecff">
+    <br><center><span style="font-size: 20px">{$courseno}的等价课程</span></center>
+</div>
+<div data-options="region:'center',title:'',split:false" >
+    <table class="easyui-datagrid" id="dm"
+           data-options="url:'__APP__/Status/Status/Squery',fitColumns:true,singleSelect:true,fit:true">
+        <thead>
+        <tr>
+            <th data-options="field:'courseno',width:100,align:'center'">课号</th>
+            <th data-options="field:'coursename',width:100,align:'center'">课名</th>
+            <th data-options="field:'credit',width:100,align:'center'">学分</th>
+            <th data-options="field:'kkdw',width:100,align:'center'">开课单位</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+</body>

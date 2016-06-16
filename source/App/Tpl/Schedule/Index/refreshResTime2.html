@@ -1,0 +1,24 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+   var year='{$year}';
+   var term='{$term}'
+       setTimeout(function(){
+           $.post('__URL__/refreshResTime2/hasJson/1',{'YEAR':year,'TERM':term},function(c){
+               eval('var one='+c);
+               $('body').append(one['str']);
+               //num用于标记错误编号
+               $.post('__URL__/classTime/hasJson/1',{'YEAR':year,'TERM':term,NUM:one['count']},function(cc){
+                   $('body').append(cc);
+               });
+           });
+       },500);
+
+</script>
+
+<body style="background: #fff">
+
+</body>
+
+</html>
+

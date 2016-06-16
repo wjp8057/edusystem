@@ -1,0 +1,107 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    #toobar{padding:5px 0px 2px;}
+    #toobar label{padding-left:12px;}
+    #addForm table{margin:15px auto;border-collapse:collapse;}
+    #addForm td,#addForm th{border-bottom:dashed 1px #CCC;height:40px;}
+</style>
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%"
+           pagination="true" pageSize="10" pageList="[10,20,30]" striped="true" singleSelect="true">
+        <thead>
+        <tr>
+            <th data-options="field:'NAME',align:'center',width:10">姓名</th>
+            <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+            <th data-options="field:'RATIO',align:'center',width:10,formatter:function(value,row){ return parseFloat(value)}">平均系数</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:20">所在学院</th></tr>
+        </thead>
+    </table>
+    <div style="height:3px;">&nbsp;</div>
+    <table id="datagrid_2" fitColumns="true" width="100%"
+           pagination="true" pageSize="10" pageList="[10,20,30]" striped="true" singleSelect="true">
+        <thead>
+        <tr>
+            <th data-options="field:'NAME',align:'center',width:10">姓名</th>
+            <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+            <th data-options="field:'COURSENAME',align:'center',width:40">课程名称</th>
+            <th data-options="field:'SCORE',align:'center',width:10">评分</th>
+            <th data-options="field:'RATIO',align:'center',width:10,formatter:function(value,row){ return parseFloat(value)}">折算系数</th></tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <label>学年：</label><input name="year" size="4" maxlength="4">
+        <label>学期：</label><input name="term" size="1" maxlength="1">
+        <label>姓名：</label><input name="name" value='%'  size="14">
+        <label>教师号：</label><input name="teacherno" value='%'  size="14">
+        <label>学院：</label>
+        <select class="easyui-combobox" name="school" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检 索</a>
+        <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出</a>
+    </form>
+</div>
+<script type="text/javascript">
+    var list=null;var year="";var term="";
+    $(function(){
+        $("#datagrid").css("height",$("body").height()/2);
+        $("#datagrid_2").css("height",$("body").height()/2-8);
+        $("#toobar [name='year']").val(parent.$("#YEAR").val());
+        $("#toobar [name='term']").val(parent.$("#TERM").val());
+        var datagrid_2 = $('#datagrid_2').datagrid();
+        var datagrid = $('#datagrid').datagrid({toolbar:'#toobar',onClickRow:function(index,row){
+            //验证学年学期是否输入
+            year=$.trim($("#toobar [name='year']").val());
+            term=$.trim($("#toobar [name='term']").val());
+            if(year=="" || term==""){
+                msgShow("系统提示：","请输入要检索的学年与学期！","error");
+                return;
+            }
+            datagrid_2.datagrid("options").url = "__URL__/queryDetail/hasJson/1";
+            datagrid_2.datagrid("load",{"year":row.YEAR,"term":row.TERM,"teacherno":row.TEACHERNO});
+        }});
+        // 条件查询
+        $("#searcher").click(function(){
+            //验证学年学期是否输入
+            year=$.trim($("#toobar [name='year']").val());
+            term=$.trim($("#toobar [name='term']").val());
+            if(year=="" || term==""){
+                msgShow("系统提示：","请输入要检索的学年与学期！","error");
+                return;
+            }
+            datagrid.datagrid("options").url = "__URL__/queryScore/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+        //导出
+        $("#ExportBut").click(function(){
+            list=datagrid.datagrid('getRows');
+            if(list.length){
+                $("#queryForm").attr("action","__URL__/expScore/");
+                $("#queryForm").submit();
+            }else{
+                msgShow("系统提示：","请先检索出您要导出的数据","info");
+            }
+        });
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            year:$.trim($("#toobar [name='year']").val()),
+            term:$.trim($("#toobar [name='term']").val()),
+            name:$.trim($("#toobar [name='name']").val()),
+            teacherno:$.trim($("#toobar [name='teacherno']").val()),
+            school:$.trim($("#toobar [name='school']").val())
+        };
+        return data;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+insert into bookteacher([year],term,courseno,teacherno,status,book_id)values(:year,:term,:courseno,:teacherno,:status,:book_id)

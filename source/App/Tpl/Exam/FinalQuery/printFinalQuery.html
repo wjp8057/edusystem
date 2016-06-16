@@ -1,0 +1,147 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style type="text/css">
+    body{
+        margin: 0;
+        font-size: 12px;
+        line-height: 100%;
+        font-family: Arial, sans-serif;
+    }
+    .background {
+        display: block;
+        width: 100%;
+        height: 100%;
+        opacity: 0.4;
+        filter: alpha(opacity=40);
+        background:while;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2000;
+    }
+    .progressBar {
+        border: solid 2px #86A5AD;
+        background: white url(progressBar_m.gif) no-repeat 10px 10px;
+    }
+    .progressBar {
+        display: block;
+        width: 148px;
+        height: 28px;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        margin-left: -74px;
+        margin-top: -14px;
+        padding: 10px 10px 10px 50px;
+        text-align: left;
+        line-height: 27px;
+        font-weight: bold;
+        position: absolute;
+        z-index: 2001;
+    }
+</style>
+<script>
+
+    $(function(){
+
+        var post = eval("("+'{$post}'+")");
+
+
+
+        var year = post.n_YEAR;
+        var term = post.n_TERM;
+        var classno = post.n_CLASSNO;
+        var changci = post.n_CHANGCI;
+        var teacherno = post.n_TEACHERNO;
+        var school = post.n_SCHOOL;
+        var school2 = post.n_SCHOOLTWO;
+
+        var arr=[];
+        var dat=$('#daaa').datagrid({
+
+            fit:false,
+            singleSelect:true,
+            pagination:true,
+            pageList:[10000],
+            columns:[[
+                {field:'kh',title:'课号',width:80 },
+                {field:'km',title:'课名',width:100},
+                {field:'xkrs',title:'选课人数',width:80},
+                {field:'kcc1',title:'考场1',width:80 },
+                {field:'kw1',title:'考位1',width:80},
+                {field:'kcc2',title:'考场2',width:80 },
+                {field:'kw2',title:'考位2',width:80},
+                {field:'kcc3',title:'考场3',width:80 },
+                {field:'kw3',title:'考位3',width:80}
+            ]],
+            view: detailview,
+            onBeforeLoad: function (param) {
+                document.getElementById('background').style.display = '';
+                document.getElementById('progressBar').style.display = '';
+                return true;
+            },
+            detailFormatter: function(rowIndex, rowData){
+                arr[rowData.row]=rowData;
+                return "<div id=a"+rowData.row+" style='width:600px;height:106px'>"+rowData.row+"</div>"
+            },
+            onExpandRow:function(index,row){
+                $('#a'+row.row).html('<table width="744" cellspacing="0" style="border:1px solid #eee"><tr><td  align="center"  style="border:1px solid #aaa;height:25px" width="100" bgcolor="#E0ECFF" ><font size="2">考试时间</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['kssj']+'</font></td></tr><tr id=SLAVE><td  align="center"  rowspan="4" bgcolor="#E0ECFF" style="border:1px solid #aaa"><font size="2">监考老师</font></td><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场1:'+arr[row.row]['ST1']+'</font></td></tr><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场2:'+arr[row.row]['ST2']+'</font></td></tr><tr><td align="left" style="border:1px solid #aaa"><font size="2">考场3:'+arr[row.row]['ST3']+'</font></td></tr><tr><td  align="center" style="border:1px solid #aaa;height:25px"  bgcolor="#E0ECFF"><font size="2">备注</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['rem']+'</font></td></tr></table>')
+            },onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                });
+
+                if(data.total){
+                    document.getElementById('background').style.display = 'none';
+                    document.getElementById('progressBar').style.display = 'none';
+                }
+            },rowStyler: function(index,row){
+                return 'background-color:rgb(243, 243, 243);color:black;';
+            }
+        });
+
+
+        dat.datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+        dat.datagrid('options').pageSize = 10000;
+        dat.datagrid('load',{'Sqlpath':{'select':'exam/FinalExamQuery_select.SQL','count':'exam/FinalExamQuery_count.SQL'},
+            bind:{':YEAR':year,':TERM':term,':CLASSNO':classno,':CHANGCI':changci,
+                ':TONE':teacherno,
+                ':TTWO':teacherno,
+                ':TTHREE':teacherno,
+                ':TFOUR':teacherno,
+                ':TFIVE':teacherno,
+                ':TSIX':teacherno,
+                ':TSEVEN':teacherno,
+                ':TEIGHT':teacherno,
+                ':TNINE':teacherno,
+                ':SONE':school,':STWO':school,':STHREE':school,
+                ':SFOUR':school,':SFIVE':school,':SSIX':school,
+                ':SSEVEN':school,':SEIGHT':school,':SNINE':school,
+                ':COURSESCHOOL':school2}});
+    });
+
+    function toprint(){
+        document.getElementById('toprint').style.display = 'none';
+        window.print();
+    }
+
+</script>
+
+<body style="background-color: #fff">
+
+<div style="text-align: center">
+    <h2>第{$year}学年，第{$term}学期的期末课程考试计划列表</h2>
+</div>
+<a href="javascript:void(0)" class="easyui-linkbutton" onclick="toprint()" iconCls="icon-tanchu"  id="toprint" plain=true>点我打印</a>
+<!--<div id="cc" class="easyui-layout" data-options="fit:true">-->
+     <div  style="padding:0px;background:#eee;height: 100%">
+        <div id="daaa" ></div>
+    </div>
+
+</div>
+<div id="background" class="background" style="display: none; "></div>
+<div id="progressBar" class="progressBar" style="display: none; ">数据加载中，请稍等...</div>
+
+</body>
+</html>

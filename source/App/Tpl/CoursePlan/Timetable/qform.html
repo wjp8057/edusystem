@@ -1,0 +1,129 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    $("#YEAR").val(parent.$("#YEAR").val());
+    $("#TERM").val(parent.$("#TERM").val());
+
+    //检索
+    $("#queryGlobal").bind("click",function(){
+        doSearch("检索",1);
+    });
+    //检索教师为空的排课列表
+    $("#teachernull").bind("click",function(){
+        doSearch("检索教师为空的排课列表",2);
+    });
+    //检索初级职称教师的排课列表
+    $("#firstteacher").bind("click",function(){
+        doSearch("检索初级职称教师的排课列表",3);
+    });
+    //检索公选课
+    $("#PlanSelect").bind("click",function(){
+        doSearch("检索公选课",4);
+    });
+
+    function doSearch(title, searchType){
+        openTabsWindows(title,"__ROOT__ /CoursePlan/Timetable/qlist?SEARCHTYPE="+searchType+"&"+$('#schForm').serialize(),"",true);
+    }
+});
+</script>
+<body bgcolor="#FFFFFF" style="background: #ffffff">
+
+<p align=center><font face="隶书" style="font-size: 24pt;">检 索 排 课 计 划</font></p>
+
+<form name="schForm" id="schForm">
+    <table border="1" width="59%" align="center" style="border-collapse:collapse;font-size:10pt">
+        <tr>
+            <td width="8%" align="right">学年：</td>
+            <td width="32%"><input type="text" id="YEAR" name="YEAR" size="4" value="2011"></td>
+            <td width="38%" align="right">教室类型要求：</td>
+            <td width="22%"><Cwebs:sqlselect id="ROOMTYPE" name="ROOMTYPE" value="CODE" title="NAME" headerKey="%" headerTitle="所有类型" file="common/roomTypeOptions.sql" /></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">学期：</td>
+            <td width="32%"><input type="text" id="TERM" name="TERM" size="1" value="1"></td>
+            <td width="38%" align="right">选课有人数限制：</td>
+            <td width="22%"><select size="1" id="LOCK" name="LOCK">
+                <option selected value="2">所有情况</option>
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">课号：</td>
+            <td width="32%"><input type="text" id="COURSENO" size="7" name="COURSENO" value="%"></td>
+            <td width="38%" align="right">预计人数上限：</td>
+            <td width="22%"><input type="text" id="ESTIMATEUP" name="ESTIMATEUP" size="6" value="5000"></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">组号：</td>
+            <td width="32%"><input type="text" id="GROUP" name="GROUP" size="2" value="%"></td>
+            <td width="38%" align="right">预计人数下限：</td>
+            <td width="22%"><input type="text" id="ESTIMATEDOWN" name="ESTIMATEDOWN" size="6" value="-5000"></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">开课学院：</td>
+            <td width="32%"><Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="所有学院" file="school/schoolOptions.sql" /></td>
+            <td width="38%" align="right">实际修课人数上限：</td>
+            <td width="22%"><input type="text" id="ATTENDENTSUP" name="ATTENDENTSUP" size="6" value="5000"></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">排课类型：</td>
+            <td width="32%"><Cwebs:sqlselect id="COURSETYPE" name="COURSETYPE" value="CODE" title="NAME" headerKey="%" headerTitle="所有类别" file="course/courseTypeOptions.sql" /></td>
+            <td width="38%" align="right">实际修课人数下限：</td>
+            <td width="22%"><input type="text" id="ATTENDENTSDOWN" name="ATTENDENTSDOWN" size="6" value="0"></td>
+        </tr>
+        <tr>
+            <td width="23%" align="right">排课情况：</td>
+            <td width="31%"><select size="1" id="SCHEDULED" name="SCHEDULED">
+                <option value="%" selected>所有情况</option>
+                <option value="Y">已排</option>
+                <option value="N">未排</option>
+            </select></td>
+            <td width="38%" align="right">期末统一排考：</td>
+            <td width="21%"><select size="1" id="EXAM" name="EXAM">
+                <option selected value="2">所有情况</option>
+                <option value="1">统一排考</option>
+                <option value="0">不统一排考</option>
+            </select></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">教师来源：</td>
+            <td width="32%">
+                <p align="left"><Cwebs:sqlselect id="TEACHERNO" name="TEACHERNO" value="CODE" title="NAME" headerKey="%" headerTitle="所有学院" file="school/schoolOptions.sql" /></p>
+            </td>
+            <td width="38%" align="right">考核方式：</td>
+            <td width="22%"><Cwebs:sqlselect id="EXAMTYPE" name="EXAMTYPE" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="common/examOptions.sql" /></td>
+        </tr>
+        <tr>
+            <td width="8%" align="right">排课天数：</td>
+            <td width="32%"><select size="1" id="DAYS" name="DAYS">
+                <option selected value="%">所有情况</option>
+                <option value="5">5天制</option>
+                <option value="7">7天制</option>
+            </select></td>
+            <td width="38%" align="right">班号：</td>
+            <td width="22%"><input type="text" id="CLASSNO" name="CLASSNO" size="10" value="%"></td>
+        </tr>
+
+    </table>
+    <p align="center">
+        <input type="button" value="检索" id="queryGlobal" />
+        <input type="button" value="检索教师为空的排课列表" id="teachernull" />
+        <input type="button" value="检索初级职称教师的排课列表" id="firstteacher"  />
+        <input type="button" value="检索公选课" id="PlanSelect"  />
+    </p>
+    <p align="center"><font size=2>为了加快检索的速度，请详细设置各检索条件!</font></p>
+</form>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+

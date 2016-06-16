@@ -1,0 +1,32 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val())
+        $("#TERM").val(parent.$("#TERM").val())
+
+        //生志数据
+        $("#btAuto").bind("click",function(){
+            if($('#YEAR').val()==''||$('#TERM').val()==''){
+                return $.messager.alert('提示','学年学期不能为空')
+            }
+            openTabsWindows('刷新中','__ROOT__/Schedule/Index/refreshResTime2/YEAR/'+$("#YEAR").val()+'/TERM/'+$("#TERM").val(),'',true)
+        });
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#FFFFFF;">
+        <table border="0">
+            <tr><td height="20"></td></tr>
+            <tr><td width="140" align="right">排课学年：</td><td><input type="text" id="YEAR" name="YEAR" /></td></tr>
+            <tr><td align="right">排课学期：</td><td><input type="text" id="TERM" name="TERM" /></td></tr>
+            <tr><td></td><td><input type="button" id="btAuto" value="刷新资源时间表"></td></tr>
+        </table>
+    </div>
+</div>
+</body>
+
+</html>
+

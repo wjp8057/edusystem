@@ -1,0 +1,24 @@
+select count(*) as ROWS from(select row_number() over(order by temp.name) as row,temp.name as 专业,temp.total 参加人数,isnull(temp3.pass,0) 通过人数 from (select majorcode.name,count(*) total from personal
+inner join students on students.studentno=personal.studentno
+inner join majorcode on majorcode.code=personal.major
+inner join
+(
+select distinct 学号 from 英语B级统考成绩
+group by 学号
+) as temp2 on temp2.学号=students.studentno
+where substring(students.classno,1,2)=:GONE and students.studentno not like 'PT%'
+group by majorcode.name ) as temp
+left outer join (
+select majorcode.name,count(*) pass from personal
+inner join students on students.studentno=personal.studentno
+inner join majorcode on majorcode.code=personal.major
+inner join
+(
+select distinct 学号 from 英语B级统考成绩
+group by 学号
+having max(成绩)>=60
+) as temp2 on temp2.学号=students.studentno
+where substring(students.classno,1,2)=:GTWO and students.studentno not like 'PT%'
+group by majorcode.name
+) as temp3 on temp3.name=temp.name
+) as b

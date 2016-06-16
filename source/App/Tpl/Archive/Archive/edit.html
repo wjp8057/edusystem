@@ -1,0 +1,414 @@
+<include file=":Include:jqueryHeader" />
+<style >
+#title{text-align:center;line-height:40px;font-size:25px;color:#0000FF}
+.edit{margin:20px auto;border: solid 1px #ccc;}
+legend{margin-left: 20px;color:#0000FF;font-size: 14px;}
+.edit table{border-collapse:collapse;width:95%;margin:0px auto;}
+.edit td,.edit th{border-bottom:dashed 1px #CCC;height:25px;}
+table.cls{margin:15px auto;}
+table.cls td,table.cls th{border:solid 1px #CCC;text-align:center;}
+table.cls td{height:20px;}
+table.error td{border:none;color:red;text-align:center;height:20px;}
+</style>
+<body style="background:#FFFFFF">
+<div style="width:75%;margin: 0px auto;">
+<p id="title">教师详细信息</p>
+<fieldset class="edit">
+	<legend>个人基本信息</legend>
+	<table align="center" border="0" cellpadding="4">
+		 <tr>
+		   <th align="right" width="20%">姓名：</th>
+		   <td><span>{$t.NAME}</span></td>
+		   <th align="right" width="20%">性别：</th>
+		   <td>
+		   <assign name="SEX" value="$t.SEX"/>
+		   <volist name="sex" id="s">
+		   <input type="radio" name="SEX" value="{$s.code}" <if condition="$s.code eq $SEX">checked="checked"</if> style="vertical-align:middle;"><label>{$s.name}</label>&nbsp;&nbsp;
+		   </volist></td>
+		 </tr>
+		 <tr>
+		   <th align="right">出生年月：</th>
+		   <td><input name="Birth" class="easyui-datebox" value="{$t.Birth}"></td>
+		   <th align="right">身份证号：</th>
+		   <td><input name="ID" value="{$t.ID}" maxlength="18"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">民族：</th>
+		   <td><select name="Nationality" class="easyui-combobox" data-options="editable:false">
+		   <option value="%">请选择</option>
+		   <assign name="Nationality" value="$t.Nationality"/>
+		   <volist name="national" id="n">
+		   <option value="{$n.CODE}" <if condition="$n.CODE eq $Nationality">selected="selected"</if>>{$n.NAME}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">政治面貌：</th>
+		   <td><select name="Party" class="easyui-combobox" data-options="editable:false">
+		   <option value="%">请选择</option>
+		   <assign name="Party" value="$t.Party"/>
+		   <volist name="partycode" id="p">
+		   <option value="{$p.CODE}" <if condition="$p.CODE eq $Party">selected="selected"</if>>{$p.NAME}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr>
+		   <th align="right">所在学院：</th>
+		   <td><span>{$t.SCHOOLNAME}</span></td>
+		   <th align="right">系：</th>
+		   <td><input name="Department" value="{$t.Department}" maxlength="20"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">现任职务：</th>
+		   <td><input name="HeadShip" value="{$t.HeadShip}" maxlength="20"></td>
+		   <th align="right">任职时间：</th>
+		   <td><input name="HDate" value="{$t.HDate}" class="easyui-datebox"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">现任职称：</th>
+		   <td><select name="Profession" class="easyui-combobox" data-options="editable:false">
+		   <assign name="Profession" value="$t.Profession"/>
+		   <volist name="pro" id="p">
+		   <option value="{$p.Code}" <if condition="$p.Code eq $Profession">selected="selected"</if>>{$p.Name}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">获得时间：</th>
+		   <td><input name="PDate" value="{$t.PDate}" class="easyui-datebox"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">职称学科：</th>
+		   <td colspan="3"><input name="PSubject" value="{$t.PSubject}" maxlength="20"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">最高学历：</th>
+		   <td><select name="EduLevel" class="easyui-combobox" data-options="editable:false">
+		   <option value="%">请选择</option>
+		   <assign name="EduLevel" value="$t.EduLevel"/>
+		   <volist name="edu" id="e">
+		   <option value="{$e.Code}" <if condition="$e.Code eq $EduLevel">selected="selected"</if>>{$e.Name}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">获得学校：</th>
+		   <td><input name="ESchool" value="{$t.ESchool}" maxlength="50"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">最高学位：</th>
+		   <td><select name="Degree" class="easyui-combobox" data-options="editable:false">
+		   <assign name="Degree" value="$t.Degree"/>
+		   <volist name="deg" id="d">
+		   <option value="{$d.Code}" <if condition="$d.Code eq $Degree">selected="selected"</if>>{$d.Name}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">获得学校：</th>
+		   <td><input name="DSchool" value="{$t.DSchool}" maxlength="50"></td>
+		 </tr>
+		 <tr>
+		   <th align="right">联系电话：</th>
+		   <td><input name="Tel" value="{$t.Tel}" maxlength="20"></td>
+		   <th align="right">E-Mail：</th>
+		   <td><input name="Email" value="{$t.Email}" maxlength="20"></td>
+		 </tr>
+		 
+		 <tr style="height: 50px">
+		   <td align="center" colspan="4" style="border-bottom:none;">
+		   <input name="TEACHERNO" value="{$t.TEACHERNO}" type="hidden">
+		   <a href="javascript:void(0)" id="editbut">更&nbsp;新</a></td>
+		 </tr>
+	</table>
+</fieldset>
+
+<fieldset class="edit">
+	<legend>学习与工作经历</legend>
+	<table align="center" border="0" class="cls" cellpadding="4">
+		<tr><th width="20%">开始时间</th><th width="20%">结束时间</th><th>在何学校（单位）学习、工作及任何职</th><th width="12%">操作</th></tr>
+		<volist name="study" id="s">
+		<tr><td>{$s.startdate}</td><td>{$s.enddate}</td><td>{$s.school}</td>
+			<td><a href="javascript:void(0)" onclick="del({$s.recno},'editStudy')">删除</a></td></tr>
+		</volist>
+	</table>
+	<table align="center" border="0">
+		<tr align="center"><td width="20%"><input name="STARTDATE" class="easyui-datebox"></td>
+		<td width="20%"><input name="ENDDATE" class="easyui-datebox"></td>
+		<td><input name="SCHOOL" maxlength="100" size="60"></td>
+		<td width="12%"><a href="javascript:void(0)" class="add" onclick="addStuay()">新&nbsp;增</a></td></tr>
+	</table>
+	<table align="center" border="0" class="error">
+		<tr><td width="20%"></td><td width="20%"></td><td></td><td width="12%"></td></tr>
+	</table>
+</fieldset>
+
+<fieldset class="edit">
+	<legend>各类获奖情况</legend>
+	<table align="center" border="0" class="cls" cellpadding="4">
+		<tr>
+			<th width="30%">荣誉称号、表彰奖励名单</th>
+			<th width="15%">获奖时间</th>
+			<th width="24%">奖励部门</th>
+			<th width="9%">获奖级别</th>
+			<th width="9%">排名/人数</th>
+			<th width="12%">操作</th></tr>
+		<volist name="honor" id="h">
+		<tr>
+			<td>{$h.name}</td>
+			<td>{$h.date}</td>
+			<td>{$h.department}</td>
+			<td>{$h.level}</td>
+			<td>{$h.myorder}</td>
+			<td><a href="javascript:void(0)" onclick="del({$h.recno},'editHonor')">删除</a></td></tr>
+		</volist>
+	</table>
+	<table align="center" border="0">
+		<tr align="center">
+		<td width="30%"><input name="NAME" maxlength="100" size="40"></td>
+		<td width="15%"><input name="DATE" class="easyui-datebox" size="14"></td>
+		<td width="24%"><input name="DEPT" maxlength="50" size="30"></td>
+		<td width="9%"><select name="LEVEL" class="easyui-combobox" data-options="editable:false">
+		   <volist name="honorl" id="h">
+		   <option value="{$h.Code}">{$h.Name}</option>
+		   </volist>
+		   </select></td>
+		<td width="9%"><input name="MYORDER" size="8" maxlength="8"></td>
+		<td width="12%"><a href="javascript:void(0)" class="add" onclick="addHonor()">新&nbsp;增</a></td></tr>
+	</table>
+	<table align="center" border="0" class="error">
+		<tr><td width="30%"></td><td width="15%"></td><td width="24%"></td><td width="9%"></td><td width="9%"></td><td></td></tr>
+	</table>
+</fieldset>
+
+<fieldset class="edit">
+	<legend>论文、编写教材、科研教研成果一览表</legend>
+	<table align="center" border="0" class="cls" cellpadding="4">
+		<tr>
+			<th>成果名称</th>
+			<th width="30%">何年何月在何刊物发表或何出版社出版或通过何级鉴定</th>
+			<th width="24%">本人承担部分及字数（注明排名）</th>
+			<th width="15%">获奖情况</th>
+			<th width="12%">操作</th></tr>
+		<volist name="thesis" id="t">
+		<tr>
+			<td>{$t.name}</td>
+			<td>{$t.publish}</td>
+			<td>{$t.content}</td>
+			<td>{$t.honor}</td>
+			<td><a href="javascript:void(0)" onclick="del({$t.recno},'editThesis')">删除</a></td></tr>
+		</volist>
+	</table>
+	<table align="center"  border="0">
+		<tr align="center">
+		<td><input name="thesisName" maxlength="100" size="22"></td>
+		<td width="30%"><input name="PUBLISH" maxlength="100" size="40"></td>
+		<td width="24%"><input name="CONTENT" maxlength="100" size="30"></td>
+		<td width="15%"><input name="HONOR" size="18" maxlength="100"></td>
+		<td width="12%"><a href="javascript:void(0)" class="add" onclick="addThesis()">新&nbsp;增</a></td></tr>
+	</table>
+	<table align="center" border="0" class="error">
+		<tr><td></td><td width="30%"></td><td width="24%"></td><td width="15%"></td><td width="12%"></td></tr>
+	</table>
+</fieldset>
+</div>
+</body>
+<script type="text/javascript">
+var is_school={$is_school};
+var teacherno=$.trim($("[name='TEACHERNO']").val());
+var url="";
+var data=null;
+$(function(){
+	$('#editbut').linkbutton({iconCls: 'icon-edit'});//提交按钮
+	$('.add').linkbutton({iconCls: 'icon-add'});//新增按钮
+	//更新教师基本信息
+	$('#editbut').click(function(){
+		if(!is_school){
+			$.messager.alert('提示','对不起，您不能修改其他学院教师信息！','info');
+			return;
+		}
+		var ary={SEX:$("[name='SEX']:checked").val(),
+				Birth:$("[name='Birth']").val(),
+				ID:$("[name='ID']").val(),
+				Nationality:$("[name='Nationality']").val(),
+				Party:$("[name='Party']").val(),
+				Department:$("[name='Department']").val(),
+				HeadShip:$("[name='HeadShip']").val(),
+				HDate:$("[name='HDate']").val(),
+				Profession:$("[name='Profession']").val(),
+				PDate:$("[name='PDate']").val(),
+				PSubject:$("[name='PSubject']").val(),
+				EduLevel:$("[name='EduLevel']").val(),
+				ESchool:$("[name='ESchool']").val(),
+				Degree:$("[name='Degree']").val(),
+				DSchool:$("[name='DSchool']").val(),
+				Tel:$("[name='Tel']").val(),
+				Email:$("[name='Email']").val(),
+				TEACHERNO:teacherno};
+		//Ajax方式提交数据
+		$.ajax({
+            url:"__URL__/edit/hasJson/1",
+            type:"POST",
+            data:ary,
+            success: function(data){
+                if(data){
+                	$.messager.alert("提示","更新数据成功！");
+                }else  $.messager.alert("提示","数据更新失败！请检查您提交的数据是否合法");
+            }
+        });
+	});
+});
+//新增学习与工作经历
+function addStuay(){
+	if(!is_school){
+		$.messager.alert('提示','对不起，您不能修改其他学院教师信息！','info');
+		return;
+	}
+	var startdate=$.trim($("[name='STARTDATE']").val());
+	var enddate=$.trim($("[name='ENDDATE']").val());
+	var school=$.trim($("[name='SCHOOL']").val());
+	//判断开始时间是否为空
+	if(startdate==""){
+		$(".error:eq(0)").find("td:eq(0)").html("开始时间不能为空");
+		return;
+	}else $(".error:eq(0)").find("td:eq(0)").html("");
+	//判断工作单位是否为空
+	if(school==""){
+		$(".error:eq(0)").find("td:eq(2)").html("该项不能为空");
+		return;
+	}else $(".error:eq(0)").find("td:eq(2)").html("");
+	//判断教师号是否为空
+	if(teacherno==""){
+		$.messager.alert('提示','未获取到教师号，停止添加操作！','info');
+		return;
+	}
+	//判断结束时间与开始时间是否合法
+	if(startdate!="" && enddate!=""){
+		if(getDate(startdate) > getDate(enddate)){
+			$.messager.alert('提示','开始时间不能在结束时间之后','info');
+			return;
+		}
+	}
+	url="editStudy";
+	data={STARTDATE:startdate,ENDDATE:enddate,SCHOOL:school,TEACHERNO:teacherno};
+	add(url,data);
+}
+//新增各类获奖情况
+function addHonor(){
+	if(!is_school){
+		$.messager.alert('提示','对不起，您不能修改其他学院教师信息！','info');
+		return;
+	}
+	var name=$.trim($("[name='NAME']").val());
+	var date=$.trim($("[name='DATE']").val());
+	var department=$.trim($("[name='DEPT']").val());
+	var level=$.trim($("[name='LEVEL']").val());
+	var myorder=$.trim($("[name='MYORDER']").val());
+	
+	if(name==""){
+		$(".error:eq(1)").find("td:eq(0)").html("荣誉称号、表彰奖励不能为空");
+		return;
+	}else $(".error:eq(1)").find("td:eq(0)").html("");
+	if(department==""){
+		$(".error:eq(1)").find("td:eq(2)").html("奖励部门不能为空");
+		return;
+	}else $(".error:eq(1)").find("td:eq(2)").html("");
+	if(myorder==""){
+		$(".error:eq(1)").find("td:eq(4)").html("排名不能为空");
+		return;
+	}else $(".error:eq(1)").find("td:eq(4)").html("");
+	if(teacherno==""){
+		$.messager.alert('提示','未获取到教师号，停止添加操作！','info');
+		return;
+	}
+	
+	url="editHonor";
+	data={NAME:name,DATE:date,DEPARTMENT:department,LEVEL:level,MYORDER:myorder,TEACHERNO:teacherno};
+	add(url,data);
+	
+}
+//新增论文、编写教材、科研教研成果一览表
+function addThesis(){
+	if(!is_school){
+		$.messager.alert('提示','对不起，您不能修改其他学院教师信息！','info');
+		return;
+	}
+	var name=$.trim($("[name='thesisName']").val());
+	var publish=$.trim($("[name='PUBLISH']").val());
+	var content=$.trim($("[name='CONTENT']").val());
+	var honor=$.trim($("[name='HONOR']").val());
+	
+	if(name==""){
+		$(".error:eq(2)").find("td:eq(0)").html("成果名称不能为空");
+		return;
+	}else $(".error:eq(2)").find("td:eq(0)").html("");
+	if(teacherno==""){
+		$.messager.alert('提示','未获取到教师号，停止添加操作！','info');
+		return;
+	}
+	
+	url="editThesis";
+	data={NAME:name,PUBLISH:publish,CONTENT:content,HONOR:honor,TEACHERNO:teacherno};
+	add(url,data);
+}
+//ajax新增
+function add(url,ary){
+	$.ajax({
+        url:"__URL__/"+url+"/hasJson/1",
+        type:"POST",
+        data:ary,
+        success: function(data){
+            if(data){
+            	$.messager.alert("提示","新增数据成功！","info",function(){
+            		window.location.reload();
+            	});
+            }else  $.messager.alert("提示","数据新增失败！请检查您提交的数据是否合法");
+        }
+    });
+}
+//删除
+function del(recno,url){
+	if(!is_school){
+		$.messager.alert('提示','对不起，您不能修改其他学院教师信息！','info');
+		return;
+	}
+	$.messager.confirm('提示','您确定要删除吗',function(b){
+		if(b){
+			$.ajax({
+                url:"__URL__/"+url+"/",
+                type:"POST",
+                data:{recno:recno},
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("提示","删除成功！","info",function(){
+                    		window.location.reload();
+                    	});
+                    }else  $.messager.alert("提示","删除失败！","error");
+                }
+            });
+		}
+	});
+}
+//将字符串转为日期
+function getDate(strDate){
+	var date = eval('new Date(' + strDate.replace(/\d+(?=-[^-]+$)/,
+			function (a){return parseInt(a, 10) - 1; }).match(/\d+/g) + ')');
+	return date;
+}
+//处理键盘事件 禁止后退键（Backspace）密码或单行、多行文本框除外
+function forbidBackSpace(e){
+	var ev = e || window.event; //获取event对象 
+    var obj = ev.target || ev.srcElement; //获取事件源 
+    var t = obj.type || obj.getAttribute('type'); //获取事件源类型 
+    //获取作为判断条件的事件类型 
+    var vReadOnly = obj.readOnly;
+    var vDisabled = obj.disabled;
+    //处理undefined值情况 
+    vReadOnly = (vReadOnly == undefined) ? false : vReadOnly;
+    vDisabled = (vDisabled == undefined) ? true : vDisabled;
+    //当敲Backspace键时，事件源类型为密码或单行、多行文本的， 
+    //并且readOnly属性为true或disabled属性为true的，则退格键失效 
+    var flag1 = ev.keyCode == 8 && (t == "password" || t == "text" || t == "textarea") && (vReadOnly == true || vDisabled == true);
+    //当敲Backspace键时，事件源类型非密码或单行、多行文本的，则退格键失效 
+    var flag2 = ev.keyCode == 8 && t != "password" && t != "text" && t != "textarea";
+    //判断 
+    if (flag2 || flag1) return false;
+}
+//禁止后退键 作用于Firefox、Opera
+document.onkeypress = forbidBackSpace;
+//禁止后退键  作用于IE、Chrome
+document.onkeydown = forbidBackSpace;
+</script>
+</html>

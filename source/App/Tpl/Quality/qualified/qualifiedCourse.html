@@ -1,0 +1,253 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+body{background:#FFF}
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'kcmc',align:'center',width:160" >课程名称</th>
+                <th data-options="field:'rkls',align:'center',width:120">任课老师</th>
+                <th data-options="field:'rs',align:'center',width:80">人数</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<!--合格课程列表 -->
+<div id="toobar_1">
+    <div class="query">
+        <label>学年：</label><input type="text" name="YEAR" size="4" value="{$yearterm.YEAR}">
+        <label>学期：</label><input  type="text" name="TERM" size="1" value="{$yearterm.TERM}">
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton">检 索</a>
+        &nbsp&nbsp
+        <a href="javascript:void(0)" id="xiangxiBut" class="easyui-linkbutton" data-options="iconCls:'icon-mingxi',plain:true">查看详细</a>
+        <a href="javascript:void(0)" id="diaochaBut" class="easyui-linkbutton" data-options="iconCls:'icon-diaocha',plain:true">问卷调查</a>
+    </div>
+
+</div>
+
+<!--todo:查看明细的window-->
+<div style="display:none;" class="disDiv">
+	<div id="MingxiList" title="">
+	    <div id="cc" class="easyui-layout" data-options="fit:true" >
+	        <div data-options="region:'north',title:'',split:true" style="height:60px;">
+	            <p align="center"><b><font face="楷体_GB2312" size="5"><span id="mingxititle"></span></font></b></p>
+	        </div>
+	        <div data-options="region:'center',title:''" style="padding:5px;background:#eee;">
+	            <table id="Mingxi" fitColumns="true" width="100%" fit="true"
+	               pagination="true" pageSize="15" pageList="[15,30,45]" striped="true" >
+	            <thead>
+	            <tr><th data-options="field:'recno',checkbox:true"></th>
+	                <th data-options="field:'row',align:'center',width:80">序号</th>
+	                <th data-options="field:'one',align:'center',width:80">1</th>
+	                <th data-options="field:'two',align:'center',width:80" >2</th>
+	                <th data-options="field:'three',align:'center',width:80">3</th>
+	                <th data-options="field:'four',align:'center',width:80">4</th>
+	                <th data-options="field:'five',align:'center',width:80" >5</th>
+	                <th data-options="field:'six',align:'center',width:80">6</th>
+	                <th data-options="field:'seven',align:'center',width:80">7</th>
+	                <th data-options="field:'eight',align:'center',width:80" >8</th>
+	                <th data-options="field:'nine',align:'center',width:80">9</th>
+	                <th data-options="field:'ten',align:'center',width:80">10</th>
+	                <th data-options="field:'total',align:'center',width:80">总分</th></tr>
+	            </thead>
+	        	</table>
+	        </div>
+	        <div data-options="region:'south',title:'平均分',split:true" style="height:85px;">
+	            <!--todo;明细的平均分-->
+	            <table id="MingxiPingjun" fitColumns="true" width="100%" fit="true" pagination="false" striped="true" >
+	            <thead>
+	            <tr><th data-options="field:'one',align:'center',width:80">1</th>
+	                <th data-options="field:'two',align:'center',width:80" >2</th>
+	                <th data-options="field:'three',align:'center',width:80">3</th>
+	                <th data-options="field:'four',align:'center',width:80">4</th>
+	                <th data-options="field:'five',align:'center',width:80" >5</th>
+	                <th data-options="field:'six',align:'center',width:80">6</th>
+	                <th data-options="field:'seven',align:'center',width:80">7</th>
+	                <th data-options="field:'eight',align:'center',width:80" >8</th>
+	                <th data-options="field:'nine',align:'center',width:80">9</th>
+	                <th data-options="field:'ten',align:'center',width:80">10</th>
+	                <th data-options="field:'zongfen',align:'center',width:80">总分</th></tr>
+	            </thead>
+	        	</table>
+	        </div>
+	    </div>
+	</div>
+	<!--查看详细 -->
+	<div id="toobar_2">
+		<a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除</a>
+		<a href="javascript:void(0)" id="backBut_1" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">返回</a>
+	</div>
+		
+	<!--todo:问卷调查-->
+	<div id="wenjuandiaocha" title=" ">
+		<include file="wenjuandiaocha" />
+	</div>
+</div>
+
+</body>
+<script>
+$(function(){
+	var Mingxiarr={};
+	var qualifiedCourseRecno="";            //todo:保存课程的recno
+	
+	//合格课程列表
+	var datagrid=$('#datagrid').datagrid({toolbar:'#toobar_1',onRowContextMenu:function(e,rowindex,row){
+        datagrid.datagrid('rejectChanges')
+        var tt=$('#datagrid');
+
+        e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+        tt.datagrid('selectRow',rowindex);
+        $('#admin_access_menu').menu('show',{
+            left: e.pageX,
+            top: e.pageY
+        });
+    }});
+	
+	//todo:明细列表    window
+    var MingxiList=$('#MingxiList').window({
+    	fit:true,minimizable:false,
+    	maximizable:false,collapsible:false,
+    	draggable:false,resizable:false,closable:false,
+    	modal:false,closed:true
+    });
+    //todo:问卷调查   window
+    var wenjuandiaocha=$('#wenjuandiaocha').window({
+    	fit:true,minimizable:false,
+    	maximizable:false,collapsible:false,
+    	draggable:false,resizable:false,closable:false,
+    	modal:false,closed:true
+    });
+    
+	
+	//查看详细
+	var mingxi=$('#Mingxi').datagrid({toolbar:'#toobar_2'});
+	
+	//todo:点击查询
+    $('#searcher').bind('click',function(){
+    	datagrid.datagrid("options").url = "__URL__/qualifiedCourse/hasJson/1";
+    	datagrid.datagrid('load',{'year':$('[name=YEAR]').val(),'term':$('[name=TERM]').val()});
+    });
+
+    function llook(){
+        var yi = yitiao(datagrid,'请选择一条要查看的数据,不能选择多条查看','请选择一条要查看的数据');
+        if(yi){
+            var row=datagrid.datagrid('getSelected');
+            qualifiedCourseRecno=row.recno;
+            ajiakesi('__URL__/MingxiList',{recno:row.recno},function(c){
+                $('#mingxititle').html(c);
+                //todo:明细主体内容
+                mingxi.datagrid('options').url='__URL__/MingxiList/hasJson/1';
+                mingxi.datagrid('load',{recno:row.recno});
+                //todo:明细平均分
+                var pingjun=$('#MingxiPingjun').datagrid({});
+                pingjun.datagrid('options').url='__URL__/deletemingxi/hasJson/1';
+                pingjun.datagrid('load',{recno:row.recno});
+                MingxiList.window({closed:false});
+            });
+        }
+
+    }
+	//查看详细
+	$("#xiangxiBut").bind('click',llook)
+    $('#admin_look').bind('click',llook)
+
+    function ddc(){
+        var yi=yitiao(datagrid,'请选择一条数据不能选择多条','请选择一条数据');
+        if(yi){
+            var row=datagrid.datagrid('getSelected');
+            ajiakesi('__URL__/MingxiList',{recno:row.recno},function(c){
+                $('[name=courseTeacher]').html(c);
+            });
+            $('#UPDATEFORM')[0].reset();
+            $('#zongfen').html(0);
+            Mingxiarr['recno']=row.recno;
+            wenjuandiaocha.window({closed:false});
+        }
+    }
+	//问卷调查
+	$("#diaochaBut").bind('click',ddc);
+    $('#admin_wenjuan').bind('click',ddc)
+	
+	//删除明细
+	$("#delBut").click(function(){
+		var yi=yitiao(mingxi,'请选择一条要删除的记录,不能选多条','请选择一条要删除的记录');
+		if(yi){
+			var row=mingxi.datagrid('getSelected');
+			$.messager.confirm('提示','您确定要删除吗',function(b){
+				if(b){
+					ajiakesi('__URL__/deleteMingxi',{recno:row.recno},function(c){
+						mingxi.datagrid('load',{recno:qualifiedCourseRecno});
+						$('#MingxiPingjun').datagrid('load',{recno:qualifiedCourseRecno});
+					});
+				}
+			});
+		}
+	});
+	//明细查询返回上一页
+	$("#backBut_1").click(function(){
+		MingxiList.window({closed:true});
+	});
+	
+	
+	//todo:问卷调查
+    //todo:对所有select进行绑定onchange事件
+    $('[name=selected]').bind('change',function(){
+    	var value=$(this).val();
+    	var arr=countfen();
+    	var numstr='';
+    	if(arr['num']<60)
+    		numstr='<font color="red">'+arr['num']+'</font>';
+    	else
+    		numstr='<font color="green">'+arr['num']+'</font>';
+    	$('#zongfen').html(numstr);
+    });
+    //todo:点击提交评分的时间
+    $('#UPDATE').bind('click',function(){
+    	var countnum=0;
+    	var zero=$("[name=selected]");
+        for(var i=0;i<zero.length;i++){
+            if(zero[i].value=="0"){
+                countnum++;
+            }
+        }
+        if(countnum){
+            return $.messager.alert('提示','您还有'+countnum+'项没有选择');
+        }
+        ajiakesi('__URL__/insertMingxi',Mingxiarr,function(c){
+        	$.messager.alert('提示',c);
+        });
+    });
+	//计算分数
+    function countfen(){
+		var arr={};
+        arr['num']=0;
+        var list=$('[name=selected]');
+        for(var i=0;i<list.length;i++){
+            arr['num']+=parseInt(list[i].value);
+            Mingxiarr[list[i].id]=parseInt(list[i].value);
+        }
+        Mingxiarr['total']=arr['num'];
+        return arr;
+    }
+    //问卷调查返回上一页
+	$("#backBut_2").click(function(){
+		wenjuandiaocha.window({closed:true});
+	});
+  	//显示查看明细及问卷调查div
+	$(".disDiv").show();
+});
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_look'>查看详细</div>
+    <div id='admin_wenjuan'>问卷调查</div>
+</div>
+</html>

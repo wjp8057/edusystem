@@ -1,0 +1,95 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "10","icon": "icon-group","menuname": "个人信息",
+                "menus": [
+                    {"menuid": "11","menuname": "基本信息","icon": "icon-personal","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=basicinfo"},
+                    {"menuid": "12","menuname": "学习经历","icon": "icon-book","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=xuexijingli"},
+                    {"menuid": "13","menuname": "荣誉与获奖","icon": "icon-jiangbei","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=Honor"},
+                    {"menuid": "14","menuname": "论文与成果","icon": "icon-cjiajia","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=thesis"}
+                ]
+            },{"menuid": "20","icon": "icon-bookList","menuname": "教学过程",
+                "menus": [
+                    {"menuid": "16","menuname": "学期课程","icon": "icon-courseList","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=TeacherList"},
+                    {"menuid": "21","menuname": "成绩输入","icon": "icon-shuru","url": "__ROOT__/Results/Results/Three_three"},
+                    {"menuid": "15","menuname": "历年工作量","icon": "icon-workload","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=work"},
+                    {"menuid": "17","menuname": "教学质量","icon": "icon-lock","url": "__ROOT__/index.php?g=Userinfo&m=Userinfo&a=teachingQuality"}
+                ]
+            }
+        ]
+    };
+
+    var menuTabs = null;
+
+    $(function() {
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+        var prems= $.trim(window.location.search);
+        if(prems!=null){
+            prems=prems.substring(1,prems.length);
+            if(prems=="21")
+                $(".navlist li a[ref='"+prems+"']").parent().parent().parent().parent().prev().children(".panel-tool").children().click();
+            $(".navlist li a[ref='"+prems+"']").click();
+        }
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden;font-family: 宋体, simsun;"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        学年：<input type="text" name="YEAR" id="YEAR" value="2014" style="width:30px" maxlength="4" />
+        学期：<input type="text" name="TERM" id="TERM" value="2" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" id="xu_demo" >
+        <div style="padding:20px;overflow:hidden; color:#000000; " >
+        <span style="font-size: 20px">个人信息功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">教师个人各类信息查询。有基本信息、学习经历、荣誉与获奖、论文与成果、历年工作量、学期课程、教学质量。</p></b>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、基本信息:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人的基本信息进行初始设定，可以修改或者查看。个人基本信息包括性别、出生年月、身份证、民族、政治面貌、所在学院、系、现任职务、任职时间、现任职称、职称获得时间、职称学科、最高学历、学历获得学校、最高学位、学位获得学校、电话、Email。</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、学习经历:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人的学习工作经历进行新增、修改、删除操作，包括开始时间、结束时间、在何学校学习工作或任何职务，其中时间格式参照1900-01-01</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、荣誉与获奖:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人的所有的获奖情况进行新增、修改、删除操作，包括奖励名称、获奖时间、奖励部门、级别、排名，其中时间格式参照1900-01-01</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、论文与成果:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人的所有的论文、编写教材、科研教研成果进行新增、修改、删除操作。</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">5、历年工作量:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人历年所有的教学记录和工作量进行查看，可以查看到具体的某学年、学期、课号、课名、工作量、人数、班级。</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">6、学期课程:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">教师可以对本人在某学年某学期的排课信息进行查看，并可以检索到本人的周课表。</p>
+        &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">7、教学质量:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">查看教师本人历年详细学评教评分信息，并可查看学院、学校、学生对于本人的评分。具体评分信息来自《教学质量评估》模块。</p>
+
+    </div>
+    </div>
+</div>
+
+
+</body>
+</html>

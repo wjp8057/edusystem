@@ -1,0 +1,1 @@
+update CreditCertficate set cert_name=:cert_name,credit=:credit,status=:status where cert_id=:cert_id

@@ -1,0 +1,1 @@
+select count(*) as ROWS from CreditSinglefirm where Studentno=:studentno and certficatetime=:certficatetime and projectname=:projectname

@@ -1,0 +1,100 @@
+<include file=":Include:jqueryHeader" />
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<table id="datagrid" fitColumns="true" width="100%" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" border="false">
+            <thead>
+            <tr><th data-options="field:' ',checkbox:true" ></th>
+	            <th data-options="field:'courseno',align:'center',width:50">课号</th>
+	            <th data-options="field:'coursename',align:'center',width:70">课程名称</th>
+	            <th data-options="field:'approaches',align:'center'">修课方式</th>
+	            <th data-options="field:'classname',align:'center',width:60">上课班级</th>
+	            <th data-options="field:'students',align:'center',width:50">班级预计人数</th>
+                <th data-options="field:'isbn',align:'center',width:70">征订代号（ISBN）</th>
+                <th data-options="field:'bookname',align:'center',width:80">教材名称</th>
+                <th data-options="field:'author',align:'center',width:60">主编</th>
+                <th data-options="field:'press',align:'center',width:60">出版社</th>
+                <th data-options="field:'sum',align:'center',width:35">征订数量</th>
+                <th data-options="field:'teachername',align:'center',width:60">上课教师</th>
+                <th data-options="field:'name',align:'center',width:40">学院</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <a href="javascript:void(0)" id="createBut" class="easyui-linkbutton" data-options="iconCls:'icon-print',plain:true">确认生成征订单</a>
+    <a href="javascript:void(0)" id="editStatus" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">暂不征订</a>
+</div>
+<form id="queryForm" action="__ROOT__/Book/Excel/createOrder/" method="post" style="display:none;">
+	<input value="{$year}" name="year">
+	<input value="{$term}" name="term">
+	<input value="0" name="status">
+	<input name="apply_ids">
+</form>
+<script type="text/javascript">
+var list=null;
+$(function(){
+	var year="{$year}",term="{$term}",school="{$school}";
+	//教材征订信息
+	var datagrid = $('#datagrid').datagrid({
+        url:"__URL__/bookApplyList/hasJson/1",
+        queryParams:{year:year,term:term,school:school},
+		toolbar:'#toobar'});
+	//设置订单暂不征订
+	$("#editStatus").click(function(){
+		list=datagrid.datagrid('getSelections');
+    	if (list.length){
+             $.messager.confirm('提示','您确定暂不征订这些教材吗？',function(b){
+                 if(b){
+                	 var ids="";
+                	 for(var i=0;i < list.length;i++){
+ 						ids+="'"+list[i].apply_id+"',"
+ 					 }
+                     $.ajax({
+                         url:'__URL__/editStatus/',
+                         data:{'ids':ids},
+                         type:'POST',
+                         success:function(data){
+                             if(data){
+                                 msgShow("系统提示：","操作成功！","info");
+                                 datagrid.datagrid('reload');
+                             }else{
+                                 msgShow("系统提示：","操作失败！","info");
+                             }
+                         }
+                     });
+                 }
+             });
+         }else{
+        	 msgShow("系统提示：","请选择要操作的数据","info");
+         }
+	});
+	//确认生成征订单及导出
+	var sel_list=null;
+	$("#createBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		sel_list=datagrid.datagrid('getSelections');
+    		if(sel_list.length){
+    			$.messager.confirm('提示','您是否确认生成征订单？',function(b){
+    				if(b){
+    					var ids="";
+    					for(var i=0;i < sel_list.length;i++){
+    						ids+="'"+sel_list[i].apply_id+"',"
+    					}
+    	    			$("[name='apply_ids']").val(ids);
+    	        		$("#queryForm").submit();
+    	        		setTimeout("location.reload()",3000);
+    				}
+    			});
+    		}else msgShow("系统提示：","请选择数据再进行操作","info");
+    	}else{
+    		msgShow("系统提示：","没有可生成征订单的记录！","info");
+    	}
+	});
+});
+
+</script>
+</body>
+</html>

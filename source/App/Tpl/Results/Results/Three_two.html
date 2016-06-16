@@ -1,0 +1,136 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$school.SCHOOL}'
+
+    var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+    $('[name=SCHOOL]').val(school)
+    var arr=[];
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+        // var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+
+
+        $('#search_one').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+                    if($('[name=SCHOOL]').val()!=school.trim()&&school.trim()!='A1'){
+                        return $.messager.alert('提示','你只能输入自己学院的成绩');
+                    }
+                    var datag=$('#yingyuA2');
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Three_one_Two_select.SQL','count':'Results/Three_one_Two_count.SQL'
+                    },'bind':{':year':$('[name=YEAR]').val(),':term':$('[name=TERM]').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}})
+                    $('#three_year').html($('[name=YEAR]').val());
+                    $('#three_term').html($('[name=TERM]').val());
+                    $('#wd3').panel({closed:false})
+                    $('#wd').panel({closed:true})
+                })
+
+
+
+        $('#cjsr').bind('click',function(){
+            var row=$('#yingyuA2').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('提示','请选择你要输入成绩的课程');
+                return;
+            }
+            var R12=$('[name=R12]:checked').val();
+            var zt=row.zt=="锁定"?1:0;
+            open('__URL__/Three_BKCJSR_StudentList/YEAR/'+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/COURSENO/'+row.kh+'/R1/'+R12+"/ZT/"+zt);
+        });
+
+
+
+        $('#kaifang').bind('click',function(){
+            $.messager.confirm('提示','您真的要开放课程吗',function(c1){
+                if(c1){
+                    var str=''
+                    if(($('[name=YEAR]').val()==parent.$("#YEAR").val()&&$('[name=TERM]').val()==parent.$("#TERM").val())||school=='A1'){
+
+                        var rowList=$('#yingyuA2').datagrid('getSelections')
+                        for(var i=0;i<rowList.length;i++){
+                            str+=rowList[i].kh+','
+                        }
+                        ajiakesi('__URL__/kf_course/hasJson/1',{'courseno':str,year:$('[name=YEAR]').val(),'term':$('[name=TERM]').val()},function(c){
+                            $.messager.alert('提示',c)
+                            $('#yingyuA2').datagrid('reload')
+                        })
+                    }else{
+                        return $.messager.alert('提示','你只能改变当前学期的状态！')
+                    }
+
+                }
+
+            })
+        })
+
+
+
+    })
+
+
+
+
+</script>
+<body style="background: #fff">
+
+
+
+    <div id="ccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+            学年：<input type="text" name="YEAR"  size="4">&nbsp&nbsp
+
+            学期：<input type="text" name="TERM"  size="1">
+
+            所在学院：<select name="SCHOOL">
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+            <a id="search_one">查询</a>
+
+
+
+            </font><font size="2"><input type="radio" value="five" ID="five" name="R12">五级制&nbsp
+                <input type="radio" value="ten" ID="ten" name="R12" checked=checked>百分制</font>
+            <a href="javascript:void(0)" id="cjsr" class="easyui-linkbutton" iconCls="icon-edit" plain="true">补考成绩单输入</a>
+            <a href="javascript:void(0)" id="kaifang" class="easyui-linkbutton" iconCls="icon-cut" plain="true">开放选中课程</a>
+        </div>
+        <div data-options="region:'center',border:false,split:false" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="yingyuA2"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,pageList:[20,50,100,200,500],fit:true,singleSelect:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'kh',width:100" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                    <th data-options="field:'xkfs',width:100" align="center">修课方式</th>
+                    <th data-options="field:'rs',width:100" align="center">人数</th>
+                    <th data-options="field:'zt',width:100" align="center">状态</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+
+
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+

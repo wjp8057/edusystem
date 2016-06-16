@@ -1,0 +1,147 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<SCRIPT >
+        $(function(){
+
+            var recno='{$info}';
+
+                ajiakesi('__URL__/selectStudentFile',{recno:recno},function(c){
+                    eval('var one='+c)
+                    var textList=$(':text')
+                    var num='';
+                    for(var i=0;i<textList.length;i++){
+                        nm=textList[i].id;
+                        textList[i].value=one[nm.substring(0,nm.indexOf('e'))]
+                    }
+                    //学籍异动的学号（保存在hidden的 ， 因为学号可被更改）
+                    $('#OLDSTUDENTNO').val(one['STUDENTNO'])
+                })
+
+
+
+           //todo:ajax请求方法
+           /* function ajia(url,data,str1,list,wd,str){                                    //todo:赋值
+                $.ajax({
+                    type:'POST',
+                    url:'__URL__/'+url,
+                    data:data,
+                    success:function(content2){
+                        //todo:如果学生号不存在 不往下执行
+                        if(content2=='false'){
+                            return  $.messager.alert('提示',str1);
+                        };
+                        eval('var one='+content2);
+                        if(str=='File'){               //todo:查看学生学籍异动的时候
+                            var textList=$('#wd4 :text')
+                            var num='';
+                            for(var i=0;i<textList.length;i++){
+                                nm=textList[i].id;
+                                textList[i].value=one[nm.substring(0,nm.indexOf('e'))]
+                            }
+                            //学籍异动的学号（保存在hidden的 ， 因为学号可被更改）
+                            $('#OLDSTUDENTNO').val(one['STUDENTNO'])
+                        }else if(str<2){
+                            if(one['regcode']){                                                 //todo:false代表     按学号注册      ⑵
+                                var str2=''          //todo:  #yearterm的内容
+                                for(var i=0;i<one['regcode'].length;i++){
+                                    str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                                }
+                                $('#yearterm').html(str2)
+                                for(var i=0;i<list.length;i++){
+                                    var nm=list[i].id;
+                                    $('#'+nm).html(one[nm.substring(0,nm.indexOf(str))]);
+                                }
+                            }else{
+                                for(var i=0;i<list.length;i++){                                 //todo:true代表    新生报到   ①
+                                    var nm=list[i].id;
+                                    $('#'+nm).html(one[nm]);
+                                }
+                            }
+                        }else{
+
+                            var str2=''          //todo:  #yearterm的内容
+                            for(var i=0;i<one['regcode'].length;i++){
+                                str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                            }
+                            $('#yearterm2').html(str2)
+                            for(var i=0;i<list.length;i++){
+                                var nm=list[i].id;
+                                $('#'+nm).val(one[nm.substring(0,nm.indexOf(str))]);                     //todo: 按学号注册 编辑注册信息的  ⑵。⑵
+                            }
+                            var selectlist=$('#wd3 select')
+                            for(var i=0;i<selectlist.length;i++){
+                                $('#'+selectlist[i].id).val(one[selectlist[i].id.substring(0,selectlist[i].id.indexOf(str))])
+                            }
+                        }
+                        wd.window({                                                             //todo:关闭指定窗口
+                            closed:false
+                        })
+                    }
+                })
+            }*/
+            //todo:提交更新操作的时候 所触发的方法
+            $('#submitting').bind('click',function(){
+                var obj={}
+                obj['STUDENTNO']=$('#STUDENTNOedit').val();
+                obj['FILENO']=$('#FILENOedit').val();
+                obj['INFOTYPE']=$('#INFOTYPEedit').val();
+                obj['DATE']=$('#DATEedit').val();
+                obj['REM']=$('#REMEdit').val();
+                obj['OLDSTUDENTNO']=$('#OLDSTUDENTNO').val()
+                $.ajax({
+                    type:'post',
+                    url:'__URL__/updateStudentFile',
+                    data:obj,
+                    success:function(c){
+                        $.messager.alert('提示',c)
+                    },
+                   error:function (XMLHttpRequest, textStatus, errorThrown) {
+                       alert('ererere')
+                   }
+                })
+            })
+        })
+</SCRIPT>
+<body style="background-color: #fff">
+<table align=center border="2" bordercolor="#000000" style="border-collapse: collapse; font-size:10pt;margin-top:20px" height="238" datasrc=#dsoSTUDENT>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                <b>学号：</b></td>
+        <td width="50%" height="23"><input type="text" name="StudentNo"  id=STUDENTNOedit size="9" maxlength="9" value="">&nbsp&nbsp<span lang="en-us"><font color="red">*</font>
+  </span></td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right"><b>公文号：</b></td>
+        <td width="50%" height="23"><input type="text" name="FileNo" id=FILENOedit size="20" maxlength="20">&nbsp&nbsp<font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                <b> 异动属性：</b></td>
+        <td width="50%" height="23">
+            <select size="1" name="InfoType" id=INFOTYPEedit>
+                <volist name="infotype" id="v">
+                    <option value="{$v.CODE}">{$v.NAME}</option>
+                </volist>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td width="50%" height="23">
+            <p align="right">
+                <b> 发文日期：</b></td>
+        <td width="50%" height="23"><input type="text" size="20" id=DATEedit><font color="red">注意格式： 2014-01-01</font></td>
+    </tr>
+    <tr>
+        <td width="100%" height="116" colspan="2">
+            <p align="center"><font size="3"><b>文件概要</b></font>
+            <p><textarea rows="12" cols="114"  id=REMEdit></textarea>
+            <input type="hidden" id="OLDSTUDENTNO" value="">
+        </td>
+    </tr>
+</table>
+<p align=center><input type="submit" id="submitting" value="提交更新存档">
+</body>
+</html>

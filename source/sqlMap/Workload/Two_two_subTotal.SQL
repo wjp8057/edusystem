@@ -1,0 +1,1 @@
+update totalwork set status=4 where school=:school and year=:year and term=:term

@@ -1,0 +1,89 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var num='{$shenqingdan}';
+            $.post('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/one_lookDetails.SQL','bind':{':id':num}},function(c){
+                eval('one='+c);
+               // alert(one[0]['NAME'])
+                $('#look_NAME').html(one[0]['NAME']);
+                $('#look_STUDENTNO').html(one[0]['STUDENTNO']);
+                $('#look_CLASSNAME').html(one[0]['CLASSNAME']);
+                $('#look_projectname').html(one[0]['projectname']);
+                var proarr=['','各类竞赛','学术论文','科学研究','技能证书','其他'];
+                var crearr=['','创新学分','技能学分','素质学分'];
+                var _view=['待提交','通过','不通过','待审核'];
+                $('#dengji').html(one[0]['description']);
+                $('#look_projecttype').html(proarr[one[0]['projecttype']]);
+                $('#look_credittype').html(crearr[one[0]['credittype']]);
+                $('#look_credit').html(one[0]['credit']);
+                $('#look_certficatetime').html(one[0]['certficatetime']);
+                $('#schoolview_content').html(_view[one[0]['schoolview']]);
+                $('#deanview_content').html(_view[one[0]['deanview']]);
+                $('#schoolview_time').html(one[0]['schoolsubtime']);
+                $('#deanview_time').html(one[0]['deansubtime']);
+            })
+    });
+</script>
+<body style="background-color: #fff">
+<table border="1" style="border:0px solid #E0ECFF" width="80%"  align="center" >
+    <tr>
+        <td width="107" bgcolor="#E0ECFF" height="25">
+            <p align="right"><b>姓名：</b></td>
+        <td width="180" align="center" height="25" bgcolor="#fcfcfc"><span id="look_NAME"></span></td>
+        <td bgcolor="#E0ECFF" width="107">
+            <p align="right"><b>学号：</b></td>
+        </td>
+        <td width="180" align="center" height="25"><span id="look_STUDENTNO"></span></td>
+        <td bgcolor="#E0ECFF" width="107">
+            <p align="right"><b>班级：</b></td>
+        </td>
+        <td width="180" align="center" height="25" bgcolor="#fcfcfc"><span id="look_CLASSNAME"></span></td>
+    </tr>
+    <tr>
+        <td width="107" bgcolor="#E0ECFF" height="25">
+            <p align="right"><b>项目名称：</b></td>
+        <td colspan="5" bgcolor="#fcfcfc">
+            <span id="look_projectname"></span>
+        </td>
+    </tr>
+
+    <tr>
+        <td width="107" bgcolor="#E0ECFF" height="25">
+            <p align="right"><b>学分类别：</b></td>
+        <td colspan="5" bgcolor="#fcfcfc">
+            <span id="look_credittype"></span>
+        </td>
+    </tr>
+    <tr>
+        <td width="107" bgcolor="#E0ECFF" height="25">
+            <p align="right"><b>申请学分：</b></td>
+        <td colspan="2" width="360px"><span id="look_credit"></span></td>
+        <td width="107" bgcolor="#E0ECFF" height="25">
+            <p align="right"><b>
+                证书或者活动获得时间：</b></td>
+        <td colspan="2" width="360px" bgcolor="#fcfcfc">
+            <span id="look_certficatetime"></span>
+        </td>
+    </tr>
+    <tr>
+        <td height="100%" colspan="6" bgcolor="#fcfcfc">
+            <p align="left"><b>学院意见（认定理由、等级及学分）：</b>
+            <div style="width:100%;height:80%">
+                <span id="schoolview_content"></span>
+            </div>
+            <p align="right"><b>审核时间：<span id="schoolview_time"></span></b></p>
+        </td>
+    </tr>
+    <tr>
+        <td height="100%" colspan="6" bgcolor="#fcfcfc">
+            <p align="left"><b>教务处审核意见：</b>
+            <div style="width:100%;height:80%">
+                <span id="deanview_content"></span>
+            </div>
+            <p align="right"><b>审核时间：<span id="deanview_time"></span></b></p>
+        </td>
+    </tr>
+
+</table>
+</body>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link id='themes_css' rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/css/css.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/datagrid.js"></script>
+    <script type="text/javascript">
+        var current_datagrid=null;
+        var current_datagrid_obj=null;
+        var workload_course_obj=new Object();
+        workload_course_obj.editIndex=undefined; //用于存储填写时的index
+        var userSchool=$('#school', parent.document).val();
+        var workload_course_cmenu_obj=new Object();
+        workload_course_cmenu_obj.cmenu=""; //标题行右键菜单
+
+        $(function(){
+            var tt=$('#workload_course_dg');
+            if(userSchool!="A1")
+                $('#workload_course_school').combobox('setValue',userSchool);
+            tt.datagrid({
+                idField:'courseno',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:20,
+                url:'/Workload/Course/query?hasJson=true',
+                toolbar:'#workload_course_toolbar',
+                queryParams: {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val(),
+                    school:$('#workload_course_school').combobox('getValue')
+                },
+                columns:[[
+                    {field:'checked',title:'信息确认*',width:60,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                        formatter:function(val,rec){
+                            if(val==1)
+                                return '√';
+                        }},
+                    {field:'courseno',title:'课号',width:80,align:'center'},
+                    {field:'coursename',title:'课名',width:260,align:'center'},
+                    {field:'schoolname',title:'开课学院',width:100,align:'center'},
+                    {field:'worktype',title:'工作量类型*',width:120,align:'center',
+                        editor:{
+                            type:'combobox',
+                            options:{url:'/Workload/Option/worktype',valueField:'type',textField:'name',panelWidth:'150',panelHeight:'200',onSelect:onWorkTypeSelect}
+                        },
+                        formatter:function(val,rec){
+                            return rec.worktypename;
+                        }},
+                    {field:'stand',title:'标准班*',width:60,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'total',title:'总课时*',width:60,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'week',title:'上课/实训周数*',width:100,align:'center' ,editor:{type:'numberbox',options:{precision:1,required:true}}}
+                ]],
+                //标题行右键菜单
+                onHeaderContextMenu: function(e, field){
+                    e.preventDefault();
+                    if (!workload_course_cmenu_obj.cmenu)//没有的话创建一个
+                        $('#workload_course_dg').datagrid('createColumnMenu',workload_course_cmenu_obj);
+                    workload_course_cmenu_obj.cmenu.menu('show', {
+                        left:e.pageX,
+                        top:e.pageY
+                    });
+                },
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_course_obj.index=index; //初始化参数
+                    workload_course_obj.field=field;
+                    $('#workload_course_dg').datagrid('startEditing',workload_course_obj);
+                    current_datagrid=$('#workload_course_dg');
+                    current_datagrid_obj=workload_course_obj;
+                },
+                //数据行上右键菜单
+                onRowContextMenu:function(e,rowindex,row){
+                    var tt=$('#workload_course_dg');
+                    if(!endEditing(tt,workload_course_obj)) return;//结束编辑,如果没有验证通过就退出
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#workload_course_menu').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                }
+            });
+            //绑定新建按钮事件
+            $("#workload_course_insert").click(function(){
+                var tt=$('#workload_course_dg');
+                if(!endEditing(tt,workload_course_obj)) return;//结束编辑,如果没有验证通过就退出
+                tt.datagrid('insertRow',{
+                    index: 0,
+                    row: {
+                        fail:0
+                    }
+                });
+                workload_course_obj.field='name';
+                workload_course_obj.index=0;
+                tt.datagrid('startEditing',workload_course_obj);
+                current_datagrid=tt;
+                current_datagrid_obj=workload_course_obj;
+            });
+            //取消更改
+            $("#workload_course_cancel").click(function(){
+                var tt= $('#workload_course_dg');
+                endEditing(tt,workload_course_obj);
+                tt.datagrid('rejectChanges');
+            });
+            //绑定点击保存按钮事件
+            $("#workload_course_save").click(function(){
+                var tt=$('#workload_course_dg');
+                if(!endEditing(tt,workload_course_obj)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getRows');
+                rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                for(var i=0;i<rows.length;i++) {
+                    if(rows[i]['school']!=userSchool&&userSchool!="A1"){
+                        $.messager.alert("无法修改","非教务处人员无法修改非本学院的课程。"+rows[i]['coursename'],'error');
+                        return;
+                    }
+                }
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                if(count<=0) //如果没有任何更新，就退出
+                    return;
+
+                $('#w').window('open');
+                $.post('/Workload/Course/update?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+
+            //搜索按钮
+            $("#workload_course_search").click(function(){
+                var tt=$('#workload_course_dg');
+
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val(),
+                    coursename:$('#workload_course_coursename').val(),
+                    courseno:$('#workload_course_courseno').val(),
+                    school:$('#workload_course_school').combobox('getValue'),
+                    worktype:$('#workload_course_worktype').combobox('getValue'),
+                    checked:$('#workload_course_status').combobox('getValue')
+                });
+            });
+        });
+        //主持人选择以后
+        function onWorkTypeSelect(rec){
+            var tt=$('#workload_course_dg');
+            //  tt.datagrid('getSelected').worktype=rec.type; 这行不能加，否则会看不到变更
+            tt.datagrid('getSelected').worktypename=rec.name;
+        }
+    </script>
+    <title>工作量统计</title>
+</head>
+<body>
+<div id="w" class="easyui-window" title="请稍候..."
+     data-options="modal:true,closed:true,closable:false,minimizable:false,maximizable:false,iconCls:'icon-shield'"
+     style="width:250px;height:80px;padding:10px;">数据更新中，请稍候！
+</div>
+<div class="container">
+    <div id="workload_course_toolbar">
+        <label for="workload_course_courseno">课号：</label><input id="workload_course_courseno" class="easyui-validatebox" size="10" value="%"/>
+        <label for="workload_course_coursename">课名：</label><input id="workload_course_coursename" class="easyui-validatebox" size="10"  value="%"/>
+        <label for="workload_course_school">学院：</label>
+        <input id="workload_course_school" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/school',valueField:'school',textField:'name',panelWidth:150">
+        <label for="workload_course_worktype">工作量类型：</label>
+        <input id="workload_course_worktype" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/worktype',valueField:'type',textField:'name',panelWidth:150">
+        <label for="workload_course_status">状态：</label>
+        <select class="easyui-combobox" id="workload_course_status"data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">已审核</option>
+            <option value="0">待审核</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:'true'"  id="workload_course_search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_course_save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_course_cancel">取消</a>
+    </div>
+    <table id="workload_course_dg">
+    </table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>可以按 Tab键进入下一个编辑单元格，或者按 Enter键进入下一行。</li>
+            <li class="warn">请仔细核对工作量类型、标准班、总课时、上课及实训周数。 </li>
+        </ol>
+    </div>
+</div>
+</body>

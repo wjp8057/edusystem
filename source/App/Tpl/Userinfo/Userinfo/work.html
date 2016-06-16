@@ -1,0 +1,41 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        function dataobj(url,columns,toolbar){
+            this.striped=true;
+            this.url=url;
+            this.columns=columns
+            this.pagination=true;
+            this.pageList=[10,20,30,40,50]
+            this.pageSize=30;
+            this.toolbar=toolbar;
+            this.fit=true;
+			plain=true;
+        }
+        var datobj=new dataobj('__URL__/work/hasJson/1',[[
+            {field:'xn',title:'学年',width:40,sortable:true
+            },
+            {field:'xq',title:'学期',width:40,sortable:true
+            },
+            {field:'kh',title:'课号',width:80,sortable:true
+            },
+            {field:'km',title:'课名',width:155,sortable:true},
+            {field:'gzl',title:'工作量',width:85,sortable:true
+            },
+            {field:'rs',title:'人数',width:55,sortable:true
+            },
+            {field:'bj',title:'班级',width:175,sortable:true
+            }
+        ]],null)
+        $('#datagrid').datagrid(datobj)
+
+    })
+</script>
+<body class="easyui-layout">
+
+<div data-options="region:'center',splist:false,border:false,plain:'true',title:'历 年 课 程 教 学 工 作 量'" style="padding:0px;background:#eee;">
+    <div id="datagrid">
+    </div>
+</div>
+</body>

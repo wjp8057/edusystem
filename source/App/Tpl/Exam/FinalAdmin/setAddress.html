@@ -1,0 +1,264 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var field='';
+    var index=0;
+    var row='';
+
+    var updRow   = null;
+    var updField = null;
+
+    $(function(){
+
+        var yearInput = $("#year");
+        var termInput = $("#term");
+        var coursegroupInput = $("#coursegroup");
+
+        var testroomWindow = $("#testroomWindow");
+        var testroomForm   = $("#testroomForm");
+        var testroomlist   = $("#testroomlist");
+        testroomWindow.window({closed:true});
+        $("#looktestroom").click(function () {
+            testroomWindow.window({closed:false});
+        });
+        $("#testroomSearch").click(function () {
+            var values = testroomForm.serialize();
+            testroomlist.datagrid('load',{_PARAMS_:values});
+        });
+        $("#testroomDelete").click(function () {
+            if(Datagrid.hasSelected(testroomlist)){
+                var rows = Datagrid.getSelections(testroomlist);
+                $.post('__URL__/setAddress/reqtag/deleteTestRoom',{rows:rows}, function (data) {
+                    return Messager.show(data, function () {
+                        testroomlist.datagrid('reload');
+                    });
+                });
+            }
+        });
+        
+        var roomlistWinow = $('#wd4');
+        var roomlist = $('#dat2');
+
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+        var examtype='{$type}';
+
+        $('#bt2').click(function(){
+            roomlist.datagrid('load',{'Sqlpath':{'select':'exam/setAddress_select_ROOM.SQL','count':'exam/setAddress_count_ROOM.SQL'},
+                'bind':{':ROOMNO':$('[name=roomno2]').val().trim(),':ROOMNAME':$('[name=roomname2]').val().trim(),':MENPAI':'%'}
+            });
+        });
+        roomlistWinow.window(new wind(700,500,false,false,true,false,false,false));
+        roomlistWinow.window({closable:true});
+
+        yearInput.val(GenKits.getParentYear());
+        termInput.val(GenKits.getParentTerm());
+
+
+        var dat = $('#daaa').datagrid({
+            fit:true,
+            url:'__URL__/setAddress/reqtag/listCourses',
+            singleSelect:true,
+            pagination:true,
+            pageList:[10,20,30,40],
+            pageSize:20,
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                dat.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onClickCell:function(rowIndex,fielda){
+                if(fielda.substring(0,6)!='ROOMNO'){
+                    return Messager.showInfo('请选择"考场"单元格');
+                }
+
+                //获取课号
+                var rowA=dat.datagrid('getRows');
+                row=rowA[rowIndex].kh;
+
+                updRow = rowA[rowIndex]; // 当前的记录号
+                updField = fielda;//当前点击的单元格
+
+
+
+                roomlistWinow.window({closed:false});
+                roomlist.datagrid('unselectAll');
+            },
+            columns:[[
+                {field:'coursegroup',title:'课号',width:80,align:'center'},
+                {field:'coursename',title:'课名',width:100,align:'center'},
+                {field:'attendents',title:'选课人数',width:80,align:'center'},
+                {field:'ROOMNO1',title:'考场1',width:80},
+                {field:'seats1',title:'考位1',width:40,align:'center'},
+                {field:'ROOMNO2',title:'考场2',width:80},
+                {field:'seats2',title:'考位2',width:40,align:'center'},
+                {field:'ROOMNO3',title:'考场3',width:80},
+                {field:'seats3',title:'考位3',width:40,align:'center'},
+                {field:'testtime',title:'考试时间',width:180},
+                {field:'classes',title:'班级',width:380}
+            ]],
+            toolbar:'#tdemo'
+        });
+
+
+        $('#e_excel').bind('click',function(){
+            window.open('__APP__/CourseManager/Excel/roomExcel/e_year/'+yearInput.val().trim()+'/e_term/'+termInput.val().trim());
+        });
+
+        //查询大列表数据
+        $('#bt').bind('click',function(){
+            dat.datagrid('load',{'year':yearInput.val(),'term':termInput.val(),'school':'%','coursegroup':coursegroupInput.val()});
+        });
+
+        function apjk(){
+            var List=dat.datagrid('getSelections')
+            if(List.length==0){
+                return $.messager.alert('提示','请您选择一条进行操作哦')
+            }
+            openTabsWindows('监考安排','__URL__/jiankaoanpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/examtype/'+examtype+'/COURSENO/'+List[0].kh+'/R15/'+List[0]['R15'],'',true)
+
+        }
+        $('#e_save').bind('click',apjk)
+        $('#admin_save').bind('click',apjk)
+    });
+
+    function addRoom(){
+        var roomlist = $("#dat2");
+
+        if(Datagrid.selectSingle(roomlist)){
+
+
+//            return console.log({
+//                'tprow':updRow,
+//                'field':updField,
+//                'roomrow':Datagrid.getSelected(roomlist),
+//                'year':$("#year").val(),
+//                'term':$('#term').val()
+//            });
+
+            $.post(
+                    '__URL__/setAddress/hasJson/1',
+                    {
+                        'tprow':updRow,
+                        'field':updField,
+                        'roomrow':Datagrid.getSelected(roomlist),
+                        'year':$("#year").val(),
+                        'term':$('#term').val()
+                    },
+                    function (data) {
+                        return Messager.show(data, function () {
+                            $('#daaa').datagrid('reload');
+                            $('#wd4').window({closed:true});
+                        });
+                    }
+            );
+
+        }
+    }
+
+</script>
+
+
+<style>
+    span{border:0 solid red;;vertical-align:middle;}
+</style>
+<body style="background-color: #fff">
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+        <label for="year">学年:</label>
+        <input name="year" id="year" type="text" size='4' value="">
+        <label for="term">学期:</label>
+        <input type="text" name="term" id="term" size="1" value="" />
+        <label for="coursegroup">课号组号</label>
+        <input type="text" id="coursegroup" size="10" value="%" />
+        <a href='javascript:void(0)' id="bt" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检索</a>
+        <a href='javascript:void(0)' id="looktestroom" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">查看教室占用情况</a>
+        <a href="javascript:void(0)" id="e_excel" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true" >导出Excel</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0;background:#eee;">
+        <div id="daaa" >
+        </div>
+    </div>
+
+</div>
+<!--教室弹出窗口-->
+<div id="wd4" title=" " data-options="">
+    <div id="ccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:50px;background:#E0ECFF;">
+            <table border="0" id="tb2" width="55%" style="margin-top: 2px" align="left" cellspacing="0" cellpadding="0" data-options="singleSelect:true">
+                <tr>
+                    <td   height="10">
+                        <p align="right"><label for="roomno2">教室号：</label></td>
+                    <td  height="10" style="border:0">
+                        <input type="text" name="roomno2" id="roomno2" size="7" value="%">
+                    </td>
+                    <td   height="10">
+                        <p align="right"><label for="roomname2">教室名：</label></td>
+                    <td  height="10" style="border:0">
+                        <input type="text" name="roomname2" id="roomname2" size="7" value="%">
+                    </td>
+
+                    <td style="border:0;" height="10" align="center" colspan="4">
+                        <a href="javascript:void(0)" id="bt2" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检索</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0;background:#eee;">
+
+            <table class="easyui-datagrid" id="dat2"
+                   data-options="url:'__URL__/setAddress/reqtag/listroom',fit:true,pagination:true,pageList:[20,50,100],toolbar:[{'text':'设为考场','iconCls':'icon-add',handler:addRoom}]">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'roomno',width:100,align:'right'" align="center">教室号</th>
+                    <th data-options="field:'testers',width:100,align:'right'" align="center">考位数</th>
+                    <th data-options="field:'building',width:100,align:'right'" align="center">楼号</th>
+                    <th data-options="field:'no',width:100,align:'right'" align="center">门牌号</th>
+                    <th data-options="field:'roomname',width:100,align:'right'" align="center">教室名称</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- 罗列被占用的教室列表 从testroom中获取 -->
+<div id="testroomWindow" title="教室占用情况查询" class="easyui-window" style="width:600px;height:400px"
+     data-options="iconCls:'icon-save',modal:true">
+        <table class="easyui-datagrid" id="testroomlist"
+               data-options="url:'__URL__/setAddress/reqtag/listtestroom',fit:true,pagination:true,pageList:[20,50,100],
+               toolbar:'#tbar'">
+            <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'roomno',width:100,align:'right'" align="center">教室号</th>
+                    <th data-options="field:'roomname',width:100,align:'right'" align="center">教室名称</th>
+                    <th data-options="field:'testers',width:100,align:'right'" align="center">考位数目</th>
+                    <th data-options="field:'batch',width:100,align:'right'" align="center">批次</th>
+                    <th data-options="field:'flag',width:100,align:'right'" align="center">场次</th>
+                </tr>
+            </thead>
+        </table>
+</div>
+</body>
+
+<div id="tbar">
+    <form id="testroomForm">
+        <label for="testroomno">教室号</label>
+        <input id="testroomno" name="roomno" value="%" size="10" />
+        <label for="batch">批次</label>
+        <input id="batch" value="%" name="batch" size="2" />
+        <label for="flag">场次</label>
+        <input id="flag" value="%" name="flag" size="2" />
+        <a id="testroomSearch" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+        <a id="testroomDelete" href="#" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true">删除选中</a>
+    </form>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_save'>安排监考老师</div>
+</div>

@@ -1,0 +1,186 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+
+<script>
+    function itrandom(ksrs)
+    {
+        var init=ksrs*Math.random()+1;
+        return Math.floor(init);
+    }
+    var start='{$start}',end='{$end}';
+    var num='{$endzz}'                //todo:考试人数
+
+    var randomnum=[]                    //todo:保存随机数的数组
+    var StudentContent={};         //todo:保存content数据
+    var year='{$get.YEAR}'                 //todo:传过来的学年
+    var term='{$get.TERM}'                 //todo:穿过来的学期
+
+    var courseno='{$get.COURSENO}'        //todo:穿过来的课号
+    $(function(){
+
+        //todo:产生随机数
+        for(i=1;i<=num;i++)
+        { flag=0;
+            do{
+                flag=0;
+                randomnum[i]=itrandom(num);
+                 for(t=0;t<i;t++)
+                {
+                    if(randomnum[i]==randomnum[t])
+                        flag=1;
+                }
+            }while (flag==1);
+        }
+
+
+
+
+
+
+
+        var dataa=$('#List')
+        $('#demo_wd').window(new wind(0,0,false,false,true,true,true))
+        dataa.datagrid({onLoadSuccess:function(data){
+            var obj
+            if(!StudentContent[1]){
+
+                return
+            }
+            for(var i=1;i<41;i++){
+                if(!StudentContent[i]){
+                    break;
+                }                   //todo:40人一组
+                if(!StudentContent[i+40]){
+                    StudentContent[i+40]={}
+                    StudentContent[i+40].xm=''
+                    StudentContent[i+40].xh=''
+                }
+
+                if(!StudentContent[i+80]){
+                    StudentContent[i+80]={}
+                    StudentContent[i+80].xm=''
+                    StudentContent[i+80].xh=''
+                }
+
+
+                if(!StudentContent[i+120]){
+                    StudentContent[i+120]={}
+                    StudentContent[i+120].xm=''
+                    StudentContent[i+120].xh=''
+                }
+                obj={'xh':StudentContent[parseInt(i)].xh,
+                    'xm':StudentContent[parseInt(i)].xm,
+                    'zw':randomnum[i],
+                    xx:'',
+
+                    'xh2':StudentContent[parseInt(i)+40].xh,
+                    'xm2':StudentContent[parseInt(i)+40].xm,
+                    'zw2':randomnum[i+40],
+                    xx2:'',
+                    'xh3':StudentContent[parseInt(i)+80].xh,
+                    'xm3':StudentContent[parseInt(i)+80].xm,
+                    'zw3':randomnum[i+80],xx3:''
+                    ,
+                    'xh4':StudentContent[parseInt(i)+80].xh,
+                    'xm4':StudentContent[parseInt(i)+80].xm,
+                    'zw4':randomnum[i+80],xx4:''}
+
+                StudentContent[i]=null
+
+                StudentContent[i+40]=null
+
+                StudentContent[i+80]=null
+
+                StudentContent[i+120]=null
+              //  $('#List2').datagrid('appendRow',obj)
+
+			  //$('#Lis')
+            }
+
+
+
+
+        }})
+
+        ajiakesi('__URL__/zuoweianpai/hasJson/1',{'Sqlpath':{'select':'exam/zuoweianpai_select.SQL','count':'exam/zuoweianpai_count.SQL'}
+            ,'bind':{':courseno':courseno,':year':year,':term':term,':start':start,':end':end}},function(c){
+            dataa.datagrid('loadData',c)
+        })
+
+
+
+    })
+</script>
+<body>
+<body class="easyui-layout">
+<div data-options="region:'north',title:'',split:false" style="height:80px;">
+    <center>
+        <b> <p align="center" style="font-size: 14px;color: #6293BB"><span style="font-size: 16px">宁波城市学院{$info.xn}学年第{$info.xq}学期期末考试座位表</span></b><br><span style="color:#6262FF">
+        课号：{$info.kh}&nbsp&nbsp课名：{$info.km}&nbsp&nbsp考试人数：{$endzz}&nbsp&nbsp考试时间:{$info.kssj}<br>
+        教室：{$info.js}&nbsp&nbsp监考老师：{$jiankao[0]}&nbsp{$jiankao[1]}&nbsp{$jiankao[2]}&nbsp&nbsp备注:{$info.rem}</span></p>
+    </center>
+</div>
+<div data-options="region:'center',title:'',split:false" style="padding:5px;background:#eee;">
+    <div id="demo_wd">
+        <table class="easyui-datagrid" id="List"
+               data-options="fitColumns:true,fit:true,singleSelect:true,pageList:[1000],pagination:true">
+            <thead>
+            <tr>
+                <th data-options="field:'xh',width:100,align:'center',formatter:function(a,b,c){
+                   StudentContent[c+1]=b
+                }">学号</th>
+                <th data-options="field:'xm',width:100,align:'center'">姓名</th>
+                <th data-options="field:'ps',width:100,align:'center'">平时</th>
+                <th data-options="field:'qm',width:100,align:'center'">期末</th>
+                <th data-options="field:'xh2',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm2',width:100,align:'center'">姓名</th>
+                <th data-options="field:'ps2',width:100,align:'center'">平时</th>
+                <th data-options="field:'qm2',width:100,align:'center'">期末</th>
+                <th data-options="field:'zp3',width:100,align:'center'">总评</th>
+                <th data-options="field:'xh3',width:100,align:'center'">学号</th>
+                <th data-options="field:'xm3',width:100,align:'center'">姓名</th>
+                <th data-options="field:'ps3',width:100,align:'center'">平时</th>
+                <th data-options="field:'qm3',width:100,align:'center'">期末</th>
+                <th data-options="field:'zp3',width:100,align:'center'">总评</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+    <table class="easyui-datagrid" id="List2"
+           data-options="fitColumns:true,fit:true,singleSelect:true,pageList:[75]">
+        <thead>
+        <tr>
+            <th data-options="field:'xh',width:50,align:'center'">学号</th>
+            <th data-options="field:'xm',width:50,align:'center'">姓名</th>
+            <th data-options="field:'zw',width:50,align:'center'">座位</th>
+            <th data-options="field:'xx',width:20,align:'center',formaater:function(a,b,c){return ''}"></th>
+
+
+            <th data-options="field:'xh2',width:50,align:'center'">学号</th>
+            <th data-options="field:'xm2',width:50,align:'center'">姓名</th>
+            <th data-options="field:'zw2',width:50,align:'center'">座位</th>
+            <th data-options="field:'xx2',width:20,align:'center',formaater:function(a,b,c){return ''}"></th>
+
+            <th data-options="field:'xh3',width:50,align:'center'">学号</th>
+            <th data-options="field:'xm3',width:50,align:'center'">姓名</th>
+            <th data-options="field:'zw3',width:50,align:'center'">座位</th>
+            <th data-options="field:'xx3',width:20,align:'center',formaater:function(a,b,c){return ''}"></th>
+
+            <th data-options="field:'xh4',width:50,align:'center'">学号</th>
+            <th data-options="field:'xm4',width:50,align:'center'">姓名</th>
+            <th data-options="field:'zw4',width:50,align:'center'">座位</th>
+            <th data-options="field:'xx4',width:20,align:'center',formaater:function(a,b,c){return ''}"></th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+</div>
+</body>
+
+
+</body>
+</html>s
+

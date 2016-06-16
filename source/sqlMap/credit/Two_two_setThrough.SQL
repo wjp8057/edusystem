@@ -1,0 +1,1 @@
+update CREDITSINGLEFIRM set schoolview=:schoolview,deanview=:deanview,schoolsubtime=:date where applydate_id=:id

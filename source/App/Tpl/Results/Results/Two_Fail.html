@@ -1,0 +1,66 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    //第2014学年第1学期 未合格人数超过11的必修课程列表
+                    $('#title').html('第'+$('[name=YEAR]').val()+'学期第'+$('[name=TERM]').val()+'学期 未合格人数超过'+$('[name=RENSHU]').val()+'的必修课程列表')
+                    $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Two_one_select.SQL','count':'Results/Two_one_count.SQL'
+                    },'bind':{
+                        ':RENSHU':$('[name=RENSHU]').val(),':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val()}})
+                        wd_two.window({closed:false})
+                })
+
+
+
+
+
+    })
+</script>
+<body>
+
+
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+            &nbsp&nbsp学年：<input type="text" name="YEAR"  size="4" >&nbsp&nbsp
+
+            学期：<input type="text" name="TERM" size="1">&nbsp&nbsp
+
+            人数:<input type="text" name="RENSHU"  size=9>&nbsp&nbsp
+
+            <a id="search">查询</a> &nbsp;
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,toolbar:'#tdemo',singleSelect:true,fit:true,pagination:true">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:230" align="center">课号</th>
+                        <th data-options="field:'km',width:450" align="center">课名</th>
+                        <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                        <th data-options="field:'rs',width:150,align:'right'" align="center">人数</th>
+
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

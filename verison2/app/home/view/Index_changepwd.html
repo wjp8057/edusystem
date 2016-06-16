@@ -1,0 +1,45 @@
+<layout name="layout" />
+<script type="text/javascript">
+    function user_resetself(){
+        if(!$('#fm').form('validate'))
+            return;
+        var oldpwd=$('#oldpwd').val();
+        var newpwd=$('#password').val();
+        $.post('{$ROOT}/admin/user/resetself',{oldpwd:oldpwd,newpwd:newpwd},function(result){
+            if (result.status==1){
+                $.messager.alert('成功',result.info,'info');
+                $('#fm').form('clear');
+            }
+            else {
+                $.messager.alert('错误',result.info,'error');
+
+            }
+        },'json');
+    }
+</script>
+<div class="container">
+    <div class="easyui-panel" title="修改密码" style="width:400px">
+        <div style="padding:10px 0 10px 60px">
+            <form id="fm" method="post">
+                <table>
+                    <tr>
+                        <td>旧密码:</td>
+                        <td><input class="easyui-validatebox" type="password" name="oldpwd" id="oldpwd"></td>
+                    </tr>
+                    <tr>
+                        <td>新密码:</td>
+                        <td><input id="password" class="easyui-validatebox" type="password" name="newpwd" data-options="validType:'minmaxLength[6,20]'"></td>
+                    </tr>
+                    <tr>
+                        <td>再一次:</td>
+                        <td><input class="easyui-validatebox" type="password" name="rnewpwd" validType="equals['#password']" onkeydown="if(event.keyCode==13) user_resetself();"></td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="user_resetself()">提交</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm('#fm')">清空</a>
+        </div>
+    </div>
+</div>

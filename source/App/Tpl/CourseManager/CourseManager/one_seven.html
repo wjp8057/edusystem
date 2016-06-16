@@ -1,0 +1,112 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        //todo:  window窗口
+
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+        var dat=$('#List_dat').datagrid({
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#List_dat');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        })
+
+        $('#bt').linkbutton({
+            text:'检索'
+        }).bind('click',function(){
+
+            $('#List_dat').datagrid('load',{
+                'Sqlpath':{'select':'CourseManager/One_huishouzhan.SQL','count':'CourseManager/One_huishouzhan_count.SQL'},
+                'bind':{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':STUDENTNO':$('[name=studentno]').val(),
+                    ':COURSENOGROUP':$('[name=courseno]').val()}
+            })
+            wd_one.window({closed:false})
+        })
+
+
+        function huifu(){
+            var rowList=$('#List_dat').datagrid('getChecked')
+            if(rowList==''){
+                return $.messager.alert('提示','您还没有选择数据');
+            }
+            ajiakesi('__URL__/huifu/hasJson/1',{'YEAR':parent.$('[name=YEAR]').val(),'TERM':parent.$('[name=TERM]').val(),
+                bind:rowList},function(c){
+                if(c==''){
+                    $.messager.alert('提示','恢复成功')
+                }else{
+                    $.messager.alert('提示',c)
+                }
+                $('#List_dat').datagrid('load')
+
+            })
+        }
+
+        $('#e_add').bind('click',huifu)
+        $('#admin_add').bind('click',huifu)
+
+
+    })
+
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #ffffff">
+
+
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+    &nbsp&nbsp&nbsp&nbsp<label for="sstudentno">设定学号:</label>
+                        <input type="text" name="studentno" id='sstudentno' value="%">&nbsp&nbsp&nbsp&nbsp
+
+                        <label for="ccourseno">设定课号:</label>
+                        <input type="text" name="courseno" id='ccourseno' value="%">&nbsp&nbsp&nbsp&nbsp
+              查看某学期被删除的选课记录,可以选定后恢复
+                        <a href="javascript:void(0)" id="bt">检索</a>
+            &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>恢复</a>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List_dat"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+                    <th data-options="field:'xm',width:220,align:'right'" align="center">姓名</th>
+                    <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                    <th data-options="field:'km',width:200,align:'right'" align="center">课名</th>
+                    <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                    <th data-options="field:'scyy',width:200,align:'right'" align="center">删除原因</th>
+                    <th data-options="field:'xkjhn',width:100,align:'right'" align="center">修课计划内</th>
+                    <th data-options="field:'xkfs',width:100,align:'right'" align="center">修课方式</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_add'>恢复</div>
+
+    </div>
+</body>
+</html>

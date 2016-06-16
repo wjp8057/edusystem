@@ -1,0 +1,43 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+        <script>
+            $(function(){
+
+                //todo:同步学生素质学分汇总表
+                $('[name=together]').bind('click',function(){
+                    $.messager.confirm('提示','您确定要同步学生素质学分汇总表吗?',function(c){
+                        if(c){
+                            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'CourseManager/Three_five_tongbu.SQL'},function(c){
+                                $.messager.alert('提示','已成功完成更新')
+                            })
+
+                        }
+                    })
+                })
+
+                $('[name=bixiu]').bind('click',function(){
+                    $.messager.confirm('提示','您确定要给学生选择课程吗?',function(c){
+                        if(c){
+                           ajiakesi('__URL__/bixiu',{'year':parent.$('[name=YEAR]').val(),'term':parent.$('[name=TERM]').val()},function(c){
+                                $.messager.alert('提示',c)
+                            })
+
+                        }
+                    })
+
+                })
+            })
+        </script>
+<body style="background: #fff">
+<p><a href="javascript:void(0)"  name="together" class="easyui-linkbutton">同步学生素质学分汇总表</a></p>
+<input type="hidden" name="MID" value="CG06"><input type="hidden" name="SQL" value="UPDATECREDIT.SQL"><input type="hidden" name="XML" value=" ">
+
+<p></p>
+<p><font face="黑体" size="3" >同步学生素质学分汇总表：本操作更新所有学分的已获得的素质学分，包括创新技能学分以及素质类课程的学分。用于公选课筛选时候参考用。</font></p>
+<p><a href="javascript:void(0)"  name="bixiu" class="easyui-linkbutton">给所有学生选必修课和模块课</a></p>
+<input type="hidden" name="MID" value="CG06"><input type="hidden" name="SQL" value="UPDATECREDIT.SQL"><input type="hidden" name="XML" value=" ">
+
+<p></p>
+<p><font face="黑体" size="3" >本操作将为所有学生选必修课与模块课（根据开课计划中的属性），休学、延长学业学生除外，专业选修课除外。</font></p>
+
+</body>

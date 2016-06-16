@@ -1,0 +1,83 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-major","menuname": "专业管理",
+            "menus": [
+                {"menuid": "11","menuname": "专业代码管理","icon":"icon-file","url": "__ROOT__/index.php?g=Major&m=Code&a=codeq"},
+                {"menuid": "12","menuname": "专业条目管理","icon": "icon-file2","url": "__ROOT__/index.php?g=Major&m=Major&a=majors"},
+                {"menuid": "12","menuname": "检索专业","icon": "icon-book","url": "__ROOT__/index.php?g=Major&m=Plan&a=selectmajors"},
+                {"menuid": "13","menuname": "专业培养计划","icon": "icon-file3","url": "__ROOT__/index.php?g=Major&m=Plan&a=plans"}
+            ]
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height:31px; background: url(__ROOT__/res/img/bg2.jpg);line-height:31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:hidden; color:#000000; " >
+            <span style="font-size: 20px">专业管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">专业管理：实现专业管理、根据培养计划进行毕业审核功能。包含新建专业、检索专业、检索专业培养计划、毕业审核等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、专业代码管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可添加或者修改、删除、查看全校所有专业，并设定编号。编号唯一通常为6位有效数字，不能与其他编号重复。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、专业条目管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">学院可以检索、查看所有的专业信息，但只能对本院的专业信息进行修改、新增、删除操作。教务处可以对全校所有的专业信息进行操作管理。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、检索专业:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、学院可以查看、检索全校所有的专业信息和培养计划，但只能对本院专业的培养计划进行新增、删除、修改，并且对学生个人或者全班进行毕业审核。
+            <br>2、教务处可以对全校所有的专业培养计划进行操作管理。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、专业培养计划:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、学院可以查看、检索全校所有的培养计划，但只能对本院专业的培养计划进行删除、修改，并且对学生个人或者全班进行毕业审核。
+            <br>2、教务处可以对全校所有的专业培养计划进行操作管理。
+        </p>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

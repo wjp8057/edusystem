@@ -1,0 +1,281 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item.field);
+                e.editor = item.editor;
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param.field);
+            e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item);
+                e.editor = {};
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param);
+            e.editor = {};
+        }
+    }
+});
+$(function()
+{
+    var indexrow=undefined;                                                              // 保存索引键的变量
+    var pd=false;                                                                         //新增标志
+    var  dat=$('#meinfo').datagrid({
+        url:'__URL__/methods/hasJson/1',
+        fit:true,
+        columns:[[{checkbox:true},{field:'METHODID',title:'方法ID', width:100,sortable:true,align:'center',editor:{
+            type:'validatebox',
+            options:
+            {
+                required:true
+            }
+        }},{field:'ROLES',title:'授权角色', width:100,sortable:true,align:'center',editor:{
+            type:'validatebox',
+            options:
+            {
+                required:true
+            }
+        }},{field:'DESCRIPTION',title:'说明', width:150,align:'center',sortable:true,editor:{
+            type:'validatebox',
+            options:
+            {
+                required:true
+            }
+        }},{field:'ACTION_PATH',title:'授权Action',align:'center',width:400,sortable:true,editor:{
+            type:'validatebox',
+            options:
+            {
+                required:true
+            }
+        }}]],
+
+        sortName:'METHODID',                      //排序用的
+        sortOrder:'asc',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        onRowContextMenu:function(e,rowindex,row){
+            var tt=$('#meinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        toolbar:"#tdemo",onDblClickRow:function(keyrow,dataRow){
+            dat.datagrid('removeEditor','METHODID');
+            if(indexrow!=undefined){
+                dat.datagrid('cancelEdit',indexrow);
+                indexrow=undefined;
+            }
+
+            if(indexrow==undefined){
+                //   dat.getagrid('endedit',indexrow);           //上一行完成编辑
+                dat.datagrid('beginEdit',keyrow);
+                indexrow=keyrow;
+            }
+        },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+            //alert(indexrow);
+            var Purl='';                //保存请求的URL地址的
+            var inserted=dat.datagrid('getChanges','inserted');
+            var updated=dat.datagrid('getChanges','updated');
+
+
+            if(inserted.length)
+                Purl='__URL__/methods/tag/insertme';
+            else if(updated.length)
+                Purl='__URL__/updateme/';
+
+            $.ajax({
+                url:Purl,
+                type:'POST',
+                data:dataRow,
+                success:function(content){
+                        alert(content);
+                    if(content)
+                    {
+                        indexrow=undefined;
+                        dat.datagrid('reload');
+                        alert('操作成功！');
+                    }
+                    else
+                    {
+                        indexrow=undefined;
+                        dat.datagrid('reload');
+                        alert('操作失败！');
+                    }
+                }
+
+            })
+        }
+    });
+    $('#dtnfo').layout({
+    })
+    var searcher=$('#searcher').linkbutton({'text':'搜索','iconCls':'icon-search'});                 //搜索按钮
+
+
+    $('#e_add').bind('click',function(){
+        if(!pd)
+        {
+            dat.datagrid('addEditor',{
+                field:'METHODID',
+                editor : {
+                    type : 'validatebox',
+                    options :
+                    {
+                        required : true
+                    }
+                }});
+            dat.datagrid('insertRow',{
+                index:0,
+                row:{
+                }
+            });
+            dat.datagrid('beginEdit',0);
+            indexrow=0;
+        }
+        pd=true;
+    })
+
+    function ddel(){
+        var row2 = dat.datagrid('getSelections');
+        if (row2.length)
+        {
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b)
+                {
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row2.length;i++)
+                    {
+                        infoarr[i]=row2[i].METHODID;
+                    }
+
+                    $.ajax(
+                            {
+                                url:'__URL__/methods/tag/deleteme',
+                                data:{'in':infoarr},
+                                type:'POST',
+                                success:function(C)
+                                {
+                                    if(C)
+                                    {
+                                        $.messager.alert('提示','删除成功！','?');
+                                        dat.datagrid('reload');
+                                    }
+                                    else
+                                    {
+                                        $.messager.alert('提示','删除失败','?');
+                                    }
+                                }
+                            })
+                }
+            });
+        }
+        }
+
+    $('#e_del').bind('click',ddel);
+    $('#admin_del').bind('click',ddel);
+
+    function eedit(){
+       var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+     //   dat.datagrid('removeEditor','METHODID');
+        if(rowList.length>1){
+           return $.messager.alert('提示','请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            return $.messager.alert('提示','请选择要编辑的数据');                         //用户没选择行
+        }else{
+            var row=dat.datagrid('getSelected')
+
+            openTabsWindows('编辑条目','__URL__/e_method/mid/'+row.METHODID,'',true)
+       /*     if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+
+            var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+            var index3 = dat.datagrid('getRowIndex', row3);
+            dat.datagrid('beginEdit', index3);
+            indexrow=index3;*/
+        }
+        $('#method_edit').window({closed:false})
+    }
+
+    $('#e_edit').bind('click',eedit);
+    $('#admin_edit').bind('click',eedit);
+
+
+    $('#e_back').bind('click',function(){
+        pd=false;
+        dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    })
+
+    $('#e_save').bind('click',function(){
+        dat.datagrid('endEdit',indexrow);
+        indexrow=undefined;
+    })
+
+
+
+
+})
+function sousuo()
+{  //点击搜索时候触发的事件
+    $('#meinfo').datagrid('load',{
+        METHODIDS: $.trim($('#mmethodid').val()),
+        ROLES:$.trim($('#jjuese').val()),
+        DESCRIPTION:$.trim($('#sshuoming').val())
+    })
+}
+</script>
+        <style>
+            *{margin:0px}
+        </style>
+<body>
+
+
+<div  class="easyui-layout"  data-options="border:false,fit:true" height:780px">
+<div id="tdemo">
+    <label for="mmethodid">方法ID号:</label>
+    <input type="text" name="methodid" id="mmethodid" size="20" value='%'  class="easyui-validatebox">
+    <label for="jjuese">授权角色:</label>
+    <input type="text" name="juese" id="jjuese" size="20"  value='%' class="easyui-validatebox">
+    <label for="sshuoming">授权角色:</label>
+    <input type="text" name="shuoming" id="sshuoming" size="20" value='%'  class="easyui-validatebox">
+    <a href="javascript:void(0)" id="searcher" onclick="sousuo()">搜索</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+</div>
+<div data-options="region:'center',border:false" style=";background:#eee;">
+    <div id="meinfo"></div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</div>
+</body>
+</html>

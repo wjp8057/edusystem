@@ -1,0 +1,1 @@
+select count(*) as ROWS from totalwork where (status<>2 and status<>4) and SCHOOL=:school and YEAR=:year AND TERM=:term

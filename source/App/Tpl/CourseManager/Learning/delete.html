@@ -1,0 +1,52 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno='{$Think.session.studnet_studentno}'
+
+    $(function(){
+            //$('#add_student_wd_List').window(new wind(0,0,false,false,false,false,true))
+
+            ajiakesi('__APP__/Status/Status/Squery/hasJson/1',{
+                'Sqlpath':{'select':'CourseManager/Four_studentPage_delete.SQL','count':'CourseManager/Four_studentPage_delete_count.SQL'},
+                'bind':{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':STUDENTNO':studentno}},function(c){
+                        $('#List_dat').datagrid('loadData',c);
+            })
+    })
+
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<body style="background-color: #ffffff">
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <!--<div data-options="region:'north',split:false" style="height:60px;">
+            <br>
+            <center><b><span face="隶书" style="font-size: 20px" id="title_name"></span></b></center>
+        </div>-->
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List_dat"
+                   data-options="fit:true,pagination:true,title:'<center>被删除的选课结果</center>'">
+                <thead>
+                <tr>
+                    <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+                    <th data-options="field:'xm',width:220,align:'right'" align="center">姓名</th>
+                    <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                    <th data-options="field:'km',width:200,align:'right'" align="center">课名</th>
+                    <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                    <th data-options="field:'scyy',width:200,align:'right'" align="center">删除原因</th>
+                    <th data-options="field:'xkfs',width:100,align:'right'" align="center">修课方式</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+</div>
+</body>
+</html>

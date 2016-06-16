@@ -1,0 +1,36 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var year='{$year}';
+    var term='{$term}'
+    $(function(){
+
+        //todo:点击按省查看情况汇总 datagrid========================================================start==============================
+        var shengobj=$('#sheng_datgrid').datagrid({
+            url:'__URL__/Studenthz/hasJson/1',
+            columns:[[
+            {checkbox:true},
+            {field:'PROVINCENAME',title:'省份',width:100,sortable:true,align:'center'
+            },
+            {field:'TOTAL',title:'应报到新生数',width:100,sortable:true,align:'center'
+            },
+            {field:'STOTAL',title:'实报到新生数',width:100,sortable:true,align:'center'
+            }
+        ]]
+    })
+        $('#sheng_datgrid').datagrid('load',{'sqlpath':{'count':'status/Three_hz_sheng_Count.SQL','select':'status/Three_hz_sheng_Select.SQL'}})
+        //var sheng_dat=$('#sheng_datgrid').datagrid(shengobj)
+    })
+</script>
+<body>
+<div  class="easyui-layout" data-options="fit:true" >
+<!--    <div data-options="region:'north',title:'',split:true,border:false" style="height:50px;">
+        <p align=center><span style="font-size:40">第2013学年第1学期新生报到情况汇总：</span></p>
+    </div>-->
+    <div data-options="region:'center',title:'<center>第{$year}学年第1学期新生报到情况汇总</center>',border:'false'" style="background:#eee;">
+        <div id="sheng_datgrid" data-options="fit:true,border:false">
+        </div>
+    </div>
+</div>
+</body>
+</html>

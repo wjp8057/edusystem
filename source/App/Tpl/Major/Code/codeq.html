@@ -1,0 +1,256 @@
+<include file=":Include:jqueryHeader" />
+<script>
+  $.extend($.fn.datagrid.methods, {
+        addEditor : function(jq, param)
+        {
+            if (param instanceof Array)
+            {
+                $.each(param, function(index, item)
+                {
+                    var e = $(jq).datagrid('getColumnOption', item.field);
+                    e.editor = item.editor;
+                });
+            }
+            else
+            {
+                var e = $(jq).datagrid('getColumnOption', param.field);
+                e.editor = param.editor;
+            }
+        },
+        removeEditor : function(jq, param)
+        {
+            if (param instanceof Array)
+            {
+                $.each(param, function(index, item)
+                {
+                    var e = $(jq).datagrid('getColumnOption', item);
+                    e.editor = {};
+                });
+            }
+            else
+            {
+                var e = $(jq).datagrid('getColumnOption', param);
+                e.editor = {};
+            }
+        }
+    });
+    $(function(){
+        var pd=false;
+        var indexrow=undefined;                                   // 保存索引键的变量
+        var  dat=$('#coinfo').datagrid({
+            url:'__URL__/codeq/hasJson/1',
+            fit:true,onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#coinfo');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            columns:[[{checkbox:true},{field:'CODE',title:'编号', width:150,align:'center',editor:{
+                type:'validatebox',
+                options:
+                {
+                    required:true
+                }
+
+            }},{field:'NAME',title:'名称', width:150,align:'center',editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+            }}]],
+            sortName:'CODE',                                       // 排序用的
+            sortOrder:'asc',
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+            toolbar:'#tdemo',onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+                //alert(indexrow);
+                var Purl='';                //保存请求的URL地址的
+                var inserted=dat.datagrid('getChanges','inserted');
+                var updated=dat.datagrid('getChanges','updated');
+
+
+                if(inserted.length){
+                    Purl='__URL__/insertco/hasJson/1';
+                }else if(updated.length){
+                    Purl='__URL__/updateco/hasJson/1';
+                }
+
+                $.ajax({
+                    url:Purl,
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                        //alert(content);
+                        if(content)
+                        {
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            alert('操作成功！');
+                        }
+                        else
+                        {
+                            indexrow=undefined;
+                            alert('操作失败！');
+                            dat.datagrid('reload');
+                        }
+
+                    }
+
+                })
+            }
+        });
+        $('#dtnfo').layout({
+        })
+        var searcher=$('#searcher').linkbutton({});                 //搜索按钮
+
+
+
+
+        $('#e_add').bind('click',function(){
+            if(!pd)
+            {
+                dat.datagrid('addEditor',{field:'CODE',title:'编号', width:150,sortable:true,editor:{
+                    type:'validatebox',
+                    options:
+                    {
+                        required:true
+                    }}});
+                dat.datagrid('insertRow',
+                        {
+                            index:0,
+                            row:{
+                            }
+                        });
+                dat.datagrid('beginEdit',0);
+                indexrow=0;
+            }
+            pd=true;
+        })
+
+
+        function ddel(){
+            var row2 = dat.datagrid('getSelections');
+            if (row2.length){
+                $.messager.confirm('提示','您确定要删除选中的记录吗',function(b){
+                    if(b){
+                        var infoarr=[];                      // 存储删除信息的数组
+                        for(var i=0;i<row2.length;i++){
+                            infoarr[i]=row2[i].CODE;
+                        }
+
+                        $.ajax({
+                            url:'__URL__/deleteco/hasJson/1',
+                            data:{'in':infoarr},
+                            type:'POST',
+                            success:function(C){
+                                if(C){
+                                    $.messager.alert('提示','删除成功！','?');
+                                    dat.datagrid('reload');
+                                    pd=false;
+                                }else{
+                                    $.messager.alert('提示','删除失败,没权限操作','?');
+                                }
+                            }
+                        })
+                    }
+                });
+            }
+        }
+
+        $('#e_del').bind('click',ddel)
+        $('#admin_del').bind('click',ddel)
+        function eedit(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            dat.datagrid('removeEditor','CODE');
+            if(rowList.length>1){
+                alert('请选择一条进行编辑,不能选多条');             //用户选了多行编辑
+            }else if(rowList.length<1){
+                alert('请选择要编辑的数据');                         //用户没选择行
+            }else{
+                if(indexrow!=undefined){
+                    dat.datagrid('endEdit',indexrow);
+                }
+
+                var row3 = dat.datagrid('getSelected');              //获得被选中的索引
+                var index3 = dat.datagrid('getRowIndex', row3);
+                dat.datagrid('beginEdit', index3);
+                indexrow=index3;
+            }
+        }
+
+        $('#e_edit').bind('click',eedit)
+        $('#admin_edit').bind('click',eedit);
+
+        $('#e_back').bind('click',function(){
+            pd=false;
+            dat.datagrid('rejectChanges');
+            indexrow=undefined;
+        })
+
+        $('#e_save').bind('click',function(){
+            dat.datagrid('endEdit',indexrow);
+            pd=false;
+
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    })
+
+    function cmdsearch()
+    {  //点击搜索时候触发的事件
+        $('#coinfo').datagrid('load',{
+            CODE: $.trim($('#tdemo').find('[name=code]').val()),
+            NAME: $.trim($('#tdemo').find('[name=name]').val())
+        })
+
+    }
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" height:780px">
+<div id="tdemo">
+    <form action="__URL__" method="POST" id="biaodan">
+                <label for="ccode">代码编号:</label>
+                    <input type="text" name="code" id='ccode' size="30"  value='%'  class="easyui-validatebox">
+
+                    &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                <label for="nname">专业名称:</label>
+                    <input type="text" name="name" id="nname" size="30"  value='%'  class="easyui-validatebox">
+
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"  onclick=cmdsearch() id="searcher">搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+
+    </form>
+</div>
+<div data-options="region:'center',border:false" style=";background:#eee;">
+    <div id="coinfo"></div>
+</div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</body>
+</html>

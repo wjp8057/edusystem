@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<script language="javascript">
+    function updatetotal(){
+        //如果其中一个还没有输入数据，跳出来。
+        if(SSCORE.value==""||XSCORE.value=="")
+            return false;
+        if(!isInteger(SSCORE.value)||!isInteger(XSCORE.value)||100-SSCORE.value-XSCORE.value<0){
+            alert("学生评分或者学院评分比例输入有误，请检查数据！");
+            return false;
+        }
+        TSCORE.value=100-SSCORE.value-XSCORE.value;
+
+        var sbli=SSCORE.value;
+        var xbli=XSCORE.value;
+        var tbli=100-SSCORE.value-XSCORE.value;
+
+        /*dsoDATASET.recordset.moveFirst();
+         while(!dsoDATASET.recordset.EOF){
+         dsoDATASET.recordset("TOTAL").value=Math.round(dsoDATASET.recordset("SSCORE").value*sbli)/100+Math.round(dsoDATASET.recordset("XSCORE").value*xbli/20)/100+Math.round(dsoDATASET.recordset("TSCORE").value*tbli)/100+Math.round(dsoDATASET.recordset("ADDSCORE").value*100)/100;
+         dsoDATASET.recordset.moveNext();
+         }
+         FillScore(1);
+         ComputeState();*/
+    }
+    function isInteger(Str)
+    {
+        var regu = /^[0-9]{1,}$/;
+        return regu.test(Str);
+    }
+    function ComputeState(){ //计算成绩分布
+        //计算优秀率
+        var level1=0;        // 优秀
+        var level2=0;        // 良好
+        var level3=0;        // 中等
+        var level4=0;        // 及格
+        var level5=0;       // 不及格
+        var Score;
+        var count=dsoDATASET.recordset.recordCount;
+        dsoDATASET.recordset.moveFirst();
+        while(!dsoDATASET.recordset.EOF){
+            Score=dsoDATASET.recordset("TOTAL").value;
+            if(Score>=90)
+                level1++;
+            else if(Score<90&&Score>=80)
+                level2++;
+            else if(Score<80&&Score>=70)
+                level3++;
+            else if(Score<70&&Score>=60)
+                level4++;
+            else level5++;
+            dsoDATASET.recordset.moveNext();
+        }
+        YOU.innerText=Math.round(level1*100/count)+"%";
+        LIANG.innerText=Math.round(level2*100/count)+"%";
+        ZHONG.innerText=Math.round(level3*100/count)+"%";
+        JI.innerText=Math.round(level4*100/count)+"%";
+        BUJI.innerText=Math.round(level5*100/count)+"%";
+    }
+</script>
+<p align="center">
+<span style="font-size: 11pt">学生评分占:<input type="text" size="2" style="cursor:hand;border-size: 0;vertical-align: middle; color: #0000FF; border-style: solid; border-color: #FFFFFF" name="SSCORE" id="SSCORE" onblur="return updatetotal()">%，
+学院评分占:<input type="text" size="2" style='cursor:hand;border-size: 0; color: #0000FF; border-style: solid;vertical-align: middle; border-color: #FFFFFF;' name="XSCORE" id="XSCORE" onblur="return updatetotal()">%，
+同行评分占:<input type="text" size="2" style='cursor:hand;border-size: 0; color: #0000FF; border-style: solid;vertical-align: middle; border-color: #FFFFFF;' name="TSCORE" id="TSCORE" readonly> %</span>&nbsp;&nbsp;&nbsp;&nbsp;
+</p>
+
+<DIV align=center><FONT size=2><BR></FONT>
+    <TABLE height=1 cellSpacing=0 cellPadding=1 width="100%" border=1 collapse?
+    border-collapse:>
+    <TBODY>
+    <TR>
+        <TD align=center width="8%" height=1><font face="宋体" color="#0000ff" size="2">成绩</font></TD>
+        <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">优秀（90分以上）</font></TD>
+        <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">良好（80-89分)</font></TD>
+        <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">中等（70-79分）</font></TD>
+        <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">及格（60-69分）</font></TD>
+        <TD align=center width="20%" height=1><font face="宋体" color="#0000ff" size="2">不及格（60分以下）</font></TD>
+    </TR>
+    <TR>
+        <TD align=center width="8%" height=1><FONT face=宋体 color=#0000ff
+                                                   size=2>百分率</FONT></TD>
+        <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                    size=2><LABEL id=YOU></LABEL> </FONT></TD>
+        <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                    size=2><LABEL id=LIANG></LABEL> </FONT></TD>
+        <TD  align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                     size=2><LABEL id=ZHONG></LABEL> </FONT></TD>
+        <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                    size=2><LABEL id=JI></LABEL> </FONT></TD>
+        <TD  align=middle width="20%" height=1><FONT face=宋体 color=#0000ff
+                                                     size=2><LABEL id=BUJI></LABEL> </FONT></TD>
+    </TR>
+    </TBODY>
+    </TABLE>
+</DIV>
+</body>
+</html>

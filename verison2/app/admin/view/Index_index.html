@@ -1,0 +1,60 @@
+<layout name="layout" />
+<body class="easyui-layout"   fit="true"   scroll="no" >
+<script type="text/javascript">
+    var menuTabs = null;
+    $(function() {
+        _menus = eval('(' + '{$menu}' + ')');
+        menuTabs = $("#west").cwebsFrame(_menus, "功能介绍");
+
+        $('#loading-mask').fadeOut(); //关闭遮罩
+        //绑定退出事件
+        $('#loginOut').click(function() {
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if (r) {
+                    location.href = '{$ROOT}/Home/Login/logout';
+                }
+            });
+        });
+        var s=getRequest();
+        if(s!=-1) {
+            var obj=$("a[menuid='"+s+"']");
+            obj.click();
+            obj.each(function(){
+                menuTabs.menuObj.accordion('select',$(this).parents('.panel').children().first().text());
+            });
+        }
+    });
+</script>
+<noscript>
+    抱歉，请开启脚本支持！
+</noscript>
+<!-- 正在加载窗口 -->
+<div id="loading-mask" >
+    <div id="pageloading">
+        <img src="{$ROOT}/img/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+<!-- 头部 -->
+<div id="top" region="north" split="false" border="false" >
+    <span style="float:right; padding-right:30px;">
+        <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-role'">{$USERINFO.username}/{$USERINFO.realname}({$USERINFO.schoolname})</a> |
+        <a href="{$ROOT}/Home/Index/index"  class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-home'">返回首页</a>
+        <a href="#"  class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-exit'" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="{$ROOT}/img/logo_min.jpg" /></span>
+</div>
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="功能导航" style="width:130px;" id="west"></div>
+<!-- 初始内容页 -->
+<div data-options="region:'center',border:'false'" style="overflow: hidden" scroll="no">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" style="overflow: hidden" scroll="no" >
+        <div class="welcome">
+            欢迎使用系统管理
+        </div>
+    </div>
+</div>
+<div id="footer" data-options="region:'south',border:false">
+    {$COPYRIGHT}
+</div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style>
+    a{color:blue;text-decoration:underline}
+</style>
+<script>
+var creditarr=['','创新学分','技能学分','素质学分']
+var panduan=0
+/* eval('var kill={$tplarr}')//学院数组*/
+var schoolname='{$schoolname.SCHOOL}',teachername='{$schoolname.NAME}',year=parent.$('#YEAR').val(),term=parent.$('#TERM').val()
+
+//var student_list_arr=[]
+$(function(){
+
+    $('#ss').bind('click',function() {
+        $('#apply_dat').datagrid('load', {
+            'studentno': $.trim($('[name=studentno]').val()),
+            'projectname': $.trim($('[name=projectname]').val()),
+            'lx': $('[name=type]').val(),
+            'lb': $('[name=leibie]').val(),
+            'year': parent.$('#YEAR').val(),
+            'term': parent.$('#TERM').val(),
+            'schoolno':$('[name=search_school]').val()
+        });
+    });
+
+    //到处EXCEL
+    $('#e_excel').bind('click',function(){
+        var rowlist=$('#apply_dat').datagrid('getRows')
+//        if(rowlist==''){
+//            return $.messager.alert('提示','你还没检索任何数据')
+//        }
+        $('[name=year_e]').val(parent.$('#YEAR').val())
+        $('[name=term_e]').val(parent.$('#TERM').val())
+        $('[name=projectname_e]').val($('[name=projectname]').val())
+        $('[name=lx_e]').val($('[name=type]').val())
+        $('[name=studentno_e]').val($('[name=studentno]').val())
+        $('[name=lb_e]').val($('[name=leibie]').val())
+        $('[name=sc_e]').val($('[name=search_school]').val())
+        $('#cpexcel').submit()
+    });
+
+});
+</script>
+<style>
+    #project_info td{border:1px #95B8E7 solid;
+    }
+    #aplly_Details td,#project_info_edit td{border:1px #95B8E7 solid;height:20px
+    }
+    #project_info input,#project_info_edit input{height:23px;vertical-align:middle;}
+    .bt{height:35px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<!--todo: 进来的默认页面-->
+<body >
+
+
+<div id="apply_list" class="easyui-panel"
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+
+    <div id="cc" class="easyui-layout" data-options="fit:true,border:false">
+        <div id="tdemo">
+            项目名称：
+            <input type="text" name="projectname" size="10" value="%">
+            &nbsp&nbsp
+
+            学分类别：
+            <select name="type">
+                <option value="%">全部</option>
+                <option value="1">创新学分</option>
+                <option value="3">素质学分</option>
+            </select>
+            &nbsp&nbsp
+            类别:
+               <select name="leibie">
+                   <option value="%">全部</option>
+                   <option value="单张">单张</option>
+                   <option value="统一">统一</option>
+               </select>
+            &nbsp&nbsp
+            学号:
+                <input type="text" name="studentno" value="%">
+            <b>学院:</b><select name="search_school" class="easyui-combobox">
+            <option value="%">全部</option>
+            <volist name="schools" id="p">
+                <option value="{$p.SCHOOL}">{$p.NAME}</option>
+            </volist>
+        </select>&nbsp&nbsp
+            <a href="javascript:void(0)" id="ss" class="easyui-linkbutton">查询</a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" id="e_excel" class="easyui-linkbutton" iconCls="icon-excel" plain="true">导出Excel</a>
+
+        </div>
+        <div data-options="region:'center',title:'',border:false,split:false">
+
+            <table id="apply_dat"  class="easyui-datagrid"
+                   data-options="url:'__URL__/select_file/list/1',fit:true,pageList:[20,50,100,200,500],border:false,pagination:true,singleSelect:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+
+                    <th align="center" data-options="field:'reason',width:330">项目名称</th>
+                    <th align="center" data-options="field:'name',width:100">姓名</th>
+                    <th align="center" data-options="field:'studentno',width:100">学号</th>
+                    <th align="center" data-options="field:'clsnm',width:100">班级</th>
+                    <th align="center" data-options="field:'lx',width:100,formatter:function(a,b,c){
+                        a = $.trim(a);
+                        if(a == '1'){
+                            return '创新';
+                        }else if(a == '3'){
+                            return '素质';
+                        }else{
+                            return a;
+                        }
+                    }">类型</th>
+                    <th align="center" data-options="field:'rd_time',width:100">认定时间</th>
+                    <th align="center" data-options="field:'bs',width:100">学院</th>
+                    <th align="center" data-options="field:'zssj',width:100,formatter:function(a,b,c){return a;}">证书时间</th>
+                    <th align="center" data-options="field:'lb',width:100">类别</th>
+                    <th align="center" data-options="field:'credit',width:100">学分</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+<form action="__URL__/select_file/hasJson/1" method="POST" id="cpexcel">
+    <input type="hidden" name="year_e">
+    <input type="hidden" name="term_e">
+    <input type="hidden" name="studentno_e">
+    <input type="hidden" name="projectname_e">
+    <input type="hidden" name="lx_e">
+    <input type="hidden" name="lb_e">
+    <input type="hidden" name="sc_e">
+</form>
+
+</body>
+</html>

@@ -1,0 +1,127 @@
+<html>
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
+<p align="center" style="font-size:22px">{$roomname}{$title}在{$year}学年第{$term}学期的周课表</p>
+<p align="center">打印时间：{$time}</p>
+<table id="WeekSchedule" name="WeekSchedule"  style="color: #000000; font-size: 10px; border-collapse: collapse" border="1" cellpadding="0" cellspacing="0" width="100%" height="196" bordercolorlight="#336699" bordercolordark="#003399">
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="13"><font size="2">节次/星期</font></td>
+        <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期一</font></td>
+        <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期二</font></td>
+        <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期三</font></td>
+        <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期四</font></td>
+        <td width="16%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期五</font></td>
+        <td width="5%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期六</font></td>
+        <td width="5%" align="center" bgcolor="#00FFFF" bordercolor="#3399CC" bordercolorlight="#008080" bordercolordark="#FFFFFF" height="13"><font size="2">星期天</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第一节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][1]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][1]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][1]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][1]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][1]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][1]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][1]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第二节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第三节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][2]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][2]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][2]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][2]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][2]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][2]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][2]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第四节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#F0F0F0" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">中午</font></td>
+        <td width="16%" align="center" bgcolor="#F0F0F0" height="34">{$msglist[1][8]}</td>
+        <td width="16%" align="center" bgcolor="#F0F0F0" height="34">{$msglist[2][8]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[3][8]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[4][8]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[5][8]}</td>
+        <td width="5%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[6][8]}</td>
+        <td width="5%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[7][8]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第五节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][3]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][3]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][3]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][3]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][3]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][3]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][3]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第六节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第七节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][4]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][4]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][4]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][4]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][4]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][4]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][4]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="17"><font size="2">第八节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#F0F0F0" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">下午</font></td>
+        <td width="16%" align="center" bgcolor="#F0F0F0" height="34">{$msglist[1][9]}</td>
+        <td width="16%" align="center" bgcolor="#F0F0F0" height="34">{$msglist[2][9]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[3][9]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[4][9]}</td>
+        <td width="16%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[5][9]}</td>
+        <td width="5%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[6][9]}</td>
+        <td width="5%" align="center" height="32" bgcolor="#F0F0F0">{$msglist[7][9]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第九节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][5]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][5]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][5]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][5]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][5]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][5]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][5]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第十节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第11节</font></td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[1][6]}</td>
+        <td width="16%" align="center" rowspan="2" height="34">{$msglist[2][6]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[3][6]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[4][6]}</td>
+        <td width="16%" align="center" height="32" rowspan="2">{$msglist[5][6]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[6][6]}</td>
+        <td width="5%" align="center" height="32" rowspan="2">{$msglist[7][6]}</td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">第12节</font></td>
+    </tr>
+    <tr>
+        <td width="10%" align="center" bgcolor="#3399CC" bordercolorlight="#008080" bordercolordark="#00FFFF" bordercolor="#00FFFF" height="16"><font size="2">时间未定</font></td>
+        <td colspan="7">{$msglist[0]}</td></tr>
+</table>
+<br>
+<br>
+
+</body>
+
+</html>
+

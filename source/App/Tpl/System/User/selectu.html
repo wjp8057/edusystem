@@ -1,0 +1,431 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+
+
+$(function(){
+
+
+    $('#handlerData').bind('click',function(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            if(rowList.length>1){
+                alert('请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+            }else if(rowList.length<1){
+                alert('请选择要编辑的数据');                         //用户没选择行
+            }else{
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                ajia(row3.jsh);
+                indexrow=row3;
+
+            }})
+
+            $('#handlerObject').bind('click',function(){
+                dat.datagrid('rejectChanges');
+                indexrow=undefined;
+            })
+        var upanduan=true;                        //判断用户输入的信息
+        var tpanduan=true;                        //判断teacherno的输入信息
+        var index;          //存放详情id
+        var hei=0;          //保存window高度的
+        var h = $(document).height();
+        if(h>'550'){          //表示不是在102*768
+            hei=620
+        }else{
+            hei=520
+        }
+        $('#combobox').combobox({                   //初始化combobox多选框
+            editable:false,
+            multiple:true
+        })
+        var indexrow=undefined;             //保存索引键的变量
+        var  dat=$('#scinfo').datagrid({
+            url:'__URL__/selectu/hasJson/1',
+            columns:[[{checkbox:true},
+                {field:'yhm',title:'用户名',width:300,align:'center',sortable:true,
+                    editor:{type:'validatebox',options:{required:true}}
+                },
+                {field:'jsh',title:'教师号',width:300,sortable:true,align:'center'
+                },
+                {field:'xm',title:'姓名',width:300,sortable:true,align:'center'
+                 },
+                {field:'zc',title:'职称',width:300,sortable:true,align:'center'
+                 },
+                {field:'xy',title:'学院名称',width:300,sortable:true,align:'center'
+                 },
+                {field:'xb',title:'性别',width:300,sortable:true,align:'center'
+                 },
+                {field:'js',title:'角色',width:300,sortable:true,align:'center'
+                }]],
+            pagination:true,
+            pageList:[30,50],
+            pageSize:30,
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#scinfo');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            toolbar:'#tdemo',onDblClickRow:function(keyrow,dataRow){
+                dat.datagrid('removeEditor','jsh');
+                if(indexrow!=undefined){
+                    dat.datagrid('cancelEdit',indexrow);
+                    indexrow=undefined;
+                }
+                if(indexrow==undefined){
+                    //   dat.getagrid('endedit',indexrow);           //上一行完成编辑
+                    dat.datagrid('beginEdit',keyrow);
+                    indexrow=keyrow;
+                }
+            }
+        });
+
+     //   dat.toolbar('#tdemo')
+        $('#dtnfo').layout({
+        })
+
+        //搜索方法
+        $('#searcher').bind("click",function(){
+            $('#scinfo').datagrid('load',{'USER':$('#USER').val().trim(),'ROLE':$('#ROLE').val().trim(),'DANWEI':$('#dw').val().trim()})
+        })
+
+        function ajia(data){                    //做查看详情时候触发
+            index=data;
+            $.ajax({
+                type:'POST',
+                url:'__URL__/editUser',                                                    //做ajax请求获取数据
+                data:{
+                    id:data
+                },
+                success:function(content2){
+                     eval('var one2='+content2);
+                   var one=$("#biaodan2 :text");
+
+                    var two=$('#biaodan2 select');
+                    var th=$("#"+one2['SEX']+"").attr('checked',true);
+
+                    var nm='';
+                // $("#"+one2['SEX']+"").attr("checked",'checked');
+                    for(var i=0;i<one.length;i++){
+                        nm=one[i].name
+                       one[i].value=one2[nm];
+                    }
+
+                    $('#PASSWORD').val(one2['PASSWORD'])
+                    for(var i=0;i<two.length;i++){
+                        nm=two[i].id;
+                        $("#"+nm+"").val(one2[nm]);
+                    }
+                    $("#combobox").combobox("setValues",one2['ROLES']);                     //设置多选值
+                    $('#TEACHERNO2').val(one2['TEACHERNO']);
+                    $('#chuangkou').window({
+                        closed:false,
+                        modal:true,
+                        height:hei,
+                        top:10,
+                        draggable:false,
+                        minimizable:false,
+                        maximizable:false
+                    })
+                }
+            })
+        }
+
+
+        var button=$('#xiugai').linkbutton({
+            'text':'修改',
+          'iconCls':'icon-edit'
+        })
+    //admin_access_menu_delete
+        button.bind('click',function (){
+            $("#TEACHERNO").blur();
+            $('#USERNAME').blur();
+            if(upanduan==false){                                //用户名不成立
+                $.messager.alert('提示','用户名输入不规范')
+                $('#USERNAME').focus();
+                return;
+            }
+            if(tpanduan==false){
+                $('#TEACHERNUM').focus();
+                $.messager.alert('提示','教师号输入不规范')
+                return;
+            }
+            if($('#info [name=PASSWORD]').val()==""){
+                $.messager.alert('提示','请输入密码')
+                return;
+            }
+
+
+            // alert(value);
+            var ct={
+                'NAME':$('#info [name=TEACHERNAME]').val(),            //教师名称
+                'USERNAME':$('#info [name=USERNAME]').val(),
+                'TEACHERNO':$('#info [name=TEACHERNO]').val(),
+                'POSITION':$('#info [name=POSITION]').val(),
+                'DAYSTOLIVE':$('#info [name=DAYSTOLIVE]').val(),
+                'PASSWORD':$('#PASSWORD').val(),
+                'TEACHERNO2':$('#info [name=TEACHERNO2]').val(),
+                // REVISIONPWD:$('#info [name=REVISIONPWD]').val(),
+                'SCHOOL':$('#info [name=SCHOOL]').val(),
+                'SEX':$('[name="SEX"]:checked').val()
+            }
+
+            ct.ROLE=$("#combobox").combobox("getValues");
+            $.ajax({
+                'url':'__URL__/updatedu',
+                'type':'POST',
+                'data':ct,
+                success:function(data){
+
+                    if(data=='true'){
+                        $.messager.alert('提示','修改成功')
+                        dat.datagrid('reload')
+                    }else{
+                        $.messager.alert('提示','修改失败,教师姓名或教师账号已被使用')
+                    }
+                    $('#chuangkou').window({
+                        closed:true
+
+                    })
+
+                }
+            })
+            //alert('#combobox').value;
+        });
+        $('#admin_edit').bind('click',function(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            if(rowList.length>1){
+                alert('请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+            }else if(rowList.length<1){
+                alert('请选择要编辑的数据');                         //用户没选择行
+            }else{
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                ajia(row3.jsh);
+                indexrow=row3;
+
+            }});
+
+
+
+
+
+
+        $("#TEACHERNO").bind('blur',username);
+
+        $('#USERNAME').bind('blur',teacher);
+
+
+        function teacher(){
+
+                $.ajax({
+                    'url':'__URL__/useryz',
+                    'type':'POST',
+                    'data':{
+                        'NAME':this.value
+                    },
+                    success:function(data){
+                        if(data=='sev'){
+                            $('#ct').html('<font color="red">不能为空！</font>')
+                            tpanduan=false;
+                        }else{
+                            $('#ct').html('<font color="green">可以使用的账号√</font>')
+                            upanduan=true;
+                        }
+                    }
+                })
+
+        }
+        function username(){
+            $.ajax({
+                'url':'__URL__/useryz',
+                'type':'POST',
+                'data':{
+                    'TEACHERNUM':this.value
+                },
+                success:function(data){
+                    if(data=='sev'){
+                        $('#ct2').html('<font color="red">教师号应该为6位！</font>')
+                        tpanduan=false;
+                    }else{
+                        $('#ct2').html('<font color="green">可以使用的教师√</font>')
+                        tpanduan=true;
+                    }
+                }
+            })
+        }
+
+    })
+</script>
+
+<body>
+<div class="easyui-window" id='chuangkou' title="编辑用户" data-options="width:530,closed:true,collapsible:false">
+    <form action="__URL__/courseyz" method="POST" id="biaodan2" name="biaodan2">
+        <table  align="center" cellspacing=15  id="info" border="0" style="margin-top:50px">
+            <tr>
+                <td align="right">
+                    <u>用户账号:</u>
+                </td>
+                <td>
+                    <input type="text" id="USERNAME" name="USERNAME"  style="width:200px" maxlength="10"  >&nbsp&nbsp<font color="red">*</font><span id="ct"></span>
+                    <input type="hidden" name="TEACHERNO2" id="TEACHERNO2" value="">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    <u>教师编号:</u>
+                </td>
+                <td>
+                    <input type="hidden" name="role" id="rl" value="">              <!--隐藏域存放权限-->
+                    <input  name="TEACHERNO" id="TEACHERNO" value="" size="10" maxlength="6" >&nbsp&nbsp<font color="red">*</font><span id="ct2"></span>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    职称:
+                </td>
+                <td>
+                    <select  name="POSITION" id="POSITION" style="width:150px;">
+                        <volist name="position" id="vo">
+                            <option value="{$vo.NAME}">{$vo.VALUE}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    密码:
+                </td>
+                <td>
+                    <input type="password" value="" name="PASSWORD"  id="PASSWORD" style="width:200px" maxlength="7">&nbsp&nbsp<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    密码有效期:
+                </td>
+                <td>
+                    <input class="easyui-validatebox" name="DAYSTOLIVE" value="-1" size="10"  >&nbsp负数，则意味着口令永不过期。
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    下次登录必须改密码:
+                </td>
+                <td>
+                    <input type="checkbox" name="REVISIONPWD" value="1">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    教师姓名:
+                </td>
+                <td>
+                    <input  name="TEACHERNAME" id="TEACHERNAME" value="" style="width:200px" maxlength="4" >&nbsp&nbsp<font color="red">*</font>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    性别:
+                </td>
+                <td>
+                    <input  name="SEX" id="M" TYPE="radio" value="M">男&nbsp&nbsp<input  name="SEX" id="F" TYPE="radio" value="F">女
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    学院:
+                </td>
+                <td>
+                    <select  id="SCHOOL" name="SCHOOL" style="width:150px;">
+                        <volist name="schools" id="vo">
+                            <option value="{$vo.SCHOOL}">{$vo.NAME}</option>
+                        </volist>
+
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">
+                    角色:
+                </td>
+                <td>
+                    <select id="combobox" class="easyui-combobox" name="dept" style="width:200px;">
+                        <volist name="roles" id="v">
+                            <option value="{$v.ROLE}">{$v.DESCRIPTION}({$v.ROLE})</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right" colspan="2">
+                    注：有下划线的是主键字段，不能为空，也不能重复。
+                </td>
+            </tr>
+
+            <tr style="height:50px" >
+                <td align="center" colspan="2" >
+                    <a href="javascript:void(0)" id="xiugai" >修改</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+   <!-- <div data-options="region:'north',split:true,border:false" style="height:70px;background:#E0ECFF">
+        <form action="__URL__/scjson" method="POST" id="biaodan">
+            <table style="margin-left:20px" cellspacing="15" >
+                <tr>
+                    <td><font size=6><b>用户名:</b></font></td>
+                    <td><input type="text" id="USER" size="10"  value=""></td>
+                    <td>&nbsp&nbsp</td>
+                    <td><font size=6><b>用户单位:</b></font></td>
+                    <td>
+                    <select id="dw" >
+                            <option value="" selected>所有</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.NAME}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                     </td>
+                    <td><font size=6><b>用户角色:</b></font></td>
+                    <td><input type="text" id="ROLE" size="10"  value=""></td>
+                    <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+                </tr>
+
+            </table>
+        </form>
+    </div>-->
+
+
+
+    <div id="tdemo">
+        <label for="USER">用户名:</label>
+        <input type="text" id="USER" placeholder='用户名' size="8" value="%">&nbsp
+        <label for="dw"> 学院:</label>
+       <select id="dw" >
+         <option value="%" selected>所有</option>
+            <volist name="schools" id="s">
+                <option value="{$s.NAME|trim=###}">{$s.NAME}</option>
+            </volist>
+        </select>&nbsp
+        <label for="ROLE">角色:</label>
+        <input type="text" id="ROLE" size="10" placeholder='用户角色' value="%">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+        <a href="#" id="handlerData" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" >编辑</a>
+        <a href="#" id="handlerObject" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true,fitColumns:true"></div>
+    </div>
+
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</body>
+</html>

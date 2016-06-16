@@ -1,0 +1,306 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+eval('type=\'{$codetype}\'')
+$(function(){
+    var major_dat=$('#major_dat').datagrid({
+        onRowContextMenu:function(e,rowindex,row){
+        major_dat.datagrid('rejectChanges')
+        var tt=$('#major_dat');
+
+        e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+        tt.datagrid('selectRow',rowindex);
+        $('#admin_access_menu').menu('show',{
+            left: e.pageX,
+            top: e.pageY
+        });
+    }
+    })
+
+    //todo:点击新建培养计划
+    $('#newplan').bind('click',function(){
+        var row=$('#major_dat').datagrid('getSelected')
+        if(row==null){
+            return $.messager.alert('提示','请您选择一条数据')
+        }
+        openTabsWindows('新建培养计划','__URL__/newplans/rowid/'+row.ROWID,'',true)
+    })
+
+    //todo:查看并修改专业培养计划
+    $('#editplan').bind('click',function(){
+        var row=$('#major_dat').datagrid('getSelected')
+
+        if(row==null){
+            return $.messager.alert('提示','请您选择一条数据')
+        }
+       // $('#dm').css('display','')
+        openTabsWindows('查看并修改专业培养计划','__URL__/editplans/rowid/'+row.ROWID,'',true)
+
+    })
+    $('#admin_edit').bind('click',function(){
+        var row=$('#major_dat').datagrid('getSelected')
+        if(row==null){
+            return $.messager.alert('提示','请您选择一条数据')
+        }
+        openTabsWindows('查看并修改专业培养计划','__URL__/editplans/rowid/'+row.ROWID,'',true)
+
+    })
+
+
+    //todo:先修课程按钮
+    $('#xxkc').bind('click',function(){
+        openTabsWindows('先修课程','__URL__/xianxiu/courseno/'+$('#xxCOURSENO').html(),'',true)
+    })
+
+    //todo:等价课程按钮
+    $('#djkc').bind('click',function(){
+        openTabsWindows('等价课程','__URL__/dengjia/courseno/'+$('#xxCOURSENO').html(),'',true)
+    })
+    var chuang={
+        modal:true,
+        fit:true,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+    var chuang2={
+        modal:true,
+        width:450,
+        height:400,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+
+    var chuang3={
+        modal:true,
+        width:470,
+        height:250,
+        minimizable:false,
+        maximizable:false,
+        closed:true
+    }
+
+    var wd=$('#wd').window(chuang)                  //window弹窗之    显示某个专业的培养计划的窗口
+
+    var counse_wd=$('#course_wd').window({modal:true,
+        width:420,
+        height:450,
+        minimizable:false,
+        maximizable:false,
+        closed:true})    //window弹窗之   显示某个课程详细信息的时候
+    var wd6=$('#wd6').window(chuang)                //window弹窗之     审核完毕显示的窗口
+   var wd7=$('#wd7').window(chuang3)                //window弹窗之      审核重修学分的弹出窗口
+    $('#wd').css('display','')
+
+    $('#wd6').css('display','')
+    $('#wd7').css('display','')
+    $('#course_wd').css('display','')
+    $('#zdm').css('display','')
+    $('#tb').css('display','')
+    var schoolno=''                          //todo:保存培养计划的所在学院号
+    var planNo=''                           //todo:保存培养计划号
+    var planobj=null                        //todo:毕业审核用
+    var indexrow=undefined;             //保存索引键的变量
+    $('#dtnfo').layout({})
+    //搜索方法
+    $('#searcher').bind("click",function(){
+        $('#major_dat').datagrid('load',{'Sqlpath':{'select':'major/query_major.SQL','count':'major/count_major.SQL'},bind:{':MAJORNO':$('#MAJOR').val(),':YEARS':$('#YEARS').val()+'%',':DEGREE':$('#DEGREE').val(),':SCHOOL':$('#SCHOOL').val()}})
+    })
+
+
+
+    var PRONO=[]            //保存教学计划号的数组
+
+    //:todo:添加到右边的方法
+    function Gotoright(obj,dataobj){
+        var index=dataobj.datagrid('getRowIndex',obj);
+        if(index!=-1)
+            return
+        dataobj.datagrid('insertRow',{index:0,row:obj});
+        dataobj.datagrid('beginEdit',0);
+    }
+//todo:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    function Gotoright2(obj,dataobj){
+        var index=dataobj.datagrid('getRowIndex',obj);
+        if(index!=-1)
+            return
+        dataobj.datagrid('appendRow',obj);
+
+    }
+
+
+    $('#chongxiuxuefen').linkbutton({
+        text:'提交审核',
+        iconCls:'icon-edit'
+    }).bind('click',function(){
+
+            })
+
+
+
+})
+
+//todo:赋value值
+function fuvalue(){
+    alert(this);
+}
+
+//todo:赋值
+function fuzhi(tablename,one){
+    for(var i in one){
+        $('#'+tablename+' [name='+i+']').val(one[i]);
+    }
+}
+
+
+//todo:取input值
+function quzhi(name,fuhao,attr){
+    var obj={};
+    obj['arr']={}
+    var inputList=$('#'+name+' input')
+    for(var i=0;i<inputList.length;i++){
+        if(inputList[i][attr]==''){
+            continue;
+        }
+        if(fuhao)
+            obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)     //todo:LIKE
+        else
+            obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)              //todo:=
+    }
+    return obj;
+}
+
+
+
+//todo:ajax请求的方法
+function ajiakesi(url,data,func){
+    $.ajax({
+        type:'post',
+        url:url,
+        data:data,
+        error:function(a,b,c){
+            $.messager.alert('系统提示','服务器异常,请求失效')
+        },
+        success:function(c){
+            func(c);
+        }
+    })
+}
+
+//todo:判断是否是选择了一条的函数
+function yitiao(obj,str1,str2){
+    var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+    if(rowList.length>1){
+        $.messager.alert('提示',str1);                         //用户选了多行编辑
+    }else if(rowList.length<1){
+        $.messager.alert('提示',str2);                         //用户没选择行
+    }else{
+        return true;
+    }
+    return false;
+}
+
+
+
+function ziback(name){
+    name.window({
+        closed:true
+    })
+}
+
+</script>
+
+<body>
+<!--todo:审核重修学分-->
+<div id="wd7" title="毕业审核结果" style="display: none">
+
+    <p align="center"><font color="#FF0000">设定条件：</font><font color="#000000">列出</font>重修学分超过必修总学分比例为<input type="text" name="BL" size="3" value="0.2">&nbsp;&nbsp;&nbsp;
+        或重修最低学分为<input type="text" name="MIN_XF" size="3" value="25"></p>
+
+    <p align="center">　</p>
+
+    <p align="center">请输入待审核的学号&nbsp; <input type="text" name="STUDENTNO" size="9" value="">&nbsp;&nbsp;&nbsp;&nbsp;
+        班号&nbsp; <input type="text" name="CLASSNO" size="8" value="">
+
+    </p>
+    <p align="center">
+        <a id="chongxiuxuefen" >查询</a>
+    </p>
+</div>
+<!--todo:审核某个培养计划-->
+<div id="wd6" title="毕业审核结果" style="display: none">
+    <p align=center><font color=#0000FF face=黑体 size=4><span id="majorname"></span>&nbsp;&nbsp;<span id="planname"></span> &nbsp;&nbsp; 毕业审核报告</font></p>
+    <p align=center><font color=#000000 size=3>要求总学分:<span id="zxf"></span>&nbsp;&nbsp;必修学分：<span id="xf"></span>&nbsp;&nbsp;审核时间：<span id="shenheshijian"></span></font></p><p align=center><b><font size=4>@_@(:终于审核结束了！:) @_@ 本次共审核了0人</font></b></p>
+</div>
+<script>
+    var wi=$('#wd3').css('width')
+    $('#right1').css('width',parseInt(wi)/2);
+    $('#right_ADDSTUDENT').css('width',parseInt(wi)/2);
+
+</script>
+<div  class="easyui-layout"  data-options="border:false,fit:true,closed:true" id="dm" style="display: none">
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options=""></div>
+    </div>
+</div>
+
+<div  class="easyui-layout"  data-options="border:false,fit:true,closed:true" id="zdm" style="display: none">
+    <div id="tdemo">
+                    <label for="YEARS">修学年限:</label>
+                        <select size="1" id="YEARS">
+                            <option value="%" selected>所有学制</option>
+                            <option value="2">二年制</option>
+                            <option value="3">三年制</option>
+                            <option value="4" >四年制</option>
+                            <option value="5">五年制</option>
+                        </select>
+                    <label for="MAJOR">专业名称:</label>
+                        <select id="MAJOR">
+                            <option value="%">所有专业</option>
+                            <volist name="majorcode" id="v">
+                                <option value="{$v.CODE}">{$v.NAME}</option>
+                            </volist>
+                        </select>
+                        <label for="DEGREE">授予学位:</label>
+                        <select id="DEGREE" >
+                            <option value="%" selected>所有学位</option>
+                            <volist name="degreeoptions" id="d">
+                                <option value="{$d.CODE}">{$d.NAME}</option>
+                            </volist>
+                        </select>
+                        <label for="SCHOOL">开设学院:</label>
+                            <select id="SCHOOL" >
+                                <option value="%" selected>所有学院</option>
+                                <volist name="schools" id="s">
+                                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                                </volist>
+                            </select>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+                        <a href="#" class="easyui-linkbutton" id='editplan' data-options="iconCls:'icon-edit',plain:true">查看并修改专业培养计划</a>
+                        <a href="#" class="easyui-linkbutton" id='newplan' data-options="iconCls:'icon-add',plain:true">新增培养计划</a>
+               </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id='major_dat' toolbar='#tdemo' class="easyui-datagrid" data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true">
+            <thead>
+            <tr>
+                <th data-options="field:'zymc',width:200,align:'center'">专业名称</th>
+                <th data-options="field:'xk',width:100,align:'center'">学科</th>
+                <th data-options="field:'xz',width:100,align:'center'">学制(年)</th>
+                <th data-options="field:'xw',width:100,align:'center'">学位</th>
+                <th data-options="field:'xy',width:200,align:'center'">学院</th>
+                <th data-options="field:'bz',width:100,align:'center'">备注</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_edit'>查看并修改专业培养计划</div>
+    </div>
+</div>
+<div id="tb" style="display: none">
+
+</div>
+
+</body>
+</html>

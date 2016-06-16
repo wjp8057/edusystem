@@ -1,0 +1,87 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function getYearTerm(){
+        return {
+            'year':parent.$('#YEAR').val().trim(),
+            'term':parent.$('#TERM').val().trim()
+        };
+    }
+
+    $(function(){
+        var iyear = $('#t_year');
+        var iterm = $('#t_term');
+
+        var yt = getYearTerm();
+
+        if(yt.term>1){
+            iterm.val(1);
+            iyear.val(yt.year);
+        }else{
+            iterm.val(2);
+            iyear.val(yt.year-1);
+        }
+
+        $('#bt').bind('click',function(){
+            $.messager.alert('提示','将查询学分75分以下的学生','info',function(){
+                $.post('__URL__/DegreeScreening/tag/search',{'YEAR':iyear.val().trim(),'TERM':iterm.val().trim(),':COURSENO':$('#courseno').val().trim()},function(data){
+                    console.log('search return',data);
+                });
+            });
+        });
+
+        $('#bt2').bind('click',function(){
+            $.messager.confirm('提示','点击确定初始化学期初排考',function(c){
+                if(c){
+                    $.post('__URL__/chushihua',{'YEAR':iyear.val().trim(),'TERM':iterm.val().trim()},function(c){
+                        $.messager.alert('提示',c);
+                    });
+                }
+            });
+        });
+
+
+        $('#clear').bind('click',function(){
+            $.post('__APP__/Book/Book/Bexecute',{':ID':'EXE2','exe':'delete from TestStudent'},function(){
+                $.messager.alert('提示','删除成功。');
+            });
+        });
+
+    })
+</script>
+<style>
+    td{border:1px #95B8E7 solid;}
+    span{border:0px solid red;;vertical-align:middle;}
+</style>
+<body style="background-color: #fff">
+
+<div id="apply_list" class="easyui-panel"
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+
+    <div id="cc" class="easyui-layout" data-options="fit:true,border:false">
+        <div id="tdemo">
+            学年：<input type="text" id="t_year" size="10">
+            学期：<input type="text" id="t_term" size="10">
+            课程号(9位)：<input type="text" id="courseno" size="9" maxlength="9">
+            <!-- 查找学分75分以下的本科学位课 -->
+            <a href="javascript:void(0)" id="bt" class="easyui-linkbutton" iconCls="icon-search" >查找</a>
+            <a href="javascript:void(0)" id="clear" class="easyui-linkbutton"  plain="true"  iconCls="icon-ok" >清理</a>
+            <a href="javascript:void(0)" id="bt2" class="easyui-linkbutton"  plain="true" iconCls="icon-ok" >初始化</a>
+        </div>
+        <div data-options="region:'center',title:'',border:false,split:false">
+
+            <table id="apply_dat"  class="easyui-datagrid"
+                   data-options="url:'__URL__/DegreeScreening/hasJson/1',fit:true,pageList:[20,50,100,200,500],border:false,pagination:true,singleSelect:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th align="center" data-options="field:'reason',width:330">项目名称</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

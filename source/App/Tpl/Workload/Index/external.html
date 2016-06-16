@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link id='themes_css' rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/css/css.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/datagrid.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.fileDownload.min.js"></script>
+    <script type="text/javascript">
+        var current_datagrid=null;
+        var current_datagrid_obj=null;
+        var workload_external_obj=new Object();
+        workload_external_obj.editIndex=undefined; //用于存储填写时的index
+        var userSchool=$('#school', parent.document).val();
+        var workload_external_cmenu_obj=new Object();
+        workload_external_cmenu_obj.cmenu=""; //标题行右键菜单
+
+        var workload_external_obj2=new Object();
+        workload_external_obj2.editIndex=undefined; //用于存储填写时的index
+        var workload_external_distribute_row=undefined;// 当前正在二次分配的行
+        $(function(){
+            var tt=$('#workload_external_dg');
+            //生成主表
+            tt.datagrid({
+                idField:'id',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:20,
+                title:'外聘教师课时费统计表',
+                url:'/Workload/External/query?hasJson=true',
+                toolbar:'#workload_external_toolbar',
+                queryParams: {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val()
+                },
+                columns:[[
+                    {field:'schoolname',title:'开课学院',width:150,align:'center'},
+                    {field:'typename',title:'类型',width:100,align:'center'},
+                    {field:'levelname',title:'职称',width:100,align:'center'},
+                    {field:'work',title:'工作量',width:100,align:'center' },
+                    {field:'perwork',title:'课时标准',width:100,align:'center' },
+                    {field:'charge',title:'课时费',width:100,align:'center'}
+                ]]
+            });
+            //生成详细分配表
+            tt=$('#workload_external_dg2');
+            tt.datagrid({
+                idField:'id',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:100,
+
+                title:'外聘教师管理费统计表',
+                url:'/Workload/External/query2?hasJson=true',
+                toolbar:'#workload_external_toolbar2',
+                queryParams: {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val()
+                },
+                columns:[[
+                    {field:'schoolname',title:'开课学院',width:150,align:'center'},
+                    {field:'typename',title:'类型',width:100,align:'center'},
+                    {field:'levelname',title:'职称',width:100,align:'center'},
+                    {field:'work',title:'工作量',width:100,align:'center' },
+                    {field:'exceedperwork',title:'管理费标准',width:100,align:'center' },
+                    {field:'charge',title:'管理费',width:100,align:'center'}
+                ]]
+            });
+            $("#workload_external_export").click(function(){
+                var queryString="year="+$('#year', parent.document).val();
+                queryString+="&term="+$('#term', parent.document).val();
+                $.fileDownload("/Workload/Export/external?"+queryString, {
+                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                    failMessageHtml: "导出失败，请重试或者联系管理员",
+                    dialogOptions: { modal: true,title:'提示' }
+                });
+                return false;
+
+            });
+            $("#workload_external_search").click(function(){
+                var tt=$('#workload_external_dg');
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val()
+                });
+                tt=$('#workload_external_dg2');
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    year:$('#year', parent.document).val(),
+                    term:$('#term', parent.document).val()
+                });
+            });
+        });
+    </script>
+    <title>工作量统计</title>
+</head>
+<body>
+
+<div id="w" class="easyui-window" title="请稍候..."
+     data-options="modal:true,closed:true,closable:false,minimizable:false,maximizable:false,iconCls:'icon-shield'"
+     style="width:250px;height:80px;padding:10px;">数据更新中，请稍候！
+</div>
+<div class="container">
+    <div class="information">
+        <ol>说明：
+            <li>外聘汇总表中不包含外教部分。</li>
+        </ol>
+    </div>
+    <div id="workload_external_toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:'true'" id="workload_external_search">检索当前学年学期数据</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:'true'" id="workload_external_export">导出Excel表</a>
+    </div>
+    <table id="workload_external_dg">
+    </table>
+    <div class="space"></div>
+    <table id="workload_external_dg2"></table>
+</div>
+</body>

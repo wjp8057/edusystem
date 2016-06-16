@@ -1,0 +1,86 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    var index = 1;
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__/Programs/ClassesPlan/search/hasJson/true";
+            datagrid.datagrid("load", {CLASSNO:$("#CLASSNO").val(), CLASSNAME:$("#CLASSNAME").val(), SCHOOL:$("#SCHOOL").val()})
+        });
+
+        $("#handlerList").bind("click",function(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['CLASSNO'] + "修读计划","__ROOT__/Programs/ClassesPlan/alist/CLASSNO/"+row['CLASSNO']);
+        });
+
+        $('#admin_edit').bind('click',function(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['CLASSNO'] + "修读计划","__ROOT__/Programs/ClassesPlan/alist/CLASSNO/"+row['CLASSNO']);
+        })
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+ <!--   <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <label for="CLASSNAME">班名:</label><input type="text" id="CLASSNAME" name="CLASSNAME" size="10"  value="%">
+        <label for="CLASSNO">班号:</label><input type="text" id="CLASSNO" size="10" name="CLASSNO"  value="%">
+        <label for="SCHOOL">学院:</label>
+        <Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" />
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+        </form>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true" idField="CLASSNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'CLASSNO',align:'center',width:100" >班号</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:200">班名</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:200">学院</th></tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+<div id="toobar">
+    <label for="CLASSNAME">班名:</label><input type="text" id="CLASSNAME" name="CLASSNAME" size="10"  value="%">
+    <label for="CLASSNO">班号:</label><input type="text" id="CLASSNO" size="10" name="CLASSNO"  value="%">
+    <label for="SCHOOL">学院:</label>
+    <Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" />
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+    &nbsp&nbsp&nbsp
+    <a href="#" id="handlerList" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">查看、修改并添加删除修课计划</a>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id="admin_edit">查看、修改并添加删除修课计划</div>
+
+</div>
+</body>
+
+</html>
+

@@ -1,0 +1,310 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+eval('one=\'{$sjson}\'')
+eval('two=\'{$sjson3}\'')
+eval('three=\'{$sjson4}\'')
+eval('four=\'{$sjson5}\'')
+var teacherschool='{$teacherschool}';
+var quanxian='{$quanxian}'
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item.field);
+                e.editor = item.editor;
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param.field);
+            e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param)
+    {
+        if (param instanceof Array)
+        {
+            $.each(param, function(index, item)
+            {
+                var e = $(jq).datagrid('getColumnOption', item);
+                e.editor = {};
+            });
+        }
+        else
+        {
+            var e = $(jq).datagrid('getColumnOption', param);
+            e.editor = {};
+        }
+    }
+});
+$(function(){
+    var pd=false;
+    var indexrow=undefined;             //保存索引键的变量
+    var  dat=$('#scinfo').datagrid({
+        url:'__URL__/majors/hasJson/1',
+        fit:true,
+        fitColumns:false,
+        singleSelect:true,
+        columns:[[{field:'ROWID',checkbox:true},
+            {field:'MAJORNAME',title:'专业名称',width:200,align:'center',
+                editor:{
+                    type:'combobox',options:
+                    {editable:false,
+                        data:eval(two)
+                    }
+                }},
+            {field:'YEARS',title:'学制(年)',width:60,align:'center',
+                editor:{
+                    type:'combobox',options:
+                    {editable:false,
+                        data:eval(four)
+                    }
+                }},
+            {field:'DEGREENAME',title:'学位',width:60,align:'center',
+                editor:{
+                    type:'combobox',options:
+                    {editable:false,
+                        data:eval(three)
+                    }
+                }},
+            {field:'SCHOOLNAME',title:'学院名称',width:200,align:'center',
+                editor:{
+                    type:'combobox',options:
+                    {editable:false,
+                        data:eval(one)
+                    }
+                }}                                                                ,
+            {field:'REM',title:'备注',width:200,
+                editor:{type:'text',options:{
+                    missingMessage:'1'
+                }
+                }}]],
+
+        sortName:'MAJORNO',                      //排序用的
+        sortOrder:'asc',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:'#tdemo',onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#scinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+            if(dataRow.YEARS==''){
+
+                dat.datagrid('beginEdit', index);
+                return $.messager.alert('提示','请选择学制')
+            }else if(dataRow.MAJORNAME==''){
+
+                dat.datagrid('beginEdit', index);
+                return $.messager.alert('提示','请选择专业')
+            }else if(dataRow.SCHOOLNAME==''){
+                dat.datagrid('beginEdit', index);
+                return $.messager.alert('提示','请选择学院')
+
+            }else if(dataRow.DEGREENAME==''){
+                dat.datagrid('beginEdit', index);
+                return $.messager.alert('提示','请选择学位')
+
+            }
+
+            var Purl='';                //保存请求的URL地址的
+            var inserted=dat.datagrid('getChanges','inserted');
+            var updated=dat.datagrid('getChanges','updated');
+            if(inserted.length){
+                Purl='__URL__/insertma/hasJson/1';
+            }else if(updated.length){
+                Purl='__URL__/updatema/hasJson/1';
+            }
+
+            $.ajax({
+                url:Purl,
+                type:'POST',
+                data:dataRow,
+                success:function(content){
+
+                    if(content=='true')
+                    {
+                        indexrow=undefined;
+                        dat.datagrid('reload');
+                        alert('操作成功！');
+                    }
+                    else
+                    { indexrow=undefined;
+                        dat.datagrid('reload');
+                        alert('操作失败,重复插入');
+                    }
+                }
+
+            })
+            dat.datagrid('acceptChanges')
+        }
+    });
+        $('#dtnfo').layout({})
+
+    $('#e_add').bind('click',function(){
+        if(!pd){
+            dat.datagrid('addEditor',{
+                field:'REM',
+                editor : {
+                    type : 'validatebox',
+                    options : {
+                        required : true
+                    }
+                }});
+            dat.datagrid('insertRow',{
+                index:0,
+                row:{
+                }
+            });
+            dat.datagrid('beginEdit',0);
+            indexrow=0;
+        }
+        pd=true;
+    })
+
+
+    function ddel(){
+        var row2 = dat.datagrid('getSelections');
+        if (row2.length){
+            $.messager.confirm('提示','您确定要删除选中的记录吗',function(b){
+                if(b){
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row2.length;i++)
+                    {
+                        if(row2[i]['SCHOOL']!=teacherschool&&teacherschool!='A1'){
+                            return $.messager.alert('提示','不能删除其他学院的')
+                        }
+                        infoarr[i]=row2[i].ROWID;
+                    }
+
+                    $.ajax({
+                        url:'__URL__/deletema/',
+                        data:{'in':infoarr},
+                        type:'POST',
+                        success:function(C)
+                        {
+                            if(C=='true')
+                            {
+                                $.messager.alert('提示','删除成功!')
+                                dat.datagrid('reload');
+                            }
+                            else
+                            {
+                                $.messager.alert('提示','删除失败,没权限操作MJ15','?');
+                            }
+                        }
+                    })
+                }
+            });
+        }
+    }
+
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+
+        if(rowList.length>1){
+            alert('请选择一条进行编辑,不能选多条');             //用户选了多行编辑
+        }else if(rowList.length<1){
+            alert('请选择要编辑的数据');                         //用户没选择行
+        }else{
+            if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+
+            var row3 = dat.datagrid('getSelected');              //获得被选中的索引
+            var index3 = dat.datagrid('getRowIndex', row3);
+            if(row3['SCHOOL']!=teacherschool&&teacherschool!='A1'){
+                return $.messager.alert('提示','不能编辑其他学院的')
+            }
+            dat.datagrid('beginEdit', index3);
+            indexrow=index3;
+        }
+    }
+
+    $('#e_edit').bind('click',eedit)
+    $('#admin_edit').bind('click',eedit);
+
+    $('#e_back').bind('click',function(){
+        pd=false;
+        dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    })
+
+    $('#e_save').bind('click',function(){
+        dat.datagrid('endEdit',indexrow);
+        pd=false;
+    })
+
+
+    //todo:搜索方法
+        $('#searcher').bind("click",function(){
+            $('#scinfo').datagrid('load',{MAJORNO:$('#MAJORNO').val(),YEARS:$('#YEARS').val(),SCHOOL:$('#SCHOOL').val(),DEGREE:$('#DEGREE').val()})
+        })
+
+    })
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo">
+        <form action="" method="POST" id="biaodan">
+            专业名称:
+                        <select id="MAJORNO">
+                                <option value="%">所有专业</option>
+                        <volist name="major" id="v">
+                                <option value="{$v.CODE}">{$v.NAME}</option>
+                        </volist>
+                        </select>
+            修业年限:
+                        <select size="1" id="YEARS">
+                            <option value="%"  selected>所有学制</option>
+                            <option value="2">二年制</option>
+                            <option value="3">三年制</option>
+                            <option value="4">四年制</option>
+                            <option value="5">五年制</option>
+                        </select>
+            开设学院:
+                        <select id="SCHOOL" >
+                            <option value="%" selected>所有学院</option>
+                            <volist name="school" id="s">
+                                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                            </volist>
+                        </select>
+            学位:<select id="DEGREE">
+                                <option value="%">所有学位</option>
+                            <volist name="degree" id="v">
+                                <option value="{$v.CODE}">{$v.NAME}</option>
+                            </volist>
+                        </select>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+        </form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true,fitColumns:true"></div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</body>
+</html>

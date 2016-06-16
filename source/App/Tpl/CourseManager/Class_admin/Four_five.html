@@ -1,0 +1,73 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var haha={'M':'必修','E':'选修','R':'现修','T':'模块','F':'辅修'}
+    $(function(){
+
+
+
+
+
+
+        //todo:查看班级周课表
+        $('#fi_sub').bind('click',function(){
+
+            if($('#CLASSNO').val()==''){
+                return $.messager.alert('提示','请填写一个班号')
+
+            }
+
+            var obj={}
+//            obj['arr']={'year':$('[name=YEAR]').val(),'term':$('[name=TERM]').val(),'CLASSNO':$('#CLASSNO').val()}
+            open("__URL__/Class_week_course/year/"+parent.$('[name=YEAR]').val()+'/term/'+parent.$('[name=TERM]').val()+'/CLASSNO/'+$('#CLASSNO').val());
+            /*
+             ajiakesi('__URL__/Class_Week_Course',obj,function(c){
+             $('#course_content').html(c)
+             wd3.window({
+             closed:false
+             })
+             })
+             */
+
+        })
+
+
+
+
+
+    })
+
+</script>
+
+<style>
+    .query{border: solid 1px #ccc;margin:50px 20px 20px 20px;padding:10px;}
+    legend{margin-left: 20px;margin-bottom: 10px;}
+    .query span{line-height: 25px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    .query a{margin-left: 20px;}
+</style>
+<body style="background-color: #FFF">
+<!--<fieldset class="query">
+    <legend>班级选课管理</legend>
+    <span>1.（将班级的必修科目统一选定到学生个人，你只能对本院的班级进行本项操作!）</span><br/>
+    <span>2.（将班级的非必修科目统一选定到学生个人，你只能对本院的班级进行本项操作！）</span><br/><br/>
+    <a href="javascript:void(0)" id="one_sub" class="easyui-linkbutton">查看学生的选课情况</a>
+    <a href="javascript:void(0)" id="two_sub" class="easyui-linkbutton">班级统一选必修课</a>
+    <a href="javascript:void(0)" id="three_sub" class="easyui-linkbutton">班级统一选非必修课</a><br/><br/><hr><br/>
+    <span>如果班级统一选课在学生选课后进行，则注意通知学生查看自己的个人页面。</span><br/><br/>
+    <a href="javascript:void(0)" id="four_sub" class="easyui-linkbutton">班级选课汇总表</a>
+    <a href="javascript:void(0)" id="fi_sub" class="easyui-linkbutton">查看班级周课表</a>
+    <a href="javascript:void(0)" id="six_sub" class="easyui-linkbutton">查看班级退课公告(可以使用通配符)</a><br/><br/><hr><br/>
+    <label>修改学生密码，学号：</label><input type="text" name="up_STUDENTNO" value="">
+    <label>密码：</label><input type=password name="PASSWORD" size="10" value="">
+    <a href="javascript:void(0)" name="setpass" class="easyui-linkbutton">提&nbsp;交</a><span> 密码长度在10位以内。</span><br/><br/>
+
+    <label>设定班号：</label><input type=text name="CLASSNO" id="CLASSNO" value="1120101" size="7">&nbsp;&nbsp;&nbsp;或者&nbsp;
+    <label>设定学号前几位：</label></label><input type="text" name="STUDENTNO" id="SNO" value="13" size="9"><br/><br/>
+</fieldset>-->
+<!--<label>设定缺省学年：</label><input type="text" name="YEAR" value="2011" size="4">
+<label>缺省学期：</label><input type="text" name="TERM" value="2" size="1">-->
+设定班号：</label><input type=text name="CLASSNO" id="CLASSNO" value="" size="7">&nbsp;&nbsp;
+<a href="javascript:void(0)" id="fi_sub" class="easyui-linkbutton">查看班级周课表</a>
+</body>
+</html>

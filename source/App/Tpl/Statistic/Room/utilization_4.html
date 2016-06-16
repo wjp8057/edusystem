@@ -1,0 +1,147 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			<div>
+			   <label>教室号：</label><input name="roomno" size="10" maxlength="20" value="%">
+			   <label>教室名：</label><input name="jsn" size="10" maxlength="50" value="%">
+			   <label>设施：</label>
+			   <select class="easyui-combobox" name="equipment" data-options="editable:false">
+			     <option value="%">全部</option>
+				 <volist name="roomoptions" id="r">
+				 <option value="{$r.NAME}">{$r.VALUE}</option>
+				 </volist>
+			   </select>
+			   <label>是否可用：</label>
+			   <select class="easyui-combobox" name="code" data-options="editable:false">
+			     <option value="%">全部</option>
+				 <volist name="roomstatus" id="r">
+				 <option value="{$r.CODE}">{$r.NAME}</option>
+				 </volist>
+			   </select>
+			   <label>所处校区：</label>
+			   <select class="easyui-combobox" name="area" data-options="editable:false">
+			     <option value="%">全部</option>
+				 <volist name="areas" id="a">
+				 <option value="{$a.NAME}">{$a.VALUE}</option>
+				 </volist>
+			   </select>
+                </div>
+	            <div style="margin-top: 2px">
+			 		   <label>座位数大于：</label><input name="seats_gt" size="6" maxlength="3" value="0">
+			   	少于：<input name="seats_lt" size="6" maxlength="3"  value="400">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="year" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="term" size="4" maxlength="1">
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+			</div>
+
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar"></div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#content').datagrid({
+		fit:true,
+        striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"roomno",title:"教室号",width:30,align:"center"},
+                  {field:"jsn",title:"教室名",width:30,align:"center"},
+                  {field:"seats",title:"座位数",width:30,align:"center"},
+                  {field:"xq",title:"校区",width:30,align:"center"},
+                  {field:"building",title:"教学楼名",width:30,align:"center"},
+                  {field:"value",title:"教室类型",width:30,align:"center"},
+                  {field:"name",title:"现状",width:30,align:"center"},
+                  {field:"sxjunit",title:"周学时",align:"center",width:30,formatter:function(value,row,index){
+	              	  if (value == "" || value==null){
+	              		  value=0;
+	              	  }
+                	  return value;
+  		          }},
+  		          {field:"lyl",title:"利用率",align:"center",width:30,formatter:function(value,row,index){
+	              	  return (value/40)+"%";
+		          }}
+        ]],
+		pagination:true,
+		pageList:[20,50,100,200,500],
+		pageSize:100,
+		toolbar:'#tdemo'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='year']").val());
+     	var term=$.trim($("[name='term']").val());
+     	var seats_gt=$.trim($("[name='seats_gt']").val());
+     	var seats_lt=$.trim($("[name='seats_lt']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	var reg=/^\d+$/;
+     	if(!reg.test(seats_gt) || !reg.test(seats_lt)){
+     		msgShow("系统提示：","教室座位数大于数量与小于数量不能为空或只能输入整数","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/utilization_4/hasJson/1";
+     	datagrid.datagrid('load',getData());
+     	//合计查询
+     	$.ajax({
+            url:"__URL__/sum/",
+            type:"POST",
+            data:getData(),
+            dataType:"JSON",
+            success: function(data){
+               if(data){
+            	   if(data.count > 0){
+            		   $("#toobar").css("line-height","22px");
+            		   var txt="&nbsp;&nbsp;<strong>[合计]</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;教室数量："+data.count;
+            		   txt+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;座位总数："+data.seats;
+            		   txt+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;周学时总数："+data.sxjunit;
+            		   txt+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;利用率："+data.lyl+"%";
+                	   $("#toobar").html(txt);
+            	   }else{
+            		   $("#toobar").html("");
+            	   }
+               }else{
+        		   $("#toobar").html("");
+        	   }
+            }
+        });
+     });
+});
+
+//获取检索条件信息
+function getData(){
+	var data={
+			year:$.trim($("[name='year']").val()),
+     		term:$.trim($("[name='term']").val()),
+     		seats_gt:$.trim($("[name='seats_gt']").val()),
+     		seats_lt:$.trim($("[name='seats_lt']").val()),
+     		area:$.trim($("[name='area']").val()),
+     		code:$.trim($("[name='code']").val()),
+     		equipment:$.trim($("[name='equipment']").val()),
+     		jsn:$.trim($("[name='jsn']").val()),
+     		roomno:$.trim($("[name='roomno']").val()),
+     		type:"4"
+        };
+	return data;
+}
+</script>
+</body>
+</html>

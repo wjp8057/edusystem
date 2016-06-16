@@ -1,0 +1,34 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    $(function() {
+        var editRow = undefined;
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url : "__ROOT__/index.php?g=Student&m=Course&a=dump&hasJson=true",
+            queryParams: {YEAR:year,TERM:term}
+        });
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="{$Think.request.YEAR}学年{$Think.request.TERM}学期被筛选课程" iconCls="icon icon-filter" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="STUDENTNO"
+           pagination="true" pageSize="15" pageList="[15,30,45]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'STUDENTNO',width:120" >学号</th>
+            <th data-options="field:'STUDENTNAME',width:100">姓名</th>
+            <th data-options="field:'COURSENOGROUP',width:70,align:'center'">课号</th>
+            <th data-options="field:'COURSENAME',width:70,align:'center'">课名</th>
+            <th data-options="field:'CREDITS',width:50,align:'center'">学分</th>
+            <th data-options="field:'REASON'">删除原因</th>
+            <th data-options="field:'INPROGRAM',width:140,align:'center'">修课计划内</th>
+            <th data-options="field:'COURSETYPE',width:70,align:'center'">修课方式</th></tr>
+        </thead>
+    </table>
+</div>
+
+</body>
+</html>

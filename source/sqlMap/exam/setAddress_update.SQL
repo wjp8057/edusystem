@@ -1,0 +1,1 @@
+update TESTROOM SET KW=:KW,status=:status where RECNO=:RECNO

@@ -1,0 +1,87 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+          {"menuid": "5","icon": "icon-plan","menuname": "选课统计",
+                "menus":[
+                    {"menuid": "51","menuname": "跟班重修学生统计","icon": "icon-file","url": "__ROOT__/Statistic/Selection/anewStu"},
+                    {"menuid": "52","menuname": "重修班选课学生统计","icon": "icon-file2","url":" __ROOT__/Statistic/Selection/anewSelection"},
+                    {"menuid": "53","menuname": "申请免听、免修学生名单统计","icon": "icon-file3","url": "__ROOT__/Statistic/Selection/exemption"},
+                    {"menuid": "54","menuname": "检索预计人数小于教室座位数课程","icon": "icon-result","url": "__ROOT__/Statistic/Selection/predict"},
+                    {"menuid": "55","menuname": "各门课程选课人数统计","icon": "icon-evaluate","url": "__ROOT__/Statistic/Selection/courseSelection"},
+                    {"menuid": "56","menuname": "查看选课人数小于座位数的课程","icon": "icon-weekTable","url": "__ROOT__/Statistic/Selection/peopleNum_lt"},
+                    {"menuid": "57","menuname": "各类课程选课总人数统计","icon": "icon-classTable","url": "__ROOT__/Statistic/Selection/courseSum"},
+                    {"menuid": "58","menuname": "班级选课汇总表","icon": "icon-office","url": "__ROOT__/Statistic/Selection/classSum"},
+                    {"menuid": "59","menuname": "查看班级周课表","icon": "icon-xuchaxun","url": "__ROOT__/Statistic/Selection/weekTable"}
+                ]
+            }
+        ]
+    };
+    var menuTabs = null;
+    $(function(){
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        $('#loginOut').click(function(){
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if(r){
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="选课统计" style="width:245px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">选课统计功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">数据统计：统计分析校内各类信息。包含课程统计、教师上课统计、学籍情况统计、教室统计、选课统计、教材统计等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">选课统计:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、跟班重修学生统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院进行检索该学期各学院跟班重修学生的名单。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、重修班选课学生统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、学院进行检索该学期各学院重修班选课学生的名单。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、申请免听、免修学生名单统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、学院进行检索该学期各学院免听免修的学生名单。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、检索预计人数小于教室座位数课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、人数进行检索人数小于教室座位数X人以上的课程。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、各门课程选课人数统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、课号、课程类型、班号、学院、课程类别、考核方式进行查看该学期课程的选课人数情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、查看选课人数小于座位数的课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、课号、课程类型、班号、学院、课程类别、考核方式进行查看选课人数小于座位数的课程。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、各类课程选课总人数统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、学院统计学院和全校的总选课人数结果表。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>8、班级选课汇总表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、班号查看该班学生选课汇总表，并可打印该表。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>9、查看班级周课表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px;">根据学年、学期、班号查看该班级的周课表。</p>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

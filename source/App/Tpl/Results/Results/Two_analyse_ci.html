@@ -1,0 +1,233 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var kaoshirenshu=0;             //todo:考试人数
+    var youxiurenshu=0;             //todo:游戏人数
+    var hegerenshu=0;               //todo:合格人数
+    var buhegerenshu=0              //todo:不合格人数
+
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        function tongji(){
+            var datag=$('#yingyuA');
+            var yxbl=isNaN(formatFloat(youxiurenshu/kaoshirenshu*100,2))?0:formatFloat(youxiurenshu/kaoshirenshu*100,2)
+
+            var hgbl=isNaN(formatFloat(hegerenshu/kaoshirenshu*100,2))?0:formatFloat(hegerenshu/kaoshirenshu*100,2)
+            var bhgbl=isNaN(formatFloat(buhegerenshu/kaoshirenshu*100,2))?0:formatFloat(buhegerenshu/kaoshirenshu*100,2)
+            datag.datagrid('options').onLoadSuccess=function(data){
+
+                var total=data.total
+                var obj={'xy':'合计','ksrs':kaoshirenshu,
+                    'yxrs':youxiurenshu,
+                    'hgrs':hegerenshu,
+                    'bhgrs':buhegerenshu,
+                    'yxbl':yxbl,
+                    'hgbl':hgbl,
+                    'bhgbl':bhgbl}
+                datag.datagrid('appendRow',obj)
+
+
+            }
+            return datag
+        }
+
+
+
+        var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+            $('#search').linkbutton({
+                text:'计算机一级',
+                iconCls:'icon-search'
+            }).bind('click',function(){
+                        zero()
+                        var datag=tongji()
+
+
+                        $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月计算机统考成绩分析')
+                        datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_one_select.SQL','count':'Results/Two_six_one_count.SQL'
+                        },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                            ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                            ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+
+                })
+
+        $('#search_one').linkbutton({
+            text:'应用能力A级',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    zero()
+                    var datag=tongji()
+
+                    $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月英语A级成绩分析')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_two_select.SQL','count':'Results/Two_six_two_count.SQL'
+                    },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                        ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                        ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+        })
+
+
+
+
+
+
+        $('#search_two').linkbutton({
+            text:'应用能力B级',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    zero()
+                    var datag=tongji()
+
+                    $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月英语A级成绩分析')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_three_select.SQL','count':'Results/Two_six_three_count.SQL'
+                    },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                        ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                        ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+        })
+
+        $('#search_three').linkbutton({
+            text:'三级',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    zero()
+                    var datag=tongji()
+
+                    $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月CET-3成绩分析')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_four_select.SQL','count':'Results/Two_six_four_count.SQL'
+                    },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                        ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                        ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+
+                })
+
+        $('#search_four').linkbutton({
+            text:'四级',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    zero()
+
+                    var datag=tongji()
+                    $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月CET-4成绩分析')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_five_select.SQL','count':'Results/Two_six_five_count.SQL'
+                    },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                        ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                        ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+
+                })
+
+        $('#search_five').linkbutton({
+            text:'六级',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    zero()
+                   var datag=tongji()
+
+                    $('#title').html($('[name=YEAR]').val()+'年'+$('[name=TERM]').val()+'月CET-4成绩分析')
+                    datag.datagrid('load',{'Sqlpath':{'select':'Results/Two_six_six_select.SQL','count':'Results/Two_six_six_count.SQL'
+                    },'bind':{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val(),
+                        ':YTHREE':$('[name=YEAR]').val(),':TTHREE':$('[name=TERM]').val(),':YFOUR':$('[name=YEAR]').val(),':TFOUR':$('[name=TERM]').val(),
+                        ':YFIVE':$('[name=YEAR]').val(),':TFIVE':$('[name=TERM]').val()}})
+
+
+                })
+
+
+
+
+    })
+
+
+
+    function zero(){
+        kaoshirenshu=0;
+        youxiurenshu=0;
+        hegerenshu=0;
+        buhegerenshu=0
+    }
+</script>
+<body style="background: #fff">
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+                    <label for="yyear">学年：</label><input type="text" name="YEAR" id="yyear"  size="4">
+
+                    <label for="tterm">月份：</label><input type="text" name="TERM" id="tterm"  size="1">
+
+
+
+
+                <td  align="center"><a id="search">查询</a></td>
+                <td  align="center"><a id="search_one">查询</a></td>
+                <td align="center"><a id="search_two">查询</a></td>
+
+                <td  align="center"><a id="search_three">查询</a></td>
+                <td  align="center"><a id="search_four">查询</a></td>
+                <td align="center"><a id="search_five">查询</a></td>
+
+
+            说明：英语为12月、6月，计算机为11月、4月
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+
+
+
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,toolbar:'#tdemo'">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'xy',width:100" align="center">学院</th>
+                        <th data-options="field:'nj',width:100" align="center">年级</th>
+                        <th data-options="field:'ksrs',width:100,formatter:function(a,b,c){
+
+                                  kaoshirenshu+=parseInt(a)
+                                  return a
+                        },align:'right'" align="center">考试人数</th>
+                        <th data-options="field:'yxrs',formatter:function(a,b,c){
+
+                                  youxiurenshu+=parseInt(a)
+                                  return a
+
+                        },width:150,align:'right'" align="center">优秀人数</th>
+                        <th data-options="field:'hgrs',formatter:function(a,b,c){
+
+                                  hegerenshu+=parseInt(a)
+                                  return a
+                        },width:100,align:'right'" align="center">合格人数</th>
+                        <th data-options="field:'bhgrs',formatter:function(a,b,c){
+
+                                  buhegerenshu+=parseInt(a)
+                                  return a
+                        },width:100,align:'right'" align="center">不合格人数</th>
+                        <th data-options="field:'yxbl',width:100,formatter:function(a,b,c){
+                                    var bl=isNaN(formatFloat(b.yxrs/b.ksrs*100,2))?0:formatFloat(b.yxrs/b.ksrs*100,2)
+                                            return bl
+
+                        },align:'right'" align="center">优秀比例</th>
+                        <th data-options="field:'hgbl',width:100,formatter:function(a,b,c){
+
+                                                var bl=isNaN(formatFloat(b.hgrs/b.ksrs*100,2))?0:formatFloat(b.hgrs/b.ksrs*100,2)
+                                            return bl
+                        },align:'right'" align="center">合格比例</th>
+                        <th data-options="field:'bhgbl',width:100,formatter:function(a,b,c){
+                                                var bl=isNaN(formatFloat(b.bhgrs/b.ksrs*100,2))?0:formatFloat(b.bhgrs/b.ksrs*100,2)
+                            return bl
+
+                        },align:'right'" align="center">不合格比例</th>
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<include file=":Include:jqueryHeader" />
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <p align="center"><font color="#0000FF" face="隶书" style="font-size: 16pt">成 绩 总 表</font></p>
+    <p align="center"><font color="#0000FF" size="3">
+        学院：<Cwebs:sqllist id="list" file="school/l_cj_get_schoolname.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">{$list.0.SCHOOLNAME}</Cwebs:sqllist>
+        班级：{$Think.session.student_info.CLASSNAME}
+        学号：{$Think.session.studnet_studentno}
+        姓名：{$Think.session.student_info.name}
+        积点和：<Cwebs:sqllist id="list" file="result/l_jDF_bystudentno.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">{$list.0.SUMPOINT|floatval}</Cwebs:sqllist>
+        获得学分：<Cwebs:sqllist id="list" file="result/l_jDF_sum_studentno.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">{$list.0.XF|floatval}</Cwebs:sqllist>(不含创新、技能学分)
+    </p>
+    <div align="center">
+        <table border="1" cellspacing="0" style="color: #000000; font-size: 10px; border-collapse: collapse" bordercolor="#111111" cellpadding="0" width="98%">
+            <tr bgcolor="#0000FF" style="color: #ffffff">
+                <th>学年</th><th>学期</th><th>课号</th><th>课名</th><th>学分</th><th>课程类型</th>
+                <th>考试方式</th><th>总评</th><th>补考</th><th>积点分</th><th>听课方式</th><th>考试备注</th>
+            </tr>
+         <!--   学号：{$Think.session.studnet_studentno}
+            姓名：{$Think.session.student_info.name}
+            班级号：{$Think.session.student_info.CLASSNO}
+            班级名：{$Think.session.student_info.CLASSNAME}-->
+            <Cwebs:sqllist id="list1" file="result/myScore.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">
+                <volist name="list1" id="data1">
+                    <tr>
+                        <td  align="center">{$data1.YEAR}</td>
+                        <td  align="center">{$data1.TERM}</td>
+                        <td  align="center">{$data1.COURSENO}</td>
+                        <td  align="center">{$data1.COURSENAME}</td>
+                        <td  align="center">{$data1.CREDITS}</td>
+                        <td  align="center">{$data1.APPROACHES}</td>
+                        <td  align="center">{$data1.EXAMTYPE}</td>
+                        <td  align="center">{$data1.EXAMSCORE}</td>
+                        <td  align="center">{$data1.EXAMSCORE2}</td>
+                        <td  align="center">{$data1.POINT}</td>
+                        <td  align="center">{$data1.APPROACHNAME}</td>
+                        <td  align="center">{$data1.REM}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+
+    <hr width="98%" color="#C0C0C0">
+
+    <p align="center"><font face="隶书" style="font-size: 16pt" color="#0000FF">各学年学期学绩分</font></p>
+    <div align="center">
+        <table border="1" cellspacing="0" style="color: #000000; font-size: 10px; border-collapse: collapse" bordercolor="#111111" cellpadding="0" width="60%">
+            <tr bgcolor="#0000FF" style="color: #ffffff">
+                <th>学年</th><th>学期</th><th>学绩分</th>
+            </tr>
+            <Cwebs:sqllist id="list2" file="result/scorePoint.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">
+                <volist name="list2" id="data2">
+                    <tr>
+                        <td  align="center">{$data2.YEAR}</td>
+                        <td  align="center">{$data2.TERM}</td>
+                        <td  align="center">{$data2.CREDITS}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+
+    <hr width="60%" color="#C0C0C0">
+    <p align="center"><font face="隶书" style="font-size: 16pt" color="#0000FF">体质健康测试成绩</font></p>
+    <div align="center">
+        <table border="1" cellspacing="0" style="color: #000000; font-size: 10px; border-collapse: collapse" bordercolor="#111111" cellpadding="0" width="60%">
+            <tr bgcolor="#0000FF" style="color: #ffffff">
+                <th>学年</th><th>成绩</th><th>分数</th><th>测试日期</th>
+            </tr>
+            <Cwebs:sqllist id="list3" file="result/sportStandard.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">
+                <volist name="list3" id="data3">
+                    <tr>
+                        <td  align="center">{$data3.YEAR}</td>
+                        <td  align="center">{$data3.RESULT}</td>
+                        <td  align="center">{$data3.CREDITS}</td>
+                        <td  align="center">{$data3.SDATE}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+
+
+    <hr width="60%" color="#C0C0C0">
+    <p align="center"><font face="隶书" style="font-size: 16pt" color="#0000FF">职业素养与职业发展</font></p>
+    <div align="center">
+        <table border="1" cellspacing="0" style="color: #000000; font-size: 10px; border-collapse: collapse" bordercolor="#111111" cellpadding="0" width="80%">
+            <tr bgcolor="#0000FF" style="color: #ffffff">
+                <th>学号</th><th>讲座</th><th>视频</th><th>心理测评</th>
+                <th>职业测评</th><th>生涯规划</th><th>学习心得</th><th>室内集训</th>
+                <th>室外集训</th><th>养成训练</th><th>社会实践</th><th>加分项</th>
+                <th>减分项</th><th>总分</th>
+            </tr>
+            <Cwebs:sqllist id="list4" file="result/vacation.sql" bind="':STUDENTNO'@session('studnet_studentno')" delimiter="@">
+                <volist name="list4" id="data4">
+                    <tr>
+                        <td  align="center">{$data4.F1}</td>
+                        <td  align="center">{$data4.F2}</td>
+                        <td  align="center">{$data4.F3}</td>
+                        <td  align="center">{$data4.F4}</td>
+                        <td  align="center">{$data4.F5}</td>
+                        <td  align="center">{$data4.F6}</td>
+                        <td  align="center">{$data4.F7}</td>
+                        <td  align="center">{$data4.F8}</td>
+                        <td  align="center">{$data4.F9}</td>
+                        <td  align="center">{$data4.F10}</td>
+                        <td  align="center">{$data4.F11}</td>
+                        <td  align="center">{$data4.F12}</td>
+                        <td  align="center">{$data4.F13}</td>
+                        <td  align="center">{$data4.F14}</td>
+                    </tr>
+                </volist>
+            </Cwebs:sqllist>
+        </table>
+    </div>
+
+    <hr width="80%" color="#C0C0C0">
+    <br />
+    <br />
+</div>
+
+</body>
+</html>

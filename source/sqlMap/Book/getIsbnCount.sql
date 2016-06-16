@@ -1,0 +1,1 @@
+select count(*) [count] from book where isbn=:isbn

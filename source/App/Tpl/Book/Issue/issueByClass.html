@@ -1,0 +1,93 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>		   
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<table id="datagrid" fitColumns="true" width="100%" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'isbn',align:'center',width:60">ISBN</th>
+                <th data-options="field:'bookname',align:'center',width:60">教材名称</th>
+                <th data-options="field:'press',align:'center',width:80">出版社</th>
+                <th data-options="field:'author',align:'center',width:60">作者</th>
+                <th data-options="field:'price',align:'center',width:40">原价</th>
+                <th data-options="field:'dis_price',align:'center',width:40">折扣价</th>
+                <th data-options="field:'num',align:'center',width:40">发放数量</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <label>班号：</label>{$class.classno}
+        <label>班名：</label>{$class.classname}&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="hidden" name="year" value="{$year}">
+        <input type="hidden" name="term" value="{$term}">
+        <input type="hidden" name="classno" value="{$class.classno}">
+        <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出发放表</a>
+        <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">撤销教材发放</a>
+    </form>
+</div>
+<script type="text/javascript">
+var year="{$year}";
+var term="{$term}";
+var classno="{$class.classno}";
+var datagrid=null;
+var list=null;
+$(function(){
+	//班级发放信息
+	datagrid = $('#datagrid').datagrid({singleSelect:true,
+        toolbar:'#toobar',url:"__URL__/issueByClass/hasJson/1",
+        frozenColumns:[[{field:'操作',title:'操作',align:'center',width:80,formatter:function(value,row,index){
+            return "<a href=\"javascript:void(0)\" onclick=\"issue('"+row.book_id+"')\">查看发放</a>";
+        }}]],
+        queryParams:{classno:classno,year:year,term:term}
+    });
+    //导出
+    $("#ExportBut").click(function(){
+        list=datagrid.datagrid('getRows');
+        if(list.length){
+            $("#queryForm").attr("action","__ROOT__/Book/Excel/classExport/");
+            $("#queryForm").submit();
+        }else{
+            msgShow("系统提示：","请先检索出您要导出的数据","info");
+        }
+    });
+    //不发放
+    $("#delBut").click(function(){
+        list=datagrid.datagrid('getSelections');
+        if (list.length){
+            $.messager.confirm('提示',"撤销教材发放将删除当前班级"+year+"学年"+term+"学期该教材的所有发放信息，您确定要撤销发放么？",function(b){
+                if(b){
+                    var ary=[];                      //存储删除信息的数组
+                    for(var i=0;i<list.length;i++){
+                        ary[i]=list[i].book_id;
+                    }
+                    $.ajax({
+                        url:'__URL__/delPayment/hasJson/1',
+                        data:{"ids":ary,"year":year,"term":term,"classno":classno},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","操作成功！","info");
+                                datagrid.datagrid("load",{classno:classno,year:year,term:term});
+                            }else{
+                                msgShow("系统提示：","操作失败,您没有权限！","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }else{
+            msgShow("系统提示：","请选择要撤销发放的教材！","error");
+        }
+    });
+});
+//发放查看
+function issue(bookId){
+    var url="__ROOT__/Book/Issue/issueByBookId/year/"+year+"/term/"+term+"/book_id/"+bookId+"/classno/"+classno;
+    openTabsWindows("班级学生发放清单",url);
+}
+</script>
+</body>
+</html>

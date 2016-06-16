@@ -1,0 +1,120 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function openwd(){
+        openTabsWindows('座位安排','__URL__/zuoweianpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/COURSENO/'+arguments[0]+'/KC/'+arguments[1],'',true);
+    }
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+
+        $('#lici_student_wd').window(new wind(370,280,false,false,true,false,false))   //todo:检索考位安排的页面
+
+        var dat=$('#listDat').datagrid({
+            toolbar:'#tdemo'
+        });
+
+        $('#e_excel').bind('click',function(){
+            $('[name=e_YEAR]').val($('[name=year]').val());
+            $('[name=e_TERM]').val($('[name=term]').val());
+            $('[name=e_COURSENO]').val($('[name=courseno]').val())
+            $('[name=select]').val('exam/Excel_C_select.SQL');
+            $('[name=e_school]').val($('#sschool').val())
+
+            $('#examexcel').submit();
+
+        })
+
+        var daaa=$('#daaa')
+
+
+
+
+
+
+        $('#bt').linkbutton({
+            'text':'查询',
+            'iconCls':''
+        }).bind('click',function(){
+                    $('#listDat').datagrid('options').url='__APP__/Status/Status/Squery'
+        $('#listDat').datagrid('load',{'Sqlpath':{'select':'exam/Xqc_kaowuquery_select.SQL','count':'exam/Xqc_kaowuquery_count.SQL'},'bind':{
+            ':year':$('[name=year]').val(),':term':$('[name=term]').val(),':COURSENO':$('[name=courseno]').val(),':SCHOOL':$('#sschool').val()
+        }})})
+
+
+
+    })
+</script>
+
+
+<style>
+
+    a{color:blue}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+            <b>学年:</b>
+            <input name="year" type="text" size='4' value="2011">
+            &nbsp &nbsp
+            <b>学期:</b>
+            <input type="text" name="term" size="1" value="1">
+            &nbsp &nbsp
+            &nbsp &nbsp
+            <b>课号:</b>
+            <input type="text" name="courseno" value="%">
+            &nbsp &nbsp
+        <label for="sschool">学院</label>
+        <select id="sschool">
+            <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+            <a href='javascript:void(0)' id="bt">提交检索(以开课学院排序)</a>&nbsp &nbsp
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel"  id="e_excel" plain=true>导出Excel</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <table class="easyui-datagrid"
+               data-options="fit:true,fitColumns:true,singleSelect:true,pagination:true" id="listDat">
+            <thead>
+            <tr>
+                <th data-options="field:'kh',width:100,align:'center'">课号</th>
+                <th data-options="field:'km',width:100,align:'center'">课名</th>
+                <th data-options="field:'xkrs',width:120,align:'center'">选课人数</th>
+                <th data-options="field:'kc1',width:130,align:'center'">考场1</th>
+                <th data-options="field:'kw1',width:100,align:'center'">考位1</th>
+                <th data-options="field:'kc2',width:300,align:'center'">考场2</th>
+                <th data-options="field:'kw2',width:100,align:'center'">考位2</th>
+                <th data-options="field:'kc3',width:100,align:'center'">考场3</th>
+                <th data-options="field:'kw3',width:100,align:'center'">考位3</th>
+                <th data-options="field:'kc1jk',width:100,align:'center'">考场1监考</th>
+                <th data-options="field:'kc2jk',width:100,align:'center'">考场2监考</th>
+                <th data-options="field:'kc3jk',width:100,align:'center'">考场3监考</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+<style>
+    #lici_student_wd td{border:1px #95B8E7 solid;
+    }
+</style>
+<form id="examexcel" action="__APP__/CourseManager/Excel/xqCkaowuQuery_excel" method="POST">
+    <input type="hidden" name="e_YEAR" VALUE="">
+    <input type="hidden" name="e_TERM" VALUE="">
+    <input type="hidden" name="e_COURSENO" VALUE="">
+    <input type="hidden" name="select" VALUE="">
+    <input type="hidden" name="e_school" VALUE="">
+
+</form>
+</body>
+</html>

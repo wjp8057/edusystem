@@ -1,0 +1,278 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var haha={'M':'必修','E':'选修','R':'现修','T':'模块','F':'辅修'}
+    $(function(){
+        //todo;班级学生列表的window
+        var List=$('#class_studentList').window(new wind(0,0,false,false,true,false,true));
+
+        var wd2=$('#wd2').window(new wind(0,0,false,false,true,false,true));
+        var wd3=$('#wd3').window(new wind(0,0,false,false,true,false,true));
+        var wd4=$('#wd4').window(new wind(0,0,false,false,true,false,true));//todo:查看班级退课公告的窗口
+
+        var ct_obj=new wind(0,0,false,false,true,false,true);
+        ct_obj.closable=true
+        var content=$('#content_wd').window(ct_obj);//todo:弹出的 窗口的公告
+
+
+        $('#one_sub').bind('click',function(){
+            if($('[name=CALSSNO]').val()==''&&$('[name=STUDENTNO]').val()==""){
+               return $.messager.alert('提示','你没有设定班号或者学号前几位！');
+            }
+
+            //todo:用学生号前几位查的
+            if($('[name=CLASSNO]').val()==""){
+                $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/Four_select_STUDENTNO.SQL','count':'CourseManager/Four_count_STUDENTNO.SQL'}
+                ,'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':STUDENTNO':$('#SNO').val()}})
+                List.window({closed:false})
+            }else{
+            //todo:用班级号查
+                $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/Four_select_CLASSNO.SQL',
+                    'count':'CourseManager/Four_count_CLASSNO.SQL'}
+                    ,'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':CLASSNO':$('#CLASSNO').val()}})
+                List.window({closed:false})
+            }
+
+        })
+
+        //todo:查看班级周课表
+        $('#fi_sub').bind('click',function(){
+
+            if($('#CLASSNO').val()==''){
+                return $.messager.alert('提示','请填写一个班号')
+
+            }
+
+            var obj={}
+//            obj['arr']={'year':$('[name=YEAR]').val(),'term':$('[name=TERM]').val(),'CLASSNO':$('#CLASSNO').val()}
+openTabsWindows('课程的情况',"__URL__/Class_week_course/year/"+$('[name=YEAR]').val()+'/term/'+$('[name=TERM]').val()+'/CLASSNO/'+$('#CLASSNO').val(),'',true);
+/*
+            ajiakesi('__URL__/Class_Week_Course',obj,function(c){
+                $('#course_content').html(c)
+                wd3.window({
+                    closed:false
+                })
+            })
+*/
+
+        })
+
+        //todo:班级选课汇总
+        $('#four_sub').bind('click',function(){
+                    if($('[name=CLASSNO]').val()==""){
+                        return $.messager.alert('提示','您还没有设定任何班级')
+                    }
+
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'CourseManager/Four_four_Datgrid_Field.SQL',bind:{
+                        ':CLASSNO':$('[name=CLASSNO]').val(),
+                        ':YEAR':$('[name=YEAR]').val(),
+                        ':TERM':$('[name=TERM]').val()
+                    }},function(c){
+                        eval('var one='+c)
+                        var myNj = 4+one.length;                    //todo:datagrid需要的长度
+                        //初始化
+                        $("#disgrid").datagrid({
+                            fit:true,
+                            url:'__URL__/Four_classcourse/hasJson/1',
+                            pageSize:30,
+                            pageList:[10,20,30,40],
+                            remoteSort: false,
+                            rownumbers:true,
+                            singleSelect:true,
+
+                            rowStyler:function(index,row){
+                                        return 'height:5px;color:blue;font-size:3px';
+                            },
+                            autoRowHeight:false,
+                            queryParams:{
+                                nj:myNj,
+                                unitType:1
+                            },toolbar:[
+                                {'text':'返回上一页',
+                                 'iconCls':'icon-goleft',
+                                 'handler':function(){
+                                     wd2.window({closed:true})
+                                 }
+                                }]
+                        });
+                        var str='';
+
+
+
+                        var s = "";
+                        s = "columns:[[";
+                        s = s + "{field:'xh',title:'学<br>号',width:100,height:200,align:'center',border:'0px',style:'layout-flow:vertical-ideographic'},{field:'xm',title:'姓名',width:80},{field:'xf',title:'学分',width:100}";
+                        for(var i=0;i<one.length;i++){
+                            s+=",{field:'a"+one[i]['COURSENOGROUP']+"',title:'"+one[i]['COURSENAME']+"',width:130,formatter:function(a,b,c){return haha[a]}}"
+                        }
+
+                       s = s + "]]";
+                        options={};
+                        options.queryParams = {
+                         nj:4+one.length,
+                         unitType:1
+                         };
+                        options.columns = eval(s);
+
+                        $("#disgrid").datagrid(options);
+                        setTimeout(function(){$('#disgrid').datagrid('load',{'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val(),'CLASSNO':$('[name=CLASSNO]').val()});}
+                        ,300)
+
+                        wd2.window({closed:false})
+
+                })
+
+        })
+        //todo:查看班级退课公告(可以使用通配符)
+        $('#six_sub').bind('click',function(){
+            $('#tuike_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/Four_six_select.SQL','count':'CourseManager/Four_six_count.SQL'},
+            'bind':{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':CLASSNO':$('[name=CLASSNO]').val()}})
+            wd4.window({closed:false})
+        })
+
+
+        //todo:修改学生密码
+        $('[name=setpass]').bind('click',function(){
+            ajiakesi('__URL__/update_password',{'STUDENTNO':$('[name=up_STUDENTNO]').val(),'PASSWORD':$('[name=PASSWORD]').val()},function(c){
+                    alert(c)
+            })
+        })
+
+
+
+        //todo:班级统一选必修课
+        $('#two_sub').bind('click',function(){
+            openTabsWindows('统一必修课',"__URL__/count_bixiu/YEAR/"+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/CLASSNO/'+$('[name=CLASSNO]').val(),'',true);
+
+        })
+
+
+
+        $('#three_sub').bind('click',function(){
+            openTabsWindows('统一非必修课',"__URL__/count_feibixiu/YEAR"+$('[name=YEAR]').val()+'/TERM/'+$('[name=TERM]').val()+'/CLASSNO/'+$('[name=CLASSNO]').val(),'',true);
+
+        })
+
+
+
+    })
+    function closedWD3(){
+        $('#wd3').window({closed:true})
+    }
+</script>
+
+<style>
+.query{border: solid 1px #ccc;margin:50px 20px 20px 20px;padding:10px;}
+legend{margin-left: 20px;margin-bottom: 10px;}
+.query span{line-height: 25px;}
+.query label{font-weight: bold;margin-left:20px;}
+.query a{margin-left: 20px;}
+</style>
+<body style="background-color: #FFF">
+<fieldset class="query">
+	<legend>班级选课管理</legend>
+	<span>1.（将班级的必修科目统一选定到学生个人，你只能对本院的班级进行本项操作!）</span><br/>
+	<span>2.（将班级的非必修科目统一选定到学生个人，你只能对本院的班级进行本项操作！）</span><br/><br/>
+	<a href="javascript:void(0)" id="one_sub" class="easyui-linkbutton">查看学生的选课情况</a>
+	<a href="javascript:void(0)" id="two_sub" class="easyui-linkbutton">班级统一选必修课</a>
+	<a href="javascript:void(0)" id="three_sub" class="easyui-linkbutton">班级统一选非必修课</a><br/><br/><hr><br/>
+	<span>如果班级统一选课在学生选课后进行，则注意通知学生查看自己的个人页面。</span><br/><br/>
+	<a href="javascript:void(0)" id="four_sub" class="easyui-linkbutton">班级选课汇总表</a>
+	<a href="javascript:void(0)" id="fi_sub" class="easyui-linkbutton">查看班级周课表</a>
+	<a href="javascript:void(0)" id="six_sub" class="easyui-linkbutton">查看班级退课公告(可以使用通配符)</a><br/><br/><hr><br/>
+	<label>修改学生密码，学号：</label><input type="text" name="up_STUDENTNO" value="">
+	<label>密码：</label><input type=password name="PASSWORD" size="10" value="">
+	<a href="javascript:void(0)" name="setpass" class="easyui-linkbutton">提&nbsp;交</a><span> 密码长度在10位以内。</span><br/><br/>
+	<label>设定缺省学年：</label><input type="text" name="YEAR" value="2011" size="4">
+	<label>缺省学期：</label><input type="text" name="TERM" value="2" size="1">
+	<label>设定班号：</label><input type=text name="CLASSNO" id="CLASSNO" value="1120101" size="7">&nbsp;&nbsp;&nbsp;或者&nbsp;
+	<label>设定学号前几位：</label></label><input type="text" name="STUDENTNO" id="SNO" value="13" size="9"><br/><br/>
+</fieldset>
+
+<div id="class_studentList" title="班 级 学 生 表">
+<table class="easyui-datagrid" id="List_dat"
+       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,toolbar:[
+                   {'text':'返回上一页',
+                   iconCls:'icon-goleft',
+                   handler:function(){
+                     $('#class_studentList').window({closed:true})
+                   }
+                   },{'text':'进入学生个人页面',
+                      'iconCls':'icon-personal',
+                      handler:function(){
+                            var row=$('#List_dat').datagrid('getSelected')
+                            if(row==''){
+                                return $.messager.alert('提示','请选择一个要查看的学生')
+                            }
+                           window.open('__URL__/My_student_Page/username/'+row.xh)
+                      }}]">
+    <thead>
+    <tr>
+        <th data-options="field:'row',checkbox:true">选择</th>
+        <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+        <th data-options="field:'xm',width:220,align:'right'" align="center">姓名</th>
+        <th data-options="field:'xsbj',width:100,align:'right'" align="center">学生班级</th>
+        <th data-options="field:'zxf',width:100,align:'right'" align="center">总学分</th>
+        <th data-options="field:'xkms',width:100,align:'right'" align="center">选课门数</th>
+    </tr>
+    </thead>
+</table>
+</div>
+
+
+<div id="wd2" title="">
+    <div id="disgrid"></div>
+</div>
+
+<!--todo:显示周课表的页面-->
+<div id="wd3" title="">
+    <div id="course_content"></div>
+</div>
+
+
+<!--todo:查看班级退课公告-->
+<div id="wd4" title="">
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false" style="height:50px;">
+            <b><center><p style="font-size: 14px;color:blue">
+                班级退课检索的结果
+            </p></center></b>
+        </div>
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="tuike_dat"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,toolbar:[
+                   {'text':'返回上一页',
+                   'iconCls':'icon-goleft',
+                   handler:function(){
+                        $('#wd4').window({closed:true})
+                        }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',checkbox:true">选择</th>
+                        <th data-options="field:'STUDENTNO',width:150" align="center">学号</th>
+                        <th data-options="field:'STUDENTNAME',width:220" align="center">姓名</th>
+                        <th data-options="field:'COURSENOGROUP',width:100" align="center">课号</th>
+                        <th data-options="field:'CREDITS',width:100" align="center">学分</th>
+                        <th data-options="field:'REASON',width:100" align="center">删除原因</th>
+                        <th data-options="field:'INPROGRAM',width:100" align="center">修课计划内</th>
+                        <th data-options="field:'COURSETYPE',width:100" align="center">修课方式</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+    </div>
+</div>
+<!--todo:弹出的窗口-->
+<div id="content_wd" title=" " data-options="closable:true">
+    <span id="ct">
+    </span>
+</div>
+
+
+</body>
+</html>

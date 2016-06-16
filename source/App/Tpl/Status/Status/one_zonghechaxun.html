@@ -1,0 +1,79 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var zonghe_dat=$('#zonghe_datgrid').datagrid({
+            striped:true,
+            url:'__URL__/Squery/hasJson/1',
+            columns:[[
+                {checkbox:true},
+                {field:'xh',title:'学号',width:60,sortable:true,align:'center'
+                },
+                {field:'xm',title:'姓名',width:50,sortable:true,align:'center'
+                },
+                {field:'xb',title:'性别',width:50,align:'center',sortable:true,formatter:function(c){
+                    if(c=='M'){
+                        return '男'
+                    }else if(c=='F'){
+                        return '女'
+                    }
+                }
+                },
+                {field:'rxrq',title:'入学日期',width:90,sortable:true,align:'center'
+                },
+                {field:'xz',title:'学制',width:50,sortable:true,align:'center'
+                },
+                {field:'tkzxf',title:'逃课总学分',width:70,sortable:true,align:'center'
+                },
+                {field:'hdxf',title:'获得学分',width:60,sortable:true,align:'center'
+                },
+                {field:'jdfh',title:'积点分和',width:60,sortable:true,align:'center'
+                },
+                {field:'txjg',title:'退学警告',width:60,sortable:true,align:'center'
+                },
+                {field:'zcrq',title:'注册日期',width:90,sortable:true,align:'center'
+                },
+                {field:'zczt',title:'注册状态',width:60,sortable:true,align:'center'
+                },
+                {field:'xjzt',title:'学籍状态',width:80,sortable:true,align:'center'
+                },
+                {field:'bm',title:'班名',width:150,sortable:true,align:'center'
+                },
+                {field:'xy',title:'学院',width:70,sortable:true
+                }
+            ]],
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:30
+        })
+       var obj={}
+
+        obj['SCHOOL']='{$school}';
+        obj['CLASSNO']='{$classno}';
+        obj['REGIS']='{$regis}'
+        obj['STATUS']='{$status}';
+        obj['YEAR']='{$year}';
+        obj['TERM']='{$term}';
+
+        obj['str']='按照学院、班级和学籍状态的查询条件共找到xAllx名学生；<p>其中有xAll2x名学生有该学年、学期的注册记录，其中符合注册状态检索条件的名单如下。</p>'
+        ajiakesi('__URL__/zonghe',obj,function(c){
+            obj['Sqlpath']={'count':'status/Three_zonghecount.SQL','select':'status/Three_zonghe.SQL'}
+            obj['bind']={':REGCODE':obj['REGIS'],':YEAR':obj['YEAR'],':TERM':obj['TERM'],':CLASSNO':obj['CLASSNO'],':SCHOOL':obj['SCHOOL'],':STATUS':obj['STATUS']};
+            zonghe_dat.datagrid('load',obj);
+            $('#zonghe_title').html(c);
+
+        })
+    })
+</script>
+<body>
+<div id="cc4" class="easyui-layout" data-options="fit:true" >
+    <div data-options="region:'north',title:'',split:false,border:false" style="height:60px;">
+        <span id="zonghe_title"></span>
+    </div>
+    <div data-options="region:'center',title:'',border:'false'" style="background:#eee;">
+        <div id="zonghe_datgrid" data-options="fit:true,border:false">
+        </div>
+    </div>
+</div>
+</body>
+</html>

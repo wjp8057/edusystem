@@ -1,0 +1,101 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        // alert(wind);
+        var wd_two=$('#wd2').window(new wind(0,0,false,false,false,true,true))
+
+
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+
+
+                        $('#title_year').html($('[name=YEAR]').val())
+                        $('#title_term').html($('[name=TERM]').val())
+                        $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_nine_select.SQL','count':'Results/One_nine_count.SQL'
+                        },'bind':{
+                            ':COURSENO':$('[name=COURSENO]').val().trim(),':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':STUDENTNO':$('[name=STUDENTNO]').val()}})
+                        wd_two.window({closed:false})
+                    })
+
+
+
+        $('#printExcel').bind('click',function(){
+            $('[name=COURSENO2]').val($('[name=COURSENO]').val());
+            $('[name=YEAR2]').val($('[name=YEAR]').val());
+            $('[name=TERM2]').val($('[name=TERM]').val());
+            $('[name=STUDENTNO2]').val($('[name=STUDENTNO]').val());
+            $('#e_excel').submit();
+        })
+
+    })
+</script>
+<body>
+<form method="POST" action="__APP__/Results/Results/Course_score" id="e_excel">
+    <input type="hidden" name="COURSENO2">
+    <input type="hidden" name="YEAR2">
+    <input type="hidden" name="TERM2">
+    <input type="hidden" name="STUDENTNO2">
+</form>
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+            &nbsp;&nbsp;<label for="yyear">学年：</label><input type="text" name="YEAR" id="yyear" size="4" >&nbsp;&nbsp;
+
+            <label for="tterm">学期：</label><input type="text" name="TERM" id="tterm" size="1">&nbsp;&nbsp;
+
+            <label for="kch">课号:</label><input type="text" name="COURSENO" id='kch' value="%" size=9>&nbsp;&nbsp;
+
+            <label for="xhh">学号:</label><input type="text" name="STUDENTNO" id='xhh' value="%" size="9">&nbsp;&nbsp;
+            <a href="javascript:void(0)" id="search">a</a>
+            <a href="javascript:void(0)" id="printExcel" class="easyui-linkbutton"  iconCls="icon-excel" plain="true">导出Excel</a>
+        </div>
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',toolbar:'#tdemo',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[20,50,100,200,500]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:230" align="center">课号</th>
+                        <th data-options="field:'km',width:450" align="center">课名</th>
+                        <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                        <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'xkfs',width:100,align:'right'" align="center">修课方式</th>
+                        <th data-options="field:'kscj',width:100,align:'right'" align="center">考试成绩</th>
+                        <th data-options="field:'kccj',width:100,align:'right'" align="center">考查成绩</th>
+                        <th data-options="field:'bkcj',width:100,align:'right'" align="center">补考成绩</th>
+                        <th data-options="field:'bkkc',width:100,align:'right'" align="center">补考考查</th>
+                        <th data-options="field:'jdf',width:100,align:'right',formatter:function(a,b,c){
+                                if(typeof a=='string'){
+
+                                    if(a.substr(0,1)=='.'){
+                                        return '0'+a
+                                    }else if(a.substr(0,1)=='-'&&a.substr(1,1)=='.'){
+                                        return '-0'+a.substr(1)
+                                    }
+                                }
+
+
+                                return a;
+                        }" align="center">积点分</th>
+                        <th data-options="field:'cx',width:100,align:'right'" align="center">重修</th>
+                        <th data-options="field:'tkfs',width:100,align:'right'" align="center">听课方式</th>
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

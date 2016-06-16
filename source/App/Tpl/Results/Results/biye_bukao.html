@@ -1,0 +1,74 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+        var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_eight_title_SCHOOL.SQL','bind':{':SCHOOL':$('[name=SCHOOL]').val()}},function(c){
+                        eval('var one='+c)
+                        $("#title_year").html($('[name=YEAR]').val())
+
+                        $('#title_school').html(one[0]['NAME'])
+                        $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_eight_select.SQL','count':'Results/One_eight_count.SQL'
+                        },'bind':{
+
+                            ':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':SCHOOL':$('[name=SCHOOL]').val()}})
+
+                             wd_two.window({closed:false})
+                        })
+
+                    })
+
+
+
+    })
+</script>
+<body>
+
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+                        学年：<input type="text" name="YEAR" size="4" > &nbsp; &nbsp;
+                        学期：<input type="text" name="TERM" size="1"> &nbsp; &nbsp;
+                        所在学院:<select name="SCHOOL">
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+
+                        <a id="search">查询</a> &nbsp;
+
+        </div>
+        <div data-options="region:'center'" style="padding:0px;background:#eee;">
+
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',toolbar:'#tdemo',fitColumns:true,singleSelect:true,fit:true,pagination:true">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'km',width:230" align="center">课名</th>
+                        <th data-options="field:'xh',width:100,align:'right'" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'bj',width:100,align:'right'" align="center">班级</th>
+                        <th data-options="field:'wjz',width:100,align:'right'" align="center">五级制</th>
+                        <th data-options="field:'bfz',width:100,align:'right'" align="center">百分制</th>
+                        <th data-options="field:'ps',width:100,align:'right'" align="center">平时</th>
+                        <th data-options="field:'qm',width:100,align:'right'" align="center">期末</th>
+                    </tr>
+                    </thead>
+                </table>
+
+        </div>
+    </div>
+
+
+</body>
+</html>

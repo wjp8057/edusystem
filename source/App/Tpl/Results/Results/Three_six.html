@@ -1,0 +1,155 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$school.SCHOOL}'
+
+    var teacherno='{$teacherno}'               //todo;操作人的教师号
+
+    $('[name=SCHOOL]').val(school)
+    var arr=[];
+    $(function(){
+        $("[name='year']").val(parent.$("#YEAR").val());
+        $("[name='term']").val(parent.$("#TERM").val());
+
+            var curr_time = new Date();
+            var strDate = curr_time.getFullYear()+"-";
+            strDate += curr_time.getMonth()+1+"-";
+            strDate += curr_time.getDate()
+       /*     strDate += curr_time.getHours()+":";
+            strDate += curr_time.getMinutes()+":";
+            strDate += curr_time.getSeconds();*/
+            $("#dd").datebox("setValue", strDate);
+
+        // var wd_yi=$('#wd_one').window(new wind(0,0,false,false,false,true,true))
+        $('#add').bind('click',function(){
+            $('[name=year]').val($('[name=syear]').val())
+            $('[name=term]').val($('[name=sterm]').val())
+            $('#addwd').window({closed:false})
+        })
+
+
+        $('#search_one').bind('click',function(){
+            $('#yingyuA2').datagrid('load',{
+                Sqlpath:{'select':'results/miance_select.SQL','count':'results/miance_count.SQL'},
+                bind:{':year':$('[name=syear]').val(),':term':$('[name=sterm]').val(),':name':$('[name=sname]').val()}
+            })
+
+        })
+
+        $('[name=studentno]').bind('blur',function(){
+
+            if($('[name=studentno]').val()==''){
+                return $.messager.alert('提示','学号不能为空')
+            }
+            ajiakesi('__URL__/Three_six/hasJson/true',{studentno: $.trim($('[name=studentno]').val())},function(c){
+                if(c=='这个学生不存在'){
+                    $('[name=name]').val('不存在')
+                    $('[name=classname]').val('不存在')
+                    return  $.messager.alert('提示',c)
+                }
+                eval('var one='+c)
+                $('[name=name]').val(one['name'])
+                $('[name=classname]').val(one['cname'])
+            })
+        })
+
+
+
+        //todo:点添加的时候
+        $('#tianjia').bind('click',function(){
+            $('[name=studentno]').blur();
+        //    alert($.trim($('[name=birthday]').val())=='')
+           if($.trim($('[name=year]').val())==''){
+               return $.messager.alert('提示','学年不能为空!')
+           }else if($.trim($('[name=term]').val())==''){
+                return $.messager.alert('提示','学期不能为空!')
+           }else if($.trim($('[name=name]').val())==''||$.trim($('[name=name]').val())=='不存在'){
+               return $.messager.alert('提示','输入的学生有问题!')
+           }else if($.trim($('[name=birthday]').val())==''){
+               return $.messager.alert('提示','批准时间请填写!')
+           }
+            setTimeout(function(){
+                ajiakesi('__URL__/add_miance/hasJson/1',{'year':$('[name=year]').val(),
+                    'term':$('[name=term]').val(),'studentno':$('[name=studentno]').val(),
+                    'name':$('[name=name]').val(),
+                    'classname':$('[name=classname]').val(),'reson':$('[name=reson]').val(),time:$('[name=birthday]').val()},function(c){
+                    $.messager.alert('提示',c)
+                })
+            },500)
+
+        })
+
+
+    })
+
+
+
+
+</script>
+<body style="background: #fff">
+
+<div id="addwd" class="easyui-window" title="新增" style="width:600px;height:230px"
+     data-options="modal:true,collapsible:false,
+     minimizable:false,maximizable:false,closabel:false,closed:true">
+<br>
+    <center>
+    学年：<input type="text" name="year" size="4">&nbsp;
+    学期：<input type="text" name="term" size="1">&nbsp;
+    学号：<input type="text" name="studentno" size="9">
+    姓名：<input type="text" name="name" size="9" readOnly="true"><br><br>
+    班级：<input type="text" name="classname" size="9" readOnly="true">
+    原因：<input type="text" name="reson" size="25">
+    批准时间：
+        <input id="dd" name="birthday" type="text" class="easyui-datebox" required="required">
+
+        <br><br>
+    <a href="javascript:void(0)" id="tianjia" class="easyui-linkbutton">添加</a>
+    </center>
+</div>
+
+<div id="ccc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+        学年：<input type="text" name="syear" value="2012" size="4">&nbsp&nbsp
+
+        学期：<input type="text" name="sterm" value="2" size="1">
+
+        姓名：<input type="text" name="sname" size="9" value='%' >
+    </select>
+        <a  href="javascript:void(0)" iconCls="icon-search" class="easyui-linkbutton" id="search_one">查询</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" plain="true" id="add" iconCls="icon-add">新增</a>
+    </div>
+    <div data-options="region:'center',border:false,split:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="yingyuA2"
+               data-options="url:'__APP__/Status/Status/Squery/hasJson/1',pageList:[20,50,100,200,500],fit:true,
+               singleSelect:true,pagination:true,toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'year',width:50" align="center">学年</th>
+                <th data-options="field:'term',width:50" align="center">学期</th>
+                <th data-options="field:'studentno',width:100" align="center">学号</th>
+                <th data-options="field:'name',width:100" align="center">姓名</th>
+                <th data-options="field:'reson',width:300" align="center">原因</th>
+                <th data-options="field:'time',width:150" align="center">批准时间</th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+
+
+
+
+
+</body>
+
+
+
+
+
+
+

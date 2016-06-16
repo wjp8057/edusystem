@@ -1,0 +1,1 @@
+select rtrim(ROLES) as rl from METHODS where METHODID=:ID

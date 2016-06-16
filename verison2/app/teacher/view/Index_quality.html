@@ -1,0 +1,29 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'我的学评教',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/Teacher/Quality/query',toolbar:'#toolbar',
+            columns:[[
+                {field:'year',title:'学年',width:80,align:'center'},
+                {field:'term',title:'学期',width:50,align:'center'},
+                {field:'courseno',title:'课号',width:100,align:'center'},
+                {field:'coursename',title:'课名',width:200,align:'center'},
+                {field:'attendent',title:'参加人数',width:60,align:'center'},
+                {field:'done',title:'完成人数',width:60,align:'center'},
+                {field:'used',title:'有效人数',width:60,align:'center'},
+                {field:'type',title:'类型',width:60,align:'center'},
+                {field:'score',title:'得分',width:60,align:'center'},
+                {field:'courseschool',title:'开课学院',width:120,align:'center'},
+                {field:'valid',title:'状态',width:60,align:'center'}
+            ]]
+        });
+    });
+</script>
+<div class="container">
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+
+    </div>
+</div>

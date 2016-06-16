@@ -1,0 +1,86 @@
+<include file=":Include:jqueryHeader" />
+<style type="text/css">
+table{border:solid 1px #95B8E7;border-collapse:collapse;margin: 0px auto;}
+table td,table th{border:solid 1px #95B8E7;}
+</style>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="0" split="false" style="padding:5px;overflow-x:hidden" >
+    <P ALIGN=CENTER><FONT style="font-size: 16pt" face="隶书">学生{$info.NAME|trim}注册信息</font></p>
+    <table align="center" width="80%" datasrc="#dsoSTUDENT" cellpadding="4">
+        <tr>
+            <td width="129" align="right" height="22" >学号：</td>
+            <td>{$info.STUDENTNO}</td>
+            <td><a href="#" onclick="openTopTabs('110')">修课计划</a></td>
+            <td width="153" rowspan="9"><img border="0"  id= "photo" src="__ROOT__/pictures/{$info.STUDENTNO|substr=0,2}/{$info.STUDENTNO}.jpg" width="150" height="200"></td>
+        </tr>
+        <tr>
+            <td align="right" height="22">姓名：</td>
+            <td  colspan="2">{$info.NAME}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">性别：</td>
+            <td colspan="2" width="422">{$info.SEX}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">入学日期：</td>
+            <td colspan="2">{$info.ENTERDATE}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">学制：</td>
+            <td colspan="2">{$info.YEARS}年</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">主修班级编号：</td>
+            <td>{$info.CLASSNO}</td>
+            <td>班级名称：{$info.CLASSNAME}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">选课总学分：</td>
+            <td colspan="2">{$info.TAKEN}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">完成学分：</td>
+            <td colspan="2">{$info.PASSED}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">积点分和：</td>
+            <td colspan="2">{$info.POINTS}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22"><font color="#FF0000">退学警告次数：</font></td>
+            <td colspan="3">{$info.WARN}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22"><font color="#FF0000">学籍状态：</font></td>
+            <td colspan="3">{$info.STATUSVALUE}</td>
+        </tr>
+        <tr>
+            <td align="right" height="22">联系方法：<span lang="en-us"> </span></td>
+            <td colspan="3">{$info.CONTACT}</td>
+        </tr>
+        <tr>
+            <td align="right">所在学院：</td>
+            <td height="22" colspan="3">{$info.SCHOOLNAME}</td>
+    </table>
+
+    <div align="center">
+        <P ALIGN=CENTER><FONT style="font-size: 16pt" face="隶书">学籍注册信息</font></p>
+        <table cellspacing="0" width="80%" cellpadding="4">
+            <tr>
+            <th width="189" align="right" height="22">学期</th>
+            <th height="22">注册状态</th>
+            </tr>
+            <volist name="list" id="vo">
+            <tr>
+                <td width="189" align="right" height="22">{$vo.YEAR}学年第{$vo.TERM}学期：</td>
+                <td  height="22">{$vo.REGVALUE}</td>
+            </tr>
+            </volist>
+        </table>
+        <p/>
+    </div>
+</div>
+
+</body>
+</html>

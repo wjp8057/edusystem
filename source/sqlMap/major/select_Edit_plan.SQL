@@ -1,0 +1,1 @@
+select YEAR,RTRIM(REM) as REM,MCREDITS,CREDITS,专业方向 as zyfx from majorplan where ROWID=:rowid

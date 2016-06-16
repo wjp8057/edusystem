@@ -1,0 +1,124 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+    var school='{$user_info.SCHOOL}';
+    var teacherno='{$user_info.TEACHERNO}';
+
+    $(function(){
+        var year_input = $("#year_input");
+        var term_input = $("#term_input");
+        var school_input = $("#school_input");
+        var dgrid = $("#dgrid");
+
+        school_input.val(school);
+        year_input.val(GenKits.getParentYear());
+        term_input.val(GenKits.getParentTerm());
+
+        function getScoreType(){
+            return $(".scoretype:checked").val();
+        }
+
+        //查询
+        $('#search_one').click(function(){
+            var schoolno = $.trim(school_input.val());
+//            if(schoolno !== school && 'A1' !== school){
+//                return Messager.showWarning("教务处人员除外的教室只能修改自己学院的学生的成绩！");
+//            }
+            dgrid.datagrid('load',{
+                year:year_input.val(),
+                term:term_input.val(),
+                schoolno:schoolno,
+                courseno:'%'
+            });
+        });
+
+        //开启补考成绩输入界面
+        $('#openinputpage').bind('click',function(){
+            if(Datagrid.selectSingle(dgrid)){
+                var row = Datagrid.getSelected(dgrid);
+                var scoretype= getScoreType();
+                var lock = parseInt(row.lock);
+                if(lock > 0){
+                    return Messager.showWarning("课程已经锁定！");
+                }else{
+                    open('__URL__/Three_BKCJSR_StudentList/year/'+year_input.val()+'/term/'+term_input.val()+
+                    '/courseno/'+row.courseno+'/schoolno/'+row.schoolno+'/scoretype/'+scoretype+"/lock/"+lock);
+                }
+            }
+        });
+
+
+
+        $('#opencourse').bind('click',function(){
+            if(Datagrid.selectSingle(dgrid)){
+                var row = Datagrid.getSelected(dgrid);
+                console.log(row);
+                $.post('__URL__/kf_course',{year:year_input.val(),term:term_input.val(),courseno:row.courseno}, function (data) {
+                    return Messager.showMessage(data, function () {
+                        location.reload();
+                    });
+                });
+            }
+        });
+
+    });
+
+
+
+
+</script>
+<body style="background: #fff">
+
+    <div id="ccc" class="easyui-layout" data-options="fit:true">
+
+        <div id="tdemo">
+            学年：<input type="text" name="YEAR"  size="4" id="year_input" />&nbsp&nbsp
+            学期：<input type="text" name="TERM"  size="1" id="term_input" />
+            所在学院：
+            <select name="SCHOOL" id="school_input">
+                <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                </volist>
+            </select>
+            <a id="search_one" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+
+
+
+            <span style="font-size: 10pt">
+                <input type="radio" value="five" id="five" name="scoretype" class="scoretype">五级制&nbsp;
+                <input type="radio" value="ten"  id="ten"  name="scoretype" class="scoretype" checked>百分制
+            </span>
+            <a href="javascript:void(0);" id="openinputpage" class="easyui-linkbutton"   iconCls="icon-edit" plain="true">补考成绩单输入</a>
+            <a href="javascript:void(0);" id="opencourse" class="easyui-linkbutton" iconCls="icon-cut" plain="true">开放选中课程</a>
+        </div>
+
+        <div data-options="region:'center',border:false,split:false" style="padding:0;background:#eee;">
+            <table class="easyui-datagrid" id="dgrid"
+                   data-options="url:'__URL__/Three_two',fitColumns:true,pageList:[20,50,100,200,500],fit:true,singleSelect:true,pagination:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'courseno',width:100" align="center">课号</th>
+                    <th data-options="field:'coursename',width:100" align="center">课程名称</th>
+                    <th data-options="field:'schoolname',width:100" align="center">课程所在学院</th>
+                    <th data-options="field:'schoolno',width:100,hidden:true" align="center">课号</th>
+                    <th data-options="field:'num',width:100" align="center">人数</th>
+                    <th  align="center" data-options="field:'lock',width:100,formatter: function(value,row,index){
+                        return parseInt(value) > 0?'锁定':'开放';
+                    }">状态</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+
+</body>
+
+
+
+
+
+
+

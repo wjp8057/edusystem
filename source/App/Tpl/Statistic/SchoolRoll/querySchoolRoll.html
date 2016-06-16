@@ -1,0 +1,195 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+   <!-- <div data-options="region:'north',split:false,border:false" style="background:#E0ECFF;overflow:hidden;padding-bottom: 2px;">
+
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<div id="toobar">
+    <form id="queryForm" action="" target="download" method="post">
+            <div class="query">
+                <label>学号：</label><input name="STUDENTNO" size="10" value="%">
+                <label>学生姓名：</label><input name="NAME" size="10" value="%">
+                <label>班号：</label><input name="CLASSNO" size="10" value="%">
+                <label>学籍状态：</label>
+                <select class="easyui-combobox" name="STATUS" data-options="editable:false">
+                    <option value="%">所有情况</option>
+                    <volist name="status" id="s">
+                        <option value="{$s.NAME}">{$s.VALUE}</option>
+                    </volist>
+                </select>
+                <label>所在学院：</label>
+                <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+                    <option value="%">全校</option>
+                    <volist name="school" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+                <input type="hidden" name="type" value="schoolRoll">
+                <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+            </div>
+
+    </form>
+    <a href="javascript:void(0)" id="cancelledBut" class="easyui-linkbutton" data-options="iconCls:'icon-kaichu',plain:true">注销学籍</a>
+    <a href="javascript:void(0)" id="expelBut" class="easyui-linkbutton" data-options="iconCls:'icon-stop',plain:true">开除学籍</a>
+    <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL学生名册</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var datagrid = null;
+var user_school="{$user_school}";
+
+$(function(){
+	datagrid=$('#content').datagrid({
+        fit:true,
+        striped:true,
+        fitColumns:true,
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#content');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{field:'STUDENT',checkbox:true},
+                  {field:"STUDENTNO",title:"学号",width:80,align:"center",formatter:function(value,row,index){
+                	  return "<a style='color:#000080' href=\"javascript:edit('"+value+"')\">"+value+"</a>";
+  		          }},
+                  {field:"NAME",title:"姓名",width:80,align:"center"},
+                  {field:"SEX",title:"性别",width:50,align:"center"},
+                  {field:"CLASSNAME",title:"主修班级",width:160,align:"center"},
+                  {field:"STATUS",title:"学籍状态",align:"center"},
+                  {field:"WARN",title:"退学警告次数",align:"center"},
+                  {field:"POINTS",title:"积点分",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"TAKEN",title:"选课学分",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"PASSED",title:"完成学分",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"SCHOOLNAME",title:"所在学院",width:120,align:"center"}
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#toobar'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	datagrid.datagrid("options").url = "__URL__/querySchoolRoll/hasJson/1";
+    	datagrid.datagrid('load',{
+    		STUDENTNO:$.trim($("[name='STUDENTNO']").val()),
+    		NAME:$.trim($("[name='NAME']").val()),
+    		CLASSNO:$.trim($("[name='CLASSNO']").val()),
+    		STATUS:$.trim($("[name='STATUS']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val())
+    	});
+    });
+    var msg="";
+    //注销学籍
+    $("#cancelledBut").click(function(){
+    	cancelled("注销",0);
+    });
+    $('#admin_zx').bind('click',function(){
+        cancelled("注销",0);
+    })
+
+    //开除学籍
+    $("#expelBut").click(function(){
+    	cancelled("除名",5);
+    });
+    $('#admin_kc').bind('click',function(){
+        cancelled("除名",5);
+    })
+    //EXCEL学生名册
+	$("#ExportBut").click(function(){
+		list=datagrid.datagrid('getRows');
+    	if(list.length){
+    		var stuno=$.trim($("[name='STUDENTNO']").val());
+    		var name=$.trim($("[name='NAME']").val());
+    		var classno=$.trim($("[name='CLASSNO']").val());
+    		var status=$.trim($("[name='STATUS']").val());
+    		var school=$.trim($("[name='SCHOOL']").val());
+    		if(stuno=="" && name=="" && classno=="" && status=="" && school==""){
+    			msgShow("系统提示：","请输入检索条件，由于数据量过大，暂不支持导出全校学生学籍情况","info");
+    			return;
+    		}else{
+    			var total = datagrid.datagrid('getPager').data("pagination").options.total;
+    			if(total > 2000){
+    				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+        			return;
+    			}
+    			$("#queryForm").attr("action","__URL__/export/");
+	    		$("#queryForm").submit();
+    		}
+    	}else{
+    		msgShow("系统提示：","请先检索出您要导出的数据","info");
+    	}
+    });
+});
+//学籍注销或除名
+function cancelled(msg,graduation){
+	
+	msg="你确实要"+msg+"选中学生的学籍吗？学籍注销将首先将学生移动到毕业生库中，然后删除相关的学生记录、个人情况记录、选课记录、修课计划列表、辅修班学生记录，删除后记录不能恢复！但学生的学籍异动记录，成绩记录不会删除。如果是毕业正常注销学籍，则毕业生库中的毕业代码为“正常毕业”，如果为开除学籍，则该字段为“除名”。";
+	list=datagrid.datagrid('getSelections');
+	if (list.length){
+		if(user_school!="A1"){
+    		msgShow("系统提示：","注销学生学籍的操作只有教务处学籍管理人员才能完成","info");
+    		return;
+    	}
+		
+		$.messager.confirm('提示',msg,function(b){
+    		if(b){
+              	var ary=[];                      //存储删除信息的数组
+                  for(var i=0;i<list.length;i++){
+                 	 ary[i]=list[i].STUDENTNO;
+                  }
+                  $.ajax({
+                      url:'__URL__/cancelled/',
+                      data:{'studentnos':ary,"graduation":graduation},
+                      type:'POST',
+                      success:function(message){
+                    	  if(message){
+                    		  msgShow("系统提示：",message,"info");
+                              datagrid.datagrid('reload');
+                    	  }
+                      }
+                  });
+              }
+    	});
+	}else{
+		msgShow("系统提示：","请选择你要操作的数据","info");
+	}
+}
+//跳转到学生信息编辑窗口
+function edit(studentno){
+	var url="__URL__/edit/STUDENTNO/"+studentno;
+	openTabsWindows("学号「"+studentno+"」注册信息",url);
+}
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_zx'>注销学籍</div>
+    <div id='admin_kc'>开除学籍</div>
+</div>
+</body>
+</html>

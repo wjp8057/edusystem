@@ -1,0 +1,126 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+
+        $('#dg').datagrid({
+            title:'报到注册',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20, url:'{$ROOT}/Base/Student/registerlist',
+            queryParams: {year: $('#year').val(),term: $('#term').val(),school:school.combobox('getValue')},
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'checkbox',title:'选中',checkbox:true},
+                {field:'studentno',title:'学号',width:120,align:'center'},
+                {field:'name',title:'姓名',width:100,align:'center'},
+                {field:'classname',title:'班级',width:200,align:'center'},
+                {field:'schoolname',title:'学院',width:180,align:'center'},
+                {field:'statusname',title:'学籍状态',width:100,align:'center'},
+                {field:'regname',title:'注册状态',width:100,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                studentno: $('#studentno').val(),
+                classno: $('#classno').val(),
+                school:$('#school').combobox('getValue'),
+                type:$('#type').combobox('getValue')
+            });
+        });
+        $("#register").click(function(){
+            var tt=$('#dg');
+
+            var rows=tt.datagrid('getSelections');
+            var count=rows.length;
+            var regcode=$('#regcode').combobox('getValue');
+            if(count<=0){ //检查是否有选中记录
+                $.messager.alert('提示','请选择至少一条记录！','info');
+                return false;
+            }
+            if(regcode==''){ //检查是否选择注册类型
+                $.messager.alert('提示','请选择注册类型！','info');
+                return false;
+            }
+            for(var i=0;i<count;i++){ //检查是否有权限操作
+                if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                    $.messager.alert('错误', '你无法为其它学院的学生注册（' + rows[i].name + '）！', 'error');
+                    return false;
+                }
+            }
+            var effectRow = new Object();
+            effectRow["updated"]=$.toJSON(rows);
+            effectRow["year"]= $('#year').val();
+            effectRow["term"]= $('#term').val();
+            effectRow["regcode"]= regcode;
+
+            $.post('{$ROOT}/Base/Student/register',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('clearSelections');
+                    tt.datagrid('clearChecked');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        $('#regcode').combobox({
+            url:'{$ROOT}/all/option/regcode',
+            valueField:'code',
+            textField:'name',
+            panelHeight:'auto'
+        });
+    });
+</script>
+<div class="container">
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school">
+        <label for="type">状态：</label>
+        <select class="easyui-combobox" id="type" data-options="panelHeight:'auto'" >
+            <option selected="selected" value="0">全部</option>
+            <option value="1">已注册</option>
+            <option value="2">未注册</option>
+        </select>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索注册信息</a> |
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:'true'" id="register">将选中学生注册状态设置为>></a>
+        <input id="regcode" size="9">
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>检索结果仅包含学籍状态为正常、延长学业、休学等有正常学籍的学生。</li>
+            <li>检索到结果后，选中相应记录，选择注册类型，并点击"将选中学生注册状态设置为"按钮</li>
+        </ol>
+    </div>
+</div>

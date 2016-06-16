@@ -1,0 +1,157 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script src="__ROOT__/thirdparty/jquery/js/lazerloader.min.js"></script>
+<script>
+    new Lazerloader().start({url:'__URL__/shenhe/tag/getlist',tplid:'_tpl' ,ctnselector:'body',delay:100,size:1});
+</script>
+<style>
+    div.alicenter {text-align: center}
+</style>
+<body style="background: #FFffff">
+<div id="_tpl" style="display: none">
+    <!-- start:查询的学生的相关信息 班级层面 -->
+    <div class="_bigtitle">
+        <div class="alicenter">
+            <span style="font-size: 25px">
+                <span class="_grade" style="font-size: 25px"></span>
+                <span class="_majorname" style="font-size: 25px"></span>
+                &nbsp&nbsp&nbsp
+                <span class="_majordirection" style="font-size: 25px"></span>
+                &nbsp&nbsp&nbsp毕业审核报告
+            </span>
+        </div>
+        <br>
+        <div class="alicenter">
+            <span style="font-size: 15px">
+                要求总学分:
+                <span class="_creditrequesttotal" style="font-size: 25px"></span>
+                &nbsp&nbsp必修学分:
+                <span class="_creditmusttotal" style="font-size: 25px"></span>
+                &nbsp&nbsp&nbsp审核时间
+                <span class="_checktime" style="font-size: 25px"></span>
+            </span></div>
+        <br>
+    </div>
+    <!-- end:教学计划相关信息 -->
+
+    <!-- begin : 学生在该教学计划下的学分获得情况 -->
+    <div class="_studentofplan" >
+        <br /><hr /><br />
+        <span class="_studentindex" style="font-size: 17px;"></span>
+        <span style="font-size: 17px">
+            学号：
+            <span class="_studentno" style="font-size: 17px"></span>
+            &nbsp&nbsp姓名:
+            <span class="_studentname" style="font-size: 17px"></span>
+            &nbsp;&nbsp;班级:
+            <span class="_classname" style="font-size: 17px"></span>
+            &nbsp&nbsp获得总学分
+            <span class="_credittotalofplan" style="font-size: 17px"></span>
+            (含创新技能学分
+            <span class="_creditskill" style="font-size: 17px"></span>
+            )
+            <b><span  style='font-size: 20px;font-weight: bold;color: green' class="_passmarkok"> </span>
+            <span  style='font-size: 20px;font-weight: bold;color: red' class="_passmarkno"> </span></b>
+        </span>
+        <br><br>
+    </div>
+    <!-- end :学生在该教学计划下的学分获得情况  -->
+
+    <!-- 教学计划类型 -->
+    <div class="_scheduleplantitle">
+        <span style="font-size:17px">
+            教学计划号:
+            <span class="_teachingplanno" style="font-size:17px"></span>
+            &nbsp&nbsp教学计划名称:
+            <span class="_teachingplanname" style="font-size:17px"></span>
+            &nbsp&nbsp类型:
+            <span class="_teachingplantype" style="font-size:17px"></span>
+        </span>
+        <br />
+    </div>
+
+    <!-- bein :  部分选部分通过 -->
+    <div class="_parttopart">
+        <span style="font-size:15px">
+            要求学分:
+            <span class="_ptprequest" style="font-size:15px"></span>
+            &nbsp;&nbsp;已通过学分:
+            <span class="_ptppassed" style="font-size:15px"></span>
+        </span>&nbsp;
+        <b><span  style='font-size: 20px;font-weight: bold;color: green' class="_ptpmarkok"></span>
+        <span  style='font-size: 20px;font-weight: bold;color: red' class="_ptpmarkno"></span></b>
+    </div>
+
+    <!-- begin : 公共选修课 -->
+    <div class="_publicpart">
+        <span style="font-size:15px">
+            要求学分:
+            <span class="_pprequest" style="font-size:15px"></span>
+            &nbsp&nbsp已通过学分:
+            <span class="_pppasswed" style="font-size:15px"></span>
+            (含创新学分
+            <span class="_ppskillcredit" style="font-size:15px"></span>
+            )
+        </span>&nbsp;
+        <b><span  style='font-size: 20px;font-weight: bold;color: green' class="_ppmarkok"></span>
+        <span  style='font-size: 20px;font-weight: bold;color: red' class="_ppmarkno"></span></b>
+    </div>
+
+    <!-- begin : 全选全通过（额外列出未通过的课程） -->
+    <div class="_alltoallok">
+        <!-- courselist为空的情况 -->
+        <span style="font-size:15px">
+            要求学分:
+            <span class="_atarequest"></span>
+            &nbsp&nbsp已通过学分:
+            <span class="_atapassed"></span>
+        </span>&nbsp;
+        <b><span  style='font-size: 20px;font-weight: bold;color: green' class="_ataomark">√</span></b>
+    </div>
+    <!-- courselist不为空的情况-->
+    <div  class="_alltoallnot">
+        <span style="font-size:15px">
+            要求学分:
+            <span class="_atanrequest"></span>
+        </span>&nbsp;
+        <b><span  style='font-size: 20px;font-weight: bold;color: red'  class="_atanmark">×</span></b>
+    </div>
+    <!--  全选全通过下的不通过的课程 -->
+    <div class="_alltoallcourses">
+        <!--<b><span style="font-size: 15px">尚未通过的课程</span></b><br>-->
+            <b><span style="font-size: 17px;font-weight: bold;color: red"  >×</span></b>
+            <span style="font-size:15px;line-height:30px">
+                课号:
+                <span class="_ataccourseno"></span>
+                &nbsp&nbsp学分:
+                <span class="_ataccredit"></span>
+                &nbsp&nbsp课名:
+                <span class="_ataccoursename"></span>
+            </span><br />
+    </div>
+
+    <!-- begin:tail -->
+    <div class="_countstudents " >
+        <br /><hr /><br />
+        <div class="alicenter">
+        @_@(:终于审核结束了！:) @_@ 本次共审核了
+        <span class="_countstudentnum"></span>
+        人
+        </div>
+    </div>
+    <!-- begin:tail -->
+    <div class="_tips " >
+        <div class="alicenter">
+            <span style="font-size: 25px">
+                <span class="_tipmsg" style="font-size: 25px"></span>
+            </span>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+</body>
+</html>

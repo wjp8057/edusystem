@@ -1,0 +1,149 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%" fit="true"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true">
+        <thead>
+        <tr>
+            <th data-options="field:' ',checkbox:true"></th>
+            <th data-options="field:'COURSENO',align:'center',width:20">课号</th>
+            <th data-options="field:'COURSENAME',align:'center',width:40">课程名称</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:20">开课学院</th>
+            <th data-options="field:'STANDARD',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">标准班</th>
+            <th data-options="field:'HOURS',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">总课时</th>
+            <th data-options="field:'WEEKS',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">周数（实训周）</th></tr>
+        </thead>
+    </table>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <label>课号：</label><input name="courseno" value='%'  size="14" maxlength="10">
+        <label>课名：</label><input name="coursename" value='%'  size="20">
+        <label>开课学院：</label>
+        <select class="easyui-combobox" id="school" name="school" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检 索</a>
+        <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+        <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+        <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    </form>
+</div>
+<script type="text/javascript">
+    var list=null;
+    var datagrid=null;
+    var ary={};
+    $(function(){
+        var userSchool=parent.$("#userSchool").val();
+        datagrid = $('#datagrid').datagrid({
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges');
+                e.preventDefault();
+                datagrid.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{left: e.pageX,top: e.pageY});
+            },
+            toolbar:'#toobar',
+            onDblClickRow:function(keyrow,dataRow){
+                if(dataRow.SCHOOL!=userSchool && userSchool!="A1"){
+                    msgShow("系统提示：","您只能编辑自己学院的课程信息","info");
+                    return;
+                }
+               if(ary[keyrow]==undefined){
+                   datagrid.datagrid('beginEdit',keyrow);
+                   ary[keyrow]=keyrow;
+               }else{
+                   datagrid.datagrid('cancelEdit',keyrow);
+                   delete ary[keyrow];
+               }
+            }
+        });
+        //指定默认学院
+        if(userSchool!="A1") $("#school").combobox('setValue', userSchool);
+        // 条件查询
+        $("#searcher").click(function(){
+            datagrid.datagrid("options").url = "__URL__/courseParam/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+        //编辑
+        function fn_edit(){
+            list=datagrid.datagrid('getSelections');
+            if(list.length > 0){
+                var index=null;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].SCHOOL!=userSchool && userSchool!="A1") continue;
+                    index= datagrid.datagrid('getRowIndex',list[i]);
+                    datagrid.datagrid('beginEdit',index);
+                    ary[index]=index;
+                }
+                if(index==null)msgShow("系统提示：","您只能编辑自己学院的课程信息","info");
+            }else{
+                msgShow("系统提示：","请选择要编辑的数据","error");
+            }
+        }
+        $("#editBut").bind('click',fn_edit);
+        $('#admin_edit').bind('click',fn_edit);
+        //取消编辑
+        $("#cancelBut").click(function(){
+            datagrid.datagrid('rejectChanges');
+            ary={};
+        });
+        //保存编辑
+        $("#saveBut").click(function(){
+            for (var key in ary){
+                if(key){
+                    datagrid.datagrid('endEdit',key);
+                }
+            }
+            ary={};
+            list=datagrid.datagrid('getChanges');
+            if(list.length > 0){
+                $.ajax({
+                    url:'__URL__/updateParam/',
+                    data:{'update':"courseParam","list":list},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            $.messager.alert("提示","保存成功！","info",function(){
+                                datagrid.datagrid('reload');
+                            });
+                        }else{
+                            $.messager.alert("提示","保存失败！请检查您提交的数据是否合法","error",function(){
+                                datagrid.datagrid('reload');
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            "YEAR":getYear(),"TERM":getTerm(),
+            "COURSENO":$.trim($("#toobar [name='courseno']").val()),
+            "COURSENAME":$.trim($("#toobar [name='coursename']").val()),
+            "SCHOOL":$.trim($("#toobar [name='school']").val())
+        };
+        return data;
+    }
+    function getYear(){
+        return parent.$("#YEAR").val();
+    }
+    function getTerm(){
+        return parent.$("#TERM").val();
+    }
+</script>
+
+
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+<include file="./methods" />
+</body>
+</html>

@@ -1,0 +1,70 @@
+<include file=":Include:jqueryHeader" />
+<style>
+body{background:#FFF;}
+h1{margin:0px;padding:0px;line-height:25px;color:#0360af;text-align:center;}
+#content{margin:5px auto;border-collapse:collapse;}
+#content td{border:solid 1px #95b8e7;line-height:normal;text-align:center;font-size:10px;}
+</style>
+<body>
+<div>
+    <h1 id="title">班级选课汇总表</h1>
+    <table id="content" border="0" cellpadding="1" align="center"></table>
+    <p align="center">打印时间：<?php echo date("Y-m-d H:i:s");?></p>
+</div>
+<script type="text/javascript">
+var year="{$year}";
+var term="{$term}";
+var classno="{$classno}";
+$(function(){
+	if(year=="" || term=="" || classno==""){
+  		msgShow("系统提示：","检索时学年、学期、班号都不能为空！","error");
+  		return;
+  	}
+  	$.ajax({
+        url:"__URL__/classSum/hasJson/1",
+        type:"POST",
+        data:{"YEAR":year,"TERM":term,"CLASSNO":classno},
+        dataType:"JSON",
+        success:function(data){
+        	if(data){
+        		$("#content").html("");
+        		$("#title").html(year+"学年第"+term+"学期 "+data["classname"]+"("+classno+")的选课汇总表");
+        		
+        		var html="<tr><td width='30'>学号</td><td style='white-space:nowrap;'>姓名</td><td>学分</td>";
+        		//生成列
+          	    var course=data["course"];//课程列表
+          	  	var column=new Array(course.length+3);//存储列名称
+          	  	column[0]="STUDENTNO";column[1]="NAME";column[2]="CREDITS";
+          	    for(var i=0;i<course.length;i++){
+          	    	html+="<td width='10'>"+course[i].COURSENAME+course[i].CREDITS+"</td>";
+          	    	column[i+3]=course[i].COURSENO.toUpperCase();
+          	    }
+          	    $("#content").append(html+"</tr>");
+          	    
+          	    //生成班级学生选课详细内容
+          	    var student=data["student"];//学生选课列表
+          	    for(var i=0;i<student.length;i++){
+          	    	html="<tr>";
+          	    	for(var j=0;j<column.length;j++){
+          	    		var type="";
+          	    		//若为学分将之转为数值类型
+          	    		if(j==2)type=parseFloat(student[i][column[j]]);
+          	    		else type=student[i][column[j]];
+          	    		
+          	    		if(type==null || type==undefined)type="";
+          	    		if(j==1) html+="<td style='white-space:nowrap;'>"+type+"</td>";
+          	    		else html+="<td>"+type+"</td>";
+            	    }
+          	    	$("#content").append(html+"</tr>");
+        	    }
+          	  	window.print();
+            }else{
+            	$("#title").html("暂无选课信息");
+            	$("#content").html("");
+     	    }
+        }
+    });
+});
+</script>
+</body>
+</html>

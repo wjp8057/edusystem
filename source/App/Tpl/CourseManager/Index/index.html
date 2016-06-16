@@ -1,0 +1,137 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "1","icon": "icon-admin","menuname": "选课管理",
+            "menus": [
+                {"menuid": "11","menuname": "课程选课情况","icon": "icon-book","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_one"},
+                {"menuid": "12","menuname": "选课数超座位数","icon": "icon-room2","url":"__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_two"},
+                {"menuid": "13","menuname": "有空的公选课","icon": "icon-bookList","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_three"},
+                {"menuid": "14","menuname": "选课人数过少","icon": "icon-book2","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_four"},
+                {"menuid": "15","menuname": "公选课超选","icon": "icon-personal","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_five"},
+                {"menuid": "17","menuname": "回收站","icon": "icon-huishouzhan","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_seven"},
+                {"menuid": "13","menuname": "锁定/开放学生","icon": "icon-lock","url": "__ROOT__/System/User/frozenu"}
+            ]
+
+},
+        {"menuid": "2","icon": "icon-zhongzhi","menuname": "选课控制",
+            "menus": [
+                {"menuid": "16","menuname": "同步课程总表","icon": "icon-office","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=one_six"},
+                {"menuid": "31","menuname": "选课同步","icon": "icon-log","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=tb_suzhi"},
+                {"menuid": "21","menuname": "选课终止","icon": "icon-stop","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=Two_ElectiveStop"},
+                {"menuid": "31","menuname": "选课开放","icon": "icon-log","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=Three_ElectiveStart"}
+             ]
+        },{"menuid": "4","icon": "icon-room","menuname": "班级选课管理",
+            "menus": [
+                {"menuid": "41","menuname": "查看学生选课情况","icon": "icon-admin","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=one"},
+                {"menuid": "42","menuname": "班级统一必修课","icon": "icon-tongyi1","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_two"},
+                {"menuid": "43","menuname": "统一选模块课","icon": "icon-book2","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_three"},
+                {"menuid": "44","menuname": "班级选课汇总","icon": "icon-tongji","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_four"},
+                {"menuid": "45","menuname": "查看班级周课表","icon": "icon-bookList","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_five"},
+                {"menuid": "46","menuname": "查看退课公告","icon": "icon-book","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_six"},
+                {"menuid": "47","menuname": "修改学生密码","icon": "icon-personal","url": "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=Four_seven"}
+
+            ]
+
+        },{"menuid": "5","icon": "icon-tongji","menuname": "选课统计",
+            "menus": [
+                {"menuid": "51","menuname": "跟班重修学生统计","icon": "icon-tongji","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=one"},
+                {"menuid": "52","menuname": "重修班选课学生统计","icon": "icon-personalList","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=two"},
+                {"menuid": "53","menuname": "申请免听、免修学生名单统计","icon": "icon-tongyi1","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=three"},
+                {"menuid": "54","menuname": "查询未充分利用的教室","icon": "icon-room","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=four"},
+                {"menuid": "56","menuname": "各门课程选课人数统计","icon": "icon-book2","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=five"},
+                {"menuid": "57","menuname": "查看选课人数小于座位数的课程","icon": "icon-book","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=six"},
+                {"menuid": "58","menuname": "各类课程选课总人数统计","icon": "icon-lookroom","url": "__ROOT__/index.php?g=CourseManager&m=course_count&a=seven"}
+        /*       {"menuid": "59","menuname": "班级选课汇总表","icon": "icon-tongji","url": "__ROOT__/index.php?g=CourseManager&m=CourseManager&a=Five_count"}*/
+
+            ]
+
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+
+
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        缺省学年：<input type="text" name="YEAR" id="YEAR" value="{$yearTerm.YEAR}" style="width:30px" maxlength="4" />
+        缺省学期：<input type="text" name="TERM" id="TERM" value="{$yearTerm.TERM}" style="width:14px" maxlength="1" />
+        <a href="__ROOT__/Teacher">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="选课管理" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" id="xutb">
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">选课管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">选课管理：实现多种方式的选课开放、关闭、各种条件的筛选，统一选课，各类统计报表打印等功能。包含选课查询与管理、选课终止、选课开放、班级选课管理、选课统计等模块。各学院管理员的权限仅限本开课学院的选课信息，教学处管理员是管理全校的选课信息。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 17px">一、选课查询与管理:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、查看某项课程的选课情况</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以查看全校所有的课程选课情况，并对该门选课人数上限调整、选该门课的学生进行增加、删除管理，还可以对该门课程的安排时间进行调整。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、所有选课人数超过教室座位数的课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以查看系统自动列出的选课人数超过教室座位数的课程，并对该门选课人数上限、选该门课的学生进行增加、删除管理，还可以对该门课程的安排时间进行调整。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、所有有空的公选课</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以通过设置课号、课程类型、开课学院、课程类别、学年学期、考核方式为检索条件进行查找所有符合条件的有空位置的公选课。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、选课人数少于（条件）的课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以通过以下两种搜索条件进行筛选所有符合的课程，可以列出所有选课人数少于教室座位数X人的课程，和列出所有选课人数少于X人的课程。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、列出超过特殊类别课程的选修门数限制的学生</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom:5px">可以通过班号、课号或者课程类别进行查询相应条件下超过选修门数而被限制的学生。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、同步课程总表</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以对设置的学年学期里的所有课程，进行同步操作。若对课程总表有做过更改操作，则需要进行此同步操作。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>7、回收站</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom:5px">管理某学期被删除的学生选课记录，可选择恢复或彻底清除：</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>8、选课新生预计人数大于教室座位数的课程</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">可以管理查看全校所有参与选课的新生人数大于教室座位数的课程，并对此进行管理，对该门选课人数上限调整、选该门课的学生进行增加、删除管理，还可以对该门课程的上课时间进行调整。</p>
+            <br>
+
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 17px">二、选课终止:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、在预选后，教务处筛选时，应关闭选课；
+            <br>2、全部选课完毕后，应关闭选课；
+            <br>3、可关闭一学期的所有选课课程，也可关闭某个课程；
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 17px">三、选课开放:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、首先开放所有的选课课程，开始选课，然后教务处筛选选课情况，筛选完成后，再对有限制的选课进行开放，可以进行退改选。若限制人数满后，该课程停止选课。
+            <br>2、可以指定学年、学期的学生选课记录和所有的选课回收站记录进行统一初始化清空操作。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 17px">四、班级选课管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、可对班级学生统一选必修课或非必修课；学院只能对本开课学院的班级进行操作。
+            <br>2、可查看班级学生的选课情况，并查看班级选课汇总表、班级周课表、班级退课公告；可修改学生密码；学院可以查看全校所有学生的信息，但只能对本开课院的班级进行修改操作。教务处可以对所有学生进行修改操作。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 17px">五、选课统计:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以对所有学院的学生选课人数进行不同类型的人数统计，并可查看学生名单。类型包括跟班重修学生、重修班选课学生、申请免听免修学生、各门课程选课的人数、选课人数小于座位数的课程、各类课程选课总人数的统计</p>
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

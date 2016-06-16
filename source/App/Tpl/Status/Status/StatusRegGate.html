@@ -1,0 +1,450 @@
+<include file=":Include:jqueryHeader" />
+    <SCRIPT>
+        $(function(){
+
+            var num=''                                      //todo:判断选择哪个datagrid
+            function zchuangkou(){
+                this.closed=true
+                this.fit=true
+                this.modal=true
+                this.minimizable=false
+                this.maximizable=false
+            }
+            var chuangkou=new zchuangkou();             //todo:普通的窗口
+            var chuangkou2=new zchuangkou();            //todo:学籍情况的窗口对象
+            chuangkou2.closed=false;
+            chuangkou2.inline=true;
+            var chuangkou3=new zchuangkou();            //todo:个人情况的窗口对象
+            chuangkou3.inline=true;
+
+
+              //  var func1=$('#func1').window(chuangkou2);                //todo:检索学籍情况
+            //    var func2=$('#func2').window(chuangkou3);                //todo:检索个人情况
+            //    var wd=$('#wd').window(chuangkou)                       //todo:查看学生个人信息的窗口
+             //   var wd3=$('#wd3').window(chuangkou)                     //todo:点击编辑学生情况的按钮
+           // $("#wd").css("display","")
+        //    $("#wd3").css("display","")
+            $('#cc').css('display','')
+                //todo:检索学籍情况
+                $('#xuejiButton').bind('click',function(){
+                   var obj={}
+                    obj['STUDENTNO']=$('#STUDENTNO').val().Trim()
+
+                    obj['NAME']=$('#NAME').val().Trim()
+                    obj['CLASSNO']=$('#CLASSNO').val().Trim()
+                    obj['STATUS']=$('#STATUS').val().Trim()
+                    obj['SCHOOL']=$('#SCHOOL').val().Trim()
+                    num='';
+                    dat.datagrid('options').url='__URL__/StatusRegGate/hasJson/1'
+                    dat.datagrid('load',obj)
+                    $('#w_one').panel({
+                        closed:false
+                    })
+                    $('#w_two').panel({
+                        closed:true
+                    })
+                })
+
+
+                //todo:检索个人情况
+              $('#gerenButton').bind('click',function(){
+                    var obj={
+                      'Sqlpath':{'count':'status/Two_countInfo.SQL','select':'status/Two_selectInfo.SQL'},
+                       bind:{
+                           ':StudentNo':$('#STUDENTNO').val().Trim(),
+                           ':Name':$('#NAME').val().Trim(),
+                           ':ClassNo':$('#CLASSNO').val().Trim(),
+                           ':School':$('#SCHOOL').val().Trim(),
+                           ':Status':$('#STATUS').val().Trim()
+                       }
+                  }
+                  num=2;
+                  dat2.datagrid('options').url='__URL__/Squery/hasJson/1'
+                  dat2.datagrid('load',obj);
+                  $('#w_one').panel({
+                      closed:true
+                  })
+                  $('#w_two').panel({
+                      closed:false
+                  })
+              })
+
+
+
+
+
+
+
+            var dat=$('#datgrid').datagrid({
+                striped:true,
+
+                frozenColumns:[[{field:'RECNO',checkbox:true},{field:'STUDENTNO',title:'学号',width:80,sortable:true
+                }]],
+                columns:[[
+                    {field:'NAME',title:'姓名',width:60,sortable:true,align:'center'
+                    },
+                    {field:'SEX',title:'性别',width:30,sortable:true,align:'center'
+                    },
+                    {field:'CLASSNAME',title:'主修班级',width:150,sortable:true,align:'center'
+                    },
+                    {field:'STATUSVALUE',title:'学籍状态',width:55,sortable:true,align:'center'},
+                    {field:'WARN',title:'退学警告次数',width:85,sortable:true,align:'center'
+                    },
+                    {field:'POINTS',title:'积点分',width:55,sortable:true,align:'center'
+                    },
+                    {field:'TAKEN',title:'选课学分',width:55,sortable:true,align:'center'
+                    },
+                    {field:'PASSED',title:'完成学分',width:55,sortable:true,align:'center'
+                    },
+                    {field:'SCHOOLNAME',title:'所在学院',width:80,sortable:true,align:'center'
+                    }
+                ]],
+                pagination:true,
+                pageList:[10,20,30,40,50],
+                pageSize:30,onRowContextMenu:function(e,rowindex,row){
+                    dat.datagrid('rejectChanges')
+                    var tt=$('#datgrid');
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#admin_access_menu').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                },
+                toolbar:[{
+                    text:'刷新页面',
+                    iconCls:'icon-reload',
+                    handler:function(){
+                        window.location.href=window.location.href
+                    }
+                },'-',{
+                    text:'查看学生个人信息',
+                    iconCls:'icon-personal',
+                    handler:function(){
+                        var yi=yitiao(dat,'请选择一条要查看的信息，不能查看多条','请选择一条要查看的信息')
+                        if(yi){
+                            var obj=dat.datagrid('getSelected');
+                            var objecte={}
+                            objecte['studentno']=obj.STUDENTNO;
+                            openTabsWindows('学生注册','__URL__/xueshengzhuce/studentno/'+obj.STUDENTNO,'',true)
+
+                            /* var list=$('#wd span')
+                             ajiakesi('__URL__/studentNO',objecte,function(c){
+                             if(c=='false'){
+                             return  $.messager.alert('提示','str');
+                             };
+                             eval('var one='+c);
+                             var str2=''          //todo:  #yearterm的内容
+
+                             for(var i=0;i<one['regcode'].length;i++){
+                             str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                             }
+                             $('#yearterm').html(str2)
+                             for(var i=0;i<list.length;i++){
+                             var nm=list[i].id;
+                             $('#'+nm).html(one[nm.substring(0,nm.indexOf(1))]);
+                             }
+                             wd.window({closed:false,title:" "})*/
+                            // })
+
+                        }
+                    }
+                },'-',{
+                    text:'导出',
+                    iconCls:'icon-excel',
+                    handler:function(){
+                        var list=dat.datagrid('getRows');
+                        if(list.length){
+                            $("#queryFrom").attr("action","__URL__/studentExp/");
+                            $("#queryFrom").submit();
+                        }else{
+                            msgShow("系统提示：","请先检索出您要导出的数据","info");
+                        }
+                    }
+                }
+                ]})
+
+
+            //todo:检索个人情况的datagrid
+            var dat2=$('#datgrid2').datagrid({
+                striped:true,
+
+                frozenColumns:[[{field:'RECNO',checkbox:true},{field:'STUDENTNO',title:'学号',width:80,sortable:true
+                }]],
+                columns:[[
+                    {field:'NAME',title:'姓名',width:60,sortable:true,align:'center'
+                    },
+                    {field:'SEX',title:'性别',width:30,sortable:true,align:'center'
+                    },
+                    {field:'ENTERDATE',title:'入学日期',width:70,sortable:true,align:'center'
+                    },
+                    {field:'YEARS',title:'年级',width:35,sortable:true,align:'center'},
+                    {field:'CLASSNO',title:'班号',width:75,sortable:true,align:'center'
+                    },
+                    {field:'CLASSNAME',title:'班级',width:75,sortable:true,align:'center'
+                    },
+                    {field:'WARN',title:'退学警告次数',width:85,sortable:true,align:'center'
+                    },
+                    {field:'STATUSVALUE',title:'学籍状态',width:55,sortable:true,align:'center'
+                    },
+                        {field:'BIRTHDAY',title:'出生日期',width:80,sortable:true,align:'center'
+                    },
+                    {field:'minzu',title:'民族',width:100,sortable:true,align:'center'
+                    },
+                    {field:'zhengzhimm',title:'政治面貌',width:80,sortable:true,align:'center'
+                    },
+                    {field:'POSTCODE',title:'邮编',width:50,sortable:true,align:'center'
+                    },
+                    {field:'ADDRESS',title:'地址',width:250,sortable:true,align:'center'
+                    },
+                    {field:'TEL',title:'联系电话',width:150,sortable:true,align:'center'
+                    },
+                    {field:'SCORE',title:'高考总分',width:60,sortable:true,align:'center'
+                    },
+                    {field:'MIDSCHOOL',title:'毕业中学',width:80,sortable:true,align:'center'
+                    },
+                    {field:'ID',title:'身份证号',width:150,sortable:true,align:'center'
+                    }
+                ]],onRowContextMenu:function(e,rowindex,row){
+                    dat2.datagrid('rejectChanges')
+                    var tt=$('#datgrid2');
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#admin_access_menu2').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                },
+                pagination:true,
+                pageList:[10,20,30,40,50],
+                pageSize:30,
+                toolbar:[{
+                    text:'刷新页面',
+                    iconCls:'icon-reload',
+                    handler:function(){
+                        dat2.datagrid('load')
+                    }
+                },'-',{
+                    text:'查看学生个人信息',
+                    iconCls:'icon-personal',
+                    handler:function(){
+                        var yi=yitiao(dat2,'请选择一条要查看的信息，不能查看多条','请选择一条要查看的信息')
+                        if(yi){
+
+                            var obj=dat2.datagrid('getSelected');
+                            openTabsWindows('学生注册','__URL__/xueshengzhuce/studentno/'+obj.STUDENTNO,'',true)
+                            /*   var objecte={}
+                             objecte['studentno']=obj.STUDENTNO;
+                             var list=$('#wd span')
+                             ajiakesi('__URL__/studentNO',objecte,function(c){
+                             if(c=='false'){
+                             return  $.messager.alert('提示','str');
+                             };
+                             eval('var one='+c);
+                             var str2=''          //todo:  #yearterm的内容
+
+                             for(var i=0;i<one['regcode'].length;i++){
+                             str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                             }
+                             $('#yearterm').html(str2)
+                             for(var i=0;i<list.length;i++){
+                             var nm=list[i].id;
+                             $('#'+nm).html(one[nm.substring(0,nm.indexOf(1))]);
+                             }
+                             wd.window({closed:false,title:" "})
+                             })*/
+
+                        }
+                    }
+                }
+                ]})
+
+
+
+
+
+
+          /*  //todo:学生注册信息页面的返回按钮
+            $('#register_back').bind('click',function(){
+                wd.window({closed:true})
+            })*/
+  /*          //todo:学生编辑页面的返回按钮
+            $('#edit_back').bind('click',function(){
+                wd3.window({closed:true})
+            })*/
+
+
+
+
+
+            //todo:学生注册
+            $('#admin_look2').bind('click',function(){
+                var yi=yitiao(dat2,'请选择一条要查看的信息，不能查看多条','请选择一条要查看的信息')
+                if(yi){
+
+                    var obj=dat2.datagrid('getSelected');
+                    openTabsWindows('学生注册','__URL__/xueshengzhuce/studentno/'+obj.STUDENTNO,'',true)
+                 /*   var objecte={}
+                    objecte['studentno']=obj.STUDENTNO;
+                    var list=$('#wd span')
+                    ajiakesi('__URL__/studentNO',objecte,function(c){
+                        if(c=='false'){
+                            return  $.messager.alert('提示','str');
+                        };
+                        eval('var one='+c);
+                        var str2=''          //todo:  #yearterm的内容
+
+                        for(var i=0;i<one['regcode'].length;i++){
+                            str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                        }
+                        $('#yearterm').html(str2)
+                        for(var i=0;i<list.length;i++){
+                            var nm=list[i].id;
+                            $('#'+nm).html(one[nm.substring(0,nm.indexOf(1))]);
+                        }
+                        wd.window({closed:false,title:" "})
+                    })*/
+
+                }
+            })
+
+            $('#admin_look').bind('click',function(){
+                var yi=yitiao(dat,'请选择一条要查看的信息，不能查看多条','请选择一条要查看的信息')
+                if(yi){
+                    var obj=dat.datagrid('getSelected');
+                    var objecte={}
+                    objecte['studentno']=obj.STUDENTNO;
+                    openTabsWindows('学生注册','__URL__/xueshengzhuce/studentno/'+obj.STUDENTNO,'',true)
+
+                   /* var list=$('#wd span')
+                    ajiakesi('__URL__/studentNO',objecte,function(c){
+                        if(c=='false'){
+                            return  $.messager.alert('提示','str');
+                        };
+                        eval('var one='+c);
+                        var str2=''          //todo:  #yearterm的内容
+
+                        for(var i=0;i<one['regcode'].length;i++){
+                            str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                        }
+                        $('#yearterm').html(str2)
+                        for(var i=0;i<list.length;i++){
+                            var nm=list[i].id;
+                            $('#'+nm).html(one[nm.substring(0,nm.indexOf(1))]);
+                        }
+                        wd.window({closed:false,title:" "})*/
+                   // })
+
+                }
+
+
+            })
+
+
+        })
+        //todo:去掉空格函数
+        String.prototype.Trim = function()
+        {
+            return this.replace(/(^\s*)|(\s*$)/g, "");
+        }
+
+        function ajiaqu(url,wd,list,str,num){                                                      //取值
+            var obj={};
+            var nm='';
+            for(var i=0;i<list.length;i++){
+                nm=list[i].id.substring(0,list[i].id.indexOf(num));
+                obj[nm]=list[i].value;
+            }
+            var select=$('#'+wd+' select')
+
+            for(var i=0;i<select.length;i++){
+                nm=select[i].id.substring(0,select[i].id.indexOf(num));
+                obj[nm]=select[i].value;
+            }
+            ajiakesi('__URL__/studentUpdate',obj,function(c){
+                $.messager.alert('提示',c)
+            })
+        }
+
+        function ajiakesi(url,data,func){
+            $.ajax({
+                type:'POST',
+                url:url,
+                data:data,
+                success:function(c){
+                    func(c);
+                }
+            })
+        }
+
+
+        //todo:判断是否是一条
+        function yitiao(dat,str,str2){
+
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+
+            if(rowList.length>1){
+                $.messager.alert('提示',str)
+            }else if(rowList.length<1){
+
+                $.messager.alert('提示',str2)
+
+            }else{
+                return true
+            }
+                return false;
+
+        }
+
+    </SCRIPT>
+
+
+<div  id='cc' class="easyui-layout"  data-options="border:false,fit:true"  style="display: none">
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_look'>查看学生个人信息</div>
+    </div>
+
+    <div id="admin_access_menu2" class="easyui-menu" style="width:100px;">
+        <div id='admin_look2'>查看学生个人信息</div>
+    </div>
+    <div data-options="region:'north',split:false,border:false" style="height:31px;background:rgb(244, 244, 244)">
+        <form id="queryFrom" method="post">
+                   学号：<input type="text" name="StudentNo" id="STUDENTNO" size="9" maxlength="9" value="%">
+                   学生姓名：<input type="text" name="Name" id='NAME' size="20" maxlength="20" value="%">
+                    班号：<input type="text" name="ClassNo" id="CLASSNO" size="6" value="%">
+                    学籍状态：<select size="1" name="Status" id="STATUS">
+                            <option selected value="%">所有情况</option>
+                            <volist name="statusoptions" id="v">
+                            <option value="{$v.NAME}">{$v.VALUE}</option>
+                            </volist>
+                        </select>
+                    所在学院：<select size="1" name="School" id="SCHOOL">
+                            <option selected value="%">全校</option>
+                            <volist name="schools" id="v">
+                                <option value="{$v.SCHOOL}">{$v.NAME}</option>
+                            </volist>
+                        </select>
+                    <a href="javascript:void(0)" name="B1" id="xuejiButton" class="easyui-linkbutton">检索学籍情况</a>&nbsp;&nbsp;&nbsp;
+                        <a href="javascript:void(0)" name="B2" id="gerenButton" class="easyui-linkbutton">检索学生个人情况</a>
+            </form>
+
+            <input type="hidden" name=page value="1">
+            <input type="hidden" name=pagename value="StatusListTemplate_ByClassNo.htm">
+
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="w_one" class="easyui-panel" title=""
+             data-options="iconCls:'icon-save',closable:false,fit:true,closed:false,border:false,
+                collapsible:false,minimizable:false,maximizable:false" >
+            <div id="datgrid" data-options="fit:true"></div>    <!--todo:检索学籍情况-->
+        </div>
+        <div id="w_two" class="easyui-panel" title=""
+             data-options="iconCls:'icon-save',closable:false,fit:true,closed:true,border:false,
+                collapsible:false,minimizable:false,maximizable:false">
+            <div id="datgrid2" data-options="fit:true"></div>   <!--todo:检索学生个人情况-->
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

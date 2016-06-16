@@ -1,0 +1,2 @@
+update bookapply set status = '2' 
+where [year] = :year and term = :term and classno=:classno and book_id in (select book_id from book where isbn=:isbn) and school=:school and oderno=:oderno and status like '0' 

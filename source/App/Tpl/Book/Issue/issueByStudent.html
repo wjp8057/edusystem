@@ -1,0 +1,319 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body>		   
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+    	<table id="datagrid" fitColumns="true" width="100%" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'payment_id',checkbox:true" ></th>
+                <th data-options="field:'isbn',align:'center',width:60">ISBN</th>
+                <th data-options="field:'bookname',align:'center',width:60">教材名称</th>
+                <th data-options="field:'press',align:'center',width:80">出版社</th>
+                <th data-options="field:'author',align:'center',width:60">作者</th>
+                <th data-options="field:'price',align:'center',width:40">原价</th>
+                <th data-options="field:'dis_rate',align:'center',width:40,editor:{type:'validatebox',options:{required:true}}">折扣率</th>
+                <th data-options="field:'dis_price',align:'center',width:40">折扣价</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+    <label>学号：</label>{$stu.studentno}
+    <label>姓名：</label>{$stu.name}
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增发放</a>
+    <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">不发放</a>
+</div>
+<script type="text/javascript">
+var list=null;
+var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+var indexrow=undefined;
+var datagrid=null;
+var bookDatagrid=null;
+var dataSelect=null;
+var bookAry={$list};
+$(function(){
+	var year="{$year}";
+    var term="{$term}";
+	var studentno="{$stu.studentno}";
+    var name="{$stu.name}";
+    var classno="{$stu.classno}";
+    var add="{$add}";
+	//学生发放信息
+	datagrid = $('#datagrid').datagrid({
+        onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges');
+            var tt=$('#datagrid');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        toolbar:'#toobar',url:"__URL__/issueByStudent/hasJson/1",
+        queryParams:{studentno:studentno,year:year,term:term},
+        onAfterEdit:function(index,dataRow,changes){
+            if(!reg.test(dataRow.dis_rate)){
+                msgShow("系统提示：","折扣率格式错误","error");
+                datagrid.datagrid('beginEdit', index);
+                return;
+            }
+            var updated=datagrid.datagrid('getChanges','updated');
+            if(updated.length){
+                updateDiscount(dataRow,true);
+            }
+        }
+    });
+    //更新价格
+    function updateDiscount(dataRow,bool){
+        $.ajax({
+            url:"__URL__/updateDiscount/",
+            type:'POST',
+            data:dataRow,
+            success:function(data){
+                var index = datagrid.datagrid('getRowIndex', datagrid.datagrid('getSelected'));
+                if(data){
+                    if(bool){
+                        indexrow=undefined;
+                        datagrid.datagrid('reload');
+                        msgShow("系统提示：","更新成功！","info");
+                    }
+                }else{
+                    if(bool) msgShow("系统提示：","更新失败！","info");
+                }
+            }
+        });
+    }
+    //不发放
+    function del(){
+        list=datagrid.datagrid('getSelections');
+        if (list.length){
+            $.messager.confirm('提示','您确定不发放选中学员教材吗？',function(b){
+                if(b){
+                    var ary=[];                      //存储删除信息的数组
+                    for(var i=0;i<list.length;i++){
+                        ary[i]=list[i].payment_id;
+                    }
+                    $.ajax({
+                        url:'__URL__/delPayment/',
+                        data:{'ids':ary},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                msgShow("系统提示：","操作成功！","info");
+                                datagrid.datagrid('reload');
+                            }else{
+                                msgShow("系统提示：","操作失败,您没有权限！","info");
+                            }
+                        }
+                    });
+                }
+            });
+        }else msgShow("系统提示：","请选择不发放的教材的数据","info");
+    }
+    $("#delBut").bind('click',del);
+    $('#admin_del').bind('click',del);
+
+    /*新增发放start*************************************************************************************************/
+    $("#addBut").click(function(){
+        $('#win').window('open');
+        $('#win').window('maximize');
+        //搜索按钮
+        $('#searcher').linkbutton({iconCls: 'icon-search'});
+        bookDatagrid = $('#bookDatagrid').datagrid({toolbar:'#toobarBook',url:"__URL__/getBookList/"});
+        //教材查询
+        $("#searcher").click(function(){
+            var type= $("input[name='type']:checked").val();
+            var key= $.trim($("input[name='key']").val());
+            if(type=="classno" && (key=="" || key=="%")){
+                msgShow("系统提示：","请输入具体班号","error");
+                return;
+            }
+            bookDatagrid.datagrid("load",{key:key,type:type,year:year,term:term});
+        });
+        //学生教材列表
+        dataSelect = $('#dataSelect').datagrid({toolbar:'#toobarSelect',url:"__URL__/getStuBook/",queryParams:{year:year,term:term,studentno:studentno}});
+
+    });
+    //若add等于1说明是列表页链接进来学生添加教材
+    if(add=="1"){
+        $("#addBut").click();
+    }
+    //搜索类型点击事件
+    $("input[name='type']").click(function(){
+        if($(this).val()=="isbn")
+            $("input[name='key']").val("%");
+        else $("input[name='key']").val("");
+    });
+    //将选中教材添加到右边
+    var ary={};
+    $("#addBook").click(function(){
+        list=bookDatagrid.datagrid('getSelections');
+        if(list==null || list.length==0){
+            msgShow("系统提示：","请选择您要添加的教材","error");
+            return;
+        }
+        var count = 0;
+        var num=0;
+        $.each(list,function(index,row){
+            var bool=true;
+            for(var i=0;i<bookAry.length;i++){
+                if(bookAry[i].book_id==row.book_id){
+                    bool=false;
+                    break;
+                }
+            }
+            if(ary[row.book_id]!=row.book_id && bool){
+                ary[row.book_id]=row.book_id;
+                dataSelect.datagrid("insertRow",{row:{book_id:row.book_id,
+                    bookname:row.bookname,price:row.price,dis_price:row.dis_price,
+                    dis_rate:row.dis_rate,number:1,author:row.author,press:row.press}});
+            }
+        })
+        $('#dataSelect').datagrid("clearSelections");
+    });
+    //删除学生列表里的教材
+    var delId="";
+    $("#delbook").click(function(){
+        list = dataSelect.datagrid("getSelections");
+        if(list==null || list.length==0){
+            msgShow("系统提示：","请选择您要取消添加的教材","error");
+            return;
+        }
+        for(var i = list.length - 1; i >= 0; i--){
+            var row = list[i];
+            var bool=true;
+            for(var j=0;j<bookAry.length;j++){
+                if(bookAry[j].book_id==row.book_id){
+                    delId+=row.book_id+",";
+                    bool=false;
+                    break;
+                }
+            }
+            if(bool){
+                ary[row.book_id] = null;
+            }
+            dataSelect.datagrid('deleteRow', dataSelect.datagrid('getRowIndex',row));
+        }
+    });
+    //提交数据
+    $("#addDataBut").click(function(){
+        $.messager.confirm('提示','您确定要将列表提交到数据库？',function(b){
+            $.ajax({
+                url:'__URL__/savebooklist/hasJson/1',
+                data:{ids:ary,year:year,term:term,studentno:studentno,name:name,delId:delId},
+                type:'POST',
+                success:function(d){
+                    if(d=="1"){
+                        $.messager.alert("系统提示：","数据保存成功","info",function(){
+                            window.location.href="__ROOT__/Book/Issue/issueByStudent/year/"+year+"/term/"+term+"/studentno/"+studentno;
+                        });
+                    }else{
+                        msgShow("系统提示：","没有可更新的数据！","info");
+                    }
+                }
+            });
+        });
+    });
+    /*新增发放end****************************************************************************************************/
+    //编辑
+    function edit(){
+        list=datagrid.datagrid('getSelections');//获取所有被选中的
+        datagrid.datagrid('removeEditor','payment_id');
+        if(list.length>1){
+            msgShow("系统提示：","请选择一条进行编辑,不能选多条","info");
+        }else if(list.length<1){
+            msgShow("系统提示：","请选择要编辑的数据","info");
+        }else{
+            if(indexrow!=undefined){
+                datagrid.datagrid('endEdit',indexrow);
+                //return;
+            }
+            var row = datagrid.datagrid('getSelected');
+            var index = datagrid.datagrid('getRowIndex', row);
+            datagrid.datagrid('beginEdit', index);
+            indexrow=index;
+        }
+    }
+    $("#editBut").bind('click',edit);
+    $('#admin_edit').bind('click',edit);
+    //取消编辑
+    $("#cancelBut").click(function(){
+        datagrid.datagrid('rejectChanges');
+        indexrow=undefined;
+    });
+    //保存
+    $("#saveBut").click(function(){
+        datagrid.datagrid('endEdit',indexrow);
+    });
+
+});
+</script>
+
+<div id="win" class="easyui-window" style="width:600px;height:400px" title="学生新增发放" data-options="minimizable:false,collapsible:false,modal:true,closed:true">
+    <div class="easyui-layout"  data-options="border:false,fit:true" >
+        <div data-options="region:'west',split:true" style="width:550px;">
+            <table id="bookDatagrid" fitColumns="true" width="100%" fit="true" pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+                <thead>
+                <tr><th data-options="field:'book_id',checkbox:true" ></th>
+                    <th data-options="field:'isbn',align:'center',width:50">ISBN</th>
+                    <th data-options="field:'bookname',align:'center',width:60">教材名称</th>
+                    <th data-options="field:'press',align:'center',width:50">出版社</th>
+                    <th data-options="field:'classname',align:'center',width:60">班级</th></tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center'">
+            <div class="easyui-layout" data-options="fit:true,border:false"  style="height: 100%">
+                <div data-options="region:'north',split:false,border:false" style="height:100px;background:#FFF;overflow: hidden">
+                    <style type="text/css">.title label{padding-right:15px;}</style>
+                    <div class="title" align="center" style="padding:5px;margin:0px;line-height:22px;">
+                        {$year}学年第{$term}学期领用教材列表<br/>
+                        <label>学号：{$studentno}</label><label>姓名：{$stu.name}</label><label>班级：{$stu.classname}</label><label>学院：{$stu.schoolname}</label><br/>
+                        <label>征订总数：<span name="number">{$data.number}</span>本</label><label>总金额：<span name="price">{$data.price}</span>元</label><label>折扣总金额：<span name="dis_price">{$data.dis_price}</span>元</label><br/>
+                        <span style="font-size:11px;color:#999"><font style="color:red">*</font>注：删除的教材提交列表到数据库中才能生效，否则不支持二次添加</span>
+                    </div>
+                </div>
+                <div data-options="region:'center',border:false" >
+                    <table id="dataSelect" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="book_id" pagination="true" pageSize="20" pageList="[20,40,60]" striped="true">
+                        <thead>
+                        <tr><th data-options="field:'book_id',checkbox:true" ></th>
+                            <th data-options="field:'bookname',align:'center',width:80">教材名称</th>
+                            <th data-options="field:'price',align:'center'">原价</th>
+                            <th data-options="field:'dis_price',align:'center'">折扣价</th>
+                            <th data-options="field:'dis_rate',align:'center'">折扣率</th>
+                            <th data-options="field:'number',align:'center'">数量</th>
+                            <th data-options="field:'author',align:'center',width:50">主编</th>
+                            <th data-options="field:'press',align:'center',width:50">出版社</th></tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="toobarBook" style="padding:5px">
+        <input name="key" size="20" value='%'  maxlength="50">
+        <input name="type" type="radio" value="isbn" checked>ISBN&nbsp;&nbsp;
+        <input name="type" type="radio" value="classno">班号
+        <a href="javascript:void(0)" id="searcher">检索</a>
+        <p style="height:4px;padding:0px;margin: 0px;"></p>
+        <a href="javascript:void(0)" id="addBook" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true">将选中教材添加到右边</a>
+    </div>
+    <div id="toobarSelect">
+        <a href="javascript:void(0)" id="delbook" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >将选中教材从列表中取消</a>
+        <a href="javascript:void(0)" id="addDataBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" >将列表提交数据库</a>
+    </div>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>不发放</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+
+<include file="./methods" />
+</body>
+</html>

@@ -1,0 +1,153 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<P ALIGN=CENTER><FONT SIZE=4 face="隶书">学生<LABEL datasrc=#dsoSTUDENT id=NAME></LABEL>注册信息</font></p>
+<table align="center" border="1" width="722" datasrc=#dsoSTUDENT cellspacing="0" style="font-size: 10pt; color: #000000; border-collapse: collapse;" bordercolor="#111111" cellpadding="0" height="243" >
+    <tr>
+        <td width="181" align="right" height="22" >学号：</td>
+        <td height="22" colspan="2" width="169"><input type="text" style="readonly:expression(this.readOnly=true);border:0px" id=STUDENTNO2></td>
+        <td height="22" colspan="2" width="211"> <a href="/scripts/general.exe/query?pagename=studentprogramlist.htm&STUDENTNO=<#PARAMETER NAME=STUDENTNO>" target="_blank">修课计划</a></td>
+        <td width="153" height="198" rowspan="9">
+            <img border="0"  id="photo"  src="/pictures/<#PARAMETER NAME=STUDENTNO>.jpg" width="150" height="200">
+        </td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">姓名：</td>
+        <td height="22" colspan="4" width="380">
+            <input type="text" name=NAME id=NAME2></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">性别：</td>
+        <td height="22" colspan="4" width="380"><SELECT NAME=SEX SIZE=1 id=SEXCODE2>
+            <OPTION value="M">男</OPTION>
+            <OPTION value="F">女</OPTION>
+        </SELECT>
+        </td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">入学日期：</td>
+        <td height="22" colspan="4" width="380">
+            <input type=text name=ENTERDATE id=ENTERDATE2>
+        </td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">学制：</td>
+        <td height="22" colspan="2" width="190">
+            <INPUT TYPE=TEXT NAME=YEARS id=YEARS2>年</td>
+        <td height="22" width="95">
+            <p align="right">专业：</td>
+        <td height="22" width="95">
+            <SELECT NAME=Major id=MAJOR2 SIZE=1>
+                <volist name="majorcode" id="v">
+                    <option value="{$v.CODE}">{$v.NAME}</option>
+                </volist>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">主修班级编号：</td>
+        <td height="22" width="46">
+            <INPUT TYPE=TEXT id=CLASSNO2 NAME=CLASSNO></td>
+        <td height="22" width="125" colspan="2" nowrap>
+            <p align="right">班级名称：</td>
+        <td height="22" width="205">
+            <SPAN id=CLASSNAME2 ></SPAN></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22"><span lang="en-us">&nbsp;</span>选课总学分<span lang="en-us">:&nbsp;</span></td>
+        <td height="22" colspan="4" width="380">
+            <SPAN id=TAKEN2 ></SPAN></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">完成学分：</td>
+        <td height="22" colspan="4" width="380">
+            <input type="text" style="readonly:expression(this.readOnly=true);border:0px" id=PASSED2></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">积点分和：<span lang="en-us">
+      </span></td>
+        <td height="22" colspan="4" width="380">
+            <input type="text" style="readonly:expression(this.readOnly=true);border:0px"  id=POINTS2></td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22"><font color="#FF0000">退学警告次数：</font></td>
+        <td height="22" colspan="5" width="535">
+            <INPUT TYPE=TEXT NAME=WARN id=WARN2>
+        </td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22"><font color="#FF0000">学籍状态：</font></td>
+        <td height="22" colspan="5" width="535">
+            <SELECT NAME=STATUS id=STATUS2 SIZE=1>
+                <volist name="statusoption" id="v">
+                    <option value="{$v.NAME}">{$v.VALUE}</option>
+                </volist>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="129" align="right" height="22" nowrap>出生日期</td>
+        <td height="22" colspan="5" width="577" nowrap><span lang="en-us" DATAFLD=BIRTHDAY></span>
+
+            　</td>
+    </tr>
+    <tr>
+        <td width="181" align="right" height="22">联系方法：<span lang="en-us"> </span></td>
+        <td height="22" colspan="5" width="535">
+            <INPUT TYPE=TEXT id=CONTACT2 NAME=CONTACT>
+        </td>
+    </tr>
+    <tr>
+        <td width="181" align="right">来源：</td>
+        <td height="22" colspan="5" width="535">
+            <SELECT NAME=SCHOOL0 id=CLASS2 SIZE=1>
+                <volist name="classcode" id="v">
+                    <option value="{$v.CODE}">{$v.NAME}</option>
+                </volist>
+            </SELECT><tr>
+    <td width="181" align="right">所在学院：</td>
+    <td height="22" colspan="5" width="535">
+        <SELECT NAME=SCHOOL id=SCHOOL2 SIZE=1>
+            <volist name="schools" id="v">
+                <option value="{$v.SCHOOL}">{$v.NAME}</option>
+            </volist>
+        </SELECT>
+</table>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    注册信息：</p>
+<div align="center">
+    <center>
+        <table datasrc=#dsoReg border="1" cellspacing="0" width="709" bordercolor="#000000" cellpadding="0" height="44">
+            <thead>
+            <th width="189" align="right" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">学期</font></th>
+            <th width="514" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">注册状态</font></th>
+            </thead>
+            <tr>
+                <td width="189" align="right" height="22"><font size="2"><SPAN id=YEAR></SPAN>学年第<SPAN id=TERM2></SPAN>学期:</font></td>
+                <td width="514" height="22"><font size="2"><SPAN id=REGVALUE2></SPAN></font></td>
+            </tr>
+        </table>
+        <p>
+            <input type="button" name="Submit" value="提交更新" id="tijiaoinfo" >
+        <form name=updateform method=post action="/scripts/general.exe/write?" target="_self">
+            <input type="hidden" name=SQL value="">
+            <input type="hidden" name=XML value="">
+            <input type="hidden" name=MID value="SS09">
+            <input type="hidden" name=REDIRECT value="">
+        </form>
+    </center>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

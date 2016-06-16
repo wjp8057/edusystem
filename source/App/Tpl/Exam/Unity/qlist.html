@@ -1,0 +1,327 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var html_COURSENO = $("#wsCOURSENO").html();
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            url: '__ROOT__/Exam/Unity/qlist/hasJson/true',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                $('#datagrid').datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        //添加统考科目
+        $("#btAdd").bind("click",function(){
+            $("#winForms").css("display","");
+            $("#winForms").window({title:"添加统考科目",iconCls:"icon-add"})
+            $("#winForms").window("open");
+            cleanFormsVal();
+        });
+
+
+        function eedit(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行编辑！","error");
+                return;
+            }
+
+            $("#winForms").css("display","");
+            $("#winForms").window({title:"编辑统考科目",iconCls:"icon-edit"})
+            $("#winForms").window("open");
+            setFormsVal(rows[0]);
+        }
+        //编辑统考科目
+        $("#btEdit").bind("click",eedit);
+        $('#admin_edit').bind('click',eedit)
+
+
+
+
+
+
+        $("#efOK").bind("click",function(){
+            row = getFormsVal();
+            if(row.COURSENO==""){
+                msgShow("系统提示：","<br />考试科目课号不能为空！","error");
+                return;
+            }else if(row.EXAMNAME==""){
+                msgShow("系统提示：","<br />考试科目名称不能为空！","error");
+                return;
+            }
+
+            var url = "";
+            if(row.ISADD==true) url = "__ROOT__/Exam/Unity/save/hasJson/true"
+            else url = "__ROOT__/Exam/Unity/update/hasJson/true"
+            $.post(url, row, function(rsp) {
+                if(rsp){
+                    if(rsp.type=="info"){
+                        $("#winForms").window("close");
+                    }
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                    datagrid.datagrid("reload");
+                }
+            },"JSON");
+        });
+        $("#efCancel").bind("click",function(){
+            $("#winForms").window("close");
+        });
+
+
+        function ddel(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择任一条记录进行删除！","error");
+                return;
+            }
+
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.COURSENO);
+            });
+
+            $.messager.confirm('系统消息：','如果你删除了一条统考科目，则在课程库中的相应的课程条目也将被删除，如果已经有按此条目输入的统考成绩，则这些成绩就会没有相应的课程与之对应，并且所有本科目相关的考试通知、报名条目都要自动删除？<br /><br />要继续吗？<br />你只能在本条考试科目未经任何使用前删除它！',function(r){
+                if (r){
+                    $.post("__ROOT__ /Exam/Unity/delete/hasJson/true", {COURSENO:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+
+        //删除考科目
+        $("#btDelete").bind("click",ddel);
+        $('#admin_del').bind('click',ddel)
+
+
+
+        //清除值
+        function cleanFormsVal(){
+            $("#wsCOURSENO").html(html_COURSENO);
+            $("#wCOURSENO").val("");
+            $("#wEXAMNAME").val("");
+            $("#wTESTCODE").val("");
+            $("#wTESTLEVEL").val("N");
+            $("#wSCHOOLCODE").val("");
+            $("#wCREDITS").val("0");
+            $("#wREM").val("");
+        }
+        //设置值
+        function setFormsVal(row){
+            $("#wsCOURSENO").html($.trim(row.COURSENO));
+            $("#wEXAMNAME").val($.trim(row.EXAMNAME));
+            $("#wTESTCODE").val($.trim(row.TESTCODE));
+            $("#wTESTLEVEL").val($.trim(row.TESTLEVELCODE));
+            $("#wSCHOOLCODE").val($.trim(row.SCHOOLCODE));
+            $("#wCREDITS").val($.trim(row.CREDITS));
+            $("#wREM").val($.trim(row.REM));
+        }
+        //获得值
+        function getFormsVal(){
+            var isadd = false;
+            var courseno = "";
+            if($("#wsCOURSENO #wCOURSENO").size()==1) {
+                isadd = true;
+                courseno = $.trim($("#wCOURSENO").val());
+            }else{
+                isadd = false;
+                courseno = $.trim($("#wsCOURSENO").html());
+            }
+            return {
+                ISADD : isadd,
+                COURSENO : courseno,
+                EXAMNAME : $.trim($("#wEXAMNAME").val()),
+                TESTCODE : $.trim($("#wTESTCODE").val()),
+                TESTLEVEL : $.trim($("#wTESTLEVEL").val()),
+                SCHOOLCODE : $.trim($("#wSCHOOLCODE").val()),
+                CREDITS : $.trim($("#wCREDITS").val()),
+                REM : $.trim($("#wREM").val())
+            }
+        }
+        function setPubFormsVal(row){
+            $("#pCOURSENO").html($.trim(row.COURSENO));
+            $("#pEXAMNAME").html($.trim(row.EXAMNAME));
+            $("#pTESTCODE").html($.trim(row.TESTCODE));
+            $("#pREM").html($.trim(row.REM));
+            $("#pYEAR").val(parent.$("#YEAR").val());
+            $("#pTERM").val(parent.$("#TERM").val());
+            $("#pRECNO").val($.trim(row.RECNO));
+            $("#pDATEOFEXAM").datetimebox("setValue","");
+            $("#pDEADLINE").datetimebox("setValue","");
+        }
+        function getPubFormsVal(){
+            return {
+                YEAR : $.trim($("#pYEAR").val()),
+                TERM : $.trim($("#pTERM").val()),
+                MAP : $.trim($("#pRECNO").val()),
+                DEADLINE : $.trim($('#pDEADLINE').datetimebox('getValue')),
+                FEE : $.trim($("#pFEE").val()),
+                REM : $.trim($("#newREM").val()),
+                DATEOFEXAM : $.trim($('#pDATEOFEXAM').datetimebox('getValue'))
+            }
+        }
+
+        $("#pDATEOFEXAM").datetimebox();
+        $("#pDEADLINE").datetimebox();
+
+        function faabu(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行发布！","error");
+                return;
+            }
+
+            setPubFormsVal(rows[0]);
+
+            $("#pubForms").css("display","");
+            $("#pubForms").window({title:rows[0].COURSENO+"科目的考试通告",iconCls:"icon-addroom"})
+            $("#pubForms").window("open");
+        }
+
+        $("#btPub").bind("click",faabu)
+        $('#admin_fabu').bind('click',faabu)
+
+
+
+
+        $("#epCancel").bind("click",function(){
+            $("#pubForms").window("close");
+        });
+        $("#epOK").bind("click",function(){
+            var row = getPubFormsVal();
+            if(row.YEAR==""){
+                msgShow("系统消息：", "学年不能为空！", "error");
+                return false;
+            }else if(row.TERM==""){
+                msgShow("系统消息：", "学期不能为空！", "error");
+                return false;
+            }else if(row.DATEOFEXAM==""){
+                msgShow("系统消息：", "考试日期不能为空！", "error");
+                return false;
+            }else if(row.DEADLINE==""){
+                msgShow("系统消息：", "报名截止日期不能为空！", "error");
+                return false;
+            }else if(row.FEE==""){
+                msgShow("系统消息：", "报名费不能为空！", "error");
+                return false;
+            }
+
+            $.post( '__ROOT__/Exam/Unity/pub/hasJson/true', row, function(rsp) {
+                if(rsp){
+                    if(rsp.type=="info"){
+                        $("#pubForms").window("close");
+                    }
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        })
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <!--<div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <p align=center><font face="隶书" style="font-size: 16pt;"></font></p>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" title='<center>所 有 统 考 科 目 列 表</center>' fitColumns="true" width="100%" singleSelect="false" fit="true" idField="COURSENO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'COURSENO',align:'center',width:100">统考课号</th>
+                <th data-options="field:'EXAMNAME',align:'center',width:250">考试名称</th>
+                <th data-options="field:'TESTLEVEL',align:'center',width:100">考试级别</th>
+                <th data-options="field:'TESTCODE',align:'center',width:80">考试代码</th>
+                <th data-options="field:'SCHOOLCODE',align:'center',width:80">学校代码</th>
+                <th data-options="field:'CREDITS',align:'center',width:60">学分</th>
+                <th data-options="field:'REM',align:'center',width:200">备注</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <a href="#" id="btAdd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" style="float: left;">添加</a>
+    <a href="#" id="btEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" style="float: left;">修改</a>
+    <a href="#" id="btDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" style="float: left;">删除</a>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="btPub" class="easyui-linkbutton" data-options="iconCls:'icon-addroom',plain:true" >发布选定科目的考试通告</a>
+</div>
+
+<!-- 编辑界面 -->
+<div id="winForms" class="easyui-window" style="width:380px;height:280px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3 border="0" cellspacing="0">
+                <tr><th align="right">考试科目课号：</th><td><div id="wsCOURSENO"><input id="wCOURSENO" maxlength="7" type="text" style="width:60px" /> 7位，必填</div></td></tr>
+                <tr><th align="right">考试科目名称：</th><td><input id="wEXAMNAME" type="text" maxlength="15" style="width:140px" /> 最多15字，必填</td></tr>
+                <tr><th align="right">考试代码：</th><td><input id="wTESTCODE" type="text" style="width:60px" /></td></tr>
+                <tr><th align="right">考试级别：</th><td><Cwebs:sqlselect id="wTESTLEVEL" name="wTESTLEVEL" value="CODE" title="NAME" file="common/testlevels.sql" /></td></tr>
+                <tr><th align="right">学校代码：</th><td><input id="wSCHOOLCODE" type="text" style="width:60px" /></td></tr>
+                <tr><th align="right">相应学分：</th><td><input id="wCREDITS" type="text" value="0" style="width:60px" /></td></tr>
+                <tr><th align="right">备注：</th><td><input id="wREM" type="text" style="width:200px" /></td></tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="efOK" class="easyui-linkbutton" icon="icon-ok" >确定</a> <a id="efCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- 发布通知界面 -->
+<div id="pubForms" class="easyui-window" style="width:420px;height:260px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 5px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=2 border="0" cellspacing="0" width="100%">
+                <tr><th align="right"  width="100">考试科目课号：</th><td><div id="pCOURSENO"></div></td>
+                    <th align="right">考试代码：</th><td><div id="pTESTCODE"></div></td></tr>
+                <tr><th align="right">考试科目名称：</th><td colspan="3"><div id="pEXAMNAME"></div></td></tr>
+                <tr><th align="right">备注：</th><td colspan="3"><div id="pREM"></div></td></tr>
+                <tr><th align="right" colspan="4"><hr size="1"></th></tr>
+                <tr><th align="right" >学年：</th><td><input type="text" id="pYEAR" style="width:60px;"></td>
+                    <th align="right"  width="100">学期：</th><td><input id="pTERM" type="text" style="width:60px;"></td></tr>
+                <tr><th align="right">考试日期：</th><td colspan="3"><input type="text" id="pDATEOFEXAM" style="width:200px;"></td></tr>
+                <tr><th align="right">报名截止日期：</th><td colspan="3"><input type="text" id="pDEADLINE" style="width:200px;"></td></tr>
+                <tr><th align="right">报名费：</th><td><input type="text" id="pFEE" value="0" style="width:60px;"> 元</td>
+                    <th align="right">本次报考说明：</th><td><input type="text" id="newREM" style="width:90px;"></td></tr>
+            </table>
+            <input type="hidden" id="pRECNO" />
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="epOK" class="easyui-linkbutton" icon="icon-ok" >提交发布</a> <a id="epCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+    <div id="admin_fabu">发布选定科目的考试通告 </div>
+</div>
+</body>
+
+</html>
+

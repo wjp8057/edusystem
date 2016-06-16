@@ -1,0 +1,1 @@
+update CREDITSINGLEFIRM set recordmark=1 where year=:year and term=:term and deanview=1

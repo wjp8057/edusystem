@@ -1,0 +1,362 @@
+<include file=":Include:jqueryHeader" />
+<style>
+    #toobar{padding:5px 0px 2px;}
+    #toobar label{padding-left:12px;}
+    #searcher{margin: 0px 20px 0px;}
+    #addForm table{margin:15px auto;border-collapse:collapse;}
+    #addForm td,#addForm th{border-bottom:dashed 1px #CCC;height:40px;}
+</style>
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%" fit="true"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true">
+        <thead>
+        <tr>
+            <th data-options="field:'ID',checkbox:true"></th>
+            <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+            <th data-options="field:'TEACHERNAME',align:'center',width:10">教师姓名</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:20">所在学院</th>
+            <th data-options="field:'COURSENO',align:'center',width:20">课号</th>
+            <th data-options="field:'COURSENAME',align:'center',width:40">课程名称</th>
+            <th data-options="field:'SCORE',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">评分</th>
+            <th data-options="field:'RATIO',align:'center',width:10">折算系数</th></tr>
+        </thead>
+    </table>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <label>学年：</label><input name="year" size="4" maxlength="4">
+        <label>学期：</label><input name="term" size="1" maxlength="1">
+        <label>课号：</label><input name="courseno" value='%'  size="14" maxlength="10">
+        <label>课名：</label><input name="coursename" value='%'  size="14" maxlength="10">
+        <label>任课教师：</label><input name="teacher" value='%'  size="14" maxlength="10">
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检 索</a>
+    </form>
+    <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+    <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+    <a href="javascript:void(0)" id="delBut" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">删除</a>
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增评教</a>
+</div>
+<script type="text/javascript">
+    var list=null;var year="";var term="";
+    var datagrid=null;var reg=/^(([1-9]\d*)|\d)(\.\d+)?$/;
+    var ary={};var teacherno="{$teacherno}";
+    $(function(){
+        $("#toobar [name='year']").val(parent.$("#YEAR").val());
+        $("#toobar [name='term']").val(parent.$("#TERM").val());
+        //新增评教窗口
+        var wd=$('#wd').window({
+            modal:true,height:220,width:650,
+            minimizable:false,maximizable:false,collapsible:false,
+            draggable:false,resizable:false,closed:true
+        });
+        datagrid = $('#datagrid').datagrid({
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges');
+                var tt=$('#datagrid');
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            toolbar:'#toobar',
+            onAfterEdit:function(index,dataRow,changes){
+               if(!reg.test(dataRow.SCORE)){
+                    msgShow("系统提示：","评分格式错误","error");
+                    datagrid.datagrid('beginEdit', index);
+                }
+            },
+            onDblClickRow:function(keyrow,dataRow){
+                if(teacherno!=dataRow.SUPERVISOR){
+                    msgShow("系统提示：","您选中的数据并不是您的评教信息，暂时不予编辑","info")
+                    return;
+                }
+               if(ary[keyrow]==undefined){
+                   datagrid.datagrid('beginEdit',keyrow);
+                   ary[keyrow]=keyrow;
+               }else{
+                   datagrid.datagrid('cancelEdit',keyrow);
+                   delete ary[keyrow];
+               }
+            }
+        });
+        // 条件查询
+        $("#searcher").click(function(){
+            //验证学年学期是否输入
+            year=$.trim($("#toobar [name='year']").val());
+            term=$.trim($("#toobar [name='term']").val());
+            if(year=="" || term==""){
+                msgShow("系统提示：","请输入要检索的学年与学期！","error");
+                return;
+            }
+            datagrid.datagrid("options").url = "__URL__/supervisorPj/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+        //编辑
+        function fn_edit(){
+            list=datagrid.datagrid('getSelections');
+            if(list.length > 0){
+                var index=null;
+                var num=0
+                for(var i=0;i<list.length;i++){
+                    if(teacherno!=list[i].SUPERVISOR){
+                        num++;
+                        continue;
+                    }
+                    index= datagrid.datagrid('getRowIndex',list[i]);
+                    datagrid.datagrid('beginEdit',index);
+                    ary[index]=index;
+                }
+                if(num > 0) msgShow("系统提示：","您选中的数据其中"+num+"条并不是您的评教信息，暂时不予编辑","info");
+            }else{
+                msgShow("系统提示：","请选择要编辑的数据","error");
+            }
+        }
+        $("#editBut").bind('click',fn_edit);
+        $('#admin_edit').bind('click',fn_edit);
+        //取消编辑
+        $("#cancelBut").click(function(){
+            datagrid.datagrid('rejectChanges');
+            ary={};
+        });
+        //保存编辑
+        $("#saveBut").click(function(){
+            for (var key in ary){
+                if(key){
+                    datagrid.datagrid('endEdit',key);
+                }
+            }
+            list=datagrid.datagrid('getChanges');
+            if(list.length > 0){
+                $.ajax({
+                    url:'__URL__/updateScore/',
+                    data:{"list":list,'year':$.trim($("#toobar [name='year']").val()),'term':$.trim($("#toobar [name='term']").val())},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            $.messager.alert("提示","保存成功！","info",function(){
+                                datagrid.datagrid('reload');
+                            });
+                        }else{
+                            $.messager.alert("提示","保存失败！请检查您提交的数据是否合法");
+                        }
+                    }
+                });
+            }
+        });
+        //删除
+        function del(){
+            list=datagrid.datagrid('getSelections');
+            if (list.length){
+                $.messager.confirm('提示','确定要删除选中的评教信息吗？',function(b){
+                    if(b){
+                        var ary=[];                      //存储删除信息的数组
+                        var num=0;
+                        for(var i=0;i<list.length;i++){
+                            if(teacherno!=list[i].SUPERVISOR){
+                                continue;
+                            }
+                            ary[i]=list[i].ID;
+                            num++;
+                        }
+                        if(num > 0){
+                            $.ajax({
+                                url:'__URL__/delDdpj/',
+                                data:{'ids':ary,'year':$.trim($("#toobar [name='year']").val()),'term':$.trim($("#toobar [name='term']").val())},
+                                type:'POST',
+                                success:function(date){
+                                    if(date){
+                                        msgShow("系统提示：","成功删除"+date+"条数据！","info");
+                                        datagrid.datagrid('reload');
+                                    }else{
+                                        msgShow("系统提示：","操作失败,您没有权限！","info");
+                                    }
+                                }
+                            });
+                        }else{
+                            msgShow("系统提示：","您只能删除自己添加的评教信息！","error");
+                        }
+                    }
+                });
+            }else{
+                msgShow("系统提示：","请选择您要删除的评教信息！","info");
+            }
+        }
+        $("#delBut").bind('click',del);
+        $('#admin_del').bind('click',del);
+        //打开新增窗口
+        $("#addBut").click(function(){
+            //验证学年学期是否输入
+            year=$.trim($("#toobar [name='year']").val());
+            term=$.trim($("#toobar [name='term']").val());
+            if(year==""||term==""){
+                msgShow("系统提示：","学年学期不可为空","error");
+                return;
+            }
+            $("#addForm")[0].reset();
+            $("#addForm").find("font").html("*");
+            $("#addForm [name='year']").val(year);
+            $("#addForm [name='term']").val(term);
+            wd.window({closed:false,title:"新增评教"});
+        });
+        //保存新增评教
+        $("#addsave").click(function(){
+            $("#addForm td font").css("color","red");
+            var bool=true;
+            $("#addForm input[type='text']").each(function(){
+                if($.trim($(this).val())==""){
+                    $(this).next("font").html("请输入"+$(this).parent("td").prev("th").children("label").html());
+                    bool=false;
+                }else if($(this).attr("name")=="teacherno"){
+                    bool=ajaxCount("teacher",$(this),"教师号");
+                }else if($(this).attr("name")=="courseno"){
+                    bool=ajaxCount("course",$(this),"课号");
+                }else{
+                    $(this).next("font").css("color","green");
+                    $(this).next("font").html("√");
+                }
+            });
+            if(bool){
+                $.ajax({
+                    url:'__URL__/saveSupervisor/',
+                    data:{"year":$.trim($("#addForm [name='year']").val()),
+                        "term":$.trim($("#addForm [name='term']").val()),
+                        "teacherno":$.trim($("#addForm [name='teacherno']").val()),
+                        "courseno":$.trim($("#addForm [name='courseno']").val()),
+                        "score":$.trim($("#addForm [name='score']").val())},
+                    type:'POST',
+                    success:function(data){
+                        if(data==-1){
+                            $.messager.alert("提示","该教师当前学年学期已存在您的评教信息！");
+                        }else if(data){
+                            $.messager.alert("提示","新增评教成功！","info",function(){
+                                datagrid.datagrid('reload');
+                                wd.window({closed:true});
+                            });
+                        }else{
+                            $.messager.alert("提示","数据提交失败！请检查您提交的数据是否合法");
+                        }
+                    }
+                });
+            }
+        });
+        //教师号验证
+        $("#addForm [name='teacherno']").blur(function(){
+            ajaxCount("teacher",$(this),"教师号");
+        });
+        //教师号验证
+        $("#addForm [name='courseno']").blur(function(){
+            ajaxCount("course",$(this),"课号");
+        });
+        //评分成绩验证
+        $("#addForm [name='score']").blur(function(){
+            $(this).next("font").css("color","red");
+            if($.trim($(this).val())!="" ){
+                if(!reg.test($.trim($(this).val()))){
+                    $(this).next("font").html("请输入规范数值");
+                }else{
+                    $(this).next("font").css("color","green");
+                    $(this).next("font").html("√");
+                }
+            }else $(this).next("font").html("请输入评分成绩");
+        });
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            year:$.trim($("#toobar [name='year']").val()),
+            term:$.trim($("#toobar [name='term']").val()),
+            courseno:$.trim($("#toobar [name='courseno']").val()),
+            coursename:$.trim($("#toobar [name='coursename']").val()),
+            teacher:$.trim($("#toobar [name='teacher']").val())
+        };
+        return data;
+    }
+    //查询教师号或课号是否存在
+    function ajaxCount(type,ele,str){
+        var bool=true;
+        if($.trim(ele.val())!=""){
+            $.ajax({
+                url:"__URL__/ajaxGetCount/",
+                async:false,
+                type:"POST",
+                data:{value:$.trim(ele.val()),"type":type},
+                success: function(data){
+                    if(data==0){
+                        ele.next().css("color","red");
+                        ele.next().html("该"+str+"不存在");
+                        bool=false;
+                    }else{
+                        ele.next().css("color","green");
+                        ele.next().html("√");
+                    }
+                }
+            });
+        }else{
+            ele.next().css("color","red");
+            ele.next().html("请输入"+str);
+        }
+        return bool;
+    }
+    //编辑函数
+    $.extend($.fn.datagrid.methods, {
+        addEditor:function(jq,param){
+            if (param instanceof Array){
+                $.each(param, function(index, item){
+                    var e = $(jq).datagrid('getColumnOption', item.field);e.editor = item.editor;
+                });
+            }else{
+                var e = $(jq).datagrid('getColumnOption', param.field);e.editor = param.editor;
+            }
+        },
+        removeEditor :function(jq, param){
+            if (param instanceof Array){
+                $.each(param, function(index, item){
+                    var e = $(jq).datagrid('getColumnOption', item);e.editor = {};
+                });
+            }else{
+                var e = $(jq).datagrid('getColumnOption', param); e.editor = {};
+            }
+        }
+    });
+</script>
+
+<div id="wd" title=" ">
+    <div style="padding:10px">
+        <form action="#" id="addForm">
+            <table border="0" align="center" width="95%" style="border-collapse: collapse;">
+                <tr>
+                    <th align="right" width="14%"><label>学年</label>：</th>
+                    <td align="left" width="35%"><input type="text" name="year" maxlength="4" size="6"> <font color="red">*</font></td>
+                    <th align="right" width="14%"><label>学期</label>：</th>
+                    <td align="left"><input type="text" name="term" maxlength="1" size="2"> <font color="red">*</font></td>
+                </tr>
+                <tr>
+                    <th align="right"><label>教师号</label>：</th>
+                    <td align="left"><input type="text" name="teacherno" maxlength="10" size="14"> <font color="red">*</font></td>
+                    <th align="right"><label>课号</label>：</th>
+                    <td align="left"><input type="text" name="courseno" maxlength="9" size="14"> <font color="red">*</font></td>
+                </tr>
+                <tr>
+                    <th align="right"><label>评分成绩</label>：</th>
+                    <td align="left"><input type="text" name="score" maxlength="10" size="10"> <font color="red">*</font></td>
+                    <th align="right"></th>
+                    <td align="left">
+                        <a href="javascript:void(0)" id="addsave" class="easyui-linkbutton" data-options="iconCls:'icon-add'">新 增</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+
+</body>
+</html>

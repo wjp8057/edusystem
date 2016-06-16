@@ -1,0 +1,142 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+
+
+    var youxiu=0;         //优秀
+var lianghao=0;       //良好
+var zhongdeng=0;      //中等
+var jige=0;           //及格
+var bujige=0;         //不及格
+var ScoreTotal=0;       //获取到总条数
+    $(function(){
+        //todo:=============================================================
+        var Listobj=new dataTable('',[[
+            {field:'jsh',title:'教师号',width:80},
+            {field:'xm',title:'姓名',width:80},
+            {field:'xspf',title:'学生评分',width:80},
+            {field:'thpf',title:'同行评分',width:80},
+            {field:'xypf',title:'学院评分',width:80},
+            {field:'qtpf',title:'其他评分',width:80},
+            {field:'total',title:'总评',width:80,formatter:function(value,row,index){
+                //todo:计算优秀率
+                var SScore=value;
+                if(SScore>90){
+                    youxiu++;
+                }else if(SScore>=80&&SScore<90){
+                    lianghao++
+                }else if(SScore>=70&&SScore<80){
+                    zhongdeng++
+                }else if(SScore>=60&&SScore<70){
+                    jige++
+                }else{
+                    bujige++
+                }
+                return value
+            }},
+            {field:'bz',title:'备注',width:200}
+        ]])
+        Listobj.pageSize=50
+        var ScoreList=$('#ScoreList').datagrid(Listobj)
+//todo;=============================end=======================================
+
+
+
+        ScoreList.datagrid('options').onLoadSuccess=function(data){
+            var S=data.total;          //todo:获取到总条数
+            //todo:在这边处理 优秀 良好 及格 不及格
+
+            $('#YOU').html(Math.round(youxiu*100/S))      //优秀率
+            $('#LIANG').html(Math.round(lianghao*100/S))      //良好率
+            $('#ZHONG').html(Math.round(zhongdeng*100/S))     //中等
+            $('#JI').html(Math.round(jige*100/S))          //及格
+            $('#BUJI').html(Math.round(bujige*100/S))        //不及格
+        }
+
+
+
+
+
+
+
+
+        //todo:评分change
+        function Scorechange(){
+            var xuesheng=$('[name=xuesheng]').val()
+            var xueyuan=$('[name=xueyuan]').val()
+            if(xuesheng!=""&&xueyuan!=""){
+                if(!(isInt(xuesheng)&&isInt(xueyuan))){
+                    return $.messager.alert('提示','百分比请填写整型')
+                }else if(xuesheng<0||xueyuan<0){
+                    return $.messager.alert('提示','百分比不能小于0')
+                }else if(parseInt(xuesheng)+parseInt(xueyuan)>100){
+                    return $.messager.alert('提示','百分比之和超过100%')
+                }else{
+                    $('#TSCORE').html(100-(parseInt(xuesheng)+parseInt(xueyuan)));
+                    zero();
+                    ScoreList.datagrid('options').url="__URL__/selectList/hasJson/1";
+                    ScoreList.datagrid('load',{'xspfb':xuesheng,'xypfb':xueyuan,'qtpfb':$('#TSCORE').html(),'count':'Three_countScoreList.SQL','select':'Three_selectScoreList.SQL','arr':{':TEACHERNO':"{$jiaoshi}",':SCHOOL':'{$SCHOOL}',':YEAR':'{$YEAR}'}})
+                }
+            }
+        }
+        $('[name=xuesheng]').bind('change',Scorechange);
+        $('[name=xueyuan]').bind('change',Scorechange);
+
+    })
+
+    function isInt(str){
+        var reg = /^(-|\+)?\d+$/ ;
+        return reg.test(str);
+    }
+
+    //优秀率重置
+    function zero(){
+        youxiu=0;         //优秀
+        lianghao=0;       //良好
+        zhongdeng=0;      //中等
+        jige=0;           //及格
+        bujige=0;         //不及格
+    }
+</script>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',title:'',split:true" style="height:100px;">
+            <span id="Scoretitle"><p align="center"><font size="4" face="黑体">{$YEAR}{$schoolname}教学质量评估成绩表</font></span>
+            <center><span style="font-size: 11pt">学生评分占:<input type="text" size="2" name="xuesheng">%，
+                        学院评分占:<input type="text" size="2" name="xueyuan">%，
+                        同行评分占:<label id="TSCORE"></label> %</span><br><br>
+                <font color="red">注：需填完评分比，系统才会去检索数据</font>
+            </center>
+        </div>
+        <div data-options="region:'south',title:'',split:true" style="height:100px;">
+            <TABLE height=1 cellSpacing=0 cellPadding=1 width="100%" border=1>
+                <TBODY>
+                <TR>
+                    <TD align=center width="8%" height=1><font face="宋体" color="#0000ff" size="2">成绩</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">优秀（90分以上）</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">良好（80-89分)</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">中等（70-79分）</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">及格（60-69分）</font></TD>
+                    <TD align=center width="20%" height=1><font face="宋体" color="#0000ff" size="2">不及格（60分以下）</font></TD></TR>
+                <TR>
+                    <TD align=center width="8%" height=1><FONT face=宋体 color=#0000ff
+                                                               size=2>百分率</FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                                size=2><span id=YOU></span> </FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                                size=2><span id=LIANG></span> </FONT></TD>
+                    <TD  align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                                 size=2><span id=ZHONG></span> </FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff
+                                                                size=2><span id=JI></span> </FONT></TD>
+                    <TD  align=middle width="20%" height=1><FONT face=宋体 color=#0000ff
+                                                                 size=2><span id=BUJI></span> </FONT></TD></TR></TBODY></TABLE>
+            说明：
+
+            1、总评=学评教成绩*学评教比例+学院评分*学院评分比例*100/20+同行评分*同行评分比例+其他评分
+            <p align="center">制表人：<label id="maker">{$name}</label>&nbsp;&nbsp; 制表日期：<label id=madetime>{$date}</label>
+
+        </div>
+        <div data-options="region:'center',title:''" style="padding:5px;background:#eee;">
+            <div id="ScoreList"></div>
+        </div>
+    </div>

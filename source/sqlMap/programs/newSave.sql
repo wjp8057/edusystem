@@ -1,0 +1,1 @@
+insert into Programs(Programno,Progname,Date,Rem,Url,Valid,School,Type) values(:PROGRAMNO,:PROGRAMNAME,:DATE,:REM,:URL,:VALID,:SCHOOL,:TYPE)

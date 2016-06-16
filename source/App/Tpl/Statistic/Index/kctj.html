@@ -1,0 +1,81 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-office","menuname": "课程统计",
+                "menus":[
+                    {"menuid": "11","menuname": "开课门数统计（课号前7位相同）","icon": "icon-file","url": "__ROOT__/Statistic/Course/beginSeven"},
+                    {"menuid": "12","menuname": "开课门次统计（课号前9位相同）","icon": "icon-file2","url":" __ROOT__/Statistic/Course/beginNine"},
+                    {"menuid": "13","menuname": "实验课程统计","icon": "icon-file3","url": "__ROOT__/Statistic/Course/experiment"},
+                    {"menuid": "14","menuname": "实习（设计）课程统计","icon": "icon-result","url": "__ROOT__/Statistic/Course/design"},
+                    {"menuid": "15","menuname": "根据学生修课方式统计开课门次","icon": "icon-evaluate","url": "__ROOT__/Statistic/Course/courses"},
+                    {"menuid": "16","menuname": "根据课程类型统计开课门次","icon": "icon-plan","url": "__ROOT__/Statistic/Course/courseType"}
+                ]
+            }
+        ]
+    };
+    var menuTabs = null;
+    $(function(){
+        menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+        $('#loading-mask').fadeOut(); //关闭遮罩
+
+        $('#loginOut').click(function(){
+            $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+                if(r){
+                    location.href = '__ROOT__/Login/logout';
+                }
+            });
+        });
+    });
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="课程统计" style="width:245px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:scroll; color:#000000; " >
+            <span style="font-size: 20px">课程统计功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">数据统计：课程统计</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">一、课程统计:</font></b><br>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>1、开课门数统计（课号前7位相同）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院统计各学院在该学期课号前7位相同的开课门数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>2、开课门次统计（课号前9位相同）</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院统计各学院在该学期课号前9位相同的开课门数。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>3、实验课程统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院统计各学院在该学期各门实验课程的学时情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>4、实习（设计）课程统计</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院统计各学院在该学期各门实习（设计）课程的上课情况。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>5、根据学生修课方式统计开课门次</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院、修课方式统计各学院各类型修课方式的的开课门次和全校开课门次。</p>
+            &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<b>6、根据课程类型统计开课门次</b>：<p style="font-size: 13px;padding-left:65px;margin-top: 0px;margin-bottom: 5px">根据学年、学期、学院、课程类别统计各学院各类别的开课门次和全校开课门次。</p>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>

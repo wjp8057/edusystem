@@ -1,0 +1,185 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function yitiao(obj){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            alert('请选择一条,不能选多条');                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            alert('请选择一条要编辑的数据');                         //用户没选择行
+        }else{
+            return true;
+        }
+        return false;
+    }
+    var content='{$info}'
+    $(function(){
+        var ClassNo='{$info.classno}';         //todo:存放 添加修读计划时候 要用到的CLASSNO
+        var SCHOOLNO='{$info.schoolno}';        //todo:存放 学校NO 做权限判断时候用的
+        var StudentNo='';       //todo:存放 学生学号      做查看某学生教学计划的时候用到
+
+
+        $('#wd').css('display','')
+    var StudetDatGrid=$('#StudentList').datagrid({
+    url:'__URL__/ClassQueryStudent',
+    fit:true,
+    columns:[[{checkbox:true},{field:'StudentNo',title:'学号',align:'center', width:100},
+             {field:'Name',title:'姓名', width:100,align:'center'},
+             {field:'Sex',title:'性别',align:'center', width:100,formatter:function(c){
+                        if(c=='F')
+                            return '女'
+                        else
+                            return '男'
+                        }},
+            {field:'Points',title:'积点分',align:'center', width:100,formatter:function(c){
+                        if(c=='.00'){
+                             return 0;
+                        }
+                    }},
+            {field:'Scores',title:'高考成绩', width:150,align:'center'},
+            {field:'SchoolName',title:'所在学院', width:150,align:'center'}
+]],
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+            toolbar:[{
+                text:'查看学生注册信息',
+                iconCls: 'icon-personal',
+                handler:function(){
+                    var yi=yitiao(StudetDatGrid);
+                    if(yi){
+                        var obj={}
+                        var row3 = StudetDatGrid.datagrid('getSelected');                 //获得被选中的索引
+                        openTabsWindows(row3.Name+'信息','__URL__/studentinfo/studentno/'+row3.StudentNo,'',true)
+                    }
+                }
+},'-',{
+text:'将学生从班级列表中删除',
+iconCls: 'icon-kaichu',
+handler:function(){
+    var row3 = StudetDatGrid.datagrid('getSelections');                 //获得被选中的索引
+    if(row3.length<1)
+        return $.messager.alert('提示','请选择一条要删除的数据');
+        var fangfa=function(c1){
+            if(c1=='true'){
+                $.messager.confirm('提示','您确定要删除吗',function(c){
+            if(c){
+                var gaga=function(cc){
+                $.messager.alert('提示',cc)
+                StudetDatGrid.datagrid('reload')
+            };
+                ajiakesi('__URL__/deleteClassStudent/hasJson/1',{STUDENT:row3},gaga);
+            }
+})
+return
+}
+$.messager.alert('提示',c1);
+
+}
+ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+}
+
+},'-',{
+text:'添加学生',
+iconCls: 'icon-add',
+handler:function(){
+    var fangfa=function(c){
+        if(c=='true'){
+        	return openTabsWindows('添加学生','__URL__/add_student/classno/'+ClassNo,'',true);
+        }
+    $.messager.alert('提示',c)
+
+    }
+    ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+}
+},{
+text:'刷新',
+iconCls:'icon-reload',
+handler:function(){
+StudetDatGrid.datagrid('load')
+}
+},{
+    text:'导出学生信息',
+    iconCls:'icon-excel',
+    handler:function(){
+        $('[name=classno_e]').val(ClassNo)
+        $('#classexcel').submit();
+
+    }
+}
+],onRowContextMenu:function(e,rowindex,row){
+            StudetDatGrid.datagrid('rejectChanges')
+            var tt=$('#StudentList');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+
+})
+
+        var classno='{$info.classno}'
+        setTimeout(function(){
+
+            StudetDatGrid.datagrid('load',{'CLASSNO':classno});
+
+        },500)
+
+        //todo:右键查看注册信息
+        $('#admin_del2').bind('click',function(){
+            var obj={}
+            var row3 = StudetDatGrid.datagrid('getSelected');                 //获得被选中的索引
+            openTabsWindows(row3.Name+'信息','__URL__/studentinfo/studentno/'+row3.StudentNo,'',true)
+        })
+
+
+        //todo:右键删除
+        $('#admin_edit2').bind('click',function(){
+            var row3 = StudetDatGrid.datagrid('getSelected');                 //获得被选中的索引
+            var fangfa=function(c1){
+                if(c1=='true'){
+                    $.messager.confirm('提示','您确定要删除吗',function(c){
+                        if(c){
+                            var gaga=function(cc){
+                                $.messager.alert('提示',cc)
+                                StudetDatGrid.datagrid('reload')
+                            };
+                            ajiakesi('__URL__/deleteClassStudent/hasJson/1',{STUDENT:row3},gaga);
+                        }
+                    })
+                    return
+                }
+                $.messager.alert('提示',c1);
+
+            }
+            ajiakesi('__URL__/quanxianpd',{SCHOOL:SCHOOLNO},fangfa)          //todo:做权限验证
+
+        })
+
+
+    })
+    //todo:需求需要的返回按钮
+    function ziback(name){
+        name.window({
+            closed:true
+        })
+    }
+
+</script>
+<body>
+
+	<div id="StudentList"></div>
+	<div id="admin_access_menu" class="easyui-menu" style="width: 100px;">
+		<div id='admin_del2'>查看学生注册信息</div>
+		<div id='admin_edit2'>将学生从班级列表中删除</div>
+	</div>
+
+	<form action="__APP__/CourseManager/Excel/class_studentList"
+		method="POST" id="classexcel">
+		<input type="hidden" name="classno_e">
+
+	</form>
+</body>
+</html>

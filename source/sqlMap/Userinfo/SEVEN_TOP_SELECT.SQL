@@ -1,0 +1,2 @@
+select * from (select row_number() over(order by 课号)as row,学年 as xn,学期 as xq,课号 as kh,课名 as km,有效人数 as yxrs,参加人数 as cjrs,完成人数 as wcrs,态度 as td,内容 as nr,方法 as ff,效果 as xg,类型 as lx,得分 as df,有效 as yx from 教学质量评估成绩 inner join users on users.teacherno=教学质量评估成绩.教师号
+where users.username=:username)as b where b.row between :start and :end

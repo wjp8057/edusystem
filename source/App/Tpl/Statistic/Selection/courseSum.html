@@ -1,0 +1,81 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+h1{margin:0px;padding:0px;padding-left: 20px;line-height:30px;color:#0360af}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+			<div>
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="2">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">统  计</a>
+		<br>
+                <h1 >学院选课总人数统计结果表</h1>
+
+            </div>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#FFF;">
+    	<div id="content" style="height:390px;"></div>
+        <h1>全校选课总人数统计结果表</h1>
+        <div id="content_2" style="height:180px;"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function(){
+	//根据修课方式学院开课门次统计结果表
+	$('#content').datagrid({
+		striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"SCHOOL",title:"学院代号",width:60,align:"center"},
+                  {field:"SCHOOLNAME",title:"开课学院",width:150,align:"center"},
+                  {field:"VALUE",title:"课程类型",width:120,align:"center"},
+                  {field:"ATTENDENTS",title:"选课总人数",width:120,align:"center"}]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+        toolbar:'#tdemo'
+    });
+	//根据修课方式全校开课门次统计结果表
+	$('#content_2').datagrid({
+		striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"VALUE",title:"课程类型",width:300,align:"center"},
+                  {field:"ATTENDENTS",title:"选课总人数",width:300,align:"center"}]]
+    });
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({});//搜索按钮
+    $('#searcher').click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	var school=$.trim($("[name='SCHOOL']").val());
+    	if(year=="" || term==""){
+    		$.messager.alert("提示","统计时学年学期不能为空！");
+    		return;
+    	}
+    	$('#content').datagrid("options").url = "__URL__/courseSum/hasJson/1";
+    	$('#content').datagrid('load',{YEAR:year,TERM:term,SCHOOL:school});
+    	
+    	$('#content_2').datagrid("options").url = "__URL__/courseSumAll/";
+    	$('#content_2').datagrid('load',{YEAR:year,TERM:term});
+    });
+});
+</script>
+</body>
+</html>

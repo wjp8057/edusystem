@@ -1,0 +1,182 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name='YEAR']").val(parent.$("#YEAR").val());
+        $("[name='TERM']").val(parent.$("#TERM").val());
+
+        $('[name=Search]').bind('click',function(){
+            var year=$('[name=YEAR]').val()
+            var term=$('[name=TERM]').val()
+            var teacherno=(function(){
+                var yi=yitiao($('#yingyuC'),'请选择一个要查看的数据,不能选多条','请选择一条要查看的数据')
+                if(yi){
+                    var row=$('#yingyuC').datagrid('getSelected');
+                    return row.jsh;
+                }
+                return null
+            })()
+            if(teacherno!=null)
+                window.open('__APP__/Userinfo/Userinfo/teachercourse/year/'+year+'/term/' +term+'/teacherno/'+teacherno);
+        })
+
+
+
+        var TeacherList=$('#wd3').window(new wind(0,0,false,false,true,true,true))
+
+
+    //    var wd_three=$('#wd_one').window(new wind(0,0,false,false,true,true,true))
+     //   var wd_four=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+
+
+
+
+
+        //todo:打印成绩临时登陆单
+        $('#sub_one').linkbutton({
+            'text':'打印临时成绩登陆单'
+        }).bind('click',function(){
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/Four_title_schoolname.SQL','bind':{':school':$('[name=SCHOOL]').val()}},function(c){
+                eval('var one='+c)
+
+                $('#title').html(one[0]['name']+'学院'+$('#YEAR').val()+'学年第'+$('#TERM').val()+'学期 学期初补考课程列表')
+                $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/Four_one_one_select.SQL','count':'Results/Four_one_one_count.SQL'}
+                    ,'bind':{':year':$('#YEAR').val(),':term':$('#TERM').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}
+                })
+            })
+
+            $('#wd_one').panel({closed:false})
+            $('#wd_two').panel({closed:true})
+
+                })
+
+        //todo:打印成绩单(内含成绩)
+        $('#sub_two').linkbutton({
+            'text':'打印成绩单(内含成绩)'
+        }).bind('click',function(){
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/Four_title_schoolname.SQL','bind':{':school':$('[name=SCHOOL]').val()}},function(c){
+                eval('var one='+c)
+
+                $('#title').html(one[0]['name']+'学院'+$('#YEAR').val()+'学年第'+$('#TERM').val()+'学期 学期初补考课程列表')
+                $('#yingyuB').datagrid('load',{'Sqlpath':{'select':'Results/Four_one_one_select.SQL','count':'Results/Four_one_one_count.SQL'}
+                    ,'bind':{':year':$('#YEAR').val(),':term':$('#TERM').val(),':school':$('[name=SCHOOL]').val(),':courseno':'%'}
+                })
+            })
+
+                    $('#wd_one').panel({closed:true})
+                    $('#wd_two').panel({closed:false})
+
+                })
+
+
+
+
+
+
+
+    })
+</script>
+<body style="background: #fff">
+<style>
+    #wd td {border:0px solid #95B8E7}
+
+</style>
+
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:50px;background:#E0ECFF;">
+<br>
+            &nbsp;&nbsp;
+
+
+                            学年：
+
+                            <input type=text name="YEAR" id="YEAR" size="4" >
+
+                            学期：
+
+                            <input type=text name="TERM" id="TERM" size="1" >
+
+
+                            课号：
+
+
+                            <input type="text" name="COURSENO" size="9" value="%">
+
+                            开课学院:
+
+                            <select size="1" name="SCHOOL" class="easyui-combobox">
+                                <volist name="schools" id="s">
+                                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                                </volist>
+                            </select>
+
+
+                  <a href="javascript:void(0)" id="sub_one">打印成绩临时登陆单</a>&nbsp&nbsp&nbsp
+                <a href="javascript:void(0)" id="sub_two">打印成绩单(内含成绩)</a>
+
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+            <div id="wd_one" class="easyui-panel"
+
+                 data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,toolbar:[{'text':'查看成绩登记表',iconCls:'icon-search',handler:function(){
+
+                            var row=$('#yingyuA').datagrid('getSelections')
+
+                          if(!row.length){
+                            return $.messager.alert('提示','请选择一行数据')
+                          }
+                            window.open('__URL__/Four_one_daying/YEAR/'+$('#YEAR').val()+'/TERM/'+$('#TERM').val()+'/COURSENO/'+row[0].kh)
+                       }}]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                        <th data-options="field:'xkfs',width:100,align:'right'" align="center">修课方式</th>
+                        <th data-options="field:'rs',width:100,align:'right'" align="center">人数</th>
+                        <th data-options="field:'zt',width:100,align:'right'" align="center">状态</th>
+                        <th data-options="field:'SL',width:100,align:'right'" align="center">SL</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div id="wd_two" class="easyui-panel"
+
+                 data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+                <table class="easyui-datagrid" id="yingyuB"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,toolbar:[{'text':'查看成绩登记表',iconCls:'icon-search',handler:function(){
+
+                            var row=$('#yingyuB').datagrid('getSelections')
+
+                          if(!row.length){
+                            return $.messager.alert('提示','请选择一行数据')
+                          }
+                            window.open('__URL__/Three_BKCJSR_StudentList/reqtag/Four_one_daying_youbian/year/'+$('#YEAR').val()+'/term/'+$('#TERM').val()+'/courseno/'+row[0].kh)
+                       }}]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'kh',width:100" align="center">课号</th>
+                        <th data-options="field:'kcmc',width:100" align="center">课程名称</th>
+                        <th data-options="field:'xkfs',width:100,align:'right'" align="center">修课方式</th>
+                        <th data-options="field:'rs',width:100,align:'right'" align="center">人数</th>
+                        <th data-options="field:'zt',width:100,align:'right'" align="center">状态</th>
+                        <th data-options="field:'SL',width:100,align:'right'" align="center">SL</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+
+</body>
+</html>

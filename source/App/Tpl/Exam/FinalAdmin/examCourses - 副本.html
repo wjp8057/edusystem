@@ -1,0 +1,145 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var key=[];
+    $(function(){
+
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+        $('#dat').datagrid({onLoadSuccess:function(){
+
+            $('#dat').datagrid('unselectAll');
+
+            for(var i=0;i<key.length;i++){
+
+               if(typeof key[i]=='undefined'){
+                    continue;
+                }
+                $('#dat').datagrid('selectRow',key[i])
+            }
+            wd4.window({closed:false});
+            key=[];
+        },
+        onSelect:function(index,row){
+            $('#dat').datagrid('getRows')[index].exam=1
+        },onUnselect:function(index,row){
+            $('#dat').datagrid('getRows')[index].exam=0;
+            },
+         onSelectAll:function(rows){                            //todo:全选
+             for(var i=0;i<rows.length;i++){
+                 rows[i].exam=1;
+             }
+         },onUnselectAll:function(rows){
+                for(var i=0;i<rows.length;i++){
+                    rows[i].exam=0;
+                }
+            }
+        });
+       var wd4=$('#wd4').window(new wind(0,0,false,false,false,false,true));        //todo:默认的页面
+        //todo: 点击检索的时候
+        $('#bt').linkbutton({
+            'text':'检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+            if($('[name=year]').val()==""||$('[name=term]').val()==""){
+                return $.messager.alert('提示','请输入学年学期,不能为空')
+            }
+            $('#dat').datagrid('options').url='__APP__/Status/Status/Squery';
+            $('#dat').datagrid('load',{'Sqlpath':{'select':'exam/examQuery_Typk_select.SQL','count':'exam/examQuery_Typk_count.SQL'},'bind':{':year':$('[name=year]').val(),':term':$('[name=term]').val(),':school':$('[name=SCHOOL]').val(),':EXAMNO':$('[name=tongyi]').val()}});
+                $('#t_school').css({'font-size':'14px'}).html($('[name=SCHOOL]').find("option:selected").text());
+                $('#t_year').css({'font-size':'14px'}).html($('[name=year]').val());
+                $('#t_term').css({'font-size':'14px'}).html($('[name=term]').val());
+        });
+
+        /*-- 提交到数据库 --*/
+        $('#e_add').bind('click',function(){
+            var roww=$('#dat').datagrid('getRows');
+            var obj = {};
+            for(var x in roww){
+                obj[x] = new Object();
+                obj[x]['exam'] = roww[x]['exam'];
+                obj[x]['recno'] = roww[x]['recno'];
+                obj[x]['kh'] = roww[x]['kh'];
+            }
+            $.post('__URL__/insertPaikao',{'bind':obj},function(c){
+                $.messager.alert('提示',c);
+            });
+        });
+
+        $('#e_excel').bind('click',function(){
+            $('[name=e_year]').val($('[name=year]').val());
+            $('[name=e_term]').val($('[name=term]').val());
+            $('[name=e_school]').val($('[name=SCHOOL]').val());
+            $('[name=e_examno]').val($('[name=tongyi]').val());
+            $('#f_excel').submit();
+        })
+    })
+</script>
+<style>
+    input{height:15px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+</style>
+<body >
+<!--todo:查看班级退课公告-->
+
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+
+            <b>学年：</b>
+            <input name="year" type="text" size='4' >
+
+            <b>学期：</b>
+            <input type="text" name="term" size="1" >
+
+
+              <b>学院代号：</b>
+
+                <select name="SCHOOL">
+                    <option value="%">所有学院</option>
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+
+               <b>是否统一排考：</b>
+                <select name="tongyi">
+                    <option value="%">全部</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+
+                <a href="javascript:void(0)" id="bt">检索</a>
+
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>提交到数据库</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-excel"  id="e_excel" plain=true>导出Excel</a>
+
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+            <table class="easyui-datagrid" id="dat"
+                   data-options="fit:true,pagination:true,pageList:[20,50,100],toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                    <th data-options="field:'kcmc',width:320,align:'right'" align="center">课程名称</th>
+                    <th data-options="field:'exam' , width:100,align:'right',
+                    		formatter:function(a,b,c){  if(a=='1'){ key[c]=c;return '是'}else{return '否'}   }" align="center">是否统一安排</th>
+                    <th data-options="field:'examtype',width:140,align:'right'" align="center">考试类型(考试/考查)</th>
+                    <th data-options="field:'kkxy',width:100,align:'right'" align="center">开课学院</th>
+                    <th data-options="field:'bj',width:240,align:'right'" align="center">主修班级</th>
+					<th data-options="field:'recno',hidden:true,width:200,align:'right'" align="center">recno</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+    </div>
+    <form action="__APP__/CourseManager/Excel/kaowu_excel"  id="f_excel" method="POST">
+        <input type="hidden" name="e_year">
+        <input type="hidden" name="e_term">
+        <input type="hidden" name="e_school">
+        <input type="hidden" name="e_examno">
+    </form>
+
+</body>

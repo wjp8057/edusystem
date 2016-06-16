@@ -1,0 +1,243 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var eqno=09321;
+    $(function(){
+
+
+        $('#wd4').window(new wind(700,600,false,false,true,false,false,false))
+        $('#wd4').window({
+            closable:true
+        })
+        var daat=$('#dat').datagrid({
+            onDblClickRow:function(index,row){
+                if(eqno!=09321&&eqno!=index){
+                    $.messager.confirm('提示','您还有正在编辑的未保存,点击"确定"结束编辑吗(不做保存)',function(c){
+                        if(c){
+                            $('#dat').datagrid('rejectChanges')
+                            $('#dat').datagrid('beginEdit',index)
+                            $('#dat').datagrid('selectRow',index);
+                            eqno=index;
+                        }else{
+                            $('#dat').datagrid('unselectAll')
+                            $('#dat').datagrid('selectRow',eqno);
+                        }
+                    })
+
+                    return;
+                }
+                $('#dat').datagrid('beginEdit',index)
+                eqno=index;
+
+            },onRowContextMenu:function(e,rowindex,row){
+                daat.datagrid('rejectChanges')
+                var tt=$('#dat');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+
+        })
+
+                $('#e_add').bind('click',function(){
+                    $('#wd4').window({closed:false})
+                })
+
+                        function eedit(){
+                            var index=$('#dat').datagrid('getRowIndex',$('#dat').datagrid('getSelected'));
+                            if(eqno!=09321&&eqno!=index){
+                                $.messager.confirm('提示','您还有正在编辑的未保存,点击&quot确定&quot结束编辑吗(不做保存)',function(c){
+                                    if(c){
+                                        $('#dat').datagrid('rejectChanges')
+                                        $('#dat').datagrid('beginEdit',index)
+                                        $('#dat').datagrid('selectRow',index);
+                                        eqno=index;
+                                    }else{
+                                        $('#dat').datagrid('unselectAll')
+                                        $('#dat').datagrid('selectRow',eqno);
+                                    }
+                                })
+
+                                return;
+                            }
+                            $('#dat').datagrid('beginEdit',index)
+                            eqno=index;
+                        }
+
+        $('#e_edit').bind('click',eedit);
+        $('#admin_edit').bind('click',eedit);
+
+        $('#e_back').bind('click',function(){
+            eqno=09321
+            $('#dat').datagrid('acceptChanges')
+        })
+
+         $('#e_save').bind('click',function(){
+             if(eqno==09321){
+                 return $.messager.alert('提示','您还未编辑过数据呢')
+             }
+             $('#dat').datagrid('endEdit',eqno)
+             var row=$('#dat').datagrid('getRows')[eqno]
+             ajiakesi('__APP__/exam/FinalAdmin/examCourses/hasJson/1',
+                     {':ID':'EXE','exe':'exam/setAddress_update.SQL',bind:{':KW':row.kws,':status':row.zt,':RECNO':row.RECNO}},function(c){
+                         $('#dat').datagrid('load',{
+                             'Sqlpath':{'select':'exam/setAddress_select.SQL','count':'exam/setAddress_count.SQL'
+                             },'bind':{':ROOMNO':$('[name=roomno]').val().trim(),':ROOMNAME':$('[name=roomname]').val().trim(),
+                                 ':MENPAI':$('[name=menpai]').val().trim()}
+                         })
+                         $.messager.alert('提示','保存成功')
+
+                         eqno=09321
+                         $('#dat').datagrid('acceptChanges')
+                     })
+         })
+
+
+
+        $('#bt').linkbutton({
+            'text':'检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+            $('#dat').datagrid('options').url='__APP__/Status/Status/Squery'
+            $('#dat').datagrid('load',{
+                'Sqlpath':{'select':'exam/setAddress_select.SQL','count':'exam/setAddress_count.SQL'
+                            },'bind':{':ROOMNO':$('[name=roomno]').val().trim(),':ROOMNAME':$('[name=roomname]').val().trim(),
+                    ':MENPAI':$('[name=menpai]').val().trim()}
+            })
+        })
+
+
+        $('#bt2').linkbutton({
+            'text':'检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    $('#dat2').datagrid('options').url='__APP__/Status/Status/Squery'
+                    $('#dat2').datagrid('load',{
+                        'Sqlpath':{'select':'exam/setAddress_select_ROOM.SQL','count':'exam/setAddress_count_ROOM.SQL'
+                        },'bind':{':ROOMNO':$('[name=roomno2]').val().trim(),':ROOMNAME':$('[name=roomname2]').val().trim(),
+                            ':MENPAI':'%'}
+                    })
+                })
+        //WHERE ROOMNO LIKE :ROOMNO AND ROOMNAME LIKE :ROOMNAME AND menpaiNO LIKE :MENPAI
+    })
+</script>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+
+                 <b>教室号：</b>
+                        <input type="text" name="roomno" size="7" value="%">
+
+                  <b>教室名：</b>
+                        <input type="text" name="roomname" size="7" value="%">
+                <b>门牌号：</b>  <input type="text" name="menpai" size="7" value="%">
+                    <a href="javascript:void(0)" id="bt">检索</a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="dat"
+               data-options="fit:true,pagination:true,striped:true,singleSelect:true,pageList:[20,50,100,500,1000],toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'row',checkbox:true">选择</th>
+                <th data-options="field:'jsh',width:100,align:'right'" align="center">教室号</th>
+                <th data-options="field:'kws',width:100,align:'right',editor:{type:'text'}" align="center">考位数</th>
+                <th data-options="field:'lh',width:100,align:'right'" align="center">楼号</th>
+                <th data-options="field:'mph',width:100,align:'right'" align="center">门牌号</th>
+                <th data-options="field:'jsmc',width:100,align:'right'" align="center">教室名称</th>
+                <th data-options="field:'zt',width:100,align:'center',editor:{type:'combobox',options:{data:[
+{'value':'1','text':'启用'},
+{'value':'0','text':'未启用'}
+]}},formatter:function(a,b,c){
+                    if(a=='启用'){
+                        return '<center><font color=green>启用</font></center>'
+                    }else{
+                        return '<center><font color=red>未启用</font></center>'
+                    }
+                }" align="center">启用</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+        <!--todo:点击添加教室弹出的窗口-->
+        <div id="wd4" title=" " data-options="">
+            <div id="ccc" class="easyui-layout" data-options="fit:true">
+                <div data-options="region:'north',split:false,border:false" style="height:50px;background:#E0ECFF;">
+                    <table border="0" id="tb2" width="55%" style="margin-top: 2px" align="left"cellspacing="0" cellpadding="0">
+                        <tr>
+
+                            <td   height="10">
+                                <p align="right"><b>教室号：</b></td>
+                            <td  height="10" style="border:0px">
+                                <input type="text" name="roomno2" size="7" value="%">
+                            </td>
+                            <td   height="10">
+                                <p align="right"><b>教室名：</b></td>
+                            <td  height="10" style="border:0px">
+                                <input type="text" name="roomname2" size="7" value="%">
+                            </td>
+
+                            <td style="border:0px;" height="10" align="center" colspan="4">
+                                <a href="javascript:void(0)" id="bt2">检索</a> </td>
+
+                        </tr>
+                    </table><p align="center">
+                </div>
+                <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+                    <table class="easyui-datagrid" id="dat2"
+                           data-options="fit:true,pagination:true,pageList:[20,50,100,500,1000],toolbar:[
+               {'text':'设为考场',
+               'iconCls':'icon-add',
+               handler:function(){
+                    var List=$('#dat2').datagrid('getSelections')
+                    if(List.length==0){
+                        return $.messager.alert('提示','您还没选择数据哦')
+                    }
+                    ajiakesi('__URL__/setAddress/hasJson/1',{'bind':List},function(c){
+                          $.messager.alert('提示',c)
+                          $('#dat').datagrid('load',{
+                      'Sqlpath':{'select':'exam/setAddress_select.SQL','count':'exam/setAddress_count.SQL'
+                            },'bind':{':ROOMNO':$('[name=roomno]').val().trim(),':ROOMNAME':$('[name=roomname]').val().trim(),
+                    ':MENPAI':$('[name=menpai]').val().trim()}
+                })
+                    })
+
+
+               }
+               },{'text':'关闭',
+               'iconCls':'icon-stop',
+               handler:function(){
+                   $('#wd4').window({closed:true})
+               }
+               }]">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'row',checkbox:true">选择</th>
+                            <th data-options="field:'jsh',width:100,align:'right'" align="center">教室号</th>
+                            <th data-options="field:'kws',width:100,align:'right'" align="center">考位数</th>
+                            <th data-options="field:'lh',width:100,align:'right'" align="center">楼号</th>
+                            <th data-options="field:'mph',width:100,align:'right'" align="center">门牌号</th>
+                            <th data-options="field:'jsmc',width:100,align:'right'" align="center">教室名称</th>
+
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+
+    <div id='admin_edit'>编辑本条目</div>
+</div>

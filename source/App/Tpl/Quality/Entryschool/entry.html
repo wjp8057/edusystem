@@ -1,0 +1,408 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<style type="text/css">
+body{background:#FFF;}
+#init #title{font-size: 16pt;font-family:"隶书";padding-top:20px;}
+#init table{margin:130px auto 0px;border-collapse:collapse;}
+#init td,#init th{border-bottom:dotted 1px #CCC;height:40px;}
+#btninit,#btnadd{margin-right:20px;}
+#bottomtab{border-collapse:collapse;margin:10px auto 0px;}
+#bottomtab td{border:solid 1px #CCC;}
+*{font-family:宋体,simsun;}
+</style>
+<body >
+<div>
+	<form method="POST" id="init" action="__URL__">
+        <p align="center" id="title">院 校 评 教</p>
+        <table width="40%" align="center">
+            <tr>
+                <td width="15%" align="right">学年：</td>
+                <td width="35%"><input type="text" name="YEAR" size="4" value="{$yearTerm.YEAR}"></td>
+                <td width="15%" align="right">学院：</td>
+                <td width="35%">
+                	<select id="SCHOOL">
+		                <option value="%" selected>所有学院</option>
+		                <volist name="school" id="s">
+		                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+		                </volist>（输入时候选择学院）
+	                </select></td>
+            </tr>
+            <tr>
+                <td width="15%" align="right">教师号：</td>
+                <td colspan="3"><input  type="text" name="TEACHERNO" size="8" value="%">（如要检索整个学院，请使用默认值）</td>
+            </tr>
+        </table>
+        <p align="center">
+            <input  type="hidden" name="FLAG" value="">
+            <a id="btninit" class="easyui-linkbutton" icon="icon-edit">同步名单</a>
+            <a id="btnadd" class="easyui-linkbutton" icon="icon-add">输入评分</a>
+            <a id="btnprint" class="easyui-linkbutton" icon="icon-print">检索总评并打印</a>
+        </p>
+        <div style="padding:50px 0px 0px 280px;">
+        	<span style="line-height:20px;">1、同步名单：同步参与院校评分的名单，此名单根据教师上课情况产生。有上课的教师都会有一条记录。<br>
+        	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	<font color="#FF0000">如果在输入评分中没有找到相应教师的记录，是在排课计划中没有设定该教师，请设定后运行此方法。</font></span>
+            <br><br>
+            2、输入评分：设定好学院以后，点击该按钮可以输入评分，教师按照学院、姓名排序。
+            <br><br>
+            3、检索并打印：设定条件后可以检索到教学质量评估的各项得分，设定各项评分的比例后，可以获得总评成绩。</div>
+	</form>
+</div>
+
+
+<div id="wd">
+    <include file="entryadd" />
+</div>
+
+<div id="wd2" title="<a onclick='back()' class='l-btn l-btn-plain' href='javascript:void(0)'><span class='l-btn-left'><span class='l-btn-text icon-back l-btn-icon-left' style='font-weight: normal'>返回</span></span></a>">
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',title:'',split:false" style="height:100px;line-height:25px;padding-top: 5px;">
+            <center>
+            <span id="Scoretitle" style="font-weight:bold;font-size:14px;"></span><br>
+            <span style="font-size: 12px">学生评分占:<input type="text" size="2" name="xuesheng">%，
+                        学院评分占:<input type="text" size="2" name="xueyuan">%，
+                        同行评分占:<label id="TSCORE"></label> %</span><br>
+                <font color="red">注：需填完评分比，系统才会去检索数据</font>
+            </center>
+        </div>
+        <div data-options="region:'south',title:'',split:false" style="height:100px;">
+            <TABLE cellSpacing="0" cellPadding="3" width="98%" id="bottomtab"><TBODY>
+                <TR>
+                    <TD align=center width="8%" height=1><font face="宋体" color="#0000ff" size="2">成绩</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">优秀（90分以上）</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">良好（80-89分)</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">中等（70-79分）</font></TD>
+                    <TD align=center width="15%" height=1><font face="宋体" color="#0000ff" size="2">及格（60-69分）</font></TD>
+                    <TD align=center width="20%" height=1><font face="宋体" color="#0000ff" size="2">不及格（60分以下）</font></TD></TR>
+                <TR>
+                    <TD align=center width="8%" height=1><FONT face=宋体 color=#0000ff size=2>百分率</FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff size=2><span id=YOU></FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff size=2><span id=LIANG></FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff size=2><span id=ZHONG></FONT></TD>
+                    <TD align=middle width="15%" height=1><FONT face=宋体 color=#0000ff size=2><span id=JI></FONT></TD>
+                    <TD align=middle width="20%" height=1><FONT face=宋体 color=#0000ff size=2><span id=BUJI></FONT></TD></TR>
+            </TBODY></TABLE>
+         	<p style="padding:5px 0px 0px 10px"> 说明：1、总评=学评教成绩*学评教比例+学院评分*学院评分比例*100/20+同行评分*同行评分比例+其他评分</p>
+        </div>
+        <div data-options="region:'center',title:'',split:false,border:false" style="padding:0px;background:#eee;">
+            <div id="ScoreList"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+var youxiu=0;         //优秀
+var lianghao=0;       //良好
+var zhongdeng=0;      //中等
+var jige=0;           //及格
+var bujige=0;         //不及格
+var ScoreTotal=0;       //获取到总条数
+//window弹窗之检索总评并打印
+var wd2=$('#wd2').window({
+	fit:true,minimizable:false,
+	maximizable:false,collapsible:false,
+	draggable:false,resizable:false,closable:false,
+	modal:false,closed:true});
+	
+$(function(){
+	var obj2=null;   // todo:存放页面信息的对象 
+    
+ 	// window弹窗之输入评分
+    var wd=$('#wd').window({
+		fit:true,minimizable:false,
+		maximizable:false,collapsible:false,
+		draggable:false,resizable:false,closable:false,
+		modal:false,closed:true});
+   
+    //点击同步名单
+    $('#btninit').bind('click',function(){
+        if($('#init [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');return;
+        }
+        if($('#init [name=TEACHERNO]').val()==""){
+            $.messager.alert('提示','请输入教师号!');return;
+        }
+        ct={
+            YEAR:$('#init [name=YEAR]').val(),
+            TERM:$('#init [name=TEACHERNO]').val()
+        };
+        $.ajax({
+            url:'__URL__/entry/hasJson/1',
+            type:'POST',
+            data:ct,
+            success: function(C){
+                $.messager.alert('提示','数据已成功完成更新！');
+            }
+        });
+    });
+
+    //点击输入评分
+    $('#btnadd').bind('click',function(){
+        if($('#init [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');
+            return;
+        }
+        if($("#SCHOOL").find("option:selected").val()=="%"){
+            $.messager.alert('提示','请选择学院!');
+            return;
+        }
+        var YEAR=$('#init [name=YEAR]').val();
+        var SCHOOLNO=$("#SCHOOL").find("option:selected").val();
+        var SCHOOLNAME=$("#SCHOOL").find("option:selected").text();
+        
+        var pd=false;
+        var indexrow=undefined;
+        var dat=$('#slinfo').datagrid({
+            url:'__URL__/schoollist',
+            fit:true,
+            striped:true,
+            fitColumns:true,
+            queryParams:{YEAR:YEAR,SCHOOLNO:SCHOOLNO,SCHOOLNAME:SCHOOLNAME},
+            columns:[[{checkbox:true},
+                      {field:'TEACHERNO',title:'教师号',align:"center",width:60,sortable:true},
+                      {field:'TEACHERNAME',title:'教师姓名',align:"center",width:60},
+                      {field:'YEAR',title:'年份',align:"center",width:60},
+                      {field:'SCHHOLNAME',title:'所在学院',align:"center",width:80},
+                      {field:'TSCORE',title:'同行评分',align:"center",width:60,editor:{
+                    	  type:'validatebox',options:{required:true} }},
+                      {field:'XSCORE',title:'学院评分',align:"center",width:60,editor:{
+                    	  type:'validatebox',options:{required:true} }},
+                      {field:'ADDSCORE',title:'其他评分',align:"center",width:60,editor:{
+                    	  type:'validatebox',options:{required:true} }},
+                      {field:'REM',title:'备注',align:"center",width:100,editor:{type:'validatebox'}} ]],
+            sortName:'TEACHERNO',                      //排序用的
+            sortOrder:'asc',
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+            toolbar:[{
+                text:'编辑',
+                iconCls:'icon-edit',
+                handler:function(){
+                    var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+                    dat.datagrid('removeEditor','TEACHERNO');
+                    if(rowList.length>1){
+                        $.messager.alert("提示",'请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+                    }else if(rowList.length<1){
+                        $.messager.alert("提示",'请选择要编辑的数据');                         //用户没选择行
+                    }else{
+                        if(indexrow!=undefined){
+                            dat.datagrid('endEdit',indexrow);
+                        }
+
+                        var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                        var index3 = dat.datagrid('getRowIndex', row3);
+                        dat.datagrid('beginEdit', index3);
+                        indexrow=index3;
+                    }
+                }
+            },'-',{
+                text:'取消编辑',
+                iconCls:'icon-back',
+                handler:function(){
+                    pd=false;
+                    dat.datagrid('rejectChanges');
+                    indexrow=undefined;
+                }
+            },'-',{
+                text:'保存',
+                iconCls:'icon-save',
+                handler:function(){
+                    dat.datagrid('endEdit',indexrow);
+                }
+            },'-',{
+                text:'返回',
+                iconCls:'icon-back',
+                handler:function(){
+                    wd.window({closed:true});
+                }
+            }
+            ],
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#slinfo');
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+                //alert(indexrow);
+                pd=false;              //保存请求的URL地址的
+                var inserted=dat.datagrid('getChanges','inserted');
+                var updated=dat.datagrid('getChanges','updated');
+                if(updated.length){
+                	var reg=/^(([1-9]\d*)|\d)*(\.\d+)?$/;
+                    if(!reg.test(dataRow.TSCORE) ||!reg.test(dataRow.XSCORE)||!reg.test(dataRow.ADDSCORE)){
+                    	$.messager.alert('提示','输入评估分格式不符合要求，操作失败！');
+                    	dat.datagrid('beginEdit', index);
+                    	return;
+                    }
+                    $.ajax({
+                        url:"__URL__/updateentry/hasJson/1",
+                        type:'POST',
+                        data:dataRow,
+                        success:function(content){
+                            //alert(content);
+                            if(content=='a1'){
+                                $.messager.alert('提示','同行评估分不符合要求!');
+                            }else if(content=='a2'){
+                                $.messager.alert('提示','学院评估分不符合要求!');
+                            }else if(content=='a3'){
+                                $.messager.alert('提示','其他得分不符合要求!');
+                            }else if(content=='1'){
+                            	indexrow=undefined;
+                                $.messager.alert('提示','操作成功！','?',function(){
+                                	dat.datagrid('reload');
+                                });
+                            }else{
+                            	$.messager.alert('提示','操作失败!');
+                            }
+                        }
+
+                    });
+                }
+            }
+        });
+
+        $('#admin_edit').bind('click',function(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            dat.datagrid('removeEditor','TEACHERNO');
+            if(rowList.length>1){
+                $.messager.alert("提示",'请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+            }else if(rowList.length<1){
+                $.messager.alert("提示",'请选择要编辑的数据');                         //用户没选择行
+            }else{
+                if(indexrow!=undefined){
+                    dat.datagrid('endEdit',indexrow);
+                }
+
+                var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+                var index3 = dat.datagrid('getRowIndex', row3);
+                dat.datagrid('beginEdit', index3);
+                indexrow=index3;
+            }
+        })
+        wd.window({
+            title:YEAR+'学年'+SCHOOLNAME+'校院评估分输入表',
+            closed:false
+        });
+    })
+//todo:=============================================================
+    var ScoreList=$('#ScoreList').datagrid({
+    	fit:true,
+        striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:'jsh',title:'教师号',width:80,align:"center"},
+                  {field:'xm',title:'姓名',width:80,align:"center"},
+                  {field:'xspf',title:'学生评分',width:80,align:"center"},
+                  {field:'thpf',title:'同行评分',width:80,align:"center"},
+                  {field:'xypf',title:'学院评分',width:80,align:"center"},
+                  {field:'qtpf',title:'其他评分',width:80,align:"center"},
+                  {field:'total',title:'总评',width:80,align:"center",formatter:function(value,row,index){
+                      //todo:计算优秀率
+                      var SScore=value;
+                      if(SScore>90){
+                          youxiu++;
+                      }else if(SScore>=80&&SScore<90){
+                          lianghao++;
+                      }else if(SScore>=70&&SScore<80){
+                          zhongdeng++;
+                      }else if(SScore>=60&&SScore<70){
+                          jige++;
+                      }else{
+                          bujige++;
+                      }
+                      return value;
+
+                  }},
+                  {field:'bz',title:'备注',width:200} ]],
+        pagination:true,
+        pageList:[15,25,35,45,55],
+        pageSize:15
+    });
+//todo;=============================end=======================================
+
+    //点击检索总评并打印
+    $('#btnprint').bind('click',function(){
+    	
+        if($('#init [name=YEAR]').val()==""){
+            return  $.messager.alert('提示','请输入学年!');
+        }
+        if($("#init").find("option:selected").text()=="所有学院"){
+            return  $.messager.alert('提示','请选择学院输入!');
+        }
+        ScoreList.datagrid('load',{});
+        $('[name=xuesheng]').val('');
+        $('[name=xueyuan]').val('');
+        ScoreList.datagrid('options').onLoadSuccess=function(data){
+            var S=data.total;          //todo:获取到总条数
+            //todo:在这边处理 优秀 良好 及格 不及格
+            $('#YOU').html(isNaN(Math.round(youxiu*100/S))?' ':Math.round(youxiu*100/S))      //优秀率
+            $('#LIANG').html(isNaN(Math.round(lianghao*100/S))?' ':Math.round(lianghao*100/S))      //良好率
+            $('#ZHONG').html(isNaN(Math.round(zhongdeng*100/S))?' ':Math.round(zhongdeng*100/S))     //中等
+            $('#JI').html(isNaN(Math.round(jige*100/S))?' ':Math.round(jige*100/S))          //及格
+            $('#BUJI').html(isNaN(Math.round(bujige*100/S))?' ':Math.round(bujige*100/S))        //不及格
+        }
+        ajiakesi('__URL__/selectList',{schoolno:$('#SCHOOL').val()},function(c){
+            $('#Scoretitle').html($('[name=YEAR]').val()+c+'教学质量评估成绩表');
+        });
+        wd2.window({closed:false});
+    });
+
+    //todo:评分change
+    function Scorechange(){
+        var xuesheng=$('[name=xuesheng]').val()
+        var xueyuan=$('[name=xueyuan]').val()
+        if(xuesheng!=""&&xueyuan!=""){
+            if(!(isInt(xuesheng)&&isInt(xueyuan))){
+                return $.messager.alert('提示','百分比请填写整型')
+            }else if(xuesheng<0||xueyuan<0){
+                return $.messager.alert('提示','百分比不能小于0')
+            }else if(parseInt(xuesheng)+parseInt(xueyuan)>100){
+                return $.messager.alert('提示','百分比之和超过100%')
+            }else{
+                $('#TSCORE').html(100-(parseInt(xuesheng)+parseInt(xueyuan)));
+                zero();
+                ScoreList.datagrid('options').url="__URL__/selectList/hasJson/1";
+                ScoreList.datagrid('load',{
+                	'xspfb':xuesheng,
+                	'xypfb':xueyuan,
+                	'qtpfb':$('#TSCORE').html(),
+                	'count':'Three_countScoreList.SQL',
+                	'select':'Three_selectScoreList.SQL',
+                	'arr':{':TEACHERNO':"%"+$('[name=TEACHERNO]').val()+"%",
+                		':SCHOOL':$('#SCHOOL').val(),
+                		':YEAR':$('[name=YEAR]').val()}
+                });
+            }
+        }
+    }
+    $('[name=xuesheng]').bind('change',Scorechange);
+    $('[name=xueyuan]').bind('change',Scorechange);
+    function isInt(str){
+        var reg = /^(-|\+)?\d+$/ ;
+        return reg.test(str);
+    }
+});
+//返回上一页
+function back(){
+	wd2.window({closed:true});
+}
+
+//优秀率重置
+function zero(){
+    youxiu=0;         //优秀
+    lianghao=0;       //良好
+    zhongdeng=0;      //中等
+    jige=0;           //及格
+    bujige=0;         //不及格
+}
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</html>

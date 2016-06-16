@@ -1,0 +1,242 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+			<div>
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="2">
+			   <label>学号：</label><input name="STUDENTNO" size="18" value='%' >
+			   <label>姓名：</label><input name="NAME" size="10" value='%' >
+			   <label>课号：</label><input name="COURSENO" size="18" value='%' >
+                <label>周次：</label><input name="WEEK" size="4" value='%' >
+			</div>
+            <div style="margin-top: 2px">
+                <label>学生所在学院：</label>
+                <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+                    <option value="%">全部</option>
+                    <volist name="school" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+                <a href="javascript:void(0)" id="searcher">检索</a>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+            </div>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+eval('one=\'{$tjson}\'')
+eval('two=\'{$rjson}\'')
+eval('three=\'{$wjson}\'')
+$(function(){
+    var indexrow=undefined;
+    var dat=$('#content').datagrid({
+        fitColumns:true,
+        fit:true,
+        striped:true,
+        columns:[[{field:'RECNO',checkbox:true},
+                  {field:'YEAR',title:'学年',width:35,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },{field:'TERM',title:'学期',width:35,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },{field:'WEEK',title:'周次',width:35,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },{field:'DATETIME',title:'上课时间',width:100,sortable:true,align:'center',editor:{
+                  	type:'datebox',options:{required:true}}
+                  },{field:'TIMENO',title:'节次',width:120,sortable:true,align:'center',editor:{
+                  	type:'combobox',options:{data:eval(one)}}
+                  },{field:'COURSENO',title:'课号',width:90,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },
+                  {field:'COURSENAME',title:'课名',sortable:true,align:'center'},
+                  {field:'SCHOOLNAME',title:'开课学院',sortable:true,align:'center'},
+                  {field:'STUDENTNO',title:'学号',width:80,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },
+                  {field:'STUDENTNAME',title:'姓名',sortable:true,align:'center'},
+                  {field:'CLASSNO',title:'班号',width:60,sortable:true,align:'center'},
+                  {field:'CLASSNAME',title:'班名',sortable:true},
+                  {field:'TIMENUM',title:'学时',width:40,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}}
+                  },{field:'REASON',title:'上课情况',sortable:true,align:'center',editor:{
+                  	type:'combobox',options:{data:eval(two)}}
+                  },
+                  {field:'BREAKTHERULE',title:'违纪情况',sortable:true,align:'center',editor:{
+                  	type:'combobox',options:{data:eval(three)}}
+                  }]],
+		sortName:'RECNO',                      //排序用的
+		sortOrder:'desc',
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#tdemo',
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#content');
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        onAfterEdit:function(index,dataRow,changes){
+        	//保存请求的URL地址的
+            var Purl='';
+            var updated=dat.datagrid('getChanges','updated');
+            if(updated.length){
+                Purl='__URL__/update/';
+                $.ajax({
+                    url:Purl,
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                    	var index = dat.datagrid('getRowIndex', dat.datagrid('getSelected'));
+                    	if(content==-1){
+                    		$.messager.alert('提示','课号不存在','?');
+                    		dat.datagrid('beginEdit', index);
+                    		indexrow=index;
+                    	}else if(content==-2){
+                    		$.messager.alert('提示','学号不存在','?');
+                    		dat.datagrid('beginEdit', index);
+                    		indexrow=index;
+                    	}else if(content){
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            $.messager.alert('提示','操作成功！','?');
+                        }else{
+                        	$.messager.alert('提示','操作失败！','?');
+                        }
+                    }
+                });
+            }
+        }
+    });
+    
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	//验证学年学期是否输入
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	if(year=="" || term==""){
+    		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+    		return;
+    	}
+    	
+    	dat.datagrid("options").url = "__URL__/query/hasJson/1";
+    	dat.datagrid('load',{
+    		YEAR:year,TERM:term,
+    		STUDENTNO:$.trim($("[name='STUDENTNO']").val()),
+    		NAME:$.trim($("[name='NAME']").val()),
+    		COURSENO:$.trim($("[name='COURSENO']").val()),
+    		WEEK:$.trim($("[name='WEEK']").val()),
+    		SCHOOL:$.trim($("[name='SCHOOL']").val())
+        })
+    });
+
+
+
+    function ddel(){
+        var row1 = dat.datagrid('getSelections');
+        if (row1.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr=[];                      //存储删除信息的数组
+                    for(var i=0;i<row1.length;i++){
+                        infoarr[i]=row1[i].RECNO;
+                    }
+                    $.ajax({
+                        url:'__URL__/del/hasJson/1',
+                        data:{'in':infoarr},
+                        type:'POST',
+                        success:function(del){
+                            if(del){
+                                $.messager.alert('提示','删除成功！','?');
+                                dat.datagrid('reload');
+                            }else{
+                                $.messager.alert('提示','删除失败,没权限操作','?');
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');//获取所有被选中的
+        dat.datagrid('removeEditor','RECNO');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行编辑,不能选多条','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要编辑的数据','?');//用户没选择行
+        }else{
+            if(indexrow!=undefined){
+                dat.datagrid('endEdit',indexrow);
+            }
+            var row2 = dat.datagrid('getSelected');//获得被选中的索引
+            var index2 = dat.datagrid('getRowIndex', row2);
+            dat.datagrid('beginEdit', index2);
+            indexrow=index2;
+        }
+    }
+
+    $('#e_edit').bind('click',eedit)
+    $('#admin_edit').bind('click',eedit);
+
+    $('#e_back').bind('click',function(){
+        dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    })
+
+    $('#e_save').bind('click',function(){
+        dat.datagrid('endEdit',indexrow);
+        indexrow=undefined;
+    })
+
+})
+
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item.field);e.editor = item.editor;
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param.field);e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item);e.editor = {};
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param); e.editor = {};
+        }
+    }
+});
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</html>

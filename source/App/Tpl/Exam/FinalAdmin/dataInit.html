@@ -1,0 +1,56 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var wd=$('#wd').window(new wind(500,300,false,false,false,false,false));        //todo:默认的页面
+        $('#bt').bind('click',function(){
+            $.messager.confirm('提示','您真的要初始化排考数据吗',function(c){
+                if(c){
+                    if($('[name=year]').val()==""||$('[name=term]').val()==""){
+                        return $.messager.alert('提示','请输入学年、学期不能为空')
+                    }
+                    $.post('__URL__/dataInit/hasJson/1',{'YEAR':$('[name=year]').val(),'TERM':$('[name=term]').val()},function(c){
+                        if(c == 'success'){
+                            $.messager.alert('提示','操作成功');
+                        }else{
+                            $.messager.alert('提示','错误，返回'+c);
+                        }
+                    })
+                }
+            });
+        });
+    });
+</script>
+<style>
+    td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<body style="background-color: #fff">
+<div id="wd" title="初始化" data-options="draggable:false,resizable:false">
+    <table border="0"  width="400" style="margin-top: 30px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学年：</b></td>
+            <td width="159" height="25"><input name="year" type="text" size='4' value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学期：</b></td>
+            <td width="159" height="25"><input type="text" name="term" size="1" value=""></td>
+        </tr>
+        <tr>
+            <td style="border:0px;" height="25" align="center" colspan="2">
+                <button id="bt">提交</button> </td>
+        </tr>
+    </table>
+    <br>
+    &nbsp&nbsp<b>提示：这将清空考试课程、学生；并且重新生成考试课程、考试学生</b>
+</div>
+</body>
+</html>

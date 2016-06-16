@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link id='themes_css' rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/css/css.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/datagrid.js"></script>
+    <script type="text/javascript">
+        var current_datagrid=null;
+        var current_datagrid_obj=null;
+        var workload_teacher_obj=new Object();
+        workload_teacher_obj.editIndex=undefined; //用于存储填写时的index
+        var workload_teacher_cmenu_obj=new Object();
+        workload_teacher_cmenu_obj.cmenu=""; //标题行右键菜单
+
+        var userSchool=$('#school', parent.document).val();
+
+        $(function(){
+            var tt=$('#workload_teacher_dg');
+            tt.datagrid({
+                idField:'id',
+                striped:'true',
+                pagination:'true',
+                rownumbers:true,
+                singleSelect:true,
+                pageSize:20,
+                url:'/Workload/Teacher/query?hasJson=true',
+                toolbar:'#workload_teacher_toolbar',
+                queryParams: {
+                    year:$('#year', parent.document).val()
+                },
+                columns:[[
+                    {field:'newenter',title:'新教师*',width:50,align:'center',rowspan:2,editor:{type:'checkbox',options:{on:1,off:0}},
+                        formatter:function(val,rec){
+                            if(val==1)
+                                return '√';
+                        }},
+                    {field:'disable',title:'不计入*',width:50,align:'center',rowspan:2,editor:{type:'checkbox',options:{on:1,off:0}},
+                        formatter:function(val,rec){
+                            if(val==1)
+                                return '√';
+                        }},
+                    {field:'teacherno',title:'教师号',width:50,align:'center',rowspan:2},
+                    {field:'teachername',title:'姓名',width:50,align:'center',rowspan:2},
+                    {field:'schoolname',title:'所在学院',width:100,align:'center',rowspan:2},
+                    {field:'jobname',title:'岗位',width:70,align:'center',rowspan:2},
+                    {field:'typename',title:'类型',width:70,align:'center',rowspan:2},
+                    {field:'positionname',title:'职称',width:70,align:'center',rowspan:2},
+                    {title:'请假/下企业/兼职*',align:'center',colspan:2},
+                    {title:'工作量',align:'center',colspan:3},
+                    {title:'其中',align:'center',colspan:2},
+                    {field:'personalstand',title:'考核标准',width:60,align:'center',rowspan:2},
+                    {field:'exceedadd',title:'上限增量*',width:60,align:'center',rowspan:2},
+                    {field:'personalexceedstand',title:'上限标准',width:80,align:'center',rowspan:2},
+                    {field:'rem',title:'备注*',width:150,align:'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]'}}}
+
+                ],[
+                    {field:'leaveday',title:'请假/下企业(天)',width:90,align:'center',rowspan:2,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'partterm',title:'兼职学期数',width:80,align:'center',rowspan:2,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'workone',title:'第一学期',width:60,align:'center'},
+                    {field:'worktwo',title:'第二学期',width:80,align:'center'},
+                    {field:'worktotal',title:'总计',width:60,align:'center'},
+                    {field:'workup',title:'专升本',width:60,align:'center'},
+                    {field:'workpratice',title:'实践指导',width:60,align:'center'}
+                ]],
+                //标题行右键菜单
+                onHeaderContextMenu: function(e, field){
+                    e.preventDefault();
+                    if (!workload_teacher_cmenu_obj.cmenu)//没有的话创建一个
+                        $('#workload_teacher_dg').datagrid('createColumnMenu',workload_teacher_cmenu_obj);
+                    workload_teacher_cmenu_obj.cmenu.menu('show', {
+                        left:e.pageX,
+                        top:e.pageY
+                    });
+                },
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_teacher_obj.index=index; //初始化参数
+                    workload_teacher_obj.field=field;
+                    $('#workload_teacher_dg').datagrid('startEditing',workload_teacher_obj);
+                    current_datagrid=$('#workload_teacher_dg');
+                    current_datagrid_obj=workload_teacher_obj;
+                },
+                //数据行上右键菜单
+                onRowContextMenu:function(e,rowindex,row){
+                    var tt=$('#workload_teacher_dg');
+                    if(!endEditing(tt,workload_teacher_obj)) return;//结束编辑,如果没有验证通过就退出
+                    e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                    tt.datagrid('selectRow',rowindex);
+                    $('#workload_teacher_menu').menu('show',{
+                        left: e.pageX,
+                        top: e.pageY
+                    });
+                }
+            });
+
+            //取消更改
+            $("#workload_teacher_cancel").click(function(){
+                var tt= $('#workload_teacher_dg');
+                endEditing(tt,workload_teacher_obj);
+                tt.datagrid('rejectChanges');
+            });
+            //绑定点击保存按钮事件
+            $("#workload_teacher_save").click(function(){
+                var tt=$('#workload_teacher_dg');
+                if(!endEditing(tt,workload_teacher_obj)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getRows');
+                rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                for(var i=0;i<rows.length;i++) {
+                    if(rows[i]['school']!=userSchool&&userSchool!="A1"){
+                        $.messager.alert("无法修改","非教务处人员无法修改非本学院的教师信息。"+rows[i]['teachername'],'error');
+                        return;
+                    }
+                }
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                if(count<=0) //如果没有任何更新，就退出
+                    return;
+
+                $('#w').window('open');
+                $.post('/Workload/Teacher/update?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+
+            //搜索按钮
+            $("#workload_teacher_search").click(function(){
+                var tt=$('#workload_teacher_dg');
+                tt.datagrid('loadData',{total:0,rows:[]});
+                tt.datagrid('load', {
+                    year:$('#year', parent.document).val(),
+                    teacherno:$('#workload_teacher_teacherno').val(),
+                    teachername:$('#workload_teacher_teachername').val(),
+                    school:$('#workload_teacher_school').combobox('getValue'),
+                    newenter:$('#workload_teacher_newenter').combobox('getValue'),
+                    type:$('#workload_teacher_type').combobox('getValue'),
+                    job:$('#workload_teacher_job').combobox('getValue'),
+                    leave:$('#workload_teacher_leave').combobox('getValue'),
+                    partterm:$('#workload_teacher_partterm').combobox('getValue')
+                });
+            });
+
+            $("#workload_teacher_init").click(function(){
+                if(userSchool!="A1"){
+                    $.messager.alert("错误","亲，非教务处管理人员不能同步噢！^_^",'error');
+                }
+                else{
+                    $.messager.confirm('确认', "真的要同步么？<br />本操作将添加教师并教师所在学院、岗位类型、教师类型、职称等信息。", function(r){
+                        if (r){
+                            $('#w').window('open');
+                            $.post('/Workload/Teacher/init?hasJson=true',{year:$('#year', parent.document).val(),term:$('#term', parent.document).val()},function(result){
+                                if (result.status==1){
+                                    $.messager.alert("成功",result.info,'info');
+
+                                } else {
+                                    $.messager.alert(result.status,result.info,'error');
+                                }
+                            },'json').always(function() {
+                                $('#w').window('close');
+                            });
+                        }
+                    });
+                }
+            });
+
+            $("#workload_teacher_work2").click(function(){
+                if(userSchool!="A1"){
+                    $.messager.alert("错误","亲，非教务处管理人员不能同步噢！^_^",'error');
+                }
+                else{
+                    $.messager.confirm('确认', "真的要同步么？<br />本操作将更新第二学期工作量。<br/>注意：专升本工作量仅提取备注中带有“专升本”的课程", function(r){
+                        if (r){
+                            $('#w').window('open');
+                            $.post('/Workload/Teacher/initwork2?hasJson=true',{year:$('#year', parent.document).val()},function(result){
+                                if (result.status==1){
+                                    $.messager.alert("成功",result.info,'info');
+
+                                } else {
+                                    $.messager.alert(result.status,result.info,'error');
+                                }
+                            },'json').always(function() {
+                                $('#w').window('close');
+                            });
+                        }
+                    });
+                }
+            });
+
+            $("#workload_teacher_work1").click(function(){
+                if(userSchool!="A1"){
+                    $.messager.alert("错误","亲，非教务处管理人员不能同步噢！^_^",'error');
+                }
+                else{
+                    $.messager.confirm('确认', "真的要同步么？<br />本操作将更新第二学期工作量。<br/>注意：专升本工作量仅提取备注中带有“专升本”的课程", function(r){
+                        if (r){
+                            $('#w').window('open');
+                            $.post('/Workload/Teacher/initwork2?hasJson=true',{year:$('#year', parent.document).val()},function(result){
+                                if (result.status==1){
+                                    $.messager.alert("成功",result.info,'info');
+
+                                } else {
+                                    $.messager.alert(result.status,result.info,'error');
+                                }
+                            },'json').always(function() {
+                                $('#w').window('close');
+                            });
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+    <title>工作量统计</title>
+</head>
+<body>
+<div id="w" class="easyui-window" title="请稍候..."
+     data-options="modal:true,closed:true,closable:false,minimizable:false,maximizable:false,iconCls:'icon-shield'"
+     style="width:250px;height:80px;padding:10px;">数据更新中，请稍候！
+</div>
+<div class="container">
+    <div id="workload_teacher_toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-diaocha',plain:'true'"  id="workload_teacher_init">同步基本信息</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-diaocha',plain:'true'"  id="workload_teacher_work1">同步第一学期</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-diaocha',plain:'true'"  id="workload_teacher_work2">同步第二学期</a> |
+        <label for="workload_teacher_teacherno">教师号：</label><input id="workload_teacher_teacherno" class="easyui-validatebox" size="4" value="%"/>
+        <label for="workload_teacher_teachername">姓名：</label><input id="workload_teacher_teachername" class="easyui-validatebox" size="4" value="%"/>
+        <label for="workload_teacher_school">学院：</label>
+        <input id="workload_teacher_school" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/school',valueField:'school',textField:'name',panelWidth:150">
+        <label for="workload_teacher_type">类型：</label>
+        <input id="workload_teacher_type" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/teachertype',valueField:'name',textField:'value',panelWidth:100,panelHeight:'auto'">
+        <label for="workload_teacher_type">岗位：</label>
+        <input id="workload_teacher_job" class="easyui-combobox" size='10'
+               data-options="editable:false,url:'/Workload/Option/jobtype',valueField:'job',textField:'name',panelWidth:100,panelHeight:'auto'">
+        <label for="workload_teacher_newenter">新教师：</label>
+        <select class="easyui-combobox" id="workload_teacher_newenter"data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">是</option>
+            <option value="0">否</option>
+        </select>
+        <label for="workload_teacher_leave">请假/下企业：</label>
+        <select class="easyui-combobox" id="workload_teacher_leave"data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">有</option>
+        </select>
+        <label for="workload_teacher_partterm">兼职秘书：</label>
+        <select class="easyui-combobox" id="workload_teacher_partterm"data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">是</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:'true'"  id="workload_teacher_search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_teacher_save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_teacher_cancel">取消</a>
+    </div>
+    <table id="workload_teacher_dg">
+    </table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>可以按 Tab键进入下一个编辑单元格，或者按 Enter键进入下一行。</li>
+            <li>课时费标准中“超课/管理”：指校内专任教师的超课时当在上限内的课时标准，比如360-480之间的，对于校外兼课、校外兼职来说是“管理费”</li>
+        </ol>
+    </div>
+</div>
+</body>

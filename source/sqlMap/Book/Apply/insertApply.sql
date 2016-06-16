@@ -1,0 +1,2 @@
+insert into bookapply(book_id,[year],term,courseno,[group],approaches,remarks,attendents,stu_quantity,tea_quantity,oderno,status,createdate,school,classno,map,tea_issue_nym) 
+values(:book_id,:year,:term,:courseno,:group,:approaches,:remarks,:attendents,:stu_quantity,:tea_quantity,:oderno,:status,getdate(),:school,:classno,:map,:tea_issue_nym)

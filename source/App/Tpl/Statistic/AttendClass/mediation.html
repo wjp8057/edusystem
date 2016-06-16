@@ -1,0 +1,88 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div class="query" id="tdemo">
+		<form id="queryForm" action="" target="download" method="post">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <label>课号：</label><input name="COURSENO" size="14" maxlength="9" value="%">
+			   <label>课程名称：</label><input name="COURSENAME" size="16" value="%">
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#content').datagrid({
+		fit:true,
+        striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"SCHOOLNAME",title:"开课学院",width:30,align:"center"},
+                  {field:"COURSENO",title:"课号",width:30,align:"center"},
+                  {field:"COURSENAME",title:"课程名称",width:30,align:"center"},
+                  {field:"HOURS",title:"总课时",align:"center",width:30,formatter:function(value,row,index){
+                	  var sum=TransformWeeks(row.WEEKS);
+                	  return parseFloat(value*sum);
+  		          }},
+                  {field:"VALUE",title:"课程类型",width:30,align:"center"}
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+        toolbar:'#tdemo'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='YEAR']").val());
+     	var term=$.trim($("[name='TERM']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/mediation/hasJson/1";
+     	datagrid.datagrid('load',{
+     		YEAR:$.trim($("[name='YEAR']").val()),
+     		TERM:$.trim($("[name='TERM']").val()),
+     		SCHOOL:$.trim($("[name='SCHOOL']").val()),
+     		COURSENO:$.trim($("[name='COURSENO']").val()),
+        	COURSENAME:$.trim($("[name='COURSENAME']").val())
+     	});
+     });
+});
+//计算周次
+function TransformWeeks(Weeks){
+    var WeekString=0;
+    temp=1;
+    for(var j=0;j<18;j++){
+        if((temp&Weeks)!=0){
+        	 WeekString++;
+        }
+        temp=temp<<1;
+    }
+    return WeekString;
+}
+</script>
+</body>
+</html>

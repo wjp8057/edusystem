@@ -1,0 +1,144 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%" fit="true"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true">
+        <thead>
+        <tr>
+            <th data-options="field:'ID',checkbox:true"></th>
+            <th data-options="field:'YEAR',align:'center',width:8">学年</th>
+            <th data-options="field:'TERM',align:'center',width:8">学期</th>
+            <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+            <th data-options="field:'NAME',align:'center',width:10">姓名</th>
+            <th data-options="field:'POSITION',align:'center',width:10">职位</th>
+            <th data-options="field:'TYPE',align:'center',width:10">类别</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:10">所在学院</th>
+            <th data-options="field:'WORKLOAD',align:'center',width:10">要求工作量</th>
+            <th data-options="field:'ACTUALWORKLOAD',align:'center',width:10,formatter:getWorkload">实际工作量</th></tr>
+        </thead>
+    </table>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <input type="hidden" name="YEAR"><input type="hidden" name="TERM">
+        <label>教师号：</label><input name="TEACHERNO" value='%'  size="14">
+        <label>姓名：</label><input name="NAME" value='%'  size="10">
+        <label>学院：</label>
+        <select class="easyui-combobox" id="school" name="SCHOOL" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <label>分配状态：</label>
+        <select class="easyui-combobox" name="STATUS" data-options="editable:false">
+            <option value="%">全部</option>
+            <option value="0">未分配</option>
+            <option value="1" selected>已分配</option>
+            <option value="2">未确认</option>
+            <option value="3">已确认</option>
+        </select>
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检 索</a><br/>
+        <a href="javascript:void(0)" id="confirmBut" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">工作量确定</a>
+        <a href="javascript:void(0)" id="allocBut" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">重复工作量计算</a>
+        <a href="javascript:void(0)" id="synchBut" class="easyui-linkbutton" data-options="iconCls:'icon-lookfile',plain:true">实际汇总</a>
+    </form>
+</div>
+<script type="text/javascript">
+    var list=null;
+    var datagrid=null;
+    $(function(){
+        var userSchool=parent.$("#userSchool").val();
+        datagrid = $('#datagrid').datagrid({toolbar:'#toobar'});
+        //指定默认学院
+        if(userSchool!="A1") $("#school").combobox('setValue', userSchool);
+        // 条件查询
+        $("#searcher").click(function(){
+            datagrid.datagrid("options").url = "__URL__/confirm/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+
+        //工作量确定
+        $("#confirmBut").click(function(){
+            list=datagrid.datagrid('getSelections');
+            if(list.length > 0){
+                var infoarr=[];var num=0;
+                for(var i= 0;i<list.length;i++){
+                    if(list[i].SCHOOL!=userSchool && userSchool!="A1") continue;
+                    if(list[i].ACTUALWORKLOAD!=list[i].ALLOC && parseFloat(list[i].ALLOC) > 0){
+                        infoarr[num]={"ID":list[i].ID,"WORKLOAD":list[i].ALLOC};
+                        num++;
+                    }
+                }
+                if(num==0){
+                    msgShow("系统提示：","请选择已分配但未确定的数据进行工作量确认操作！","info");
+                    return;
+                }else if(num < list.length){
+                    $.messager.confirm("提示","您选择的数据包含工作量未正确分配或已确定的信息，在进行工作量确定时将过滤这些数据，是否继续？",function(b){
+                        if(b) confirmWork(infoarr);
+                    });
+                }else confirmWork(infoarr);
+            }else{
+                msgShow("系统提示：","请选择要确定的数据","error");
+            }
+        });
+        function confirmWork(infoarr){
+            $.ajax({
+                url:'__URL__/confirmWork/',
+                data:{"list":infoarr},
+                type:'POST',
+                success:function(data){
+                    if(data){
+                        $.messager.alert("提示","工作量确定成功！","info",function(){
+                            datagrid.datagrid('reload');
+                        });
+                    }else{
+                        msgShow("系统提示：","工作量确定失败，请检查要确定的数据是否已经完成分配！","error");
+                    }
+                }
+            });
+        }
+
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            "YEAR":getYear(),"TERM":getTerm(),
+            "TEACHERNO":$.trim($("#toobar [name='TEACHERNO']").val()),
+            "NAME":$.trim($("#toobar [name='NAME']").val()),
+            "SCHOOL":$.trim($("#toobar [name='SCHOOL']").val()),
+            "STATUS":$.trim($("#toobar [name='STATUS']").val())
+        };
+        return data;
+    }
+    function getYear(){
+        return parent.$("#YEAR").val();
+    }
+    function getTerm(){
+        return parent.$("#TERM").val();
+    }
+    //生成加载窗口
+    function Load(){
+        $("<div class=\"datagrid-mask\"></div>").css({ display: "block", width: "100%", height: $(window).height() }).appendTo("body");
+        $("<div class=\"datagrid-mask-msg\"></div>").html("正在运行，请稍候。。。").appendTo("body").css({ display: "block", left: ($(document.body).outerWidth(true) - 190) / 2, top: ($(window).height() - 45) / 2 });
+    }
+    //隐藏加载窗口
+    function dispalyLoad(){
+        $(".datagrid-mask").remove();
+        $(".datagrid-mask-msg").remove();
+    }
+    //返回值
+    function  getWorkload(val,row){
+        if(val==row.ALLOC && val!=null){
+            return val;
+        }if(row.ALLOC != null && parseFloat(row.ALLOC) > 0){
+            return "<font color=\"red\">"+row.ALLOC+"</font>";
+        }else{
+            return 0;
+        }
+    }
+</script>
+</body>
+</html>

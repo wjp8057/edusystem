@@ -1,0 +1,1 @@
+select batchfirm_id from Creditbatchfirm where project_id=:id and certficatetime=:certficatetime and Studentno=:studentno and Final_status<>0

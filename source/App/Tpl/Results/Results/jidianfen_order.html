@@ -1,0 +1,265 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+        //todo:应用英语A级
+        var wd=$('#wd').window(new wind(500,400,false,false,false,false,false))
+
+        // alert(wind);
+     //   var wd_two=$('#wd2').window(new wind(0,0,false,false,true,true,true))
+  //    var wd_three=$('#wd_one').window(new wind(0,0,false,false,false,true,true))//todo:第一个和第三个的窗口
+     //   var wd_four=$('#wd_two').window(new wind(0,0,false,false,true,true,true))  //todo:第二个的窗口
+
+        //todo:查询
+        $('#search').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    if($('[name=CLASSNO_ONE]').val()==''){}
+
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_seve_title_classname.SQL','bind':{
+                        ':CLASSNO':$('[name=CLASSNO_ONE]').val().trim()
+                    }},function(c){
+                        eval('var one='+c)
+
+                        $('#title').html($('[name=YEAR_ONE]').val()+'学年第'+$('[name=TERM_ONE]').val()+'学期 '+$('[name=classno_three]').val()+" "+one[0]['classname']+'的积点分排名表')
+
+                        $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_twelve_one_select.SQL','count':'Results/One_twelve_one_count.SQL'
+                    },'bind':{
+                        ':YEAR':$('[name=YEAR_ONE]').val().trim(),':TERM':$('[name=TERM_ONE]').val().trim(),':CLASSNO':$('[name=CLASSNO_ONE]').val().trim()}})
+
+                        $('[name=e_year]').val($('[name=YEAR_ONE]').val().trim());
+                        $('[name=e_term]').val($('[name=TERM_ONE]').val().trim());
+                        $('[name=e_classno]').val($('[name=CLASSNO_ONE]').val().trim())
+                        $('#excel').attr('action','__APP__/CourseManager/Excel/jidian_Excel_one')
+                        wd.window({closed:true})
+                        $('#wd2').panel({closed:false})
+                            $('#wd_one').panel({closed:false})
+                            $('#wd_two').panel({closed:true})
+
+
+                    })
+                })
+
+
+
+        //todo:查询2
+        $('#search2').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    if($('[name=CLASSNO_TWO]').val().trim()==''){
+                        return $.messager.alert('提示','请填写一个班号')
+                    }
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_seve_title_classname.SQL','bind':{
+                        ':CLASSNO':$('[name=CLASSNO_TWO]').val().trim()
+                    }},function(c){
+
+                        eval('var one='+c)
+
+                        if(typeof one[0]=='undefined'){
+                            return $.messager.alert('提示','班号有误')
+                        }
+                        $('#title').html($('[name=CLASSNO_TWO]').val().trim()+ one[0]['classname']+'的总成绩表')
+
+                        $('#yingyuB').datagrid('load',{'Sqlpath':{'select':'Results/One_twelve_two_select.SQL','count':'Results/One_twelve_two_count.SQL'
+                    },'bind':{
+                        ':CLASSNO':$('[name=CLASSNO_TWO]').val().trim()}})
+                        $('[name=e_classno]').val($('[name=CLASSNO_TWO]').val().trim())
+                        $('#excel').attr('action','__APP__/CourseManager/Excel/jidian_Excel_two')
+                        wd.window({closed:true})
+                        $('#wd2').panel({closed:false})
+                    $('#wd_two').panel({closed:false})
+                    $('#wd_one').panel({closed:true})
+
+                    })
+                })
+
+        //todo:查询3
+        $('#search3').linkbutton({
+            text:'查询',
+            iconCls:'icon-search'
+        }).bind('click',function(){
+                    //todo:找出班级名称
+                    ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'Results/One_seve_title_classname.SQL','bind':{
+                        ':CLASSNO':$('[name=classno_three]').val().trim()
+                    }},function(c){
+                        eval('var one='+c)
+
+                        $('#title').html($('[name=year_start]').val()+'学年第'+$('[name=term_start]').val()+'学期--'+$('[name=year_end]').val()+'学年第'+$('[name=term_end]').val()+'学期'+$('[name=classno_three]').val()+one[0]['classname']+'的积点分排名表')
+                        $('#yingyuA').datagrid('load',{'Sqlpath':{'select':'Results/One_twelve_three_select.SQL','count':'Results/One_twelve_three_count.SQL'
+                        },'bind':{
+                            ':YONE':$('[name=year_start]').val().trim(),':TONE':$('[name=term_start]').val().trim(),
+                            ':YTWO':$('[name=year_end]').val().trim(),':TTWO':$('[name=term_end]').val().trim(),':CLASSNO':$('[name=classno_three]').val().trim()}})
+
+                        $('[name=e_year]').val($('[name=year_start]').val().trim());
+                        $('[name=e_term]').val($('[name=term_start]').val().trim());
+                        $('[name=e_year_two]').val($('[name=year_end]').val().trim())
+                        $('[name=e_term_two]').val($('[name=term_end]').val().trim())
+                        $('[name=e_classno]').val($('[name=classno_three]').val().trim())
+                        $('#excel').attr('action','__APP__/CourseManager/Excel/jidian_Excel_three')
+                        wd.window({closed:true})
+                        $('#wd2').panel({closed:false})
+                        $('#wd_one').panel({closed:false})
+                        $('#wd_two').panel({closed:true})
+
+                    })
+
+
+                })
+
+
+    })
+</script>
+<body style="background-color: #ffffff">
+<div id="wd" title=" "  data-options="closable:false,collapsible:false" style="background: none repeat scroll 0% 0% ">
+
+    <fieldset>
+        <legend><b>积点分排名:</b></legend>
+        <table align="center" cellspacing="10" style="margin-top: 10px">
+            <tr>
+                <td>
+                    学年：<input type="text" id="YEAR" name="YEAR_ONE" size="4" >
+                </td>
+                <td>
+                    学期：<input type="text" id="TERM" name="TERM_ONE"  size="1" >
+                </td>
+                <td>
+                    设定班号：<input type="text" name="CLASSNO_ONE" value="" size="9">
+                </td>
+                <td  align="center">
+                    <a id="search">查询</a> &nbsp;
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+
+    <fieldset>
+        <table align="center" cellspacing="10" style="margin-top: 30px">
+            <tr>
+                <td>
+                    班级总积点分查寻，请输入班号：<input type="text" name="CLASSNO_TWO" value="" size="9">
+                </td>
+                <td  align="center">
+                    &nbsp&nbsp  <a id="search2">查询</a> &nbsp;
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+
+    <fieldset>
+        <table align="center" cellspacing="10" style="margin-top: 10px">
+
+            <tr>
+                <td>
+                    学年<input type="text" name="year_start" value="" size="4">学期:<input type="text" name="term_start" value="" size="1">
+                    及
+                    学年<input type="text" name="year_end" value="" size="4">学期:<input type="text" name="term_end" value="" size="1">&nbsp&nbsp&nbsp&nbsp<a id="search3">查询</a> &nbsp;
+                </td>
+            </tr>
+            <tr>
+                <td>
+
+                    设定班级:<input type="text" name="classno_three" value="" size="9">
+
+                    年积点分排名：(仅能算两学期积点分之和)
+
+
+
+                </td>
+            </tr>
+        </table>
+    </fieldset>
+
+
+
+</div>
+
+<div id="wd2" class="easyui-panel"
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:true,border:false" >
+    <div id="cc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" style="height:50px;">
+            <b><center><p style="font-size: 14px;color:blue">
+                <span id="title"></span>
+            </p></center></b>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+
+            <!--todo:第一个 和  第三个 的datagrid-->
+            <div id="wd_one" class="easyui-panel"
+                 data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" ><!--todo:英语能力系列-->
+                <table class="easyui-datagrid" id="yingyuA"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,pageList:[60,120],toolbar:[{
+                     text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                        $('#wd2').panel({
+                        closed:true})
+                        $('#wd').window({closed:false})
+                     }
+                   },{
+                        text:'导出Excel',
+                        iconCls:'icon-excel',
+                        handler:function(){
+
+                         $('#excel').submit()
+                        }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',width:100" align="center">序号</th>
+                        <th data-options="field:'xh',width:100" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'jdh',width:100,align:'right'" align="center">积点和</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div id="wd_two" class="easyui-panel"
+
+                 data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" ><!--todo:英语能力系列-->
+                <table class="easyui-datagrid" id="yingyuB"
+                       data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fitColumns:true,singleSelect:true,fit:true,pagination:true,toolbar:[{
+                     text:'返回上一页',
+                     iconCls:'icon-goleft',
+                     handler:function(){
+                        $('#wd2').panel({
+                        closed:true})
+                        $('#wd').window({closed:false})
+                     }
+                   },{
+                        text:'导出Excel',
+                        iconCls:'icon-excel',
+                        handler:function(){
+                            $('#excel').submit()
+                        }
+                   }]">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'row',width:100" align="center">序号</th>
+                        <th data-options="field:'xh',width:100" align="center">学号</th>
+                        <th data-options="field:'xm',width:100,align:'right'" align="center">姓名</th>
+                        <th data-options="field:'zjdf',width:100,align:'right'" align="center">总积点分</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<form id='excel' action="__APP__/CourseManager/Excel/jidian_Excel_three" method="POST">
+    <input type="hidden" name="e_year">
+    <input type="hidden" name="e_term">
+    <input type="hidden" name="e_year_two">
+    <input type="hidden" name="e_term_two">
+    <input type="hidden" name="e_classno">
+</form>
+
+</body>
+</html>

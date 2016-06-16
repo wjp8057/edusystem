@@ -1,0 +1,230 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        var approved=$('#approved');
+        approved.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',panelHeight:'auto'
+        });
+        approved.combobox('setValue','0');
+
+        $('#dg').datagrid({
+            title:'教室借用',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/Base/Room/reservelist',singleSelect:true,
+            queryParams: {year:$("#year").val(),term:$("#term").val(),approved:approved.combobox('getValue')},
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'approved',title:'批准*',width:40,editor:{type:'checkbox',options:{on:1,off:0}},align:'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }},
+                {field:'roomno',title:'教室号',width:75,align:'center',formatter:function(val,rec){
+                    return "<a class='blue_link'href='javascript:print(\""+rec.roomno+"\",true)' >"+rec.roomno+"</a>" ;
+                }},
+                {field:'roomname',title:'名称',width:140,align:'center'},
+                {field:'equipment',title:'设施',width:80,align:'center'},
+                {field:'reserved',title:'保留',width:40,align:'center',
+                    formatter:function(val,rec){
+                        if(val==1)
+                            return '是';
+                        else
+                            return '否';
+                    }},
+                {field:'status',title:'可用',width:40,align:'center',
+                    formatter:function(val,rec){
+                        if(val==1)
+                            return '是';
+                        else
+                            return '否';
+                    }},
+                {field:'day',title:'星期',width:30,align:'center'},
+                {field:'timename',title:'节次',width:60,align:'center'},
+                {field:'weeks',title:'周次',width:140,align:'center',
+                    formatter:function(value,rec){
+                        var string=parseInt(value).toString(2);
+                        string=string_reserve(str_pad(string,20,'0',1));
+                        return  str_split(string,' ',5);
+                    }},
+                {field:'schoolname',title:'借用单位',width:100,align:'center'},
+                {field:'teachername',title:'申请人',width:60,align:'center'},
+                {field:'applydate',title:'申请时间',width:110,align:'center',
+                    formatter:function(value,rec) {
+                        return "<a class='blue_link' href='javascript:print(\"" + rec.recno + "\",false)' >" + value+ "</a>";
+                    }},
+                {field:'purpose',title:'用途',width:200,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt= $('#dg');
+                tt.datagrid('startEditing',{index:index,field:field});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                roomno: $('#roomno').val(),
+                year:$('#year').val(),
+                term:$('#term').val(),
+                school:$('#school').combobox('getValue'),
+                approved:$('#approved').combobox('getValue')
+            });
+        });
+        $("#menu_insert,#insert").click(function(){
+            parent.menuTabs.addTab("借用教室申请","{$ROOT}/base/index/roomreserveapply","icon icon-schedule");
+        });
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            var length;//删除或更新的行数
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            length=rows.length;
+            if(rows.length>0){
+                var updateRows=[];
+                for(var i=0;i<length;i++){
+                    var updateObj={}; //插入的单元格
+                    updateObj.recno=rows[i].recno;
+                    updateObj.approved=rows[i].approved;
+                    updateRows.push(updateObj);
+                }
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(updateRows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            length=rows.length;
+            if(length>0){
+                var delRows=[];
+                for(var i=0;i<length;i++){
+                    var delObj={}; //插入的单元格
+                    delObj.recno=rows[i].recno;
+                    delRows.push(delObj);
+                }
+                count+=length;
+                effectRow["deleted"]=$.toJSON(delRows);
+            }
+            if(count<=0) { //如果没有任何更新，就退出
+                $.messager.alert('提示','没有需要更新的记录','info');
+                return;
+            }
+            $.post('{$ROOT}/base/room/updatereserve',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        //取消更改
+        $("#cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        $('#menu_export,#export').click(function(){
+            var year=encodeURI($('#year').val());
+            var term=encodeURI($('#term').val());
+            var school=encodeURI($('#school').combobox('getValue'));
+            var roomno=encodeURI($('#roomno').val());
+            var approved=encodeURI($('#approved').combobox('getValue'));
+            $.fileDownload("{$ROOT}/base/room/exportreserve?year="+year+"&term="+term+"&roomno=" +roomno+
+            "&approved="+approved+'&school='+school, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+
+    });
+    function print(item,istimelist){
+        var url='/base/index/roomreservenote?recno='+item;
+        if(istimelist)
+            url='/base/index/roomtimetableall?roomno='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
+        window.open('{$ROOT}'+url);
+    }
+
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-add'" id="menu_insert" >借用教室申请</div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出借用信息</div>
+        <div data-options="iconCls:'icon icon-save'" id="menu_save" >保存数据</div>
+        <div data-options="iconCls:'icon icon-remove'" id="menu_delete" >删除条目</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"  id="insert">借用教室申请</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="school">借用学院：</label><input id="school" size="20">
+            <label for="approved">批准状态：</label><input id="approved" size="10">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出借用信息</a>
+        </div>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>在批准列打勾后，点击保存。</li>
+        </ol>
+    </div>
+</div>

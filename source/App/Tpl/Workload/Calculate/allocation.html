@@ -1,0 +1,410 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%"
+           pagination="true" pageSize="15" pageList="[15,30,45]" striped="true">
+        <thead>
+        <tr><th data-options="field:'YEAR',align:'center',width:6">学年</th>
+            <th data-options="field:'TERM',align:'center',width:6">学期</th>
+            <th data-options="field:'TOTAL',align:'center',width:6,editor:{type:'validatebox',options:{required:true}}">总课时</th>
+            <th data-options="field:'WEEKS',align:'center',width:6,editor:{type:'validatebox',options:{required:true}}">周数</th>
+            <th data-options="field:'ATTENDENTS',align:'center',width:6">人数</th>
+            <th data-options="field:'STANDARD',align:'center',width:8">标准班</th>
+            <th data-options="field:'WORKTYPENAME',align:'center',width:15,editor:{type:'combobox',options:{editable:false,valueField:'code',textField:'name',url:'__ROOT__/Workload/Setting/getWorkCode/',mode:'remote'}}">工作量类型</th>
+            <th data-options="field:'CLASSCOEFF',align:'center',width:8">班型系数</th>
+            <th data-options="field:'CORRECTCOEFF',align:'center',width:8">校正系数</th>
+            <th data-options="field:'WORKLOAD',align:'center',width:8,formatter:getWorkload">工作量</th>
+            <th data-options="field:'ALLOCWORKLOAD',align:'center',width:10,formatter:getAlloc">已分配工作量</th></tr>
+        </thead>
+    </table>
+    <div style="height:3px;">&nbsp;</div>
+    <table id="datagrid_2" fitColumns="true" width="100%"
+           pagination="true" pageSize="10" pageList="[10,20,30]" striped="true">
+        <thead>
+        <tr>
+            <th data-options="field:'NAME',align:'center',width:10">教师名</th>
+            <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+            <th data-options="field:'REPEATCOEFF',align:'center',width:10">重复系数</th>
+            <th data-options="field:'TOTAL',align:'center',width:10">课时</th>
+            <th data-options="field:'WORKLOAD',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">工作量</th></tr>
+        </thead>
+    </table>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <input type="hidden" name="YEAR"><input type="hidden" name="TERM">
+        <label>课号：</label><input name="COURSENO" value='%'  size="9" maxlength="10">
+        <label>课名：</label><input name="COURSENAME" value='%'  size="15">
+        <label>开课学院：</label>
+        <select class="easyui-combobox" id="school" name="SCHOOL" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <label>工作量类型：</label>
+        <select class="easyui-combobox" name="TYPE" style="width:140px;" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="type" id="t">
+                <option value="{$t.code}">{$t.name}</option>
+            </volist>
+        </select>
+        <label>分配状态：</label>
+        <select class="easyui-combobox" name="STATUS" data-options="editable:false">
+            <option value="%">全部</option>
+            <option value="0">未分配</option>
+            <option value="1">已分配(未确认)</option>
+            <option value="2">已确认</option>
+        </select>
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search'">检 索</a><br/>
+        <a href="javascript:void(0)" id="editBut" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true">编辑</a>
+        <a href="javascript:void(0)" id="cancelBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+        <a href="javascript:void(0)" id="saveBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+        <a href="javascript:void(0)" id="confirmBut" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">确认分配</a>
+        <a href="javascript:void(0)" id="exportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出</a>
+    </form>
+</div>
+<div id="toobar_2">
+    <a href="javascript:void(0)" id="addBut" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">新增教师</a>
+    <a href="javascript:void(0)" id="cancelAllocBut" class="easyui-linkbutton" data-options="iconCls:'icon-back',plain:true">取消编辑</a>
+    <a href="javascript:void(0)" id="saveAllocBut" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存分配</a>
+    <span style="margin-left: 50px;" id="toobar_title"></span>
+</div>
+<script type="text/javascript">
+    var list=null;
+    var datagrid=null;var ary={};
+    var datagrid_2=null;var ary_2={};
+    var selRow=null;
+    $(function(){
+        var userSchool=parent.$("#userSchool").val();
+        $("#datagrid").css("height",$("body").height()/2+100);
+        $("#datagrid_2").css("height",$("body").height()/2-108);
+        datagrid = $('#datagrid').datagrid({
+            frozenColumns:[[{field:'ID',checkbox:true},{field:'COURSENO',align:'center',width:100,title:'课号'},
+                {field:'COURSENAME',align:'center',width:200,title:'课名'}]],
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges');
+                e.preventDefault();
+                datagrid.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{left: e.pageX,top: e.pageY});
+            },
+            toolbar:'#toobar',
+            onDblClickRow:function(keyrow,dataRow){
+                if(dataRow.SCHOOL!=userSchool && userSchool!="A1"){
+                    msgShow("系统提示：","您只能编辑自己学院的课程工作量信息","info");
+                    return;
+                }
+               if(ary[keyrow]==undefined){
+                   datagrid.datagrid('beginEdit',keyrow);
+                   ary[keyrow]=keyrow;
+               }else{
+                   datagrid.datagrid('cancelEdit',keyrow);
+                   delete ary[keyrow];
+               }
+            },
+            onClickRow:function(index,row){
+                $("#toobar_title").html("课号："+row.COURSENO+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;课名："+row.COURSENAME
+                        +"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;可分配工作量："+row.WORKLOAD);
+                selRow=row;
+                datagrid_2.datagrid("options").url = "__URL__/queryAlloc/";
+                datagrid_2.datagrid("load",{"ID":row.ID});
+            }
+        });
+        //教师工作量分配列表
+        datagrid_2 = $('#datagrid_2').datagrid({toolbar:'#toobar_2',
+            onClickRow:function(keyrow,row){
+                if(selRow.SCHOOL!=userSchool && userSchool!="A1"){
+                    return;
+                }
+                if(ary_2[keyrow]==undefined){
+                    datagrid_2.datagrid('beginEdit',keyrow);
+                    ary_2[keyrow]=keyrow;
+                }else{
+                    datagrid_2.datagrid('cancelEdit',keyrow);
+                    delete ary_2[keyrow];
+                }
+            }
+        });
+        //指定默认学院
+        if(userSchool!="A1") $("#school").combobox('setValue', userSchool);
+        // 条件查询
+        $("#searcher").click(function(){
+            datagrid.datagrid("options").url = "__URL__/allocation/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+        //保存分配
+        $("#saveAllocBut").click(function(){
+            list=datagrid_2.datagrid('getRows');
+            if(list.length){
+                if(selRow.SCHOOL!=userSchool && userSchool!="A1"){
+                    msgShow("系统提示：","您只能分配自己学院教师工作量","info");
+                    return;
+                }
+                for (var key in ary_2){
+                    if(key){
+                        datagrid_2.datagrid('endEdit',key);
+                    }
+                }
+                ary_2={};
+                list=datagrid_2.datagrid('getRows');
+                var sum=0;
+                for(var i=0;i<list.length;i++){
+                    sum+=parseFloat(list[i].WORKLOAD);
+                }
+                if(sum!=parseFloat(selRow.WORKLOAD)){
+                    msgShow("系统提示：","分配工作量总和必须与课程工作量相等","error");
+                    return;
+                }
+                var type="update";
+                if(list[0].CALCID!=undefined){
+                    type="insert";
+                }
+                $.ajax({
+                    url:'__URL__/updateAlloc/',
+                    data:{"list":list,"type":type},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            $.messager.alert("提示","保存分配成功！","info",function(){
+                                datagrid_2.datagrid('reload');
+                                datagrid.datagrid('reload');
+                            });
+                        }else{
+                            $.messager.alert("提示","保存分配失败！请检查您提交的数据是否合法","error",function(){
+                                datagrid_2.datagrid('reload');
+                            });
+                        }
+                    }
+                });
+            }
+        });
+        //确认分配
+        $("#confirmBut").click(function(){
+            list=datagrid.datagrid('getSelections');
+            if(list.length > 0){
+                var infoarr=[];var num=0;
+                for(var i= 0;i<list.length;i++){
+                    if(list[i].SCHOOL!=userSchool && userSchool!="A1") continue;
+                    if(list[i].ALLOC==list[i].WORKLOAD && list[i].WORKLOAD!=list[i].ALLOCWORKLOAD){
+                        infoarr[num]=list[i].ID;
+                        num++;
+                    }
+                }
+                if(num==0){
+                    msgShow("系统提示：","您选择的数据没有“未确认分配”的信息，请先进行分配再确认！","info");
+                    return;
+                }else if(num < list.length){
+                    $.messager.confirm("提示","您选择的数据包含工作量未正确分配或已确认分配的信息，确认分配将过滤这些数据，是否继续？",function(b){
+                        if(b) confirmAlloc(infoarr);
+                    });
+                }else confirmAlloc(infoarr);
+            }else{
+                msgShow("系统提示：","请选择要确认的数据","error");
+            }
+        });
+        function confirmAlloc(infoarr){
+            $.ajax({
+                url:'__URL__/confirmAlloc/',
+                data:{"list":infoarr},
+                type:'POST',
+                success:function(data){
+                    if(data){
+                        $.messager.alert("提示","确认分配成功！","info",function(){
+                            datagrid.datagrid('reload');
+                        });
+                    }else{
+                        msgShow("系统提示：","分配确认失败，请检查要确认的数据是否已经完成分配！","error");
+                    }
+                }
+            });
+        }
+        //编辑
+        function fn_edit(){
+            list=datagrid.datagrid('getSelections');
+            if(list.length > 0){
+                var index=null;
+                for(var i=0;i<list.length;i++){
+                    if(list[i].SCHOOL!=userSchool && userSchool!="A1") continue;
+                    index= datagrid.datagrid('getRowIndex',list[i]);
+                    datagrid.datagrid('beginEdit',index);
+                    ary[index]=index;
+                }
+                if(index==null)msgShow("系统提示：","您只能编辑自己学院的教师工作量信息","info");
+            }else{
+                msgShow("系统提示：","请选择要编辑的数据","error");
+            }
+        }
+        $("#editBut").bind('click',fn_edit);
+        $('#admin_edit').bind('click',fn_edit);
+        //取消编辑
+        $("#cancelBut").click(function(){
+            datagrid.datagrid('rejectChanges');
+            ary={};
+        });
+        //取消编辑-教师工作量
+        $("#cancelAllocBut").click(function(){
+            datagrid_2.datagrid('rejectChanges');
+            ary_2={};
+        });
+        //保存编辑
+        $("#saveBut").click(function(){
+            for (var key in ary){
+                if(key){
+                    datagrid.datagrid('endEdit',key);
+                }
+            }
+            ary={};
+            list=datagrid.datagrid('getChanges');
+            if(list.length > 0){
+                $.ajax({
+                    url:'__URL__/updateWorkCalc/',
+                    data:{"list":list},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            $.messager.alert("提示","保存成功！","info",function(){
+                                datagrid.datagrid('reload');
+                            });
+                        }else{
+                            $.messager.alert("提示","保存失败！请检查您提交的数据是否合法","error",function(){
+                                datagrid.datagrid('reload');
+                            });
+                        }
+                    }
+                });
+            }
+        });
+        /*************************************************************添加教师************************************************************/
+        var datagrid_query=null;
+        $("#addBut").click(function(){
+            if(selRow==null){
+                msgShow("系统提示：","请先单击要添加教师的课程","info");
+                return;
+            }
+            if(selRow.SCHOOL!=userSchool && userSchool!="A1"){
+                msgShow("系统提示：","您只能分配自己学院教师工作量","info");
+                return;
+            }
+            $('#win').window('open');
+            datagrid_query=$('#datagrid_query').datagrid({toolbar:'#toobar_query',
+                url:"__URL__/queryTeacher/",
+                queryParams:getWinData()});
+        });
+        // 教师条件查询
+        $("#queryBut").click(function(){
+            datagrid_query.datagrid("load",getWinData());
+        });
+        //添加教师
+        $("#addListBut").click(function(){
+            list=datagrid_query.datagrid('getSelections');
+            if (list.length){
+                $.ajax({
+                    url:'__URL__/addTeacher/',
+                    data:{"list":list,"COURSE":selRow},
+                    type:'POST',
+                    success:function(data){
+                        if(data){
+                            $.messager.alert("提示","添加教师成功！","info",function(){
+                                $('#win').window('close');
+                                datagrid_2.datagrid('reload');
+                            });
+                        }else{
+                            msgShow("系统提示：","数据提交失败！请检查您提交的数据是否合法！","info");
+                        }
+                    }
+                });
+            }else{
+                msgShow("系统提示：","请选择您要添加的教师！","info");
+            }
+        });
+        /*************************************************************添加教师 END************************************************************/
+        //导出
+        $("#exportBut").click(function(){
+            $("#toobar [name='YEAR']").val(getYear());
+            $("#toobar [name='TERM']").val(getTerm());
+            $("#queryForm").attr("action","__ROOT__/Workload/Excel/expTeacherAlloc/");
+            $("#queryForm").submit();
+        });
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            "YEAR":getYear(),"TERM":getTerm(),
+            "COURSENO":$.trim($("#toobar [name='COURSENO']").val()),
+            "COURSENAME":$.trim($("#toobar [name='COURSENAME']").val()),
+            "SCHOOL":$.trim($("#toobar [name='SCHOOL']").val()),
+            "TYPE":$.trim($("#toobar [name='TYPE']").val()),
+            "STATUS":$.trim($("#toobar [name='STATUS']").val())
+        };
+        return data;
+    }
+    //获取教师查询检索条件
+    function getWinData(){
+        var data={
+            NAME:$.trim($("#toobar_query [name='name']").val()),
+            TEACHERNO:$.trim($("#toobar_query [name='teacherno']").val()),
+            SCHOOL:$.trim($("#toobar_query [name='school']").val()),
+            ID:selRow.ID
+        };
+        return data;
+    }
+    //获取学年学期
+    function getYear(){
+        return parent.$("#YEAR").val();
+    }
+    function getTerm(){
+        return parent.$("#TERM").val();
+    }
+    //返回值
+    function  getWorkload(val,row){
+        if(row.ALLOC!=val) return "<font color=\"red\">"+val+"</font>";
+        return val;
+    }
+    function  getAlloc(val,row){
+        if((row.ALLOC==row.WORKLOAD && val!=row.ALLOC)||(parseFloat(row.ALLOC) > 0 && row.ALLOC!=row.WORKLOAD)) return "<font color=\"red\">"+row.ALLOC+"</font>";
+        return val;
+    }
+</script>
+
+
+<div id="win" class="easyui-window" title="检索教师" data-options="minimizable:false,maximizable:false,collapsible:false,draggable:false,resizable:false,modal:false,width:700,height:530,closed:true">
+    <div class="easyui-layout" data-options="border:false,fit:true" >
+        <div data-options="region:'center',border:false" style="padding:3px;">
+            <table id="datagrid_query" fitColumns="true" width="100%" fit="true"
+                   pagination="true" pageSize="15" pageList="[15,30,45]" striped="true">
+                <thead>
+                <tr>
+                    <th data-options="field:'CK',checkbox:true"></th>
+                    <th data-options="field:'TEACHERNO',align:'center',width:10">教师号</th>
+                    <th data-options="field:'NAME',align:'center',width:10,editor:{type:'validatebox',options:{required:true}}">教师姓名</th>
+                    <th data-options="field:'SCHOOLNAME',align:'center',width:20,editor:{type:'validatebox',options:{required:true}}">所在学院</th></tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="toobar_query">
+    <form method="post">
+        <label>教师姓名：</label><input name="name" value='%'  size="10" maxlength="15">
+        <label>教师号：</label><input name="teacherno" value='%'  size="10" maxlength="15">
+        <label>所在学院：</label>
+        <select class="easyui-combobox" name="school" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <a href="javascript:void(0)" id="queryBut" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">检 索</a>
+        <a href="javascript:void(0)" id="addListBut" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">确认添加</a>
+    </form>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+<include file="./methods" />
+</body>
+</html>

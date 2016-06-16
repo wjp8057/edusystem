@@ -1,0 +1,254 @@
+<!--本页面里使用的部分js函数在 addBook.html文件里已包含-->
+<div style="padding:10px 0px 0px 50px;">
+	<strong>注意：</strong>
+	<p>一、ISBN中间不要有“-”线，只要数字，例如：692452360199；</p>
+	<p>二、教材若有多个作者，姓名之间用“/”隔开，例如：王三/张四</p>
+	<p>三、课程教材若已征订则不可修改征订信息</p>
+</div>
+
+<form action="#" id="queryForm">
+	<table border="0" align="center" width="90%" style="border-collapse: collapse;">
+	 <tbody>
+		<tr>
+			<th align="right">教材性质：</th>
+			<td align="left">
+				<select name="booknature" class="checkNull" onchange="nature($(this),true)">
+					<option value="%">请选择</option>
+				    <option value="本科">本科</option>
+				    <option value="高职高专">高职高专</option>
+				    <option value="其他">其他</option>
+				    <option value="自编">自编</option>
+			    </select> <font color="red">*</font>
+			</td>
+			<th align="right" width="12%">ISBN：</th>
+			<td align="left" width="38%">
+			<select class="isbn_1" style="display:none;" onchange="getBook($(this),true)">
+	        <option value="%">请选择</option>
+	        <volist name="isbn" id="s">
+	        	<option value="{$s.isbn}">{$s.isbn}</option>
+	        </volist>
+			</select>
+			<input name="isbn" class="checkNull isbn_2" onchange="getBook($(this),true)" maxlength="50" size="20"> <font color="red">*</font>
+			<a href="javascript:void(0)" class="sel" onclick="sel($(this))">手动输入</a></td>
+		</tr>
+		<tr>
+			<th align="right" width="12%">教材名：</th>
+			<td align="left"><input name="bookname" class="checkNull" maxlength="100" size="20"> <font color="red">*</font></td>
+			<th align="right">作者：</th>
+			<td align="left"><input name="author" class="checkNull" maxlength="50" size="20"> <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<th align="right">出版年份：</th>
+			<td align="left"><input name="pubtime" size="6" type="text" maxlength="4"></td>
+			<th align="right">出版社：</th>
+			<td align="left">
+				<select name="press">
+		        <volist name="press" id="p">
+		        	<option value="{$p.id}">{$p.name}</option>
+		        </volist>
+				</select>
+				<font class="press" color="red">*</font>
+				<input type="hidden" name="book_id">
+			 </td>
+		</tr>
+		<tr height="60">
+			<th align="right">备注：</th>
+			<td align="left" colspan="3" ><textarea name="remarks" rows="3" cols="70"></textarea>
+			<a href="javascript:void(0)" class="del" onclick="dels($(this))">删除</a>
+			<input type="hidden" name="apply_id">
+			<input type="hidden" name="state">
+			</td>
+		</tr>
+	 </tbody>
+	</table>
+</form>
+<div style="line-height:40px;text-align:center;padding-bottom:10px;" class="edit_div">
+	<td align="center" colspan="4">
+		<a href="javascript:void(0)" id="query_addbut" class="easyui-linkbutton" data-options="iconCls:'icon-add'">新增一本</a>&nbsp;&nbsp;&nbsp;
+		<a href="javascript:void(0)" id="query_savebut" class="easyui-linkbutton" data-options="iconCls:'icon-save'">提交征订</a>&nbsp;&nbsp;&nbsp;
+		<a href="javascript:void(0)" id="query_reset" class="easyui-linkbutton">重&nbsp;置</a>
+	</td>
+</div>
+<script type="text/javascript">
+//获取新增一本时要追加HTML的内容
+var txt=$("#queryForm").html();
+var query_wd=null;
+var del_arr="";
+$(function(){
+	//查看征订记录窗口
+	query_wd=$('#query_wd').window({modal:true, height:500, width:800,
+        minimizable:false,maximizable:false,collapsible:false,
+        draggable:false,resizable:false,closed:true
+    });
+    //读取订单信息
+    function queryApply(){
+    	del_arr="";
+    	$("#queryForm").html(txt);
+    	list=datagrid.datagrid('getSelections');
+    	if(list.length < 1){
+    		msgShow("系统提示：","没有选择任何数据进行操作！","error");
+            return;
+    	}
+    	if(list.length > 1){
+    		msgShow("系统提示：","您只能选择一门课程查看申请记录！","error");
+            return;
+    	}
+    	if(list[0].APPLYNUM < 1){
+    		msgShow("系统提示：","您选择的课程尚未申请征订！","error");
+            return;
+    	}
+    	var arr = {"COURSENO":list[0].COURSENO,"GROUP":list[0].GROUP,"YEAR":list[0].YEAR,"TERM":list[0].TERM,"SCHOOL":list[0].SCHOOL,"CLASSNO":list[0].CLASSNO};
+    	//Ajax获取数据
+    	var num=0,len=0;
+        $.ajax({
+            url:"__URL__/queryBook/hasJson/1",
+            type:"POST",
+            async:false,
+            dataType:"json",
+            data:arr,
+            success: function(data){
+                if(data!=null){
+                	len=data.length;
+                    for(var i=0;i<data.length;i++){
+                    	if(i > 0) $("#queryForm").append(txt);
+                    	$("#queryForm [name='booknature']:eq("+i+")").val(data[i].booknature);
+                        $("#queryForm [name='isbn']:eq("+i+")").val(data[i].isbn);
+                        $("#queryForm [name='bookname']:eq("+i+")").val(data[i].bookname).attr("disabled","disabled");
+                        $("#queryForm [name='author']:eq("+i+")").val(data[i].author).attr("disabled","disabled");
+                        $("#queryForm [name='pubtime']:eq("+i+")").val(data[i].time).attr("disabled","disabled");
+                        $("#queryForm [name='press']:eq("+i+")").val(data[i].press).attr("disabled","disabled");
+                        $("#queryForm [name='book_id']:eq("+i+")").val(data[i].book_id);
+                        $("#queryForm [name='apply_id']:eq("+i+")").val(data[i].apply_id);
+                        $("#queryForm [name='remarks']:eq("+i+")").val(data[i].remarks);
+                        $("#queryForm [name='state']:eq("+i+")").val(data[i].state);
+                        if(parseInt(data[i].state)==1 || parseInt(data[i].state)==3){
+                        	$("#queryForm [name='booknature']:eq("+i+")").attr("disabled","disabled");
+                        	$("#queryForm [name='isbn']:eq("+i+")").attr("disabled","disabled");
+                        	$("#queryForm [name='remarks']:eq("+i+")").attr("disabled","disabled");
+                        	num++;
+                        }else{
+                        	if(data[i].booknature=="自编"){
+                        		$("#queryForm .isbn_1:eq("+i+")").val(data[i].isbn);
+                        		nature($("#queryForm [name='booknature']:eq("+i+")"),false);
+                        	}
+                        	if(i > 0) $("#queryForm .del:eq("+i+")").show();
+                        }
+                    }
+                    query_wd.window({closed:false,title:"课名："+list[0].COURSENAME});
+                }else 
+                	msgShow("系统提示：","发生未知错误，无法进行操作！","error");
+            }
+        });
+        if(num > 0 && num == len) $(".edit_div").hide();
+        else $(".edit_div").show();
+    }
+    $("#queryBut").bind('click',queryApply);
+    $('#admin_query').bind('click',queryApply);
+    //重置按钮
+    $('#query_reset').click(function(){
+    	 $("#queryBut").click();
+    	 del_arr="";
+    });
+    //新增一本
+    $('#query_addbut').click(function(){
+    	$("#queryForm").append(txt);
+		var index=$("#queryForm table").length-1;
+		$("#queryForm .del:eq("+index+")").show();
+    	$("#queryForm [name='press']:eq("+index+")").combobox({});
+    });
+	//保存信息
+	$('#query_savebut').click(function(){
+		var bool=true;
+		//验证非空字段
+		$("#queryForm .checkNull").each(function(){
+			if(!check($(this))){
+				bool=false;
+			}else{
+				if($(this).attr("name")=="isbn" && $(this).val().length < 5){
+					$(this).next().html("格式不规范");
+					bool=false;
+				}
+			}
+		});
+		//出版社验证
+		var index=0;
+		$("#queryForm [name='press']").each(function(){
+			if($.trim($(this).val())==""){
+				$("#queryForm .press:eq("+index+")").html("不能为空");
+				bool=false;
+			}else{
+				$("#queryForm .press:eq("+index+")").html("*");
+			}
+			index++;
+		});
+		//开始保存教材信息
+		if(bool){
+			var id="",booknature="",isbn="",bookname="",author="",pubtime="",press="",remarks="",apply_id="",state=0;
+			//教材数量
+			var len=$("#queryForm table").length;
+			//封装教材信息
+			var bookList=new Array(len);
+			for(var i=0;i<len;i++){
+				
+				state=$.trim($("#queryForm [name='state']:eq("+i+")").val());
+				if(state!="" && (parseInt(state)==1 || parseInt(state)==3)) continue;
+				
+				var ary=null;
+				apply_id=$.trim($("#queryForm [name='apply_id']:eq("+i+")").val());
+				
+				id=$.trim($("#queryForm [name='book_id']:eq("+i+")").val());
+				if(id!=""){
+					remarks=$.trim($("#queryForm [name='remarks']:eq("+i+")").val());
+					ary={"book_id":id,"remarks":remarks,"apply_id":apply_id};
+				}else{
+					booknature=$.trim($("#queryForm [name='booknature']:eq("+i+")").val());
+					isbn=$.trim($("#queryForm [name='isbn']:eq("+i+")").val());
+					bookname=$.trim($("#queryForm [name='bookname']:eq("+i+")").val());
+					author=$.trim($("#queryForm [name='author']:eq("+i+")").val());
+					pubtime=$.trim($("#queryForm [name='pubtime']:eq("+i+")").val());
+					press=$.trim($("#queryForm [name='press']:eq("+i+")").val());
+					remarks=$.trim($("#queryForm [name='remarks']:eq("+i+")").val());
+					ary={"booknature":booknature,"isbn":isbn,"bookname":bookname,"author":author,"pubtime":pubtime,"press":press,"remarks":remarks,"apply_id":apply_id}
+				}
+				bookList[i]=ary;
+			}
+			//封装课程信息
+			var course={"YEAR":list[0].YEAR,"TERM":list[0].TERM,"COURSENO":list[0].COURSENO,"GROUP":list[0].GROUP,
+					"ATTENDENTS":list[0].ATTENDENTS,"COURSETYPE":list[0].COURSETYPE,
+					"TEACHERNUM":list[0].TEACHERNUM,"SCHOOL":list[0].SCHOOL,"CLASSNO":list[0].CLASSNO,"MAP":list[0].S_RECNO};
+			
+			//Ajax方式提交数据
+			$.ajax({
+                url:"__URL__/editApply/",
+                type:"POST",
+                data:{book:bookList,course:course,delId:del_arr},
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("系统提示：","申请征订成功！","info",function(){
+                    		query_wd.window({closed:true});
+                    		datagrid.datagrid('reload');
+                    	});
+                    }else msgShow("系统提示：","发生未知错误，申请失败！","error");
+                }
+            });
+		}
+	});
+});
+//启用相应文本框
+function delAttr(ele){
+	ele=ele.parent().parent().parent();
+	ele.find("[name='bookname']").removeAttr("disabled");
+	ele.find("[name='author']").removeAttr("disabled");
+	ele.find("[name='pubtime']").removeAttr("disabled");
+	ele.find("[name='press']").removeAttr("disabled");
+	ele.find("[name='press']").combobox({});
+}
+//删除一本
+function dels(ele){
+	var applyid=ele.next("input").val();
+	if(applyid!=null && applyid!=""){
+		del_arr+="'"+applyid+"',";
+	}
+	ele.parent().parent().parent().parent().remove();
+}
+</script>

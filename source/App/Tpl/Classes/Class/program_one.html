@@ -1,0 +1,163 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    function yitiao(obj){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            alert('请选择一条,不能选多条');                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            alert('请选择一条要编辑的数据');                         //用户没选择行
+        }else{
+            return true;
+        }
+        return false;
+    }
+
+    $(function(){
+       var wd8= $('#wd8').window(new wind(500,400,false,false,true,true,true))
+        $('#wd8').css('display','')
+
+
+        //todo:各专业教学计划  里的搜索按钮 所触发的事件
+        $('#zhuanye_sousuo').bind('click',function(){
+            zhuanyeprogram1.datagrid('load',{SCHOOL:$('#program_school').val()})
+        })
+
+        var zhuanyeprogram1=$('#zhuanyeprogram2').datagrid({
+            url:'__URL__/zhuanyeprogram',
+            columns:[[
+                {field:'bianhao',title:'编号',width:150,align:'center'},
+                {field:'name',title:"名称",width:250,align:'center'},
+                {field:'time',title:'定制日期',width:150,align:'center'},
+                {field:'school',title:'制定学院',width:150,align:'center'},
+                {field:'programtype',title:'计划类别',width:150,align:'center'}
+            ]],
+            toolbar:[{
+                text:'查看该教学计划的课程',
+                iconCls:'icon-search',
+                handler:function(){
+                    var yi=yitiao(zhuanyeprogram1);
+                    if(yi){
+                        var row=zhuanyeprogram1.datagrid('getSelected');
+                        openTabsWindows(row.name+' 的课程','__URL__/program_course/PROGRAMNO/'+row.bianhao,'',true)
+                    }
+                }
+            },{
+                text:'返回',
+                iconCls:'icon-goleft',
+                handler:function(){
+                    wd8.window({'closed':true})
+                }
+            }],onRowContextMenu:function(e,rowindex,row){
+                zhuanyeprogram1.datagrid('rejectChanges')
+                var tt=$('#zhuanyeprogram2');
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu2').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            fit:true,
+            pageSize:20,
+            pagination:true
+        })
+
+        //todo:显示学生个人教学计划的datagrid===================================================start================================================================
+        var Student_jihua=$('#studentjihua').datagrid({
+            url:'__URL__/studentProgram',
+            columns:[[
+                {field:'bianhao',title:'编号',align:'center'},
+                {field:'name',title:"名称",width:250,align:'center'},
+                {field:'time',title:'定制日期',align:'center'},
+                {field:'rem',title:'备注',align:'center'},
+                {field:'programtype',title:'计划类别',align:'center'},
+                {field:'school',title:'学院',align:'center'}
+            ]],
+            toolbar:[{
+                text:'查看该教学计划的课程',
+                iconCls:'icon-chaxun',
+                handler:function(){
+                    var yi=yitiao(Student_jihua);
+                    if(yi){
+                        var row=Student_jihua.datagrid('getSelected');
+                        openTabsWindows(row.name+' 的课程','__URL__/program_course/PROGRAMNO/'+row.bianhao,'',true)
+                        //programcourse.datagrid('load',{PROGRAMNO:row.bianhao})
+
+                    }
+                }
+            },{
+                text:'查看全校各专业教学计划',
+                iconCls:'icon-search',
+                handler:function(){
+                    wd8.window({closed:false})
+                }
+            }
+            ],onRowContextMenu:function(e,rowindex,row){
+                Student_jihua.datagrid('rejectChanges')
+                var tt=$('#studentjihua');
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            pagination:true,
+            fit:true
+        })
+
+
+        $('#admin_look').bind('click',function(){
+            var row=Student_jihua.datagrid('getSelected');
+            openTabsWindows(row.name+' 的课程','__URL__/program_course/PROGRAMNO/'+row.bianhao,'',true)
+        })
+
+        $('#admin_look2').bind('click',function(){
+            var row=zhuanyeprogram1.datagrid('getSelected');
+            openTabsWindows(row.name+' 的课程','__URL__/program_course/PROGRAMNO/'+row.bianhao,'',true)
+        })
+        var studentno='{$info.studentno}'
+
+        Student_jihua.datagrid('load',{STUDENTNO:studentno})
+    })
+
+</script>
+<body>
+<div id="studentjihua">     <!--todo:学生个人教学计划-->
+</div>
+
+<!--todo:查看全校各专业教学计划的窗口-->
+<div id="wd8" title="搜索教学计划" style="display: none">
+    <div id="cc1" class="easyui-layout" data-options="fit:true,border:false" >
+        <div data-options="region:'north',noheader:true,split:false,border:false" style="height:50px;">
+            <table border="0">
+                <tr>
+                    <td>学校:</td>
+                    <td><select id="program_school">
+                        <volist name="school" id="v"><option value="{$v.SCHOOL}">{$v.NAME}</option></volist>
+                    </select></td>
+                    <td><a href="javascript:void(0)" id="zhuanye_sousuo" class="easyui-linkbutton">搜索</a></td>
+                </tr></table>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+            <div id="zhuanyeprogram2">
+            </div>
+        </div>
+    </div>
+    <div class="layout" >
+        <div data-options="region:'north'" style="height:50px;">
+        </div>
+        <div data-options="region:'center',title:'center title'" style="padding:0px;background:#eee;">
+
+        </div>
+    </div>
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_look'>查看该教学计划的课程</div>
+    </div>
+
+    <div id="admin_access_menu2" class="easyui-menu" style="width:100px;">
+        <div id='admin_look2'>查看该教学计划的课程</div>
+    </div>
+</div>
+</body>

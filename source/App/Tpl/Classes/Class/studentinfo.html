@@ -1,0 +1,153 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var StudentNo='';       //todo:存放 学生学号      做查看某学生教学计划的时候用到
+    $(function(){
+
+        //todo:点击查看学生个人修课计划的按钮
+        $('#lookxiuke').linkbutton({
+            text:'查看修课计划'
+        }).bind('click',function(){
+                    openTabsWindows($('#NAME1').html()+'的教学计划信息','__URL__/program_one/studentno/'+StudentNo,'',true)
+
+         })
+
+
+
+        var obj={}
+        //todo:点击查看注册信息时候的方法
+        obj['studentno']='{$info.studentno}'
+        StudentNo='{$info.studentno}'                      //todo:给StudentNo赋值
+        var spanList=$('span')
+        $.ajax({
+            content:'',
+            type:'post',
+            url:'__ROOT__/index.php/Status/Status/studentNO',
+            data:obj,
+            success:function(c){
+                eval('var one='+c);
+                if(one['regcode']){                                                 //todo:false代表     按学号注册      ⑵
+                    var str2=''          //todo:  #yearterm的内容
+                    for(var i=0;i<one['regcode'].length;i++){
+                        str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                    }
+                    $('#yearterm').html(str2)
+                    for(var i=0;i<spanList.length;i++){
+                        var nm=spanList[i].id;
+                        $('#'+nm).html(one[nm.substring(0,nm.indexOf(1))]);
+                    }
+                }
+
+            }
+        })
+
+
+    })
+</script>
+<body style="background: #fff">
+    <P ALIGN=CENTER><FONT SIZE=4 face="隶书"><span style="font-size:18px">学生<LABEL datasrc=#dsoSTUDENT ></LABEL>注册信息</span></font></p>
+    <table align="center" border="1" width="80%" datasrc=#dsoSTUDENT cellspacing="0" style="font-size: 10pt; color: #000000; border-collapse: collapse;" bordercolor="#111111" cellpadding="0" height="243" >
+        <tr>
+            <td width="129" align="right" height="22" nowrap >学号：</td>
+            <td height="22" colspan="2" width="211" nowrap>
+                <span  id=STUDENTNO1></span></td>
+            <td height="22" colspan="2" width="211" nowrap><a href="javascript:void(0)" id="lookxiuke">查看修课计划</a>
+            </td>
+            <td width="153" height="198" rowspan="9" nowrap>
+            </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>姓名：</td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <span lang="en-us" id=NAME1></span> </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>性别：</td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <span lang="en-us" id=SEX1></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>入学日期：</td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <span lang="en-us" id=ENTERDATE1></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>学制：</td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <SPAN id=YEARS1></SPAN>年</td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>主修班级编号：</td>
+            <td height="22" width="134" nowrap>
+                <span lang="en-us" id=CLASSNO1></span></td>
+            <td height="22" width="79" colspan="2" nowrap>
+                <p align="right">班级名称：</td>
+            <td height="22" width="205" nowrap>
+                <SPAN id=CLASSNAME1></SPAN></td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap><span lang="en-us">&nbsp;</span>选课总学分<span lang="en-us">:&nbsp;</span></td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <SPAN id=TAKEN1></SPAN></td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>完成学分：</td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <span lang="en-us" id=PASSED1></span></td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>积点分和：<span lang="en-us">
+      </span></td>
+            <td height="22" colspan="4" width="422" nowrap>
+                <span lang="en-us" id=POINTS1></span></td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap><font color="#FF0000">退学警告次数：</font></td>
+            <td height="22" colspan="5" width="577" nowrap>
+                <span lang="en-us" id=WARN1></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap><font color="#FF0000">学籍状态：</font></td>
+            <td height="22" colspan="5" width="577" nowrap>
+                <SPAN id=STATUSVALUE1></SPAN></td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>出生日期</td>
+            <td height="22" colspan="5" width="577" nowrap><span lang="en-us" id=BIRTHDAY1></span>
+
+                　</td>
+        </tr>
+        <tr>
+            <td width="129" align="right" height="22" nowrap>联系方法：<span lang="en-us"> </span></td>
+            <td height="22" colspan="5" width="577" nowrap>
+                <span lang="en-us" id=CONTACT1></span>
+            </td>
+        </tr>
+        <tr>
+            <td width="129" align="right" nowrap>所在学院：</td>
+            <td height="22" colspan="5" width="577" nowrap>
+                <SPAN id=SCHOOLNAME1></SPAN>
+    </table>
+
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        注册信息：</p>
+    <div align="center">
+        <center>
+            <table datasrc=#dsoReg border="1" cellspacing="0" width="709" bordercolor="#000000" cellpadding="0" height="44">
+                <thead>
+                <th width="189" align="right" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">学期</font></th>
+                <th width="514" height="22" bgcolor="#0000FF"><font size="2" color="#FFFFFF">注册状态</font></th>
+                </thead>
+                <thead id="yearterm">
+                <td width="189" align="right" height="22"><font size="2"><SPAN id=YEAR></SPAN>学年第<SPAN id=TERM></SPAN>学期:</font></td>
+                <td width="514" height="22"><font size="2"><SPAN id=REGVALUE></SPAN></font></td>
+                </thead>
+            </table>
+        </center>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+    <title>个人基本信息</title>
+    <script language="javascript">
+
+        //todo:权限判断函数
+        function qxpanduan(id,url){
+            var quanxianpd=false;
+            //todo:false代表     按学号注册      ⑵
+            ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+                eval('var o='+c)
+                for(var i=0;i<o[0]['rl'].length;i++){
+                    var zz=new RegExp(o[0]['rl'][i])
+                    var bool=zz.test(quanxian)
+
+                    if(bool){
+                        quanxianpd=true
+                        return;
+                    }
+                }
+            })
+
+            return quanxianpd;
+        }
+        //todo:权限判断函数
+        var quanxian='{$quanxian}'
+        String.prototype.isDate = function()
+        {
+            var r = this.match(/^(\d{1,4})(-|\/)(\d{1,2})\2(\d{1,2})$/);
+            if(r==null)return false;
+            var d = new Date(r[1], r[3]-1, r[4]);
+            return(d.getFullYear()==r[1]&&(d.getMonth()+1)==r[3]&&d.getDate()==r[4]);
+        }
+
+        $(function(){
+
+            var teacherno='{$teacherno}'
+            //todo:添加一个学习经历的时候
+            $('[name=B1]').bind('click',function(){
+                var boo=qxpanduan('US02','__APP__/Book/Book/Bexecute')
+                if(!boo){
+                    return $.messager.alert('提示','您没有足够的权限')
+                }
+                var obj={}
+                var start=$('#startdate').val().trim()
+                var end=$('#enddate').val().trim();
+                if(!start.isDate()||!end.isDate()){
+                    return  $.messager.alert('提示','对不起，您输入的日期格式不合要求！\n必须采用 年/月/日 格式！');
+                };
+                var school=$('#school').val().trim();
+                if(school==""){
+                    return $.messager.alert('提示','请输入完整的信息 不能为空白');
+                }
+                obj['SQLPATH']="Two_insertXuexi.SQL"
+                obj['arr']={':STARTDATE':start,':ENDDATE':end,':SCHOOL':school,':TEACHERNO':teacherno};
+                ajiakesi('__URL__/xuexijingli',obj,function(c){
+                    if(c=='1'){
+                        $.messager.alert('提示','添加成功')
+                        setTimeout(function(){  window.location.href=window.location.href;},700)
+
+                    }
+                })
+            })
+
+            //todo:删除一个奖项的时候
+            $('[name=deleteStudy]').bind('click',function(){
+                var boo=qxpanduan('US02','__APP__/Book/Book/Bexecute')
+                if(!boo){
+                    return $.messager.alert('提示','您没有足够的权限')
+                }
+                var obj1=this
+                $.messager.confirm('提示','您确定要删除吗',function(c){
+                    if(c){
+                        var obj={}
+                        obj['SQLPATH']='Two_deleteStudy.SQL'
+                        obj['arr']={':RECNO':obj1.parentNode.id}
+                        ajiakesi('__URL__/xuexijingli',obj,function(c){
+                            if(c=='1'){
+                                $.messager.alert('提示','删除成功')
+                                setTimeout(function(){  window.location.href=window.location.href;},700)
+                            }
+                        })
+
+
+                    }
+                })
+
+
+            })
+        })
+
+    </script>
+
+
+<body style="background-color: #ffffff" >
+<style>
+    td,th{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt,.cc{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<center><font face="隶书" ><span style="font-size: 17px">学 习 、工 作 经 历 </span></font></center>
+<br>
+    <input type="hidden" name="XML" value=" "><input type="hidden" name="SQL" value=" "><input type="hidden" name="MID" value=" ">
+    <input type="hidden" name=REDIRECT value="">
+    <div align="center">
+        <center>
+            <table border="0" cellspacing="1" width="75%" height="38">
+                <thead>
+                <th width="20%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>开始时间</b></font></th>
+                <th width="20%" align="center" bgcolor="#E0ECFF" height="25"><b><font size="2">结束时间</font></b></th>
+                <th width="50%" align="center" bgcolor="#E0ECFF" height="25"><font size="2"><b>在何学校（单位）学习、工作及任何职务</b></font></th>
+                <th width="10%" align="center" bgcolor="#E0ECFF" height="25">
+                    <p align="center"><font size="2"><b>操作</b></font></th>
+                </thead>
+
+                 <if condition="count($info) eq 0">
+                        <tr>
+                            <td colspan="6">暂无数据</td>
+                        </tr>
+                </if>
+                <volist name="info" id="v">
+                <tr>
+                    <td width="20%" height="25" align="center"><font size="2"><SPAN>{$v.STARTDATE}</SPAN></font></td>
+                    <td width="20%" height="25" align="center"><font size="2"><SPAN>{$v.ENDDATE}</SPAN></font></td>
+                    <td width="50%" height="25" align="center"><font size="2"><SPAN>{$v.SCHOOL}</SPAN></font></td>
+                    <td width="10%" height="25">
+                        <p align="center"><font size="2"><a href="javascript:void(0)" Id="{$v.RECNO}"><button name="deleteStudy">删除</button></a></font></td>
+                </tr>
+                </volist>
+
+            </table>
+        </center>
+    </div>
+    <p>
+    <div align="center">
+        <center>
+            <table border="0" cellspacing="1" width="75%">
+                <tr>
+                    <td width="20%" height="25">
+                        <p align="center">&nbsp;<input type="text" name="StartDate" ID="startdate" size="10" value=""></td>
+                    <td width="20%" height="25">
+                        <p align="center"><input type="text" name="EndDate" ID="enddate" size="10" value=""></td>
+                    <td width="50%" height="25">
+                        <p align="center"><input type="text" name="School" ID="school" value="" size="43"></td>
+                    <center>
+                        <td width="10%" height="25">
+                            <p align="center"><input type="button" value="添加" name="B1"></td>
+                </tr>
+            </table>
+        </center>
+    </div>
+
+
+</body>
+

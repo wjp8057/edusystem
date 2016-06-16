@@ -1,0 +1,87 @@
+<include file=":Include:jqueryHeader" />
+<style>
+body{background:#FFF;}
+#title{font-size: 16pt;font-family:"隶书";padding-top:20px;}
+table{margin:150px auto 0px;border-collapse:collapse;}
+td,th{border-bottom:dotted 1px #CCC;height:40px;}
+#btnCount{margin-right:50px;}
+</style>
+
+<body>
+<div>
+	<form method="POST" id="init" action="__URL__">
+        <p align="center" id="title">最终数据处理</p>
+        <table width="40%" align="center">
+            <tr>
+                <td width="15%" align="right">学年：</td>
+                <td width="15%"><input type="text" name="YEAR" size="4" value="{$yearTerm.YEAR}"></td>
+                <td width="15%" align="right">学期：</td>
+                <td width="15%"><input  type="text" name="TERM" size="1" value="{$yearTerm.TERM}"></td>
+            </tr>
+        </table>
+        <p align="center">
+            <input  type="hidden" name="FLAG" value="">
+            <a id="btnCount" class="easyui-linkbutton" icon="icon-add">计算总分</a>
+            <a id="btnSave" class="easyui-linkbutton" icon="icon-cancel">成绩存档</a>
+        </p>
+        <div style="padding-left: 200px;line-height:25px;">1、计算总分：计算设定学年学期的课程学评教成绩，目前计算去除前10%和后10%，未参加学生不参与计算，并将其状态设定为不可见。<br/>
+        2、成绩存档：将计算好的课程学评教成绩存档，此过程将会删除原有的记录，必须谨慎使用。在存档以后，“考评结果查询”中才能查询到结果。</div>
+	</form>
+</div>
+</body>
+<script>
+$(function(){
+	 //计算总分
+    $('#btnCount').bind('click',function(){
+        if($('#init [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');return;
+        }
+        if($('#init [name=TERM]').val()==""){
+            $.messager.alert('提示','请输入学期!');return;
+        }
+        var ct={
+            YEAR:$('#init [name=YEAR]').val(),            //学年
+            TERM:$('#init [name=TERM]').val(),
+            FLAG:1 };
+        $.ajax({
+            url:'__URL__/entry/hasJson/1',
+            type:'POST',
+            data:ct,
+            success: function(C){
+            	if(C){
+            		$.messager.alert('提示','数据已成功完成更新！');
+            	}else{
+            		$.messager.alert('提示','未知原因，操作失败！');
+            	}
+            }
+        });
+    });
+
+    //成绩存档
+    $('#btnSave').bind('click',function(){
+    	if($('#init [name=YEAR]').val()==""){
+            $.messager.alert('提示','请输入学年!');return;
+        }
+        if($('#init [name=TERM]').val()==""){
+            $.messager.alert('提示','请输入学期!');return;
+        }
+        var ct={
+            YEAR:$('#init [name=YEAR]').val(),            //学年
+            TERM:$('#init [name=TERM]').val(),
+            FLAG:2 };
+        $.ajax({
+            url:'__URL__/entry/hasJson/1',
+            type:'POST',
+            data:ct,
+            success: function(C){
+            	if(C){
+            		$.messager.alert('提示','数据已成功完成更新！');
+            	}else{
+            		$.messager.alert('提示','没有评教成绩可进行归档，操作失败！');
+            	}
+            }
+        });
+    });
+});
+</script>
+</html>

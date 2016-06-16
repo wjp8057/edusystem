@@ -1,0 +1,504 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+eval('one1=\'{$examtype}\'')
+eval('two1=\'{$xktype}\'')
+eval('three1=\'{$kaoshijibie}\'')
+eval('four1=\'{$kctype}\'')
+/*alert( for( var ieval(one1))*/
+//eval('one=\'{$sjson}\'')
+var total=0;
+var bixiu_credit=0;
+var xuanxiu_credit=0;
+var xianxiu_credit=0;
+var kaoshi_credit=0;
+var kaocha_credit=0;
+$(function() {
+
+
+
+
+
+
+    var classNoArr = {}; //已经选择的班级
+    $('#e_save').bind('click',function(){
+        var rowlist=$('#datagrid').datagrid('getRows')
+        for(var i=0;i<rowlist.length;i++){
+            $('#datagrid').datagrid('endEdit',i)
+        }
+        var rows=$('#datagrid').datagrid('getChanges')
+        ajiakesi('__URL__/updateP/hasJson/1',{bind:rows},function(c){
+            total=0;
+            bixiu_credit=0;
+            xuanxiu_credit=0;
+            xianxiu_credit=0;
+            kaoshi_credit=0;
+            kaocha_credit=0;
+            datagrid.datagrid('reload')
+        })
+    })
+    var datagrid = $('#datagrid').datagrid({
+        toolbar: '#toobar',
+        frozenColumns:[[{field:'ck',checkbox:true}]],
+        url : "__ROOT__ /Programs/TeachingPlan/courselistTemplate/hasJson/true/programno/{$Think.request.programno}",
+        onBeforeLoad:function(){
+            $(this).datagrid("clearSelections");
+            $(this).datagrid("unselectAll");
+        },onRowContextMenu:function(e,rowindex,row){
+            datagrid.datagrid('rejectChanges')
+            var tt=$('#datagrid');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },onLoadSuccess:function(data){
+
+            $('#TOTAL').html(total+'分')
+            $('#bixiu_credit').html(bixiu_credit+'分')
+            $('#xuanxiu_credit').html(xuanxiu_credit+'分')
+            $('#xianxiu_credit').html(xianxiu_credit+'分')
+            $('#kaoshi_credit').html(kaoshi_credit+'分')
+            $('#kaocha_credit').html(kaocha_credit+'分')
+
+
+        },onClickRow:function(index,row){
+                var rowlist=$('#datagrid').datagrid('getRows')
+                for(var i=0;i<rowlist.length;i++){
+                    $('#datagrid').datagrid('endEdit',i)
+                }
+                $('#datagrid').datagrid('beginEdit',index);
+
+      /*      //todo:点保存
+                var rowlist=$('#datagrid').datagrid('getRows')
+                for(var i=0;i<rowlist.length;i++){
+                    $('#datagrid').datagrid('endEdit',i)
+                }
+                datagrid.datagrid('beginEdit',index)*/
+        }/*,onAfterEdit:function(index,row,changes){
+            ajiakesi('__URL__/updateP/hasJson/1',row,function(c){
+                 total=0;
+                 bixiu_credit=0;
+                 xuanxiu_credit=0;
+                 xianxiu_credit=0;
+                 kaoshi_credit=0;
+                 kaocha_credit=0;
+                datagrid.datagrid('reload')
+            })
+        }*/
+    });
+    var _dataSearch = null;
+    var _dataSelect = null;
+
+    //初始化
+    function initDataSearch(){
+        if(_dataSearch==null){
+            _dataSearch = $('#dataSearch').datagrid({
+                toolbar:'#toobarSearch',
+                frozenColumns:[[{field:'ck',checkbox:true}]],
+                onBeforeLoad:function(){
+                    $(this).datagrid("clearSelections");
+                    $(this).datagrid("unselectAll");
+                }
+            });
+        }else{
+            _dataSearch.datagrid('loadData',{total:0,rows:[]});
+        }
+    }
+    function initDataSelect(){
+        if(_dataSelect==null){
+            _dataSelect = $('#dataSelect').datagrid({toolbar:'#toobarSelect',frozenColumns:[[{field:'ck',checkbox:true}]]});
+        }else{
+            _dataSelect.datagrid('loadData',{total:0,rows:[]});
+        }
+    }
+
+    //重新读取数据
+    $("#handlerReload").bind("click",function(){
+        datagrid.datagrid("reload");
+    })
+
+
+    function ddel(){
+        if("{$programs.SCHOOL}"!="{$theacher.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1'){
+            msgShow("系统提示：","<br />别试图删除别的学院的教学计划课程！","error");
+            return;
+        }
+
+        var rows = datagrid.datagrid("getSelections");
+        if(rows == null || rows.length==0){
+            msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+            return;
+        }
+        var arr = new Array();
+        if(rows!=null && rows.length>0){
+            $.each(rows, function(index,row){
+                arr.push(row.CourseNo);
+            });
+        }
+
+        $.messager.confirm('系统消息：','你真的确定要删除选中的顶？',function(r){
+            if (r){
+                $.post("__ROOT__/Programs/TeachingPlan/courseDelete/hasJson/true/PROGRAMNO/{$programs.PROGRAMNO}", {COURSENO:arr}, function(rsp) {
+                    if(rsp){
+                        $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        datagrid.datagrid("reload");
+                    }
+                },"JSON");
+            }
+        });
+    }
+    //删除修读课程
+    $("#handlerDelete").bind("click",ddel);
+    $('#admin_del').bind('click',ddel)
+
+    //打开添加修学班级界面
+    $("#handlerAdd").bind("click",function(){
+        if("{$programs.SCHOOL}"!="{$theacher.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1'){
+            msgShow("系统提示：","<br />你不可以改变其它学院的教学计划课程！","error");
+            return;
+        }
+        classNoArr = {}; //重置已经选择的班级
+        $('#win').window('open');
+        $('#win').window('maximize');
+        initDataSearch();
+        initDataSelect();
+    });
+    //添加修学班级 - 班级搜索
+    $("#searcher").bind("click",function(){
+        _dataSearch.datagrid("options").url = "__ROOT__/Programs/TeachingPlan/courseAdd/hasJson/true";
+        _dataSearch.datagrid("load", {
+            COURSENAME:$("#COURSENAME").val(),
+            COURSENO:$("#COURSENO").val(),
+            SCHOOL:$("#SCHOOL").val(),
+            COURSETYPE:$("#COURSETYPE").val()
+        })
+    });
+    //添加修学班级 - 从左边到右边
+    $('#AddToRight').bind("click",function(){
+        var rows = _dataSearch.datagrid("getSelections");
+        if(rows==null || rows.length==0){
+            msgShow("系统提示：","没有选择任何数据进行操作！","error");
+            return;
+        }
+
+        $.each(rows,function(index,row){
+            if(classNoArr[row.CourseNo]!=row.CourseNo){
+                classNoArr[row.CourseNo]=row.CourseNo;
+                _dataSelect.datagrid("insertRow",{row:{CourseNo:row.CourseNo,CourseName:row.CourseName,Credits:row.Credits,SchoolName:row.SchoolName}});
+            }
+        })
+        $('#dataSelect').datagrid("clearSelections");
+    });
+    //添加修学班级 - 从右边删除
+    $('#DeleteToRight').bind("click",function(){
+        var rows = _dataSelect.datagrid("getSelections");
+        for(var i = rows.length - 1; i >= 0; i--){
+            var row = rows[i];
+            classNoArr[row.CourseNo] = null;
+            _dataSelect.datagrid('deleteRow', _dataSelect.datagrid('getRowIndex', row));
+        }
+    });
+    //添加修学班级 - 把记录添加到数据表
+    $('#listToDb').bind("click",function(){
+        if("{$programs.SCHOOL}"!="{$theacher.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1'){
+            msgShow("系统提示：","<br />你不可以改变其它学院的教学计划课程！","error");
+            return;
+        }
+        $.post("__ROOT__/Programs/TeachingPlan/courseSave/hasJson/true/PROGRAMNO/{$programs.PROGRAMNO}", {COURSENO:classNoArr}, function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+                datagrid.datagrid("reload");
+            }
+        },"JSON");
+        $('#win').window('close');
+        datagrid.datagrid("reload");
+    })
+    function eedit(){
+
+        if("{$programs.SCHOOL}"!="{$theacher.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1'){
+            msgShow("系统提示：","<br />别试图删除别的学院的教学计划课程！","error");
+            return;
+        }
+        var rows = datagrid.datagrid("getSelections");
+        if(rows == null || rows.length==0){
+            msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+            return;
+        }
+        //bindForms(rows[0]);
+
+        $("#winForms").window("open");
+
+    }
+
+    $("#handlerEdit").bind("click",eedit);
+    $('#admin_edit').bind('click',eedit)
+
+    $("#wfCancel").bind("click",function(){
+        $("#winForms").window("close");
+    })
+    $("#wfOK").bind("click",function(){
+
+        if("{$programs.SCHOOL}"!="{$theacher.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1'){
+            msgShow("系统提示：","<br />别试图删除别的学院的教学计划课程！","error");
+            return;
+        }
+        $.post("__ROOT__/Programs/TeachingPlan/courseUpdate/hasJson/true/PROGRAMNO/{$programs.PROGRAMNO}", getValueForms(), function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+                if(rsp.type=="info"){
+                    datagrid.datagrid("reload");
+                    $("#winForms").window("close");
+                }
+            }
+        },"JSON");
+    });
+
+    //把数据绑定到form
+    function bindForms(row){
+        $.each(row, function(key, value) {
+            var obj = $("#w"+key);
+            var tagName =obj.prop("tagName");
+            if(tagName){
+                if(tagName.toLowerCase()=="div") obj.html(value);
+                else if(tagName.toLowerCase()=="select") obj.val(value);
+                else if(tagName.toLowerCase()=="input"){
+                    if(obj.attr("type")=="text") obj.val(value);
+                    else if(obj.attr("name")=="Weeks" && value){
+                        for(var i=18; i>0; i--){
+                            if(value.length>=i && value.substr(i-1,1)=="1")
+                                $("input[name='Weeks'][value='"+i+"']").attr("checked",true);
+                            else
+                                $("input[name='Weeks'][value='"+i+"']").attr("checked",false);
+                        }
+                    }
+                }
+            }
+        });
+    }
+    //获得数据
+    function getValueForms(){
+        var weeks = "";
+        $("input[name='Weeks']").each(function(data){
+            if($(this).attr("checked"))  weeks += "1";
+            else weeks += "0";
+        });
+        return {
+            COURSENO : $("#wCourseNo").html(),
+            YEAR : $("#wYear").val(),
+            TERM : $("#wTerm").val(),
+            EXAMTYPECODE : $("#wExamTypeCode").val(),
+            TESTCODE : $("#wTestCode").val(),
+            CATEGORYCODE : $("#wCategoryCode").val(),
+            COURSETYPECODE : $("#wCourseTypeCode").val(),
+            WEEKS : weeks
+        }
+    }
+
+
+
+
+ });
+function openNewWindow(param,programno){
+    openTabsWindows('课程详细','__ROOT__/Programs/TeachingPlan/courselistTemplate/godetail/1/courseno/'+param+"/programno/"+ $.trim(programno));
+}
+function  gotoDetail(val,row){
+    var param = '"'+row.CourseNo+'"';
+    var programno = '"{$programs.PROGRAMNO}"';
+    return "<a STYLE='COLOR: BLUE' href='javascript:openNewWindow("+param+","+programno+")'>"+row.CourseNo+'</a>  ';
+}
+
+
+
+
+
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+   <!-- <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" width="100%" >
+        <tr><th><b>{$programs.PROGRAMNO}{$programs.PROGNAME}的课程列表</b></th></tr>
+        </table>
+    </div>-->
+    <div data-options="region:'north',border:false,split:false" style="height:50px" >
+        <center>{$programs.PROGRAMNO}{$programs.PROGNAME}的课程列表<br>总学分:<span id="TOTAL"></span>&nbsp&nbsp必修学分:<span id="bixiu_credit"></span>
+        &nbsp&nbsp选修学分:<span id="xuanxiu_credit"></span>&nbsp&nbsp限修学分<span id="xianxiu_credit"></span><br>
+        考试学分:<span id="kaoshi_credit"></span>&nbsp&nbsp考查学分:<span id="kaocha_credit"></span></center>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table title='' id="datagrid" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="CourseNo"
+               pagination="false" striped="true" >
+            <thead>
+            <tr><th data-options="field:'CourseNo',align:'center',width:150,formatter:gotoDetail" >课程编号</th>
+                <th data-options="field:'CourseName',align:'center',width:300">课程名称</th>
+                <th data-options="field:'Credits',align:'center',width:100,formatter:function(a,b,c){
+                    total+=parseFloat(a);
+                   return a;
+                }">学分</th>
+                <th data-options="field:'Hours',align:'center',width:100">周课时</th>
+                <th data-options="field:'SchoolName',align:'center',width:250">开课单位</th>
+                <th data-options="field:'Year',align:'center',width:100,editor:{
+            type:'text'}">开课学年</th>
+                <th data-options="field:'Term',align:'center',width:100,editor:{
+            type:'text'}">开课学期</th>
+                <th data-options="field:'ExamType',align:'center',width:100,formatter:function(a,b,c){
+                         if($.trim(a)=='考试'){
+                            kaoshi_credit+=(parseFloat(b.Credits))
+                         }else if($.trim(a)=='考查'){
+                            kaocha_credit+=(parseFloat(b.Credits))
+                         }
+                         return a
+                },editor:{
+            type:'combobox',options:
+            {data:eval(one1),panelHeight:'auto'}
+        }">考核方式</th>
+                <th data-options="field:'CourseType',align:'center',width:100,formatter:function(a,b,c){
+                        if($.trim(a)=='必修'){
+                            bixiu_credit+=(parseFloat(b.Credits))
+                        }else if($.trim(a)=='选修'){
+                            xuanxiu_credit+=(parseFloat(b.Credits))
+                        }else if($.trim(a)=='限修'){
+                            xianxiu_credit+=(parseFloat(b.Credits))
+                        }
+                        return a;
+
+
+                },editor:{
+            type:'combobox',options:
+            {
+                data:eval(two1)
+            }
+        }">修课方式</th>
+                <th data-options="field:'TESTVALUE',align:'center',width:100,editor:{
+            type:'combobox',options:
+            {
+                data:eval(three1)
+            }
+        }">考试级别</th>
+                <th data-options="field:'CATEGORYVALUE',align:'center',width:170,editor:{
+            type:'combobox',options:
+            {
+                data:eval(four1)
+            }
+        }">课程类别</th>
+                <th data-options="field:'Weeks',align:'center',width:300">上课周次</th></tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+<div id="toobar">
+    <a href="#" id="handlerReload" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true" >刷新</a>
+<!--    <a href="#" id="handlerEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" >修改课程</a>-->
+  <!--  <a href="#" id="handlerSave" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true" >保存</a>-->
+    <a href="#" id="handlerDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >删除选定课程</a>
+    <a href="#" id="handlerAdd" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true">添加课程</a>
+    <a href="#" id="e_save" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:true">保存</a>
+</div>
+
+<!-- 添加界面 -->
+<div id="win" class="easyui-window" style="width:600px;height:400px" title="添加修读课程" data-options="minimizable:false,collapsible:false,modal:true,closed:true">
+    <div class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'west',split:true">
+            <div class="easyui-layout" data-options="fit:true,border:false"  style="height: 100%">
+            <div data-options="region:'north',split:false,border:false" style="height:60px;background:#E0ECFF;overflow: hidden">
+                <table style="margin-left:20px" height="60">
+                    <tr><th>课名：</th><td><input type="text" name="COURSENAME" id="COURSENAME" value="%" size="20" /></td>
+                        <th>课号：</th><td><input type="text" name="COURSENO" id="COURSENO" value="%" size="20" /></td><td></td></tr>
+                    <tr><th>所在学院：</th><td><Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" /></td>
+                        <th>课程类别：</th><td><Cwebs:sqlselect id="COURSETYPE" name="COURSETYPE" value="CODE" title="NAME" headerKey="%" headerTitle="所有" file="course/courseTypeOptions.sql" /></td>
+                        <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+                    </tr>
+                </table>
+            </div>
+            <div data-options="region:'center',border:false" >
+                <table id="dataSearch" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="CourseNo"
+                       pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+                    <thead>
+                    <tr><th data-options="field:'CourseNo',align:'center',width:150,formatter:gotoDetail" >课号</th>
+                        <th data-options="field:'CourseName',align:'center',width:300">课名</th>
+                        <th data-options="field:'Credits',align:'center',width:250">学分</th>
+                        <th data-options="field:'COURSETYPE',align:'center',width:250">课程类别</th>
+                        <th data-options="field:'SchoolName',align:'center',width:250">开课学院</th></tr>
+                    </thead>
+                </table>
+            </div>
+            </div>
+        </div>
+        <div data-options="region:'center'">
+            <table id="dataSelect" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true" idField="CourseNo" striped="true" >
+                <thead>
+                <tr><th data-options="field:'CourseNo',align:'center',width:150" >课号</th>
+                    <th data-options="field:'CourseName',align:'center',width:300">课名</th>
+                    <th data-options="field:'Credits',align:'center',width:250">学分</th>
+                    <th data-options="field:'SchoolName',align:'center',width:250">开课学院</th></tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="toobarSearch">
+    <a href="#" id="AddToRight" class="easyui-linkbutton" data-options="iconCls:'icon-redo',plain:true" >将选中课程添加到右边</a>
+</div>
+<div id="toobarSelect">
+    <a href="#" id="DeleteToRight" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" >将选中课程从列表中取消</a>
+    <a href="#" id="listToDb" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" >将列表提交数据库</a>
+</div>
+
+<!-- 编辑界面 -->
+<div id="winForms" class="easyui-window" title="课程修改" style="width:480px;height:290px" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding="3" border="0" cellspacing="0">
+                <tr><th align="right">课程编号：</th><td><div id="wCourseNo"/></td>
+                    <th align="right">课程名称：</th><td><div id="wCourseName"/></td></tr>
+                <tr><th align="right">开课学院：</th><td><div id="wSchoolName"/></td>
+                    <th align="right">学分：</th><td><div id="wCredits"/></td></tr>
+                <tr><th align="right">开课学年：</th><td><input id="wYear" type="text" name="Year" /></td>
+                    <th align="right">开课学期：</th><td><input id="wTerm" type="text" name="Term" /></td></tr>
+                <tr><th align="right">考核方式：</th><td><Cwebs:sqlselect id="wExamTypeCode" name="ExamType" value="CODE" title="NAME" file="common/examOptions.sql" /></td>
+                    <th align="right">修课方式：</th><td><Cwebs:sqlselect id="wCourseTypeCode" name="CourseType" value="CODE" title="NAME" file="common/approaches.sql" /></td></tr>
+                <tr><th align="right">考试级别：</th><td><Cwebs:sqlselect id="wTestCode" name="TESTVALUE" value="CODE" title="NAME" file="common/testlevels.sql" /></td>
+                    <th align="right">课程类别：</th><td><Cwebs:sqlselect id="wCategoryCode" name="CATEGORYVALUE" value="CODE" title="NAME" headerKey="" headerTitle="请选择" file="common/coursecatOptions.sql" /></td></tr>
+                <tr><th align="right">上课周次：</th><td colspan="3">
+                    <input type="checkbox" id="wWeeks" name="Weeks" value="1" />第一周　
+                    <input type="checkbox" name="Weeks" value="2" />第二周　
+                    <input type="checkbox" name="Weeks" value="3" />第三周　
+                    <input type="checkbox" name="Weeks" value="4" />第四周　
+                    <input type="checkbox" name="Weeks" value="5" />第五周<br />
+                    <input type="checkbox" name="Weeks" value="6" />第六周　
+                    <input type="checkbox" name="Weeks" value="7" />第七周　
+                    <input type="checkbox" name="Weeks" value="8" />第八周　
+                    <input type="checkbox" name="Weeks" value="9" />第九周　
+                    <input type="checkbox" name="Weeks" value="10" />第十周<br />
+                    <input type="checkbox" name="Weeks" value="11" />第十一周
+                    <input type="checkbox" name="Weeks" value="12" />第十二周
+                    <input type="checkbox" name="Weeks" value="13" />第十三周
+                    <input type="checkbox" name="Weeks" value="14" />第十四周
+                    <input type="checkbox" name="Weeks" value="15" />第十五周<br />
+                    <input type="checkbox" name="Weeks" value="16" />第十六周
+                    <input type="checkbox" name="Weeks" value="17" />第十七周
+                    <input type="checkbox" name="Weeks" value="18" />第十八周
+                </td></tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="wfOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="wfCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id="admin_edit">修改课程</div>
+    <div id='admin_del'>删除选定课程 </div>
+</div>
+</body>
+
+</html>
+
+

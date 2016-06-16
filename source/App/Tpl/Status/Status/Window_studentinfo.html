@@ -1,0 +1,97 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<body style="background-color: #fff">
+<div id="wd1">
+    <br />
+    <br />
+    <table  align="center" border="1" style="border:1px" width="82%" cellspacing="0" bordercolor="#000000" cellpadding="0">
+        <tr>
+            <td width=12% align="right" height="23"><b>准考证号：</b></td>
+            <td width=65%  height="23" ><b>{$content.EXAMNO}</b></td>
+            <td  height="230" rowspan="10" colspan="2" width="25%"><img border="0" src="/pictures/<#PARAMETER NAME=NEWSTUDENTNO>.jpg" width="20%" height="233"></td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23" ><b>学号：</b></td>
+            <td width=65%  height="23"><b>{$content.STUDENTNO}</b></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><b>姓名：</b></td>
+            <td width=65%  height="23"><b>{$content.NAME}</b></td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23">性别：</td>
+            <td width=65%  height="23">{$content.SEX}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">出生日期：</td>
+            <td width=65%  height="23">{$content.BIRTHDAY}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">民族：</td>
+            <td width=65%  height="23">{$content.NATIONALITY_NAME}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">政治面貌：</td>
+            <td width=65%  height="23">{$content.PARTY_NAME}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">考生类别码：</td>
+            <td width=65%  height="23">{$content.CLASS_NAME}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">考生特征码：</td>
+            <td width=65%  height="23">{$content.FEATURE_NAME}</td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23">录取计划类别：</td>
+            <td width=65%  height="23">{$content.PLANCLASS_NAME}</td>
+        </tr>
+    </table>
+    <table  align="center" border="1" style="border:1px"  width="82%" cellspacing="0" bordercolor="#000000" cellpadding="0" >
+        <tr>
+            <td  width=12% align="right" height="23">邮编：</td>
+            <td  width=40% height="23" >{$content.POSTCODE}1</td>
+            <td  width=12% align="right" height="23">家庭住址：</td>
+            <td  width=40% height="23" >{$content.ADDRESS}1</td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23">家庭电话：</td>
+            <td width=40%  height="23" >{$content.TEL}</td>
+            <td width=12%  align="right" height="23">原毕业院校：</td>
+            <td width=40%  height="23" >{$content.MIDSCHOOL}</td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23">录取学制：</td>
+            <td width=12%  height="23" >{$content.YEARS}</td>
+            <td width=12%  align="right" height="23">录取学院：</td>
+            <td width=40%  height="23" >{$content.SCHOOL_NAME}</td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23">录取专业：</td>
+            <td width=40%  height="23" >{$content.MAJOR_NAME}</td>
+            <td width=12%  align="right" height="23">高考总分：</td>
+            <td width=40%  height="23" >{$content.SCORE}</td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23">身份证：</td>
+            <td width=40%  height="23" >{$content.ID}</td>
+            <td width=12%  align="right" height="23">省份代码：</td>
+            <td width=40%  height="23" >{$content.PROVINCE_NAME>}</td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23">学科类别：</td>
+            <td width=40%  height="23" >{$content.BRANCH_NAME}</td>
+            <td width=12%  align="right" height="23">录取日期：</td>
+            <td width=40%  height="23" >{$content.DATE}</td>
+        </tr>
+        <tr>
+            <td  align="right" height="23">备注：</td>
+            <td height="23" colspan="3"><font size="3">{$content.REM}</td>
+        </tr>
+    </table>
+    <br />
+    <br />
+    <center> <a href="javascript:void(0)" id="tijiao"></a></center>
+</div>
+        </body>
+        </html>

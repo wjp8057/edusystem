@@ -1,0 +1,114 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            url:"__ROOT__ /CoursePlan/TranStopCourses/schoolApproval/hasJson/true",
+            queryParams:{YEAR:$("#YEAR").val(),TERM:$("#TERM").val()},
+            onBeforeLoad:function(){
+                $(this).datagrid("clearSelections");
+                $(this).datagrid("unselectAll");
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        //搜索事件
+        $("#searcher").bind("click",function(){
+            //datagrid.datagrid("options").url = "__ROOT__ /CoursePlan/TranStopCourses/schoolApproval/hasJson/true";
+            datagrid.datagrid("load", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()});
+        });
+
+        $("#verifyYes").bind("click",function(){
+            doVerify(1);
+        });
+        $('#admin_tg').bind('click',function(){
+            doVerify(1)
+        })
+
+        $("#verifyNo").bind("click",function(){
+            doVerify(0);
+        })
+
+        $('#admin_butg').bind('click',function(){
+            doVerify(0);
+        })
+
+        function doVerify(right){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+             });
+
+            $.messager.confirm('系统消息：','你真的确定要对选中的项进行审核？',function(r){
+                if (r){
+                    $.post("__ROOT__ /CoursePlan/TranStopCourses/doVerify/hasJson/true", {RIGHT:right,ITEMS:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+ <!--   <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" cellspacing="0" cellpadding="0" >
+            <tr><th align="left">
+                </th>
+            </tr>
+        </table>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" border="0" width="100%" singleSelect="false" fit="true"
+               pagination="false" pageSize="20" pageList="[20,40,60]" striped="true" idField="RECNO"  >
+            <thead>
+            <tr><th data-options="field:'COURSENO',sortable:true,align:'center',width:100" >课号</th>
+                <th data-options="field:'COURSENAME',align:'center',width:200">课名</th>
+                <th data-options="field:'TEACHERNAME',sortable:true,align:'center',width:80">任课教师</th>
+                <th data-options="field:'TIME',sortable:true,align:'center',width:200">调停课时间</th>
+                <th data-options="field:'SUBMIT',sortable:true,align:'center',width:80">申请人</th>
+                <th data-options="field:'SUBMITDATE',sortable:true,align:'center',width:130">申请时间</th>
+                <th data-options="field:'REASON',sortable:true,align:'center',width:340">申请理由</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    学年：<input type="text" id="YEAR" size="10" >&nbsp;&nbsp;
+    学期：<input type="text" id="TERM" size="10" >&nbsp;&nbsp;
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#" id="verifyYes" class="easyui-linkbutton" data-options="iconCls:'icon-ok',plain:true">审核通过</a>
+    <a href="#" id="verifyNo" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true">审核不通过并删除申请</a>
+</div>
+</body>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_tg'>审核通过</div>
+    <div id='admin_butg'>审核不通过并删除申请</div>
+</div>
+</html>
+

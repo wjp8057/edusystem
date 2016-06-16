@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <link id='themes_css' rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/default/easyui.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/js/themes/icon.css" />
+    <link rel="stylesheet" type="text/css" href="__ROOT__/thirdparty/jquery/css/css.css" />
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.validate.js"></script>
+    <script type="text/javascript" src='__ROOT__/thirdparty/jquery/js/cwebsFrame.js'> </script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/easyui.extend.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/jquery.json.js"></script>
+    <script type="text/javascript" src="__ROOT__/thirdparty/jquery/js/datagrid.js"></script>
+    <script type="text/javascript">
+        var current_datagrid=null;
+        var current_datagrid_obj=null;
+        var workload_stand_obj=new Object();
+        workload_stand_obj.editIndex=undefined; //用于存储填写时的index
+        var userSchool=$('#school', parent.document).val();
+        var workload_stand_cmenu_obj=new Object();
+        workload_stand_cmenu_obj.cmenu=""; //标题行右键菜单
+
+        var workload_stand_obj2=new Object();
+        workload_stand_obj2.editIndex=undefined; //用于存储填写时的index
+        var workload_stand_cmenu_obj2=new Object();
+        workload_stand_cmenu_obj2.cmenu=""; //标题行右键菜单
+
+        $(function(){
+            var tt=$('#workload_stand_dg');
+            tt.datagrid({
+                idField:'job',
+                title:'各类岗位教学课时要求',
+                striped:'true',
+                rownumbers:true,
+                singleSelect:true,
+                url:'/Workload/Stand/query?hasJson=true',
+                toolbar:'#workload_stand_toolbar',
+                columns:[[
+
+                    {field:'jobname',title:'岗位类型',width:100,align:'center'},
+                    {field:'stand',title:'要求课时*',width:120,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'exceedstand',title:'课时上限*',width:120,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}}
+                ]],
+                //标题行右键菜单
+                onHeaderContextMenu: function(e, field){
+                    e.preventDefault();
+                    if (!workload_stand_cmenu_obj.cmenu)//没有的话创建一个
+                        $('#workload_stand_dg').datagrid('createColumnMenu',workload_stand_cmenu_obj);
+                    workload_stand_cmenu_obj.cmenu.menu('show', {
+                        left:e.pageX,
+                        top:e.pageY
+                    });
+                },
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_stand_obj.index=index; //初始化参数
+                    workload_stand_obj.field=field;
+                    $('#workload_stand_dg').datagrid('startEditing',workload_stand_obj);
+                    current_datagrid=$('#workload_stand_dg');
+                    current_datagrid_obj=workload_stand_obj;
+                }
+
+            });
+            //绑定新建按钮事件
+
+            $("#workload_stand_cancel").click(function(){
+                var tt= $('#workload_stand_dg');
+                endEditing(tt,workload_stand_obj);
+                tt.datagrid('rejectChanges');
+            });
+            //绑定点击保存按钮事件
+            $("#workload_stand_save").click(function(){
+                var tt=$('#workload_stand_dg');
+                if(!endEditing(tt,workload_stand_obj)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getRows');
+                rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                if(count<=0) //如果没有任何更新，就退出
+                    return;
+
+                $('#w').window('open');
+                $.post('/Workload/Stand/update?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+
+
+            tt=$('#workload_stand_dg2');
+            tt.datagrid({
+                idField:'id',
+                title:'各类人员各级别课时费标准',
+                striped:'true',
+                rownumbers:true,
+                singleSelect:true,
+                url:'/Workload/Stand/query2?hasJson=true',
+                toolbar:'#workload_stand_toolbar2',
+                columns:[[
+
+                    {field:'typename',title:'教师类型',width:100,align:'center'},
+                    {field:'levelname',title:'职称级别',width:100,align:'center'},
+                    {field:'perwork',title:'一般标准（元）*',width:120,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}},
+                    {field:'exceedperwork',title:'超课时标准（元）*',width:120,align:'center' ,editor:{type:'numberbox',options:{precision:0,required:true}}}
+                ]],
+                //标题行右键菜单
+                onHeaderContextMenu: function(e, field){
+                    e.preventDefault();
+                    if (!workload_stand_cmenu_obj2.cmenu)//没有的话创建一个
+                        $('#workload_stand_dg2').datagrid('createColumnMenu',workload_stand_cmenu_obj2);
+                    workload_stand_cmenu_obj2.cmenu.menu('show', {
+                        left:e.pageX,
+                        top:e.pageY
+                    });
+                },
+                //点击单元格时候的事件
+                onClickCell:function(index, field){
+                    workload_stand_obj2.index=index; //初始化参数
+                    workload_stand_obj2.field=field;
+                    $('#workload_stand_dg2').datagrid('startEditing',workload_stand_obj2);
+                    current_datagrid=$('#workload_stand_dg2');
+                    current_datagrid_obj=workload_stand_obj2;
+                }
+
+            });
+
+            $("#workload_stand_save2").click(function(){
+                var tt=$('#workload_stand_dg2');
+                if(!endEditing(tt,workload_stand_obj2)) return;//结束编辑,如果没有验证通过就退出
+                //获取更改的数据行内容
+                var rows=tt.datagrid('getRows');
+                rows=tt.datagrid('getChanges','updated');
+                var count=0;
+                var effectRow = new Object();
+                if(rows.length>0){
+                    count+=rows.length;
+                    effectRow["updated"]=$.toJSON(rows);
+                }
+                if(count<=0) //如果没有任何更新，就退出
+                    return;
+
+                $('#w').window('open');
+                $.post('/Workload/Stand/update2?hasJson=true',effectRow,function(result){
+                    if (result.status==1){
+                        tt.datagrid('acceptChanges');
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert(result.status,result.info,'error');
+                    }
+                },'json').always(function() {
+                    $('#w').window('close');
+                });
+            });
+
+            $("#workload_stand_cancel2").click(function(){
+                var tt= $('#workload_stand_dg2');
+                endEditing(tt,workload_stand_obj2);
+                tt.datagrid('rejectChanges');
+            });
+        });
+    </script>
+    <title>工作量统计</title>
+</head>
+<body>
+<div id="w" class="easyui-window" title="请稍候..."
+     data-options="modal:true,closed:true,closable:false,minimizable:false,maximizable:false,iconCls:'icon-shield'"
+     style="width:250px;height:80px;padding:10px;">数据更新中，请稍候！
+</div>
+<div class="container">
+    <div id="workload_stand_toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_stand_save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_stand_cancel">取消</a>
+    </div>
+    <table id="workload_stand_dg">
+    </table>
+    <div class="space"></div>
+    <div id="workload_stand_toolbar2">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save',plain:'true'" id="workload_stand_save2">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:'true'" id="workload_stand_cancel2">取消</a>
+    </div>
+    <table id="workload_stand_dg2">
+    </table>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>可以按 Tab键进入下一个编辑单元格，或者按 Enter键进入下一行。</li>
+        </ol>
+    </div>
+</div>
+</body>

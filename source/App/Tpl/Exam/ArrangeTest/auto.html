@@ -1,0 +1,170 @@
+<include file=":Include:jqueryHeader" />
+<script type="text/javascript">
+$(function(){
+    $("#YEAR").val(parent.$("#YEAR").val());
+    $("#TERM").val(parent.$("#TERM").val());
+
+    var batchInput = $("#batch");
+
+    function doArrange(redo){
+        $.post("__ROOT__ /Exam/ArrangeTest/arrangeTest/hasJson/true", {
+            miniFlag:$("#maxBatch").val(), //当前场次需要的最小的场次
+            maxAttendance:$("#maxRs").val(), // 最大人数
+            'year':$("#YEAR").val(),
+            'term':$("#TERM").val(),
+            'batch':$('#selPici').val(),
+            'redo':redo
+        }, function(rsp) {
+            if(rsp){
+                $("#info").html(rsp.message);
+            }
+        },"JSON");
+    }
+
+    //开始排考
+    $("#BtArrangTest").bind("click",function(){
+        if($("#redo01").attr('checked') === 'checked'){
+            return Messager.showConfirm('全部重排将清空已经排号的记录，确认重排？', function (r) {if(r){doArrange(1);}});
+        }else{
+            doArrange(0);
+        }
+    });
+
+    function doImport(type){
+        $.post("__ROOT__/Exam/ArrangeTest/import",
+                {'examtype':$('[name=examType]').val(),
+                    'importtype':type,
+                    'year':$('#YEAR').val(),
+                    'term':$('#TERM').val()
+                },
+                function(c){
+                    return Messager.show(c);
+                }
+        );
+    }
+
+    //导入到TestPlan
+    $('#import').bind('click',function(){
+        if($("#reExp01").attr('checked') === 'checked'){
+            return Messager.showConfirm('全新倒入将清空所有已经排号的记录，确认重排？', function (r) {if(r)doImport(1);});
+        }else{
+            doImport(0);
+        }
+    });
+
+    //自动分配考场
+    $('#fenpei').bind('click',function(){
+        return Messager.showWarning('自动分配考场未能明确具体流程步骤，为安全起见请到<b>“考务管理>>期末考试管理>>安排时间考场>>考试地点设置”</b>页面手动设置！');
+        $.post("__URL__/anpai",
+                {
+                    'priority':$('[name=priority]:checked').val(),
+                    'year':$('#YEAR').val(),
+                    'term':$('#TERM').val(),
+                    'examtype':$('[name=examType]').val()
+                },
+                function(c){
+            $.messager.alert('提示',c)
+        });
+    });
+
+    function resetForm(){
+        $.post("__ROOT__/Exam/ArrangeTest/setDataInfo/hasJson/true",{batch:batchInput.val()}, function(rep){
+            var maxBatchInput = $("#maxBatch");
+            $("#_totalCourse").html(rep.totalCourse);
+            $("#_totalStudent").html(rep.totalStudent);
+            $("#_totalRoom").html(rep.totalRoom);
+            $("#_totalKw").html(rep.totalKw);
+            $("#_totalBatch").html(rep.totalBatch);
+            $("#_maxStudent").html(rep.maxStudent);
+            maxBatchInput.val(rep.maxBatch);
+            $("#maxRs").val(rep.maxStudent+500);
+
+            var testTimes = Math.ceil(parseInt(rep['totalStudent'])/ (parseInt(rep['maxStudent'])+500));
+            if(parseInt(testTimes) > parseInt(rep['maxBatch'])){
+                maxBatchInput.val(testTimes);
+            }
+        });
+    }
+
+    $("#selPici").bind("change",function(e, o){
+        resetForm();
+    });
+    resetForm();
+    //.trigger('change')
+});
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <div data-options="region:'north',split:false,border:false" style="height:200px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px;height: 200px" cellspacing="0" cellpadding="0" >
+            <tr>
+                <th align="left">
+                <label for="year">学年：</label><input type="text" id="YEAR" size="4" />
+                <label for="term">学期：</label><input type="text" id="TERM" size="1"/>
+                <br />
+                当前考试课程数：<span id="_totalCourse">{$dataInfo.totalCourse}</span>门；
+                考生：<span id="_totalStudent">{$dataInfo.totalStudent}</span>人次；
+                当前批次总数：<span id="_totalBatch">{$dataInfo.totalBatch}</span>次；
+                <br />
+                <label for="maxBatch">当前场次需要的最小的场次为：</label>
+                    <input id="maxBatch" type="text" value="" />；<br />
+
+                <!-- 无意义 -->
+                <b style="color: red">
+                    考场：<span id="_totalRoom">{$dataInfo.totalRoom}</span>个；
+                    考位：<span id="_totalKw">{$dataInfo.totalKw}</span>个；
+                </b>
+                <!-- 无意义 -->
+
+                <br />
+                该批次最大单科考生数为：<span id="_maxStudent">{$dataInfo.maxStudent}</span>；
+                <label for="maxRs">允许单场最大人数：</label>
+                <input type="text" id="maxRs" value="" />；
+                <br />
+                <br />
+
+
+
+
+                <label for="selPici">批次:</label>
+                <select name="pici"  id="selPici">
+                    <!-- 不允许全部批次 -->
+                    <!--<option value="0">全部批次</option>-->
+                    <volist name="batches" id="batch">
+                        <option value="{$batch.batch}"> 第{$batch.batch}批</option>
+                    </volist>
+                </select>
+                <input type="radio" name="redo" id="redo01" value="1" checked><label for="redo01">全部重排</label>
+                <input type="radio" name="redo" id="redo02" value="2"><label for="redo02">未排课程</label>
+                <a href="#" id="BtArrangTest" class="easyui-linkbutton" data-options="iconCls:'icon-add'">开始排考</a>
+                <input type="radio" name="priority" id="priority1" value="1" checked>课程班级优先
+                <input type="radio" name="priority" value="2">考场座位优先
+                <a href="#" id="fenpei" class="easyui-linkbutton" data-options="iconCls:'icon-add'">自动分配考场</a>
+                <br /><br />
+
+
+                <label for="examType">考试类型</label>
+                <select name="examType" id="examType">
+                    <option value="M">期末考试</option>
+                    <option value="C">期初补考(未做)</option>
+                    <option value="B">毕业重修(未做)</option>
+                </select>
+                <input type="radio" id="reExp01" name="reExp" value="1" checked>全新导入
+                <input type="radio" id="reExp02" name="reExp" value="0">未导入课程导入
+                <a href="#" id='import' class="easyui-linkbutton" data-options="iconCls:'icon-add'">导入排考结果到考试计划</a><br />
+
+
+
+            </th>
+            </tr>
+        </table>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table style="background: #ffffff;height: 100%" width="100%" cellspacing="0" cellpadding="4"  >
+            <tr><td id="info" valign="top"></td></tr>
+        </table>
+    </div>
+</div>
+
+</body>

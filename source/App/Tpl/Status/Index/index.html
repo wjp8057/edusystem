@@ -1,0 +1,87 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+    "menus": [
+        {"menuid": "6","icon": "icon-sys","menuname": "学籍管理",
+            "menus": [
+                {"menuid": "61","menuname": "学生报到注册","icon": "icon-xupersonal","url": "__ROOT__/index.php?g=Status&m=Status&a=studentregister"},
+                {"menuid": "11","menuname": "在册学生管理","icon": "icon-xuadmin","url": "__ROOT__/index.php?g=Status&m=Status&a=StatusRegGate"},
+                {"menuid": "11","menuname": "报到注册情况查询","icon": "icon-xuchaxun","url": "__ROOT__/index.php?g=Status&m=Status&a=queryStudentReg"},
+                {"menuid": "11","menuname": "添加新学生","icon": "icon-add","url": "__ROOT__/index.php?g=Status&m=Status&a=newStudent"},
+                {"menuid": "11","menuname": "学籍异动查询","icon": "icon-search","url": "__ROOT__/index.php?g=Status&m=Status&a=xuejiyidong"},
+                {"menuid": "11","menuname": "添加学籍异动记录","icon": "icon-xuadd","url": "__ROOT__/index.php?g=Status&m=Status&a=addxuejiyidong"}]
+        }
+    ]
+};
+
+var menuTabs = null;
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "__WELCOME__");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+});
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <span style="float:right; padding-right:20px;" class="head">
+        {$Think.session.S_USER_SCHOOL_NAME}({$Think.session.S_USER_SCHOOL}) {$Think.session.S_USER_INFO.NAME}({$Think.session.S_USER_NAME})
+        <a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a>
+    </span>
+    <span style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></span>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;overflow:hidden; color:#000000; " >
+            <span style="font-size: 20px">一、学籍管理功能简介</span><b><p style="font-size: 15px;padding-left:40px;margin-top: 10px">学籍管理：实现在校生报道注册、学籍异动等管理。包含学生报到注册、在册学生管理、添加新生、报道注册情况查询、学籍异动查询、添加学籍异动记录等模块。</p></b>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">1、学生报到注册:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、学院学籍管理人员可以对本学院的学生进行报到或注册操作，包括按学号进行单个学生注册，或者按班号进行批量整班注册。学院不能对新生进行报到。
+            <br>2、教务处学籍管理人员可以注册所有学生，并对新生进行报到。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">2、在册学生管理:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、学院学籍管理人员可以查看所有学生的学籍信息，但是只能对本开课学院的学生进行注册或报到情况信息的修改操作，也可更改本学院学生的个人基本信息、开除某学生。
+            <br>2、教务处可以对所有学生进行学籍信息进行查看、管理操作。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">3、报到注册情况查询:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以查看全校所有学生的报到注册人数，学生的学籍信息。包括按学院、学科专业、省份分别进行查询该类型的新生报到人数。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">4、添加新学生:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以新增某学院的学生，学号和身份证号唯一，不可重复。</p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">5、学籍异动查询:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">1、学院学籍管理人员可以查看所有学生的学籍异动记录，但是只能对本学院学生的异动记录进行修改。包括警告、记过、开除、奖金、表扬等类型。
+            <br>2、学院学籍管理人员可以查看所有学生的学籍注册信息，但是只能对本学院的学生进行注册、报到情况信息、个人基本信息的修改，批量注销或开除学生的学籍等操作。
+            <br>3、教务处可以对所有学生进行学籍异动记录进行查看、管理操作。
+        </p>
+            &nbsp&nbsp&nbsp&nbsp<b><font style="font-size: 15px">6、添加学籍异动记录:</font></b><p style="font-size: 13px;padding-left:50px;margin-top: 0px">可以新增学生的学籍异动，学院只能新增本学院学生的异动记录，教务处可以新增全校学生的异动记录。</p>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

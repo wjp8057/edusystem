@@ -1,0 +1,70 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var haha={'M':'必修','E':'选修','R':'现修','T':'模块','F':'辅修'}
+    $(function(){
+        $('#run_student').bind('click',function(){
+            var row=$('#List_dat').datagrid('getSelected')
+            if(row==''){
+                return $.messager.alert('提示','请选择一个要查看的学生')
+            }
+            window.open('__URL__/My_student_Page/username/'+row.xh)
+        })
+
+        $('#one_sub').bind('click',function(){
+            if($('[name=CALSSNO]').val()==''&&$('[name=STUDENTNO]').val()==""){
+                return $.messager.alert('提示','你没有设定班号或者学号前几位！');
+            }
+
+            //todo:用学生号前几位查的
+            if($('[name=CLASSNO]').val()==""){
+                $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/Four_select_STUDENTNO.SQL','count':'CourseManager/Four_count_STUDENTNO.SQL'}
+                    ,'bind':{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':STUDENTNO':$('#SNO').val()}})
+
+            }else{
+                //todo:用班级号查
+                $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/Four_select_CLASSNO.SQL',
+                    'count':'CourseManager/Four_count_CLASSNO.SQL'}
+                    ,'bind':{':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val(),':CLASSNO':$('#CLASSNO').val()}})
+
+            }
+
+        })
+
+
+    })
+</script>
+
+<style>
+    .query{border: solid 1px #ccc;margin:50px 20px 20px 20px;padding:10px;}
+    legend{margin-left: 20px;margin-bottom: 10px;}
+    .query span{line-height: 25px;}
+    .query label{font-weight: bold;margin-left:20px;}
+    .query a{margin-left: 20px;}
+</style>
+<body style="background-color: #FFF">
+
+<div id="tdemo">
+        <label>设定班号：</label><input type=text name="CLASSNO" id="CLASSNO" value="" size="7">&nbsp;&nbsp;&nbsp;或者&nbsp;
+        <label>设定学号前几位：</label><input type="text" name="STUDENTNO" id="SNO" value="%" size="9"><a href="javascript:void(0)" id="one_sub" class="easyui-linkbutton">检索</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" id="run_student" iconCls="icon-personal" plain="true">进入学生个人页面</a>
+</div>
+    <table class="easyui-datagrid" id="List_dat"
+           data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,pageList:[20,50,100,200,500],toolbar:'#tdemo'">
+        <thead>
+        <tr>
+            <th data-options="field:'row',checkbox:true">选择</th>
+            <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+            <th data-options="field:'xm',width:220,align:'right'" align="center">姓名</th>
+            <th data-options="field:'xsbj',width:100,align:'right'" align="center">学生班级</th>
+            <th data-options="field:'zxf',width:100,align:'right'" align="center">总学分</th>
+            <th data-options="field:'xkms',width:100,align:'right'" align="center">选课门数</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+</body>
+</html>

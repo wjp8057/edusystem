@@ -1,0 +1,19 @@
+UPDATE TESTPLAN
+SET 监考教师1=:T1,
+监考教师2=:T2,
+监考教师3=:T3,
+监考教师4=:T4,
+监考教师5=:T5,
+监考教师6=:T6,
+监考教师7=:T7,
+监考教师8=:T8,
+监考教师9=:T9,
+ROOMNO1=:R_ONE,
+SEATS1=:S_ONE,
+ROOMNO2=:R_TWO,
+SEATS2=:S_TWO,
+ROOMNO3=:R_THREE,
+SEATS3=:S_THREE,
+FLAG=:FLAG,
+rem=:REM
+WHERE R15=:R15

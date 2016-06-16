@@ -1,0 +1,2 @@
+insert into courses(total,courseno,coursename,credits,hours,lhours,experiments,computing,khours,shours,zhours,type,type2,syllabus,school,rem,limit,quarter)
+values(:total,:courseno,:coursename,:credits,:hours,:lhours,:experiments,:computing,:khours,:shours,:zhours,:type,:type2,:syllabus,:school,:rem,:limit,:quarter)

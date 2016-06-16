@@ -1,0 +1,171 @@
+<include file=":Include:jqueryHeader" />
+<body style="background: #FFFFFF">
+	<div id="content" title=" ">
+	  <form action="__URL__" id="report">
+		<table align="center" border="0"style="margin-top: 50px">
+		 <tr height="50">
+		   <th align="right" width="18%">入校年度：</th>
+		   <td width="30%"><input name="YEAR" class="txt_" value="{$year}" size="8" maxlength="4"> <font color="red">*</font></td>
+		   <th align="right" width="22%">类型：</th>
+		   <td><select name="TYPE">
+		   <volist name="teachertype" id="t">
+		   <option value="{$t.NAME}">{$t.VALUE}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr height="50">
+		   <th align="right">教师号（6位）：</th>
+		   <td><input name="TEACHERNO" class="txt_" size="20" maxlength="6"> <font color="red">*</font></td>
+		   <th align="right">姓名：</th>
+		   <td><input name="NAME" class="txt_" size="16" maxlength="8"> <font color="red">*</font></td>
+		 </tr>
+		 <tr height="50">
+		   <th align="right">性别：</th>
+		   <td>
+		   <volist name="sex" id="s">
+		   <input type="radio" name="SEX" value="{$s.code}" <if condition="$s.code eq 'M'">checked="checked"</if> style="vertical-align:middle;"><label>{$s.name}</label>&nbsp;&nbsp;
+		   </volist>
+		   </td>
+		   <th align="right">职称：</th>
+		   <td><select name="POSITION">
+		   <volist name="position" id="p">
+		   <option value="{$p.NAME}">{$p.VALUE}</option>
+		   </volist>
+		   </select></td>
+		 </tr>
+		 <tr height="30">
+		   <th align="right">学院：</th>
+		   <td><select name="SCHOOL">
+		   <volist name="school" id="s">
+		   <option value="{$s.SCHOOL}" <if condition="$s.SCHOOL eq $user_school">selected="selected"</if>>{$s.NAME}</option>
+		   </volist>
+		   </select></td>
+		   <th align="right">口令（不得低于6位）：</th>
+		   <td><input name="PWD" type="password" value="123456" class="txt_" size="20" maxlength="20"> <font color="red">*</font></td>
+		 </tr>
+		 <tr><th></th><td><font id="SCHOOL" color="red"></font></td>
+		   <td colspan="2" align="right" style="color:#999">口令由不低于6位字符的大小写英文字母、数字或下划线组成&nbsp;&nbsp;</td>
+		 </tr>
+		 <tr style="height: 50px">
+		   <td align="center" colspan="4"><a href="javascript:void(0)" id="addbut">添&nbsp;加</a></td>
+		 </tr>
+		</table>
+	  </form>
+	</div>
+</body>
+<script type="text/javascript">
+$(function(){
+	//按钮样式设置
+	$('#addbut').linkbutton({iconCls: 'icon-add'});
+	//鼠标离开文本框事件
+	$(".txt_").blur(function(){
+		var value=$.trim($(this).val());
+		if(value==""){
+			$(this).next().html("* 必填");
+		}else{
+			if($(this).attr("name")=="TEACHERNO"){
+				$.ajax({
+		            url:"__URL__/validation/hasJson/1",
+		            type:"POST",
+		            data:{VALUE:value},
+		            success: function(data){
+		                if(data > 0) $("[name='TEACHERNO']").next().html("该教师号已存在");
+		                else $("[name='TEACHERNO']").next().html("*");
+		            }
+		        });
+			}else if($(this).attr("name")=="PWD"){
+				reg=/^[A-Za-z0-9_]{6,20}$/;
+				check($(this),false,reg,"输入口令格式错误","口令");
+			}else{
+				$(this).next().html("*");
+			}
+		}
+	});
+	
+	//提交及验证教师信息
+	$("#addbut").click(function(){
+		var bool=true;
+		//学年验证
+		var reg=/^\d{4}$/;
+		if(!check($("[name='YEAR']"),false,reg,"只能输入四位数字","学年")) bool=false;
+		//教师编号验证
+		ele=$("[name='TEACHERNO']");
+		str=$.trim(ele.val());
+		if(str!=""){
+			if($.trim(ele.next().html())!="*")bool=false;
+		}else{
+			ele.next().html("教师号不能为空");bool=false;
+		}
+		//姓名非空验证
+		if(!check($("[name='NAME']"),false,null,null,"姓名")) bool=false;
+		//学院验证SCHOOL
+		var user_school="{$user_school}";
+        var school=$.trim($("[name='SCHOOL']").val());
+
+
+		if(user_school!=school && user_school!="A1"){
+			$("#SCHOOL").html("您不能添加其他学院新教师");
+			bool=false;
+		}else $("#SCHOOL").html("");
+		//口令验证
+		var ele=$("[name='PWD']");
+		reg=/^[A-Za-z0-9_]{6,20}$/;
+		if(!check(ele,false,reg,"输入口令格式错误","口令")) bool=false;
+		
+		//开始提交
+		if(bool){
+			//将信息封装到数组
+			var ary={YEAR:$.trim($("[name='YEAR']").val()),
+					TYPE:$.trim($("[name='TYPE']").val()),
+					TEACHERNO:$.trim($("[name='TEACHERNO']").val()),
+					NAME:$.trim($("[name='NAME']").val()),
+					SEX:$.trim($("[name='SEX']:checked").val()),
+					POSITION:$.trim($("[name='POSITION']").val()),
+					SCHOOL:$.trim($("[name='SCHOOL']").val()),
+					PWD:$.trim($("[name='PWD']").val())};
+			//Ajax方式提交数据
+			$.ajax({
+                url:"__URL__/add/hasJson/1",
+                type:"POST",
+                data:ary,
+                success: function(data){
+                    if(data){
+                    	$.messager.alert("提示","提交数据成功！");
+                    	$("#report")[0].reset();
+                    }else{
+						$("[name='NAME']").next().html("姓名是否有重复？");
+						$.messager.alert("提示","数据提交失败！请检查您提交的数据是否合法");
+					}
+                }
+            });
+		}
+	});
+	//子窗口
+	$("#content").window({
+        height:400,
+        width:820,
+        modal:true,
+        minimizable:false,
+        maximizable:false,
+        closable:false,
+        collapsible:false,
+        draggable:false,
+        resizable:false,
+        modal:false
+    });
+});
+//input验证
+function check(ele,isNull,reg,str,name){
+	var value=$.trim(ele.val());
+	if(value=="" && !isNull){
+		ele.next().html(name+"不能为空");return false;
+	}else{
+		if(reg!=null && !reg.test(value)){
+			ele.next().html(str);return false;
+		}else ele.next().html("*");
+	}
+	return true;
+}
+</script>
+</html>
+

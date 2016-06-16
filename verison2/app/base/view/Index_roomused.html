@@ -1,0 +1,402 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        var weekday=$('#weekday');
+        weekday.combobox({
+            url:'{$ROOT}/all/option/weekday?only=0',
+            valueField:'weekday',
+            textField:'name',panelHeight:'auto'
+        });
+        var oew=$('#oew');
+        oew.combobox({
+            url:'{$ROOT}/all/option/oew?only=0',
+            valueField:'oew',
+            textField:'name',panelHeight:'auto'
+        });
+        var time=$('#time');
+        time.combobox({
+            url:'{$ROOT}/all/option/timesection?only=0',
+            valueField:'time',
+            textField:'name'
+        });
+
+
+        var equipment=$('#equipment');
+        equipment.combobox({
+            url:'{$ROOT}/all/option/equipment?only=0',
+            valueField:'equipment',
+            textField:'name'
+        });
+        var area=$('#area');
+        area.combobox({
+            url:'{$ROOT}/all/option/area?only=0',
+            valueField:'area',
+            textField:'name'
+        });
+        var usage=$('#usage');
+        usage.combobox({
+            url:'{$ROOT}/all/option/usage?only=0',
+            valueField:'usage',
+            textField:'name',panelHeight:'auto'
+        });
+        var reserved=$('#reserved');
+        reserved.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',panelHeight:'auto'
+        });
+        var status=$('#status');
+        status.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',panelHeight:'auto'
+        });
+        //默认为高教园区南区
+        area.combobox('setValue','4');
+        if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
+            area.combobox('setValue','3');
+
+
+        $('#dg').datagrid({
+            title:'教室使用情况表',idField:'roomno', striped:'true',pagination:'true',rownumbers:false,pageSize:20,
+            url:'{$ROOT}/Base/Room/roomusagelist',
+            queryParams: {area:area.combobox('getValue') ,year:$('#year').val(),term:$('#term').val()},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {title:'教室',colspan:3},
+                {title:'周一',colspan:12,align:'center'},
+                {title:'周二',colspan:12,align:'center'},
+                {title:'周三',colspan:12},
+                {title:'周四',colspan:12},
+                {title:'周五',colspan:12},
+                {title:'周六',colspan:12},
+                {title:'周日',colspan:12}
+            ],
+                [
+                {field:'roomno',title:'教室号',width:65,align:'center',formatter:function(value,rec){
+                   //周一
+                    rec.mon1=get_lesson(rec.mon,1);
+                    rec.mon2=get_lesson(rec.mon,2);
+                    rec.mon3=get_lesson(rec.mon,3);
+                    rec.mon4=get_lesson(rec.mon,4);
+                    rec.mon5=get_lesson(rec.mon,5);
+                    rec.mon6=get_lesson(rec.mon,6);
+                    rec.mon7=get_lesson(rec.mon,7);
+                    rec.mon8=get_lesson(rec.mon,8);
+                    rec.mon9=get_lesson(rec.mon,9);
+                    rec.mona=get_lesson(rec.mon,10);
+                    rec.monb=get_lesson(rec.mon,11);
+                    rec.monc=get_lesson(rec.mon,12);
+                    //=====周二
+                    rec.tue1=get_lesson(rec.tue,1);
+                    rec.tue2=get_lesson(rec.tue,2);
+                    rec.tue3=get_lesson(rec.tue,3);
+                    rec.tue4=get_lesson(rec.tue,4);
+                    rec.tue5=get_lesson(rec.tue,5);
+                    rec.tue6=get_lesson(rec.tue,6);
+                    rec.tue7=get_lesson(rec.tue,7);
+                    rec.tue8=get_lesson(rec.tue,8);
+                    rec.tue9=get_lesson(rec.tue,9);
+                    rec.tuea=get_lesson(rec.tue,10);
+                    rec.tueb=get_lesson(rec.tue,11);
+                    rec.tuec=get_lesson(rec.tue,12);
+                    //周三
+                    rec.wes1=get_lesson(rec.wes,1);
+                    rec.wes2=get_lesson(rec.wes,2);
+                    rec.wes3=get_lesson(rec.wes,3);
+                    rec.wes4=get_lesson(rec.wes,4);
+                    rec.wes5=get_lesson(rec.wes,5);
+                    rec.wes6=get_lesson(rec.wes,6);
+                    rec.wes7=get_lesson(rec.wes,7);
+                    rec.wes8=get_lesson(rec.wes,8);
+                    rec.wes9=get_lesson(rec.wes,9);
+                    rec.wesa=get_lesson(rec.wes,10);
+                    rec.wesb=get_lesson(rec.wes,11);
+                    rec.wesc=get_lesson(rec.wes,12);
+                    //周四
+                    rec.thu1=get_lesson(rec.thu,1);
+                    rec.thu2=get_lesson(rec.thu,2);
+                    rec.thu3=get_lesson(rec.thu,3);
+                    rec.thu4=get_lesson(rec.thu,4);
+                    rec.thu5=get_lesson(rec.thu,5);
+                    rec.thu6=get_lesson(rec.thu,6);
+                    rec.thu7=get_lesson(rec.thu,7);
+                    rec.thu8=get_lesson(rec.thu,8);
+                    rec.thu9=get_lesson(rec.thu,9);
+                    rec.thua=get_lesson(rec.thu,10);
+                    rec.thub=get_lesson(rec.thu,11);
+                    rec.thuc=get_lesson(rec.thu,12);
+                    //周五
+                    rec.fri1=get_lesson(rec.fri,1);
+                    rec.fri2=get_lesson(rec.fri,2);
+                    rec.fri3=get_lesson(rec.fri,3);
+                    rec.fri4=get_lesson(rec.fri,4);
+                    rec.fri5=get_lesson(rec.fri,5);
+                    rec.fri6=get_lesson(rec.fri,6);
+                    rec.fri7=get_lesson(rec.fri,7);
+                    rec.fri8=get_lesson(rec.fri,8);
+                    rec.fri9=get_lesson(rec.fri,9);
+                    rec.fria=get_lesson(rec.fri,10);
+                    rec.frib=get_lesson(rec.fri,11);
+                    rec.fric=get_lesson(rec.fri,12);
+                    //周六
+                    rec.sat1=get_lesson(rec.sat,1);
+                    rec.sat2=get_lesson(rec.sat,2);
+                    rec.sat3=get_lesson(rec.sat,3);
+                    rec.sat4=get_lesson(rec.sat,4);
+                    rec.sat5=get_lesson(rec.sat,5);
+                    rec.sat6=get_lesson(rec.sat,6);
+                    rec.sat7=get_lesson(rec.sat,7);
+                    rec.sat8=get_lesson(rec.sat,8);
+                    rec.sat9=get_lesson(rec.sat,9);
+                    rec.sata=get_lesson(rec.sat,10);
+                    rec.satb=get_lesson(rec.sat,11);
+                    rec.satc=get_lesson(rec.sat,12);
+                    //周日
+                    rec.sun1=get_lesson(rec.sun,1);
+                    rec.sun2=get_lesson(rec.sun,2);
+                    rec.sun3=get_lesson(rec.sun,3);
+                    rec.sun4=get_lesson(rec.sun,4);
+                    rec.sun5=get_lesson(rec.sun,5);
+                    rec.sun6=get_lesson(rec.sun,6);
+                    rec.sun7=get_lesson(rec.sun,7);
+                    rec.sun8=get_lesson(rec.sun,8);
+                    rec.sun9=get_lesson(rec.sun,9);
+                    rec.suna=get_lesson(rec.sun,10);
+                    rec.sunb=get_lesson(rec.sun,11);
+                    rec.sunc=get_lesson(rec.sun,12);
+
+                    return "<a class='blue_link' href='javascript:print(\""+rec.roomno+"\",false)' >"+rec.roomno+"</a>" ;
+                }},
+                {field:'name',title:'名称',width:75,align:'center'},
+                {field:'seats',title:'座位',width:30,align:'center'},
+                {field:'mon1',title:'1',width:13,align:'center'},
+                {field:'mon2',title:'2',width:13,align:'center'},
+                {field:'mon3',title:'3',width:13,align:'center'},
+                {field:'mon4',title:'4',width:13,align:'center'},
+                {field:'mon5',title:'5',width:13,align:'center'},
+                {field:'mon6',title:'6',width:13,align:'center'},
+                {field:'mon7',title:'7',width:13,align:'center'},
+                {field:'mon8',title:'8',width:13,align:'center'},
+                {field:'mon9',title:'9',width:13,align:'center'},
+                {field:'mona',title:'A',width:13,align:'center'},
+                {field:'monb',title:'B',width:13,align:'center'},
+                {field:'monc',title:'C',width:13,align:'center'},
+                {field:'tue1',title:'1',width:13,align:'center'},
+                {field:'tue2',title:'2',width:13,align:'center'},
+                {field:'tue3',title:'3',width:13,align:'center'},
+                {field:'tue4',title:'4',width:13,align:'center'},
+                {field:'tue5',title:'5',width:13,align:'center'},
+                {field:'tue6',title:'6',width:13,align:'center'},
+                {field:'tue7',title:'7',width:13,align:'center'},
+                {field:'tue8',title:'8',width:13,align:'center'},
+                {field:'tue9',title:'9',width:13,align:'center'},
+                {field:'tuea',title:'A',width:13,align:'center'},
+                {field:'tueb',title:'B',width:13,align:'center'},
+                {field:'tuec',title:'C',width:13,align:'center'},
+                {field:'wes1',title:'1',width:13,align:'center'},
+                {field:'wes2',title:'2',width:13,align:'center'},
+                {field:'wes3',title:'3',width:13,align:'center'},
+                {field:'wes4',title:'4',width:13,align:'center'},
+                {field:'wes5',title:'5',width:13,align:'center'},
+                {field:'wes6',title:'6',width:13,align:'center'},
+                {field:'wes7',title:'7',width:13,align:'center'},
+                {field:'wes8',title:'8',width:13,align:'center'},
+                {field:'wes9',title:'9',width:13,align:'center'},
+                {field:'wesa',title:'A',width:13,align:'center'},
+                {field:'wesb',title:'B',width:13,align:'center'},
+                {field:'wesc',title:'C',width:13,align:'center'},
+                {field:'thu1',title:'1',width:13,align:'center'},
+                {field:'thu2',title:'2',width:13,align:'center'},
+                {field:'thu3',title:'3',width:13,align:'center'},
+                {field:'thu4',title:'4',width:13,align:'center'},
+                {field:'thu5',title:'5',width:13,align:'center'},
+                {field:'thu6',title:'6',width:13,align:'center'},
+                {field:'thu7',title:'7',width:13,align:'center'},
+                {field:'thu8',title:'8',width:13,align:'center'},
+                {field:'thu9',title:'9',width:13,align:'center'},
+                {field:'thua',title:'A',width:13,align:'center'},
+                {field:'thub',title:'B',width:13,align:'center'},
+                {field:'thuc',title:'C',width:13,align:'center'},
+                {field:'fri1',title:'1',width:13,align:'center'},
+                {field:'fri2',title:'2',width:13,align:'center'},
+                {field:'fri3',title:'3',width:13,align:'center'},
+                {field:'fri4',title:'4',width:13,align:'center'},
+                {field:'fri5',title:'5',width:13,align:'center'},
+                {field:'fri6',title:'6',width:13,align:'center'},
+                {field:'fri7',title:'7',width:13,align:'center'},
+                {field:'fri8',title:'8',width:13,align:'center'},
+                {field:'fri9',title:'9',width:13,align:'center'},
+                {field:'fria',title:'A',width:13,align:'center'},
+                {field:'frib',title:'B',width:13,align:'center'},
+                {field:'fric',title:'C',width:13,align:'center'},
+                {field:'sat1',title:'1',width:13,align:'center'},
+                {field:'sat2',title:'2',width:13,align:'center'},
+                {field:'sat3',title:'3',width:13,align:'center'},
+                {field:'sat4',title:'4',width:13,align:'center'},
+                {field:'sat5',title:'5',width:13,align:'center'},
+                {field:'sat6',title:'6',width:13,align:'center'},
+                {field:'sat7',title:'7',width:13,align:'center'},
+                {field:'sat8',title:'8',width:13,align:'center'},
+                {field:'sat9',title:'9',width:13,align:'center'},
+                {field:'sata',title:'A',width:13,align:'center'},
+                {field:'satb',title:'B',width:13,align:'center'},
+                {field:'satc',title:'C',width:13,align:'center'},
+                {field:'sun1',title:'1',width:13,align:'center'},
+                {field:'sun2',title:'2',width:13,align:'center'},
+                {field:'sun3',title:'3',width:13,align:'center'},
+                {field:'sun4',title:'4',width:13,align:'center'},
+                {field:'sun5',title:'5',width:13,align:'center'},
+                {field:'sun6',title:'6',width:13,align:'center'},
+                {field:'sun7',title:'7',width:13,align:'center'},
+                {field:'sun8',title:'8',width:13,align:'center'},
+                {field:'sun9',title:'9',width:13,align:'center'},
+                {field:'suna',title:'A',width:13,align:'center'},
+                {field:'sunb',title:'B',width:13,align:'center'},
+                {field:'sunc',title:'C',width:13,align:'center'},
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                roomno: $('#roomno').val(),
+                name: $('#name').val(),
+                building: $('#building').val(),
+                area:$('#area').combobox('getValue'),
+                equipment:$('#equipment').combobox('getValue'),
+                seatmin: $('#seatmin').val(),
+                seatmax: $('#seatmax').val(),
+                school:$('#school').combobox('getValue'),
+                year:$('#year').val(),
+                term:$('#term').val(),
+                weekday:$('#weekday').combobox('getValue'),
+                oew:$('#oew').combobox('getValue'),
+                time:$('#time').combobox('getValue')
+            });
+        });
+
+        $("#more").click(function() {
+            var toolbar=$("#toolbar_hide");
+            if(toolbar.is(":hidden")){
+                toolbar.show();
+            }else{
+                toolbar.hide();     //如果元素为显现,则将其隐藏
+            }
+        });
+        $("#print,#menu_print").click(function() {
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+               print(row.roomno,false);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#printall,#menu_printall").click(function() {
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                print(row.roomno,true);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#refresh").click(function(){
+            $.post('{$ROOT}/base/room/refresh',{year:$("#year").val(),term:$("#term").val()},function(result){
+                if (result.status==1){
+                    $.messager.alert('成功',result.info,'info');
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        $("#reserve,#menu_reserve").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                parent.menuTabs.addTab("借用教室申请","{$ROOT}/base/index/roomreserveapply?roomno="+row.roomno,"icon icon-schedule");
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#toolbar_hide").hide();
+
+    });
+    function print(roomno,all){
+        var url='/base/index/roomtimetable?';
+        if(all)
+            url='/base/index/roomtimetableall?';
+        window.open('{$ROOT}'+url+'year='+$("#year").val()+"&term="+$("#term").val()+"&roomno="+roomno);
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-schedule'" id="menu_reserve" >借用教室</div>
+        <div data-options="iconCls:'icon icon-print'" id="menu_print" >打印课表</div>
+        <div data-options="iconCls:'icon icon-print'" id="menu_printall" >打印课表(含借用)</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-system',plain:'true'" id="more">更多</a>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name">名称：</label><input id="name" class="easyui-validatebox" size="8" value="%"/>
+            <label for="area">校区：</label><input id="area" size="15">
+            <label for="equipment">设施：</label><input id="equipment" size="15">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-schedule',plain:'true'" id="reserve">借用选定教室</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印课表</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="printall">打印课表(含借用)</a>
+        </div>
+        <span id="toolbar_hide">
+            <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
+            <label for="school">优先学院：</label><input id="school" size="15">
+            <label for="weekday">空闲日期：</label><input id="weekday" size="5">
+            <label for="oew">单双周：</label><input id="oew" size="5">
+            <label for="time">节次：</label><input id="time" size="12">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="refresh">刷新教室资源时间表</a>
+        </span>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>点击“更多”按钮可以设置全部检索条件！</li>
+            <li> B:单双周，D：单周，E：双周</li>
+        </ol>
+    </div>
+</div>

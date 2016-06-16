@@ -1,0 +1,162 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        var studentno='{$username}';
+
+        //todo;查看已经提交的申请
+        $('#e_select').linkbutton({
+            text:'检索'
+        }).bind('click',function(){
+
+                  //  var arr=c_type_arr()
+                    $('#apply_dat').datagrid('load',{'Sqlpath':{'select':'credit/New_student_status.SQL','count':'credit/New_student_count_status.SQL'},'bind':{
+                      ':studentno':studentno,':tp':$('[name=xuefen]').val(),':year':parent.$('#YEAR').val(),':term':parent.$('#TERM').val()
+                    }})
+
+                })
+
+
+        //todo:点击修改的时候
+        function run_edit(num){
+            return $.messager.alert('提示','待定')
+            panduan=1
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'credit/one_lookDetails.SQL','bind':{':id':num}},function(c){
+                eval('one='+c);
+                $('[name=info_NAME]').html(one[0]['NAME'])
+                $('[name=info_CLASSNAME]').html(one[0]['CLASSNAME'])
+                $('[name=info_STUDENTNO]').html(one[0]['STUDENTNO'])
+                $('[name=Project_NAME]').val(one[0]['projectname']);
+                // alert(one[0]['projecttype'])
+                $('#zhuyao').val(one[0]['description'])
+                $('[name=Project_type][value='+one[0]['projecttype']+']').attr('checked',true);
+                $('[name=credit_type]').val(one[0]['credittype']);
+                $('[name=info_credit]').val(one[0]['credit']);
+                $('[name=cert_time]').val(one[0]['certficatetime']);
+                $('[name=apply_id]').val(one[0]['applydate_id']);
+
+                $('#apply_info').window({closed:false})
+            })
+        }
+
+    })
+</script>
+<body style="background-color: #fff">
+<div id="tdemo">
+    项目名称:<input type="text" name="project_name" value='%' >
+    学分类别<select name="xuefen">
+        <option value="1">创新学分</option>
+        <option value="3">素质学分</option>
+    </select>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" id="e_select">检索</a>
+</div>
+<div id="apply_list" class="easyui-panel"
+
+     data-options="fit:true,closable:false,
+                collapsible:false,minimizable:false,maximizable:false,title:'',closed:false,border:false" >
+    <table id="apply_dat"  class="easyui-datagrid"
+           data-options="url:'__APP__/Status/Status/Squery/hasJson/1',toolbar:'#tdemo',fit:true,pagination:true,singleSelect:true,border:false">
+        <thead>
+        <tr>
+            <th align="center" data-options="field:'projectname',width:100">项目</th>
+            <th align="center" data-options="field:'credit',width:100,align:'right'">学分</th>
+            <th align="center" data-options="field:'certficatetime',width:100">证书时间</th>
+            <th align="center" data-options="field:'schoolview',width:100,formatter:function(a,b,c){if(a=='0'){return '待提交'}else if(a=='1'){ return '通过'}else if(a=='2'){ return '不通过'}else if(a=='3'){ return '待审核'}}">院系审核</th>
+            <th align="center" data-options="field:'deanview',width:100,formatter:function(a,b,c){if(a=='0'){return '待提交'}else if(a=='1'){ return '通过'}else if(a=='2'){ return '不通过'}else if(a=='3'){ return '待审核'}}">终审意见</th>
+            <th align="center" data-options="field:'cert_name',width:100,formatter:function(a,b,c){if(b.schoolview!=0&&b.deanview!=2&&b.schoolview!=2){ return '<a href='+'javascript:void(0)'+' onclick=run_look(&quot'+b.applydate_id+'&quot)>查看</a>'}else{return '<span onclick='+'run_edit('+b.applydate_id+')'+'><a href='+'javascript:void(0)'+'><b>修改</b></a></span> | <span onclick='+'run_del('+b.applydate_id+')'+'><a href='+'javascript:void(0)'+'><b>删除</b></a></span>'}}">操作</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+
+
+
+
+<!--todo:申请单-->
+<div id="apply_info" data-options="inline:true" title="">
+    <br><br>
+    <table border="0" style="border:1px solid #E0ECFF" width="90%" style="" align="center" >
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>姓名：</b></td>
+            <td width="180" align="center" height="25"><span name="info_NAME"></span></td>
+            <td bgcolor="#E0ECFF" width="107">
+                <p align="right"><b>学号：</b></td>
+            </td>
+            <td width="180" align="center" height="25"><span name="info_STUDENTNO"></span></td>
+            <td bgcolor="#E0ECFF" width="107">
+                <p align="right"><b>班级：</b></td>
+            </td>
+            <td width="180" align="center" height="25"><span name="info_CLASSNAME"></span></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>项目名称：</b></td>
+            <td colspan="5">
+                <div style="float:left">
+                    <input type="text" size="30" name="Project_NAME">&nbsp&nbsp<button name="bt_select">选择</button>
+                </div>
+                <div id="Project_div" style="float:left;height:25px;padding-top:3px;margin-left: 10px;display: none">
+                    <select style="width:100px" id="Project_list">
+                        <option value="%">--请选择--</option>
+                        <volist name="Project" id="p">
+                            <option value="{$p.cert_id}_{$p.credit}">{$p.cert_name}</option>
+                            <!--{$p.credit|str_replace='.','a',###}-->
+                        </volist>
+                    </select>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>项目类别：</b></td>
+            <td colspan="5">
+                <input type="radio" name="Project_type" checked style="position: relative; bottom:3px;" value="1">各类竞赛
+                <input type="radio" name="Project_type" style="position: relative; bottom:3px;" value="2">学术论文
+                <input type="radio" name="Project_type" style="position: relative; bottom:3px;" value="3">科学研究
+                <input type="radio" name="Project_type" style="position: relative; bottom:3px;" value="4">技能证书
+                <input type="radio" name="Project_type" style="position: relative; bottom:3px;" value="5">其他
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学分类别：</b></td>
+            <td colspan="5">
+                <input type="radio" name="credit_type" checked style="position: relative; bottom:3px;" value=1>创新学分
+                <input type="radio" name="credit_type" style="position: relative; bottom:3px;" value="2">技能学分
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>认定学分：</b></td>
+            <td colspan="2" width="360px"><input type="text" name="info_credit" size="25" value=""></td>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>
+                    证书认定时间：</b></td>
+            <td colspan="2" width="360px">
+                <input type="text" size="25" name="cert_time">&nbsp&nbsp格式：2014/01/01
+            </td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>项目主要内容<br>及相应等级：</b></td>
+            <td width="" height="45" colspan="5">
+                <textarea id="zhuyao" cols="120" rows="10"></textarea>
+                <input type="hidden" name="apply_id" value="">
+            </td>
+        </tr>
+        <tr>
+            <td  colspan="6" align="center">
+                <if condition="$is_time eq 'true'">
+                    <a href="javascript:void(0)" id="add" name='3' class="easyui-linkbutton">提交审核</a>&nbsp&nbsp
+                    <else />
+                    <a href="javascript:void(0)" id="no_add" class="easyui-linkbutton"><font color="#d3d3d3">提交审核</font></a>&nbsp&nbsp
+                </if>
+                <a href="javascript:void(0)" id="closed" class="easyui-linkbutton">关闭</a>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>

@@ -1,0 +1,302 @@
+<include file=":Include:jqueryHeader" />
+<script>
+    $(function(){
+        var indexrow=undefined;                                   // 保存索引键的变量
+        var  dat=$('#roinfo').datagrid({
+            url:'__URL__/roles/hasJson/1',
+            fit:true,
+            columns:[[{checkbox:true},{field:'ROLE',title:'编号',align:'center', width:100,sortable:true,editor:{
+                type:'validatebox',
+                options:
+                {
+                    required:true
+                }
+
+            }},{field:'DESCRIPTION',title:'名称', width:150,align:'center',sortable:true,editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+            }}]],
+
+            sortName:'ROLE',                                       // 排序用的
+            sortOrder:'asc',
+            pagination:true,
+            pageList:[10,20,30,40,50],
+            pageSize:20,
+            toolbar:/*[{
+                text:'增加',
+                iconCls: 'icon-add',
+                handler:function(){
+                    dat.datagrid('insertRow',{
+                        index:0,
+                        row:{
+                        }
+                    });
+                    dat.datagrid('beginEdit',0);
+                    indexrow=0;
+                }
+            },'-',{
+                text:'删除',
+                iconCls:'icon-cancel',
+                handler:function(){
+                    var row2 = dat.datagrid('getSelections');
+
+                    if (row2.length){
+                        $.messager.confirm('提示','您确定要删除吗',function(b){
+                            if(b){
+
+                                var infoarr=[];                      // 存储删除信息的数组
+                                for(var i=0;i<row2.length;i++){
+                                    infoarr[i]=row2[i].ROLE;
+                                }
+
+                                $.ajax({
+                                    url:'__URL__/deletero/hasJson/1',
+                                    data:{'in':infoarr},
+                                    type:'POST',
+                                    success:function(C){
+                                        if(C){
+                                            dat.datagrid('load');
+                                        }else{
+                                            $.messager.alert('提示','删除失败','?');
+                                        }
+                                    }
+                                })
+                            }
+                        });
+                    }
+                }
+            },'-',{
+                text:'编辑',
+                iconCls:'icon-edit',
+                handler:function(){
+                    var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+
+                    if(rowList.length>1){
+                        alert('请选择一条进行编辑,不能选多条');             //用户选了多行编辑
+                    }else if(rowList.length<1){
+                        alert('请选择要编辑的数据');                         //用户没选择行
+                    }else{
+                        if(indexrow!=undefined){
+                            dat.datagrid('endEdit',indexrow);
+                        }
+
+                        var row3 = dat.datagrid('getSelected');              //获得被选中的索引
+                        var index3 = dat.datagrid('getRowIndex', row3);
+                        dat.datagrid('beginEdit', index3);
+                        indexrow=index3;
+                    }
+                }
+            },'-',{
+                text:'取消编辑',
+                iconCls:'icon-back',
+                handler:function(){
+                    dat.datagrid('rejectChanges');
+                    indexrow=undefined;
+                }
+            },'-',{
+                text:'保存',
+                iconCls:'icon-save',
+                handler:function(){
+                    dat.datagrid('endEdit',indexrow);
+                    indexrow=undefined;
+                }
+            }
+            ]*/'#tdemo', onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#roinfo');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },onDblClickRow:function(keyrow,dataRow){
+
+                if(indexrow!=undefined){
+                    dat.datagrid('cancelEdit',indexrow);
+                    indexrow=undefined;
+                }
+
+                if(indexrow==undefined){
+                    //   dat.getagrid('endedit',indexrow);           //上一行完成编辑
+                    dat.datagrid('beginEdit',keyrow);
+                    indexrow=keyrow;
+                }
+            },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+                //alert(indexrow);
+                var Purl='';                //保存请求的URL地址的
+                var inserted=dat.datagrid('getChanges','inserted');
+                var updated=dat.datagrid('getChanges','updated');
+
+
+                if(inserted.length){
+                    Purl='__URL__/insertro/hasJson/1';
+                }else if(updated.length){
+                    Purl='__URL__/updatero/hasJson/1';
+                }
+
+                $.ajax({
+                    url:Purl,
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                        //alert(content);
+                        if(content)
+                        {
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            alert('操作成功！');
+                        }
+                        else
+                        {
+                            alert('操作失败！');
+                        }
+                    }
+
+                })
+            }
+        });
+        $('#dtnfo').layout({
+        })
+        var searcher=$('#searcher').linkbutton({'text':'搜索','iconCls':'icon-search'});                 //搜索按钮
+
+
+        $('#e_add').bind('click',function(){
+            dat.datagrid('insertRow',{
+                index:0,
+                row:{
+                }
+            });
+            dat.datagrid('beginEdit',0);
+            indexrow=0;
+        })
+
+        function ddel(){
+            var row2 = dat.datagrid('getSelections');
+            if (row2.length){
+                $.messager.confirm('提示','您确定要删除吗',function(b){
+                    if(b){
+                        var infoarr=[];                      // 存储删除信息的数组
+                        for(var i=0;i<row2.length;i++){
+                            infoarr[i]=row2[i].ROLE;
+                        }
+                        $.ajax({
+                            url:'__URL__/deletero/hasJson/1',
+                            data:{'in':infoarr},
+                            type:'POST',
+                            success:function(C){
+                                if(C){
+                                    dat.datagrid('load');
+                                }else{
+                                    $.messager.alert('提示','删除失败','?');
+                                }
+                            }
+                        })
+                    }
+                });
+        }}
+
+        $('#e_del').bind('click',ddel);
+        $('#admin_del').bind('click',ddel);
+
+        function eedit(){
+            var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+            if(rowList.length>1){
+                alert('请选择一条进行编辑,不能选多条');             //用户选了多行编辑
+            }else if(rowList.length<1){
+                alert('请选择要编辑的数据');                         //用户没选择行
+            }else{
+                if(indexrow!=undefined){
+                    dat.datagrid('endEdit',indexrow);
+                }
+
+                var row3 = dat.datagrid('getSelected');              //获得被选中的索引
+                var index3 = dat.datagrid('getRowIndex', row3);
+                dat.datagrid('beginEdit', index3);
+                indexrow=index3;
+            }
+        }
+
+        $('#e_edit').bind('click',eedit);
+        $('#admin_edit').bind('click',eedit);
+
+
+        $('#e_back').bind('click',function(){
+            dat.datagrid('rejectChanges');
+            indexrow=undefined;
+        })
+
+        $('#e_save').bind('click',function(){
+            dat.datagrid('endEdit',indexrow);
+            indexrow=undefined;
+
+        })
+
+    })
+
+    function cmdsearch()
+    {  //点击搜索时候触发的事件
+        $('#roinfo').datagrid('load',{
+            ROLE:$('#nnumber').val(),
+            DESCRIPTION:$('#nname').val()
+        })
+
+    }
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" height:780px">
+<div id="tdemo">
+    <label for="nnumber">角色编号:</label>
+    <input type="text" name="number" id="nnumber" size="10" value='%' >
+    <label for="nname">角色名称:</label>
+    <input type="text" name="name" id="nname" size="10" value='%'  >
+    <a href="javascript:void(0)" id="searcher" onclick="cmdsearch()">搜索</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add"  id="e_add" plain=true>添加</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+</div>
+<!--<div data-options="region:'north',split:true,border:false" style="height:70px;background:#E0ECFF">
+    <form action="__URL__" method="POST" id="biaodan">
+        <table style="margin-left:20px" cellspacing="15" >
+            <tr>
+                <td>
+                    <font size=6><b>角色编号:</b></font>
+                </td>
+                <td>
+                    <input type="text" name="number" size="10" class="easyui-validatebox">
+                </td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                </td>
+                <td>
+                    <font size=6><b>角色名称:</b></font>
+                </td>
+                <td>
+                    <input type="text" name="name" size="10" class="easyui-validatebox">
+                </td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                </td>
+                <td>
+                    <a href="javascript:void(0)" id="searcher" onclick="cmdsearch()">搜索</a>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>-->
+<div data-options="region:'center',border:false" style=";background:#eee;">
+    <div id="roinfo"></div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+</div>
+</div>
+</body>
+</html>

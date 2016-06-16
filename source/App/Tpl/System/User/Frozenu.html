@@ -1,0 +1,191 @@
+<include file=":Include:jqueryHeader" />
+<script>
+  $(function(){
+      //todo:右键的时候
+      $('#admin_edit').bind('click',function(){
+          var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+
+          if(rowList.length>1){
+              alert('请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+          }else if(rowList.length<1){
+              alert('请选择要编辑的数据');                         //用户没选择行
+          }else{
+              if(indexrow!=undefined){
+                  dat.datagrid('endEdit',indexrow);
+              }
+
+              var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+              var index3 = dat.datagrid('getRowIndex', row3);
+
+              dat.datagrid('beginEdit', index3);
+              indexrow=index3;
+
+      }});
+
+
+      $('#e_edit').bind('click',function(){
+          var rowList=dat.datagrid('getSelections');              //获取所有被选中的
+
+          if(rowList.length>1){
+              alert('请选择一条进行编辑,不能选多条');                         //用户选了多行编辑
+          }else if(rowList.length<1){
+              alert('请选择要编辑的数据');                         //用户没选择行
+          }else{
+              if(indexrow!=undefined){
+                  dat.datagrid('endEdit',indexrow);
+              }
+
+              var row3 = dat.datagrid('getSelected');                 //获得被选中的索引
+              var index3 = dat.datagrid('getRowIndex', row3);
+
+              dat.datagrid('beginEdit', index3);
+              indexrow=index3;
+
+      }})
+
+
+      $('#e_back').bind('click',function(){
+          dat.datagrid('rejectChanges');
+          indexrow=undefined;
+      })
+
+
+     $('#e_save').bind('click',function(){
+         dat.datagrid('endEdit',indexrow);
+         indexrow=undefined;
+     })
+
+
+        var indexrow=undefined;             //保存索引键的变量
+        var  dat=$('#scinfo').datagrid({
+            url:'__URL__/frozenu/hasJson/1',
+            columns:[[
+                {field:'ROW',title:'排名',width:300,sortable:true,checkbox:true,align:'center'
+
+                },
+                {field:'STUDENTNO',title:'学号',width:300,sortable:true,align:'center'
+
+                    },
+                {field:'NAME',title:'姓名',width:300,sortable:true,align:'center'
+
+                    },
+                {field:'CLASSNAME',title:'学院名称',width:300,sortable:true,align:'center'
+                   },
+                {field:'_l',title:'住宿费',width:300,sortable:true,align:'center',
+                    editor:{type:'combobox',options:{
+                        data:[{value:"1",'text':'已交'},{
+                            value:'0',
+                            text:'未交'
+                        }],panelHeight:50
+                    }
+
+                    }},
+                {field:'_s',title:'学费',width:300,sortable:true,align:'center',
+                    editor:{type:'combobox',options:{
+                        data:[{value:"1",'text':'<center>已交</center>'},{
+                            value:'0',
+                            text:'<center>未交</center>'
+                        }
+                        ],panelHeight:50
+                    }
+
+                    }},
+                {field:'_b',title:'书费',width:300,sortable:true,align:'center',
+                    editor:{type:'combobox',options:{
+                        data:[{value:"1",'text':'已交'},{
+                            value:'0',
+                            text:'未交'
+                        }
+                        ],panelHeight:50
+                    }
+
+                    }}]],
+            pagination:true,
+            pageList:[30,50],
+            pageSize:30,
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#scinfo');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            toolbar:'#tdemo',onDblClickRow:function(keyrow,dataRow){
+
+                if(indexrow!=undefined){
+                    dat.datagrid('cancelEdit',indexrow);
+                    indexrow=undefined;
+                }
+                if(indexrow==undefined){
+                    //   dat.getagrid('endedit',indexrow);           //上一行完成编辑
+                    dat.datagrid('beginEdit',keyrow);
+                    indexrow=keyrow;
+                }
+            },onAfterEdit:function(index,dataRow,changes){              //当完成编辑的时候 触发此方法
+                var Purl='';                //保存请求的URL地址的
+                var updated=dat.datagrid('getChanges','updated');
+                Purl='__URL__/frozenup';
+
+                $.ajax({
+                    url:Purl,
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                        if(content=='true'){
+                            $.messager.alert('提示','操作成功');
+                            indexrow=undefined;
+                        }else{
+                            alert(content)
+                            $.messager.alert('提示','操作失败');
+                            indexrow=undefined;
+                        }
+                        dat.datagrid('load');
+                    }
+                })
+            }
+    });
+        $('#dtnfo').layout({
+       })
+        //搜索方法
+        $('#searcher').bind("click",function(){
+            $('#scinfo').datagrid('load',{STUDENTNO:$('#NAME22').val()})
+        })
+
+    })
+</script>
+<body>
+
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <!--<div data-options="region:'north',split:true,border:false" style="height:70px;background:#E0ECFF">
+        <form action="__URL__/scjson" method="POST" id="biaodan">
+            <table style="margin-left:20px" cellspacing="15" >
+                <tr>
+                    <td><font size=6><b>按学生号:</b></font></td>
+                    <td><input type="text" id="NAME22" size="10"  value=""></td>
+                    <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+                </tr>
+            </table>
+        </form>
+    </div>-->
+    <div id="tdemo">
+        <label for="NAME22">按学生号:</label>
+        <input type="text" id="NAME22" size="10"  value="%">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  iconCls="icon-edit" plain=true id="e_edit">编辑</a>
+        <a href="javascript:void(0)"  class="easyui-linkbutton" iconCls="icon-back" plain=true id="e_back">取消编辑</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" plain=true id="e_save">保存</a>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="scinfo" data-options="fit:true,fitColumns:true"></div>
+    </div>
+
+    <div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+        <div id='admin_edit'>编辑本条目</div>
+    </div>
+</div>
+</body>
+</html>

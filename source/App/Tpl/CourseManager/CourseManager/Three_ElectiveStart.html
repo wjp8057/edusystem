@@ -1,0 +1,122 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+     var quanxian='{$quanxian}'
+    //todo:权限判断函数
+    function qxpanduan(id,url){
+        var quanxianpd=false;
+        ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+
+            eval('var o='+c)
+            for(var i=0;i<o[0]['rl'].length;i++){
+
+                var zz=new RegExp(o[0]['rl'].charAt(i))
+                var bool=zz.test(quanxian)
+
+                if(bool){
+                    quanxianpd=true
+                    return;
+                }
+            }
+        })
+
+        return quanxianpd;
+    }
+    $(function(){
+        //todo:  window窗口
+        var wd=$('#wd').window(new wind(600,300,false,false,false,false,false));
+        var wd_one=$('#add_student_wd_List').window(new wind(0,0,false,false,true,true,true))
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+        //todo: 点击选课开放
+        $('#xuanke_KF').bind('click',function(){
+            var boo=qxpanduan('CG06','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限CG06')
+            }
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'CourseManager/Three_one_startLock.SQL',bind:{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val()}},function(c){
+                $.messager.alert('提示','操作成功')
+            })
+        })
+
+        //todo:点击 所有课程有人数限制开放
+        $('[name=halfunlock]').bind('click',function(){
+            var boo=qxpanduan('CG06','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限CG06')
+            }
+            ajiakesi('__URL__/Three_ElectiveStart/hasJson/1',{'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val()},function(c){
+                $.messager.alert('提示','所有课程已有人数限制开放!')
+            })
+        })
+
+
+        //todo:选课初始化
+        $('[name=Initialize]').bind('click',function(){
+            var boo=qxpanduan('CG06','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限CG06')
+            }
+            $.messager.confirm('提示','您确定要清除选课记录吗',function(c){
+                if(c){
+                    ajiakesi('__URL__/Three_chushihua',{'YEAR':$('[name=YEAR]').val(),'TERM':$('[name=TERM]').val()},function(c){
+                        $.messager.alert('提示','课程清理成功')
+                    })
+                }
+            })
+
+        })
+
+
+        //todo:解除
+        $('[name=UNLOCKSINGLE]').bind('click',function(){
+
+            var boo=qxpanduan('CG06','__APP__/Book/Book/Bexecute')
+            if(!boo){
+                return $.messager.alert('提示','您没有足够的权限CG06')
+            }
+
+            ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'CourseManager/Three_four_jiechu.SQL',
+                bind:{':YEAR':$('[name=YEAR]').val(),':TERM':$('[name=TERM]').val(),':COURSENO':$('[name=COURSENOGROUP]').val()}},function(c){
+                $.messager.alert('提示','选中的课程已解除选课锁定！')
+            })
+        })
+
+
+    })
+
+</script>
+<style>
+    body{font-family:"宋体";font-size: 10.5pt }
+    #wd td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<body style="background-color: #ffffff">
+<!--todo;刚进去的窗口-->
+
+
+        <p>请输入要开放选课的学年：<input type="text" size="4" name="YEAR" value="2014">学期：<input type="text" size="1" name="TERM" value="1"></p>
+        <p><a href="javascript:void(0)" name="unlock" id="xuanke_KF" class="easyui-linkbutton">选课开放</a>
+            <a href="javascript:void(0)" name="halfunlock" class="easyui-linkbutton">所有课程有人数限制开放</a></p>
+        <p>
+        <!--    <input type="button" value="选课初始化" name="Initialize" style="color: #FF0000; font-weight: bold; background-color: #E0ECFF; border-left-style: solid; border-left-color: #FF0000; border-right-style: solid; border-right-color: #660000; border-top-style: solid; border-top-color: #FF0000; border-bottom-style: solid; border-bottom-color: #660000" ></p>
+        -->
+        <a href="javascript:void(0)" name="Initialize" class="easyui-linkbutton" iconCls="icon-reload">选课初始化</a>
+        <p>解除某项课程的选课锁定，课号+组号：<input type="text" name="COURSENOGROUP" size="10" value="">
+        <a href="javascript:void(0)" name="UNLOCKSINGLE" class="easyui-linkbutton">解除</a>,请输入完整的课号，否则系统将进行匹配。</p>
+        <p><font color="#FF0000" size="5" face="宋体">注意：选课初始化将清除指定学年、学期的学生选课记录和所有的选课回收站记录，在选课开始前由教务处管理人员运行此方法初始化选课库，选课开始后不得运行此方法！</font></p>
+        <p><font face="宋体" size="5" color="#0000FF">选课开放：对于排课计划中有“选课有人数限制”的课程，选课开放不会造成无节制的选课，只要选课人数到达预计人数后就无法再选。对于其它课程而言，选课是自由的，无人数限制的。</font></p>
+        <p><font face="宋体" size="5" color="#0000FF">所有课程有人数限制开放：此项操作对于原来在排课计划中已经设定“选课时不根据教室座位数调整预计人数”的课程无影响。对于其它课程，系统会根据教室的座位数，自动调整排课计划中的预计人数，然后将它标识为“选课有人数限制”。如此选课人数就不会超过预计人数。</font></p>
+        <p><font face="宋体" size="5" color="#0000FF">在运行所有课程有人数限制开放以后，所有课程都变成选课有人数限制的课程了。如果还需要有某些课程开放自由选课，则需要在排课计划中将这些课程的“选课有人数限制”标志置为“否”。</font></p>
+        <p><font face="宋体" size="5" color="#0000FF">如果需要解除某些课程的选课锁定，请输入完整的课号，按解除即可。解除后的选课模式取决于锁定前的选课模式。</font></p>
+        <input type="hidden" name="todo" value="">
+
+    <p><b><font color="#008000">运行这些方法后请同步课程总表。</font></b></p>
+
+</div>
+</body>
+</html>

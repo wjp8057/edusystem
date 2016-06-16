@@ -1,0 +1,87 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $("[name=year]").val(parent.$("#YEAR").val());
+        $("[name=term]").val(parent.$("#TERM").val());
+
+        var wd=$('#wd').window(new wind(500,350,false,false,false,false,false));        //todo:默认的页面
+        $('#bt').linkbutton({
+            'text':'报名',
+            'iconCls':'icon-personal'
+        }).bind('click',function(){
+                    if($('[name=studentno]').val()==''||$('[name=courseno]').val()==''){
+                        return $.messager.alert('提示','请填写学号，课号')
+                    }
+                   up('Q');
+
+        })
+
+
+
+        $('#bt2').linkbutton({
+            'text':'取消报名',
+            'iconCls':'icon-stop2'
+        }).bind('click',function(){
+                    if($('[name=studentno]').val()==''||$('[name=courseno]').val()==''){
+                        return $.messager.alert('提示','请填写学号，课号')
+                    }
+                    up('N')
+
+
+
+
+          })
+
+
+    })
+
+
+    function up(examrem){
+        ajiakesi('__APP__/Book/Book/Bexecute',{':ID':'EXE','exe':'exam/OtherDeferred_update.SQL','bind':{
+            ':examrem':examrem,':year':$('[name=year]').val(),':term':$('[name=term]').val(),':studentno':$('[name=studentno]').val(),':courseno':$('[name=courseno]').val()
+        }},function(c){
+            alert('更新成功')
+        })
+    }
+</script>
+<style>
+    td{border:1px #95B8E7 solid;
+    }
+    input{height:23px;vertical-align:middle;}
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+<div id="wd" title="其它原因缓考报名" data-options="draggable:false,resizable:false">
+    <table border="0"  width="400" style="margin-top: 30px" align="center">
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学年：</b></td>
+            <td width="159" height="25"><input type="text" name="year" size="4"></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学期：</b></td>
+            <td width="159" height="25"><input type="text" name="term" value="" size="1"></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>学号：</b></td>
+            <td width="159" height="25"><input name="studentno" type="text" size='9' value=""></td>
+        </tr>
+        <tr>
+            <td width="107" bgcolor="#E0ECFF" height="25">
+                <p align="right"><b>课号(9位)：</b></td>
+            <td width="159" height="25"><input type="text" name="courseno" size="9" value=""></td>
+        </tr>
+        <tr>
+            <td style="border:0px;" height="35" align="center" colspan="2"><br>
+                <a href="javascript:void(0)" id="bt">报名</a>&nbsp&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt2">取消报名</a> </td>
+        </tr>
+    </table>
+    <br>
+
+</div>
+</body>
+</html>

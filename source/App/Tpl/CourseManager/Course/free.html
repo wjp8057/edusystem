@@ -1,0 +1,120 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    $(function() {
+
+
+        var wd=$('#wd').window(new wind(550,300,false,false,false,false,false))
+        var wd2=$('#mainPanle').window(new wind(0,0,false,false,true,false,true))
+
+        var editRow = undefined;
+
+
+        $('#bt').bind('click',function(){
+            var datagrid = $('#datagrid').datagrid({
+                toolbar:[
+                    {text:'返回上一页',
+                    'iconCls':'icon-goleft',
+                    'handler':function(){
+                        wd2.window({closed:true})
+                    }
+                    }],
+                url : "__ROOT__/index.php?g=Student&m=Course&a=free&hasJson=true",
+                queryParams: {YEAR:$('[name=YEAR]').val(),TERM:$('[name=TERM]').val()}
+
+            });
+            $('#mainPanle').css('title','12312312')
+            wd2.window({closed:false})
+
+        })
+    });
+</script>
+<style>
+    #wd td{border:1px #95B8E7 solid;height:25px
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+
+<div id="wd" data-options="collapsible:false,closable:false" title=" ">
+
+        <table border="0" cellpadding="0" cellspacing="1" align="center" width="504" style="margin-top: 40px" >
+            <tr>
+                <td width="70" align="right" bgcolor="#E0ECFF"><font size="2">课号：</font></td>
+                <td width="156"><input type="text" size="10" name="courseno" value="%"></td>
+                <td width="108" align="right" bgcolor="#E0ECFF"><font size="2">课程类型：</font></td>
+                <td colspan="3" width="262"><select size="1" name="type">
+                    <option  value="%" selected>全部</option>
+                    <option value="选修">选修</option>
+                    <option value="必修">必修</option>
+                    <option value="限修">限修</option>
+                    <option value="模块">模块</option>
+                </select></td>
+            </tr>
+            <tr>
+                <td width="70" align="right" bgcolor="#E0ECFF"><font size="2">班号：</font></td>
+                <td width="156"><input type="hidden" name="classno" size="7" value="000000%"></td>
+                <td width="108" align="right" bgcolor="#E0ECFF"><font size="2">开课学院：</font></td>
+                <td colspan="3" width="262">
+                    <select name="SCHOOLS">
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="70" align="right" bgcolor="#E0ECFF"><font size="2">课程类别：</font></td>
+                <td width="156"><select size="1" name="COURSETYPENAME">
+                    <option value="%" selected>公共选修课</option>
+                </select></td>
+                <td width="108" align="right" bgcolor="#E0ECFF"><font size="2">考核方式：</font></td>
+                <td colspan="3" width="262"><select size="1" name="examtype">
+                    <option  value="%" selected>全部</option>
+                    <option value="考试">考试</option>
+                    <option value="考查">考查</option>
+                </select></td>
+            </tr>
+
+
+        <tr>
+            <td width="70" align="right" bgcolor="#E0ECFF"><font size="2">学年：</font></td>
+            <td width="156"><input type="text" size="4" name="YEAR" value="{$year_term.YEAR}"></td>
+            <td width="108" align="right" bgcolor="#E0ECFF"><font size="2">学期：</font></td>
+            <td colspan="3" width="262"><input type="text" size="2" name="TERM" value="{$year_term.TERM}"></td>
+        </tr>
+        <tr>
+            <td colspan="4" align="center" style="border: 0px">
+                <a href="javascript:void(0)"  class="easyui-linkbutton" id="bt">提交</a>
+            </td>
+        </tr>
+        </table>
+
+</div>
+
+<body style="background: #fff">
+
+<div id="mainPanle"  title="" >
+    <table id="datagrid"  iconCls="icon icon-leisure" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="COURSENO"
+           pagination="true" pageSize="15" pageList="[15,30,45]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENO',align:'center'" >课号</th>
+            <th data-options="field:'COURSENAME',align:'center'">课名</th>
+            <th data-options="field:'CREDITS',align:'center'">学分</th>
+            <th data-options="field:'COURSETYPE',align:'center'">修课</th>
+            <th data-options="field:'EXAMTYPE',align:'center'">考核</th>
+            <th data-options="field:'ESTIMATE',align:'center'">预计人数</th>
+            <th data-options="field:'ATTENDAMOUNT',align:'center'">已选人数</th>
+            <th data-options="field:'COURSETYPENAME',align:'center'">课程类别</th>
+            <th data-options="field:'SCHOOLNAME',align:'center'">开课学院</th>
+            <th data-options="field:'DAYNTIME',align:'center'">上课时间</th>
+            <th data-options="field:'REM',align:'center'">备注</th></tr>
+        </thead>
+    </table>
+</div>
+
+</body>
+</html>

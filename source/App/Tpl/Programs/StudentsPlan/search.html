@@ -1,0 +1,106 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    var year = "{$Think.request.YEAR}", term = "{$Think.request.TERM}";
+    var index = 1;
+    $(function() {
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__/Programs/StudentsPlan/search/hasJson/true";
+            datagrid.datagrid("load", {STUDENTNO:$("#STUDENTNO").val(), NAME:$("#NAME").val(), CLASSNO:$("#CLASSNO").val(),SCHOOL:$("#SCHOOL").val()})
+        });
+
+        $("#handlerList").bind("click",function(){
+            var row = datagrid.datagrid("getSelected");
+            if(row==null){
+                msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                return;
+            }
+            openTabsWindows(row['STUDENTNO'] + "修读计划","__ROOT__/Programs/StudentsPlan/alist/STUDENTNO/"+row['STUDENTNO']);
+        });
+
+        $('#admin_edit').bind('click',function(){
+
+                var row = datagrid.datagrid("getSelected");
+                if(row==null){
+                    msgShow("系统提示：","没有选择任何数据进行操作！","error");
+                    return;
+                }
+                openTabsWindows(row['STUDENTNO'] + "修读计划","__ROOT__/Programs/StudentsPlan/alist/STUDENTNO/"+row['STUDENTNO']);
+            });
+
+    });
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+ <!--   <div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" >
+            <tr>
+                <td><font size=6><b>学号:</b></font></td>
+                <td><input type="text" id="STUDENTNO" size="10" name="STUDENTNO"  value="%"></td>
+                <td>&nbsp&nbsp</td>
+                <td><font size=6><b>姓名:</b></font></td>
+                <td><input type="text" id="NAME" size="10" name="NAME"  value="%"></td>
+                <td>&nbsp&nbsp</td>
+                <td><font size=6><b>班号:</b></font></td>
+                <td><input type="text" id="CLASSNO" size="10" name="CLASSNO"  value="%"></td>
+                <td>&nbsp&nbsp</td>
+                <td><font size=6><b>学院:</b></font></td>
+                <td><Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" /></td>
+                <td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a></td>
+            </tr>
+        </table>
+        </form>
+    </div>-->
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true" idField="STUDENTNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'STUDENTNO',align:'center',width:60" >学号</th>
+                <th data-options="field:'NAME',align:'center',width:60">姓名</th>
+                <th data-options="field:'SEX',align:'center',width:60">性别</th>
+                <th data-options="field:'CLASSNAME',align:'center',width:100">主修班级</th>
+                <th data-options="field:'STATUSVALUE',align:'center',width:60">学籍状态</th>
+                <th data-options="field:'WARN',align:'center',width:100">退学警告次数</th>
+                <th data-options="field:'POINTS',align:'center',width:60">积点分</th>
+                <th data-options="field:'TAKEN',align:'center',width:60">选课学分</th>
+                <th data-options="field:'PASSED',align:'center',width:60">完成学分</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:100">所在学院</th></tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+
+<div id="toobar">
+          <label for="STUDENTNO">学号:</label><input type="text" id="STUDENTNO" size="10" name="STUDENTNO"  value="%">
+          <label for="NAME">姓名:</label><input type="text" id="NAME" size="10" name="NAME"  value="%">
+          <label for="CLASSNO">班号:</label><input type="text" id="CLASSNO" size="10" name="CLASSNO"  value="%"></td>
+          <label for="SCHOOL">学院:</label>
+           <Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" />
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher">搜索</a>
+          &nbsp&nbsp&nbsp
+    <a href="#" id="handlerList" class="easyui-linkbutton" data-options="iconCls:'icon-shenhe',plain:true">查看编辑学生修课计划</a>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_edit'>查看编辑学生修课计划</div>
+</div>
+</body>
+
+</html>
+

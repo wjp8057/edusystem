@@ -1,0 +1,112 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="4" maxlength="1">
+			   <label>教师所在学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <input type="hidden" value="0" name="TYPE">
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="javascript:void(0)" onclick="Export(0)" class="easyui-linkbutton" data-options="iconCls:'icon-file',plain:true">EXCEL报表（按教师）</a>
+            <a href="javascript:void(0)" onclick="Export(1)" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL报表（按课程）</a>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var list=null;
+var datagrid = null;
+$(function(){
+	datagrid=$('#content').datagrid({
+		fit:true,
+        striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"YEAR",title:"学年",align:"center"},
+                  {field:"TERM",title:"学期",align:"center"},
+                  {field:"SCHOOL",title:"学院代号",align:"center"},
+                  {field:"SCHOOLNAME",title:"学院名称",align:"center"},
+                  {field:"TEACHERNO",title:"教师号",align:"center"},
+                  {field:"TEACHERNAME",title:"教师名",align:"center"},
+                  {field:"P_VALUE",title:"职称",align:"center"},
+                  {field:"JB",title:"级别",align:"center"},
+                  {field:"ZhuJiangZhiGe",title:"主讲资格",align:"center"},
+                  {field:"COURSENO",title:"课号",align:"center"},
+                  {field:"COURSENAME",title:"课程名称",align:"center"},
+                  {field:"VALUE",title:"课程类型",align:"center"},
+                  {field:"CREDITS",title:"学分",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"HOURS",title:"总学时",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"EXPERIMENTS",title:"实验学时",align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+  		          {field:"COMPUTING",title:"上机学时",align:"center",formatter:function(value,row,index){
+              	  	  return parseFloat(value);
+		          }},
+  		          {field:"CLASSNO",title:"授课班级班号",align:"center"},
+                  {field:"CLASSNAME",title:"授课班级班名",align:"center"}
+        ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#tdemo'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='YEAR']").val());
+     	var term=$.trim($("[name='TERM']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/noQualify/hasJson/1";
+     	datagrid.datagrid('load',{
+     		YEAR:$.trim($("[name='YEAR']").val()),
+     		TERM:$.trim($("[name='TERM']").val()),
+     		SCHOOL:$.trim($("[name='SCHOOL']").val())
+     	});
+     });
+});
+//数据导出
+function Export(num){
+	list=datagrid.datagrid('getRows');
+	if(list.length){
+		var total = datagrid.datagrid('getPager').data("pagination").options.total;
+		if(total > 2000){
+			msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+			return;
+		}
+		$("#queryForm").attr("action","__URL__/noQualifyExport/");
+		$("[name='TYPE']").val(num);
+		$("#queryForm").submit();
+	}else{
+		msgShow("系统提示：","请先检索出您要导出的数据","info");
+	}
+}
+</script>
+</body>
+</html>

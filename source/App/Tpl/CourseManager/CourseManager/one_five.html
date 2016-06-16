@@ -1,0 +1,180 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var quanxian='{$quanxian}'
+    function qxpanduan(id,url){
+        var quanxianpd=false;
+        ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+
+            eval('var o='+c)
+            for(var i=0;i<o[0]['rl'].length;i++){
+
+                var zz=new RegExp(o[0]['rl'].charAt(i))
+                var bool=zz.test(quanxian)
+
+                if(bool){
+                    quanxianpd=true
+                    return;
+                }
+            }
+        })
+
+        return quanxianpd;
+    }
+    $(function(){
+        //todo:  window窗口
+       // var wd=$('#wd').window(new wind(600,300,false,false,false,false,false));
+
+        var wd_two=$('#wd_two').window(new wind(0,0,false,false,true,true,true))
+
+
+
+        //todo:提交按钮_第一个
+        $('#sub_one').linkbutton({
+            'text':'提交'
+
+        }).bind('click',function(){
+                    $('#title_name').html('按班级限制搜索的结果')
+            $('#List_dat').datagrid('load',{'Sqlpath':{
+                'select':'CourseManager/One_six_One_select.SQL','count':'CourseManager/One_six_One_count.SQL'
+            },
+                'bind':{':CONE':$('[name=search_one]').val(),':CTWO':$('[name=search_one]').val(),':YEAR':parent.$('[name=YEAR]').val()
+                    ,':TERM':parent.$('[name=TERM]').val(),':LIMIT':$('[name=search_four]').val()}})
+
+        })
+
+        //todo:提交按钮_第二个
+        $('#sub_two').linkbutton({
+            'text':'提交'
+
+        }).bind('click',function(){
+                    $('#title_name').html('按课号检索的结果')
+                    $('#List_dat').datagrid('load',{'Sqlpath':{
+                        'select':'CourseManager/One_six_One_select.SQL','count':'CourseManager/One_six_One_count.SQL'
+                    },
+                        'bind':{':CONE':$('[name=search_two]').val(),':CTWO':$('[name=search_two]').val(),':YEAR':parent.$('[name=YEAR]').val()
+                            ,':TERM':parent.$('[name=TERM]').val(),':LIMIT':$('[name=search_four]').val()}})
+
+        })
+
+        //todo:提交按钮_第三个
+        $('#sub_three').linkbutton({
+            'text':'提交'
+        }).bind('click',function(){
+                    $('#title_name').html('按课程类别检索的结果')
+                    $('#List_dat').datagrid('load',{'Sqlpath':{
+                        'select':'CourseManager/One_six_Three_select.SQL','count':'CourseManager/One_six_Three_count.SQL'
+                    },
+                        'bind':{':TONE':$('[name=search_three]').val(),':TTWO':$('[name=search_three]').val(),':YEAR':parent.$('[name=YEAR]').val()
+                            ,':TERM':parent.$('[name=TERM]').val(),':LIMIT':$('[name=search_four]').val()}})
+
+                })
+
+
+
+        $('#bt').bind('click',function(){
+            $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_four_select.SQL',
+                'count':'CourseManager/One_four_count.SQL'},bind:{':YONE':$('[name=YEAR]').val(),':TONE':$('[name=TERM]').val(),
+                ':YTWO':$('[name=YEAR]').val(),':TTWO':$('[name=TERM]').val()}})
+
+        })
+
+
+        $('#e_add').bind('click',function(){
+
+                    var rowList=$('#List_dat').datagrid('getChecked')
+                    if(rowList==''){
+                        return $.messager.alert('提示','您还没有选择数据');
+                    }
+
+                $.messager.confirm('提示','您确定要删除吗?',function(c){
+                if(c){
+                    ajiakesi('__URL__/delete_six/hasJson/1',{'YEAR':parent.$('[name=YEAR]').val(),'TERM':parent.$('[name=TERM]').val(),
+                        bind:rowList},function(c){
+                        if(c==''){
+                            $.messager.alert('提示','删除成功')
+                        }else{
+                            $.messager.alert('提示',c)
+                        }
+                        $('#List_dat').datagrid('load')
+
+                    })
+
+                }
+
+            })
+
+
+        })
+    })
+
+
+    function one_sub(){
+        $('#List_dat2').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_four_select_top.SQL','count':'CourseManager/One_four_count_top.SQL'},bind:{
+            ':MARGIN':$('[name=num]').val(),':CLASSNOFILTER':$('[name=class_jie]').val(),':YEAR':parent.$('[name=YEAR]').val(),':TERM':parent.$('[name=TERM]').val()
+        }})
+    }
+
+
+    function two_sub(){
+        $('#List_dat').datagrid('load',{'Sqlpath':{'select':'CourseManager/One_four_select.SQL','count':'CourseManager/One_four_count.SQL'},bind:{
+            ':YONE':parent.$('[name=YEAR]').val(),':TONE':parent.$('[name=TERM]').val(),':MARGIN':$('[name=num_two]').val(),
+            ':YTWO':parent.$('[name=YEAR]').val(),':TTWO':parent.$('[name=TERM]').val(),':CLASSNOFILTER':$('[name=class_jie]').val()
+        }})
+
+    }
+
+</script>
+<style>
+   #wd td{border:1px #95B8E7 solid;
+    }
+
+    span{border:0px solid red;;vertical-align:middle;}
+    #bt{height:40px;width:70px;background-color:#E0ECFF;border:1px #95B8E7 solid; }
+</style>
+<body style="background-color: #ffffff">
+
+    <div id="ccccc" class="easyui-layout" data-options="fit:true">
+        <div id="tdemo">
+                        按班号定义:
+
+                        <input type="text" name="search_one"  value='%'  size="9">&nbsp&nbsp<a href="javascript:void(0)" id="sub_one"></a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                   按课号定义:
+
+                        <input type="text" name="search_two" value='%'  size="9">&nbsp&nbsp<a href="javascript:void(0)" id="sub_two"></a>&nbsp;&nbsp;|&nbsp;&nbsp;
+
+                        按课程类别定义:
+                        <select name="search_three" class="easyui-combobox">
+                            <option value="%">所有类别</option>
+                            <volist name="coursetypeoptions" id="c">
+                                <option value="{$c.NAME}">{$c.VALUE}</option>
+                            </volist>
+                        </select>&nbsp&nbsp<a href="javascript:void(0)" id="sub_three"></a> &nbsp;&nbsp;|&nbsp;&nbsp;
+                        设定门数限制(大于):
+                        <input type="text" name="search_four" value="3" size="2">&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+                        <a href="javascript:void(0)" id="e_add" class="easyui-linkbutton" iconCls="icon-cut" plain=true>提交到数据库清除</a>
+        </div>
+        <div data-options="region:'center',split:false,border:false" style="padding:0px;background:#eee;">
+            <table class="easyui-datagrid" id="List_dat"
+                   data-options="url:'__APP__/Status/Status/Squery/hasJson/1',fit:true,pagination:true,striped:true,toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'xh',width:150,align:'right'" align="center">学号</th>
+                    <th data-options="field:'xm',width:120,align:'right'" align="center">姓名</th>
+                    <th data-options="field:'kh',width:100,align:'right'" align="center">课号</th>
+                    <th data-options="field:'km',width:300,align:'right'" align="center">课名</th>
+                    <th data-options="field:'xf',width:100,align:'right'" align="center">学分</th>
+                    <th data-options="field:'clkcxkms',width:100,align:'right'" align="center">此类课程选课门数</th>
+                    <th data-options="field:'xkjhn',width:100,align:'right'" align="center">修课计划内</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+
+
+</div>
+</body>
+</html>

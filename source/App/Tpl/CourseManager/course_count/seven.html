@@ -1,0 +1,64 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+        $('#seven_search').bind('click',function(){
+            //todo:上面的
+            $('#dat_seven_top').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_seven_bottom').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1';
+            $('#dat_seven_top').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_seven_top_select.SQL','count':'CourseManager/Five_seven_top_count.SQL'},
+                'bind':{':YEAR':parent.$('[name=year]').val(),':TERM':parent.$('[name=term]').val(),':SCHOOL':$('[name=seven_school]').val()}})
+
+            $('#dat_seven_bottom').datagrid('load',{'Sqlpath':{'select':'CourseManager/Five_seven_bottom_select.SQL','count':'CourseManager/Five_seven_bottom_count.SQL'},
+                'bind':{':YEAR':parent.$('[name=year]').val(),':TERM':parent.$('[name=term]').val()}})
+
+        })
+
+
+    })
+</script>
+        <div id="tdemo">
+
+                    开课学院:
+                    <select name="seven_school">
+                        <option value="%">所有学院</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+                   &nbsp&nbsp&nbsp<a href="javascript:void(0)" id="seven_search" class="easyui-linkbutton">查询</a>
+                </center>
+        </div>
+
+    <div id="cccccccc" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',split:false,border:false" id="seven_top" style="height:50px;background-color: #e0ecff" title="">
+            <table class="easyui-datagrid" id="dat_seven_top"
+                   data-options="fit:true,pagination:true,pageList:[40],toolbar:'#tdemo'">
+                <thead>
+                <tr>
+                    <th data-options="field:'row',checkbox:true">选择</th>
+                    <th data-options="field:'xydh',width:100,align:'right'" align="center">学院代号</th>
+                    <th data-options="field:'kkxy',width:100,align:'right'" align="center">开课学院</th>
+                    <th data-options="field:'kclx',width:150,align:'right'" align="center">课程类型</th>
+                    <th data-options="field:'xkzrs',width:220,align:'right'" align="center">选课总人数</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center',border:false" style="padding:0px;background:#eee;" title="全校选课总人数统计结果表">
+            <center></center>
+            <table class="easyui-datagrid" id="dat_seven_bottom"
+                   data-options="fit:true,pagination:true">
+                <thead>
+                <tr>
+                    <th data-options="field:'kclx',width:150,align:'right'" align="center">课程类型</th>
+                    <th data-options="field:'xkzrs',width:220,align:'right'" align="center">选课总人数</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+<script>
+    $('#seven_top').css('height',$(window).height()/2)
+</script>

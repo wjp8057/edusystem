@@ -1,0 +1,106 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        var editRow = undefined;
+        var datagrid = $('#datagrid').datagrid({
+            view: detailview,
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            detailFormatter:function(index,row){
+                return '<div style="padding:2px;width:100%"><table width="100%">' +
+                        '<tr><td width="116" height="18">选课标志</td><td>'+row.FLAG+'</td></tr>' +
+                        '<tr><td height="18">课程安排</td><td>'+row.CURRICULUM+'</td></tr>' +
+                        '<tr><td height="18">上课教师</td><td>'+row.TEACHERNONAME+'</td></tr>' +
+                        '<tr><td height="18">备注</td><td>'+row.REM+'</td></tr></table></div>';
+            },
+            onLoadSuccess : function(data){
+                var this_datagrid = $(this);
+                $.each(data.rows, function(i,o){
+                    this_datagrid.datagrid('expandRow',i);
+                });
+            },
+            onBeforeLoad : function(){
+                $(this).datagrid("uncheckAll");
+                return true;
+            },
+            rowStyler: function(index,row){
+                return 'background-color:#6293BB;color:#fff;';
+            }
+        });
+
+        datagrid.ready(function(){
+            var year = parent.$("#YEAR").val();
+            var term = parent.$("#TERM").val();
+            if(!year || !term){
+                msgShow("系统提示","请先设置上面的学年和学期！","error");
+                return false;
+            }
+            datagrid.datagrid("options").url = "__ROOT__/index.php?g=CourseManager&m=Class_admin&a=removeList&hasJson=true&YEAR="+parent.$("#YEAR").val()+"&TERM="+parent.$("#TERM").val();
+            setYearTerm("#handlerYearTerm");
+        });
+
+
+        $("#handlerReload").bind("click",function(){
+          //  setYearTerm("#handlerYearTerm");
+            datagrid.datagrid("reload",{});
+        });
+
+        $('#handlerSave').bind("click",function(){
+            var checkedItems = datagrid.datagrid("getChecked");
+            if(checkedItems.length==0){
+                $.messager.alert("系统消息：", "没有选择任一数据项！", "error");
+                return;
+            }
+            $.messager.confirm("系统消息：","您真的要退掉选择的课程吗？",function(data){
+                if(data){
+                    var ids = [], year=parent.$("#YEAR").val(), term =parent.$("#TERM").val();
+                    $.each(checkedItems, function(index, item){
+                        ids.push(item.COURSENOGROUP);
+                    });
+                    $.post("__ROOT__/index.php?g=CourseManager&m=Class_admin&a=remove&hasJson=true", {ids:ids,YEAR:year,TERM:term}, function(rsp) {
+                        if(rsp){
+                            if(rsp.type=="info") datagrid.datagrid("load");
+                            else datagrid.datagrid("reload");
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                        }
+                    });
+                }
+            })
+        });
+
+        function setYearTerm(id){
+            $(id).html(parent.$("#YEAR").val()+"学年第"+parent.$("#TERM").val()+"学期所选课程")
+        }
+    });
+</script>
+<body class="easyui-layout" style="background: #fff;padding:5px;overflow-y: hidden"  fit="true" split="false"   scroll="no" >
+
+<div id="mainPanle" region="center" border="1" style="background: #fff; padding:5px; " >
+    <table id="datagrid" title="退课管理" iconCls="icon icon-retreat" fitColumns="false"
+           width="100%" singleSelect="false" fit="true" idField="COURSENOGROUP"
+           pagination="true" pageSize="5" pageList="[5]" striped="true" >
+        <thead>
+        <tr><th data-options="field:'COURSENOGROUP',width:120" >课号</th>
+            <th data-options="field:'COURSENAME'">课名</th>
+            <th data-options="field:'CREDITS',width:40,align:'center'">学分</th>
+            <th data-options="field:'WEEKHOURS',width:50,align:'center'">周课时</th>
+            <th data-options="field:'COURSETYPE',width:40,align:'center'">修课</th>
+            <th data-options="field:'EXAMTYPE',width:40,align:'center'">考核</th>
+            <th data-options="field:'APPROACH',width:70,align:'center'">听课</th>
+            <th data-options="field:'FLAG',hidden:true">选课标志</th>
+            <th data-options="field:'CURRICULUM',hidden:true">课程安排</th>
+            <th data-options="field:'TEACHERNONAME',hidden:true">上课教师</th>
+            <th data-options="field:'REM',hidden:true">备注</th></tr>
+        </thead>
+    </table>
+</div>
+
+<div id="toobar">
+    <a href="#" id="handlerReload" class="easyui-linkbutton" data-options="iconCls:'icon-reload',plain:true">刷新</a>
+    <a href="#" id="handlerSave" class="easyui-linkbutton" data-options="iconCls:'icon-cancel',plain:true">确认退课</a>
+    <a href="#" id="handlerYearTerm" class="easyui-linkbutton" data-options="plain:true" style="color: #ff0000"></a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var studentno='{$info}'
+    var examno='{$info2}'
+    $(function(){
+
+        ajiakesi('__URL__/newStudentNO',{newstudentno:studentno,examno:examno},function(c){
+
+            eval('var one='+c)
+            var spanList=$('span')
+            for(var i=0;i<spanList.length;i++){                                 //todo:true代表    新生报到   ①
+                var nm=spanList[i].id;
+                $('#'+nm).html(one[nm]);
+            }
+
+        })
+        $('#tijiao').linkbutton({
+            text:'提交新生报到',
+            iconCls:"icon-add"
+        }).bind('click',function(){
+
+                    ajiakesi('__URL__/Squery',{'Sqlpath':{'count':'status/One_tijiaoxinshengbaodao_c.SQL','select':'status/One_tijiaoxinshengbaodao.SQL'},bind:{':studentno':studentno}},function(c){
+
+
+                        var one=eval(c)
+
+                        //Exception学号输入错误，没有找到该学生的记录，请返回重新输入！
+                        $.messager.alert('提示','该生已注册，注册入学时间是'+one.rows[0]['ENTERDATE']);
+
+                    })
+
+
+                })
+
+
+    })
+</script>
+        <style>
+            #ttb{border:1px solid black}
+            #ttb td{border:1px solid black}
+
+        </style>
+<body style="background-color: #fff">
+    <table datasrc=#dsoSTUDENT id='ttb' align="center" border="0" style="border-bottom: 1px" width="82%" cellspacing="0"  cellpadding="0" >
+            <td width=12% align="right" height="23"><font size="2"><b>准考证号：</b></font></td>
+            <td width=65%  height="23" ><font size="2"><b><SPAN id=EXAMNO></SPAN></b></font></td>
+            <td  height="230" rowspan="10" colspan="2" width="25%"><img border="0" src="/pictures/<#PARAMETER NAME=NEWSTUDENTNO>.jpg" width="20%" height="233"></td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23" ><font size="2"><b>学号：</b></font></td>
+            <td width=65%  height="23"><font size="2"><b><SPAN id=STUDENTNO></SPAN></b></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2"><b>姓名：</b></font></td>
+            <td width=65%  height="23"><font size="2"><b><SPAN id=NAME></SPAN></b></font></td>
+        </tr>
+        <tr>
+            <td  width=12% align="right" height="23"><font size="2">性别：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=SEX></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">出生日期：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=BIRTHDAY></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">民族：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=NATIONALITY_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">政治面貌：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=PARTY_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">考生类别码：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=CLASS_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">考生特征码：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=FEATURE_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12% align="right" height="23"><font size="2">录取计划类别：</font></td>
+            <td width=65%  height="23"><font size="2"><SPAN id=PLANCLASS_NAME></SPAN></font></td>
+        </tr>
+    </table>
+    <table datasrc=#dsoSTUDENT align="center" border="1" style="border-top: 0px" width="82%" cellspacing="0" bordercolor="#000000" cellpadding="0" style="font-size: 10pt; color: #000000; ">
+        <tr>
+            <td  width=12% align="right" height="23"><font size="2">邮编：</font></td>
+            <td  width=40% height="23" ><font size="2"><SPAN id=POSTCODE></SPAN></font></td>
+            <td  width=12% align="right" height="23"><font size="2">家庭住址：</font></td>
+            <td  width=40% height="23" ><font size="2"><SPAN id=ADDRESS></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><font size="2">家庭电话：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=TEL></SPAN></font></td>
+            <td width=12%  align="right" height="23"><font size="2">原毕业院校：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=MIDSCHOOL></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><font size="2">录取学制：</font></td>
+            <td width=12%  height="23" ><font size="2"><SPAN id=YEARS></SPAN></font></td>
+            <td width=12%  align="right" height="23"><font size="2">录取学院：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=SCHOOL_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><font size="2">录取专业：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=MAJOR_NAME></SPAN></font></td>
+            <td width=12%  align="right" height="23"><font size="2">高考总分：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=SCORE></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><font size="2">身份证：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=ID></SPAN></font></td>
+            <td width=12%  align="right" height="23"><font size="2">省份代码：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=PROVINCE_NAME></SPAN></font></td>
+        </tr>
+        <tr>
+            <td width=12%  align="right" height="23"><font size="2">学科类别：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=BRANCH_NAME></SPAN></font></td>
+            <td width=12%  align="right" height="23"><font size="2">录取日期：</font></td>
+            <td width=40%  height="23" ><font size="2"><SPAN id=DATE></SPAN></font></td>
+        </tr>
+        <tr>
+            <td  align="right" height="23"><font size="2">备注：</font></td>
+            <td height="23" colspan="3"><font size="3"><SPAN id=REM></SPAN></font></td>
+        </tr>
+
+    </table>
+    <br />
+    <br />
+    <center> <a href="javascript:void(0)" id="tijiao"></a></center>
+</div>
+</body>
+</html>

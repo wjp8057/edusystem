@@ -1,0 +1,176 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var eqno=09321;
+    var teacherSCHOOL='{$teacherSCHOOL.SCHOOL}'
+    $(function(){
+
+        $('#bt').linkbutton({
+            'text':'检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+
+                    $('#dat').datagrid('options').url='__APP__/Status/Status/Squery'
+                    $('#dat').datagrid('load',{'Sqlpath':{'select':'exam/equalCourses_select.SQL','count':'exam/equalCourses_count.SQL'},
+                        'bind':{':COURSENO':$('[name=Courseno]').val().trim()}})
+                    /*  ajiakesi('__URL__/equalCourses',{'YEAR':$('[NAME=YEAR]').VAL(),'TERM':$('[name=TERM]').val(),'COURSENO':$('[name=Courseno]').val(),':EQCOURSENO':$('[NAME=eqCourseno]').val()},function(c){
+                     $.messager.alert('提示',c)
+                     })*/
+                })
+
+
+        var ddat=$('#dat').datagrid({
+            onLoadSuccess:function(data){
+
+                eqno=09321
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                ddat.datagrid('rejectChanges')
+                var tt=$('#dat');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onDblClickRow:function(index,row){
+
+                if(eqno!=09321&&eqno!=index){
+                    $.messager.confirm('提示','您还有正在编辑的未保存,点击"确定"结束编辑吗(不做保存)',function(c){
+                        if(c){
+                            $('#dat').datagrid('rejectChanges')
+                            $('#dat').datagrid('beginEdit',index)
+                            $('#dat').datagrid('selectRow',index);
+                            eqno=index;
+                        }else{
+                            $('#dat').datagrid('unselectAll')
+                            $('#dat').datagrid('selectRow',eqno);
+                        }
+                    })
+
+                    return;
+                }
+                $('#dat').datagrid('beginEdit',index)
+                eqno=index;
+
+            }
+
+        })
+
+
+        $('#bt2').linkbutton({
+            'text':'排考初始化',
+            'iconCls':''
+        }).bind('click',function(){
+                    if(teacherSCHOOL!='A1'){
+                        return $.messager.alert('提示','您不是教务处人员,不能初始化课程');
+                    }
+                    ajiakesi('__URL__/chushihua',{'YEAR':parent.$('#YEAR').val(),'TERM':parent.$('#TERM').val()},function(c){
+                        $.messager.alert('提示',c)
+                    })
+
+
+                })
+
+        function eedit(){
+            var index=$('#dat').datagrid('getRowIndex',$('#dat').datagrid('getSelected'));
+            if(eqno!=09321&&eqno!=index){
+                $.messager.confirm('提示','您还有正在编辑的未保存,点击&quot确定&quot结束编辑吗(不做保存)',function(c){
+                    if(c){
+                        $('#dat').datagrid('rejectChanges')
+                        $('#dat').datagrid('beginEdit',index)
+                        $('#dat').datagrid('selectRow',index);
+                        eqno=index;
+                    }else{
+                        $('#dat').datagrid('unselectAll')
+                        $('#dat').datagrid('selectRow',eqno);
+                    }
+                })
+
+                return;
+            }
+            $('#dat').datagrid('beginEdit',index)
+            eqno=index;
+        }
+
+        $('#e_edit').bind('click',eedit)
+        $('#admin_edit').bind('click',eedit);
+
+        $('#e_back').bind('click',function(){
+            eqno=09321
+            $('#dat').datagrid('acceptChanges')
+        })
+
+        $('#e_save').bind('click',function(){
+            if(eqno==09321){
+                return $.messager.alert('提示','您还未编辑过数据呢')
+            }
+            $('#dat').datagrid('endEdit',eqno)
+            var row=$('#dat').datagrid('getRows')[eqno]
+            ajiakesi('__URL__/GraduationMtPaikao/hasJson/1',{':ID':'EXE','exe':'exam GraduationMtpaikao.SQL',bind:{':EQCOURSENO':row.djkh,':COURSENO':row.kh}},function(c){
+                if(c=='true'){
+                    $('#dat').datagrid('load',{'Sqlpath':{'select':'exam/equalCourses_select.SQL','count':'exam/equalCourses_count.SQL'},
+                        'bind':{':COURSENO':$('[name=Courseno]').val().trim()}})
+                    $.messager.alert('提示','保存成功')
+
+                }else{
+                    $('#dat').datagrid('rejectChanges')
+                    $.messager.alert('提示','等价课号不存在')
+                }
+                eqno=09321
+                $('#dat').datagrid('acceptChanges')
+            })
+
+        })
+    })
+</script>
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+<b>课号：</b>
+
+                    <input type="text" name="Courseno" size="7" value="%">
+
+                    <a href="javascript:void(0)" id="bt" class="easyui-linkbutton">检索</a>
+                <b>注:</b>:等价课号为红色的表示修改过的<font color="red"><b>(双击可修改)</b></font>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+        &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<a href="javascript:void(0)" id="bt2"></a>
+
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+
+        <table class="easyui-datagrid" id="dat"
+               data-options="fit:true,pagination:true,singleSelect:true,pageList:[20,50,100,500,1000],toolbar:'#tdemo'">
+            <thead>
+            <tr>
+                <th data-options="field:'row',checkbox:true">选择</th>
+                <th data-options="field:'kh',width:150,align:'right'" align="center">课号</th>
+                <th data-options="field:'kcmc',width:320,align:'right'" align="center">课程名称</th>
+                <th data-options="field:'cc',width:100,align:'right'" align="center">场次</th>
+                <th data-options="field:'djkh',width:120,editor:{type:'text'},align:'right',formatter:function(a,b,c){
+                    if(b.kh!=a){
+                        return '<font color=red>'+a+'</font>'
+                    }
+                        return a;
+
+                }" align="center">等价课程号</th>
+                <th data-options="field:'djkcm',width:320,align:'right',formatter:function(a,b,c){
+                    if(b.kcmc!=a){
+                        return '<font color=red>'+a+'</font>'
+                    }
+                        return a;
+
+                }" align="center">等价课程名</th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+
+    <div id='admin_edit'>编辑本条目</div>
+</div>

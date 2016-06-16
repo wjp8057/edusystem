@@ -1,0 +1,83 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+			<div>
+			   <label>职称：</label>
+			   <select name="POSITION" class="easyui-combobox" data-options="editable:false">
+				   <option value="%">全部</option>
+				   <volist name="position" id="p">
+				   <option value="{$p.NAME}">{$p.VALUE}</option>
+				   </volist>
+			   </select>
+			   <label>学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+				   <option value="%">所有学院</option>
+				   <volist name="school" id="s">
+				   <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				   </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+                &nbsp;&nbsp;&nbsp;
+                <a href="javascript:void(0)" id="ExportBut" class="easyui-linkbutton" data-options="iconCls:'icon-file2',plain:true">EXCEL报表</a>
+
+            </div>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+         <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'NAME',align:'center',width:30">教师姓名</th>
+                <th data-options="field:'TEACHERNO',align:'center',width:30">教师号</th>
+                <th data-options="field:'VALUE',align:'center',width:30">职称</th>
+                <th data-options="field:'SEX',align:'center',width:30">性别</th>
+                <th data-options="field:'SCHOOLNAME',align:'center',width:30">所在学院</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+<div id="toobar">
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#datagrid').datagrid({toolbar:'#tdemo'});
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	datagrid.datagrid("options").url = "__URL__/teacher/hasJson/1";
+     	datagrid.datagrid('load',{
+     		POSITION:$.trim($("[name='POSITION']").val()),
+     		SCHOOL:$.trim($("[name='SCHOOL']").val())
+     	});
+     });
+     
+    //导出EXCEL
+ 	$("#ExportBut").click(function(){
+ 		var list=datagrid.datagrid('getRows');
+     	if(list.length){
+     		var total = datagrid.datagrid('getPager').data("pagination").options.total;
+ 			if(total > 2000){
+ 				msgShow("系统提示：","抱歉，系统暂不支持数目超过两千以上的数据导出！","info");
+     			return;
+ 			}
+ 			$("#queryForm").attr("action","__URL__/teacherExp/");
+     		$("#queryForm").submit();
+     	}else{
+     		msgShow("系统提示：","请先检索出您要导出的数据","info");
+     	}
+     });
+});
+</script>
+</body>
+</html>

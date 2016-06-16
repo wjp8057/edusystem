@@ -1,0 +1,387 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    var planobj=null                        //todo:毕业审核用
+    //todo:判断是否是选择了一条的函数
+    function yitiao(obj,str1,str2){
+        var rowList=obj.datagrid('getSelections');              //获取所有被选中的
+        if(rowList.length>1){
+            $.messager.alert('提示',str1);                         //用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示',str2);                         //用户没选择行
+        }else{
+            return true;
+        }
+        return false;
+    }
+
+
+    function fuzhi(tablename,one){
+        for(var i in one){
+            $('#'+tablename+' [name='+i+']').val(one[i]);
+        }
+    }
+
+
+
+    //todo:取input值
+    function quzhi(name,fuhao,attr){
+        var obj={};
+        obj['arr']={}
+        var inputList=$('#'+name+' input')
+        for(var i=0;i<inputList.length;i++){
+            if(inputList[i][attr]==''){
+                continue;
+            }
+            if(fuhao)
+                obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)     //todo:LIKE
+            else
+                obj['arr'][':'+inputList[i][attr]]= $.trim(inputList[i].value)              //todo:=
+        }
+        return obj;
+    }
+    $(function(){
+
+        var wd5=$('#wd5').window({
+            modal:true,
+            width:470,
+            height:250,
+            minimizable:false,
+            maximizable:false,
+            closed:true
+        })
+        $('#wd5').css('display','')
+        var wd4=$('#wd4').window({
+            modal:true,
+            width:400,
+            height:300,
+            minimizable:false,
+            maximizable:false,
+            collapsible:false,
+            closed:true
+        });              //window弹窗之    修改某个培养计划的时候
+        var rowid='{$info}'
+
+
+        var  dat=$('#scinfo').datagrid({
+        fit:true,
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#scinfo');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        columns:[[{field:'majorsrowid',checkbox:true},
+            {field:'nj',title:'年级',width:40,align:'center',editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+            }},
+            {field:'zymc',title:'专业名称',width:200,align:'center'
+            },
+            {field:'zyfx',title:'专业方向',width:170,align:'center'},
+            {field:'xz',title:'学制(年)',width:70,align:'center'},
+            {field:'bxzxf',title:'必修总学分',width:70,align:'center'},
+            {field:'zxf',title:'总学分',width:70,align:'center',editor:{
+                type:'validatebox',
+                options:{
+                    required:true
+                }
+            }},
+            {field:'xymc',title:'学院名称',width:100,align:'center'},
+            {field:'zypyjhbz',title:'专业培养计划备注',width:110,align:'center',
+                editor:{type:'validatebox',options:{
+                }
+                }}]],
+
+        sortName:'YEAR',                      //排序用的
+        sortOrder:'asc',
+        pagination:true,
+        pageList:[10,20,30,40,50],
+        pageSize:20,
+        toolbar:[{text:'删除选中培养计划',
+            iconCls:'icon-cancel',
+            handler:function(){
+                var yi=yitiao(dat,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+                if(yi){
+
+                    var row=dat.datagrid('getSelected')
+                    ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:row.school},function(c){
+
+                        if(c=='true'){
+                            $.messager.confirm('提示','您确定要删除吗',function(c){
+                                if(c){
+                                    ajiakesi('__URL__/delete_plan/hasJson/1',{rowid:row.majorplanrowid},function(a){
+                                        if(a!='<b>删除成功</b>'){
+                                            return $.messager.alert('提示','您没有权限')
+                                        }
+                                        $.messager.alert('提示',a)
+                                        dat.datagrid('load')
+                                    })
+                                }
+                            })
+                        }else{
+                            $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                        }
+                    })
+                }
+            }},{text:'修改选中培养计划',
+            iconCls:'icon-edit',
+            handler:function(){
+                var yi=yitiao(dat,'请选择一条培养计划,不能选多条修改','请选择一条要修改的数据')
+                if(yi){
+                    var row=dat.datagrid('getSelected')
+                    ajiakesi('__APP__/Classes/Class/quanxianpd/hasJson/1',{SCHOOL:row.school},function(c){
+                        if(c=='true'){
+                            var obj={};
+                            obj['arr']={':rowid':row.majorplanrowid};
+                            obj['paixu']={':rowid':''}
+                            obj['sqlpath']={edit2:'major/select_Edit_plan.SQL'}
+                            ajiakesi('__URL__/editInfo',obj,function(c){
+                                eval('var one='+c)
+                                fuzhi('wd4',one);
+                                wd4.window({
+                                    closed:false
+                                })
+                                $('#ROWID').val(row.majorplanrowid);        //todo:赋值rowid
+                            })
+                        }else{
+                            $.messager.alert('提示','不好意思,您不能修改其他学院的')
+                        }
+                    })
+                }
+            }},{
+            text:'查看并修改教学计划',
+            iconCls:'icon-lookfile',
+            handler:function(){
+                var yi=yitiao(dat,'请选择一条教学计划,不能选多条查看','请选择一条要查看的数据');
+                if(yi){
+                    var row=dat.datagrid('getSelected')
+                    var obj={}                  //声明保存传递数据 的对象
+                   /* obj.sqlpath={count:'major/major_countprogram.SQL',select:'major/major_selectprogram.SQL'}
+                    obj.arr={':rowid':row.majorplanrowid}
+                    planNo=row.majorplanrowid;          //todo:给培养计划号赋值
+                    schoolno=row.school;
+                    peiyangprogram.datagrid('load',obj);
+                    wd.window({
+                        title:row.zymc+' 教学计划列表',
+                        closed:false
+                    })*/
+                    openTabsWindows(row.zymc+' 教学计划列表','__URL__/look_edit_program/rowid/'+row.majorplanrowid+'/schoolno/'+row.school,'',true)
+                }
+            }
+        },{
+            text:'审核该方向学生',
+            iconCls:"icon-shenhe",
+            handler:function(){
+          /*      var boo=qxpanduan('MJ31','__APP__/Book/Book/Bexecute')
+                if(!boo){
+                    dat.datagrid('reload');
+                    return $.messager.alert('提示','MJ31 您没有足够的权限')
+                }*/
+                var yi=yitiao(dat,'请选择一条培养计划审核,不能选多条','请选择一条要审核的数据');
+                if(yi){
+                    var row=dat.datagrid('getSelected');
+                    planobj=row
+                    wd5.window({closed:false,title:row.zyfx+'的毕业审核' })
+                }
+            }
+        },{
+            text:'审核重修学分',
+            iconCls:'icon-shenhe2',
+            handler:function(){
+                var boo=qxpanduan('MJ31','__APP__/Book/Book/Bexecute')
+                if(!boo){
+                    dat.datagrid('reload');
+                    return $.messager.alert('提示','MJ31 您没有足够的权限')
+                }
+                var yi=yitiao(dat,'请选择一条培养计划审核,不能选多条','请选择一条要审核的数据');
+                var row=dat.datagrid('getSelected');
+                planobj=row
+                wd7.window({closed:false,title:'审核必修重修学分情况'+row.SPECIALS })
+            }
+        }/*,{
+            text:'返回',
+            iconCls:'icon-goleft',
+            handler:function(){
+                $('#dm').css('display','none')
+            }
+        }*/
+        ]
+
+    });
+        $('#scinfo').datagrid('options').url='__APP__/Status/Status/Squery/hasJson/1'
+        setTimeout(function(){
+
+            $('#scinfo').datagrid('load',{
+                'Sqlpath':{'select':'major/major_selectMajorplan.SQL','count':'major/major_countMajorplan.SQL'},'bind':{':ROWID':rowid}})
+
+        },500)
+
+        $('#shenhe').linkbutton({
+            text:'提交审核',
+            iconCls:'icon-edit'
+        }).bind('click',function(){
+                    if($('#shenheStudentNo').val().length<5&&$('#shenheClassNo').val().length<5){
+                        return $.messager.alert('提示','<font color="red">学号长度不够，为了节省服务器资源，请输入正确的学号！</font>')
+                    }
+                    /* var obj={}
+                     obj['arr']={':studentno':$('#shenheStudentNo').val(),':classno':$('#shenheClassNo').val()}
+                     obj['rowid']=planobj['majorplanrowid']
+                     ajiakesi('__URL__/shenhe',obj,function(c){
+                     $.messager.alert('提示',c)
+                     })*/
+                    openTabsWindows('毕业审核结果','__URL__/shenhe/rowid/'+planobj['majorplanrowid']+'/studentno/'+$('#shenheStudentNo').val()+'_/classno/'+$('#shenheClassNo').val(),'',true)
+        })
+        //todo:右键删除
+        $('#admin_del').bind('click',function(){
+            var yi=yitiao(dat,'请选择一条教学计划,不能选多条修改','请选择一条要修改的数据')
+            if(yi){
+                var row=dat.datagrid('getSelected')
+                ajiakesi('__APP__/Classes/Class/quanxianpd',{SCHOOL:row.school},function(c){
+                    if(c=='true'){
+                        $.messager.confirm('提示','您确定要删除吗',function(c){
+                            if(c){
+                                ajiakesi('__URL__/delete_plan/hasJson/1',{rowid:row.majorplanrowid},function(a){
+                                    if(a!='<b>删除成功</b>'){
+                                        return $.messager.alert('提示','您没有权限')
+                                    }
+                                    $.messager.alert('提示',a)
+                                    dat.datagrid('load')
+                                })
+                            }
+                        })
+                    }else{
+                        $.messager.alert('提示','不好意思,您不能删除其他学院的')
+                    }
+                })
+            }
+        })
+
+        //todo:右键修改选中培养计划
+        $('#admin_edit').bind('click',function(){
+            var yi=yitiao(dat,'请选择一条培养计划,不能选多条修改','请选择一条要修改的数据')
+            if(yi){
+                var row=dat.datagrid('getSelected')
+                ajiakesi('__APP__/Classes/Class/quanxianpd/hasJson/1',{SCHOOL:row.school},function(c){
+                    if(c=='true'){
+                        var obj={};
+                        obj['arr']={':rowid':row.majorplanrowid};
+                        obj['paixu']={':rowid':''}
+                        obj['sqlpath']={edit2:'major/select_Edit_plan.SQL'}
+                        ajiakesi('__URL__/editInfo',obj,function(c){
+                            eval('var one='+c)
+                            fuzhi('wd4',one);
+                            wd4.window({
+                                closed:false
+                            })
+                            $('#ROWID').val(row.majorplanrowid);        //todo:赋值rowid
+                        })
+                    }else{
+                        $.messager.alert('提示','不好意思,您不能修改其他学院的')
+                    }
+                })
+            }
+        })
+
+
+        $('#admin_shenhe').bind('click',function(){
+            var yi=yitiao(dat,'请选择一条培养计划审核,不能选多条','请选择一条要审核的数据');
+            if(yi){
+                var row=dat.datagrid('getSelected');
+                planobj=row
+                wd5.window({closed:false,title:row.zyfx+'的毕业审核' })
+            }
+        })
+
+
+        $('#admin_look').bind('click',function(){
+            var yi=yitiao(dat,'请选择一条教学计划,不能选多条查看','请选择一条要查看的数据');
+            if(yi){
+                var row=dat.datagrid('getSelected')
+                var obj={}                  //声明保存传递数据 的对象
+
+                openTabsWindows(row.zymc+' 教学计划列表','__URL__/look_edit_program/rowid/'+row.majorplanrowid+'/schoolno/'+row.school,'',true)
+            }
+        })
+
+
+
+        //todo:“提交修改后的培养计划内容 的按钮”
+        $('#editPlanButton').linkbutton({
+            text:'修改培养计划',
+            iconCls:"icon-edit"
+        }).bind('click',function(){
+                    var obj=quzhi('wd4',false,'name')
+                    obj['arr'][':ROWID']=$('#ROWID').val();
+                    obj['paixu']={':YEAR':'',':REM':'',':MCREDITS':'',':CREDITS':'',":zyfx":'',':ROWID':''}
+                    obj['sqlpath']={edit:'major/Update_Edit_plan.SQL'}
+                    ajiakesi('__URL__/xiugai',obj,function(c){
+                        if(c=='false'){
+                            return $.messager.alert('提示','<font color="red">学分请填写数字</font>')
+                        }
+                        $.messager.alert('提示',c);
+
+
+                        wd4.window({
+                            closed:true
+                        })
+                        dat.datagrid('reload');
+                    })
+                })
+    })
+</script>
+<body style="background-color: #fff">
+<div id="scinfo" data-options=""></div>
+
+<!--todo:修改某个培养计划的时候所用到的窗口-->
+<div id="wd4" title="修改培养计划"  >
+    <table border="0" width="100%">
+        <tr>
+            <td width="43%" align="right">年级：</td>
+            <td width="57%"><input type="text" name="YEAR" size="4" maxlength="4" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%" align="right">专业方向：</td>
+            <td width="57%"><input type="text" name="zyfx" size="30" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%" align="right">总学分：</td>
+            <td width="57%"><input type="text" name="CREDITS" size="6" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%" align="right">必修总学分：</td>
+            <td width="57%"><input type="text" name="MCREDITS" size="6" value=""></td>
+        </tr>
+        <tr>
+            <td width="43%" align="right">备注：</td>
+            <td width="57%"><input type="text" name="REM" size="30"  value="">
+                <input type="hidden" id="ROWID">
+            </td>
+        </tr>
+        <tr><td colspan="2" align="center"><a href="javascript:void(0)" id="editPlanButton">修改培养计划</a></td></tr>
+    </table>
+</div>
+
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除选中培养计划</div>
+    <div id='admin_edit'>修改选中培养计划</div>
+    <div id='admin_look'>查看并修改教学计划</div>
+    <div id='admin_shenhe'>审核该方向学生</div>
+</div>
+
+<div id="wd5" title="毕业审核" style="display: none">
+    <table border="0" cellspacing="10" align="center" style="margin-top:50px">
+        <tr><td align="right"> 请输入待审核的学号:</td><td><input type="text" name="STUDENTNO" id="shenheStudentNo"size="9" value=""></td></tr>
+        <tr><td align="right">班号:</td> <td><input type="text" name="CLASSNO" id="shenheClassNo"size="8" value=""></td></tr>
+        <tr><td align="center" colspan="2"><a  id="shenhe" href="javascript:void(0)">开始审核</a></td></tr>
+    </table>
+</div>
+</body>
+</html>

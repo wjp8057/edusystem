@@ -1,0 +1,340 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+var quanxian='{$quanxian}'
+function qxpanduan(id,url){
+    var quanxianpd=false;
+    ajiakesi2(url,{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+
+        eval('var o='+c)
+        for(var i=0;i<o[0]['rl'].length;i++){
+
+            var zz=new RegExp(o[0]['rl'].charAt(i))
+            var bool=zz.test(quanxian)
+
+            if(bool){
+                quanxianpd=true
+                return;
+            }
+        }
+    })
+
+    return quanxianpd;
+}
+function ajiakesi2(url,data,func){
+    $.ajax({
+        type:'POST',
+        url:url,
+        async:false,
+        data:data,
+        success:function(c){
+            func(c);
+        }
+    })
+}
+    $(function(){
+        var chuangkou={closed:true,
+            fit:true,
+            minimizable:false,
+            maximizable:false}
+
+        var schoolno="";            //保存学院信息
+        $("#wd1").css("display","")
+
+        $("#wd3").css("display","")
+       $("#startwd").css("display","")
+       // $("#wd1").css("display","")
+
+        var wd1=$('#wd1').window(chuangkou)
+
+        var wd3=$('#wd3').window(chuangkou)
+        var start=$('#startwd').window({
+            closed:false,
+            height:300,
+            width:600,
+            minimizable:false,
+            maximizable:false
+        })
+
+
+
+
+
+
+        //todo:编辑学生信息的返回按钮
+        $('#edit_back').bind('click',function(){
+            $('#wd2').window({closed:false})
+            $('#wd3').window({closed:true})
+        })
+
+        $('#tj1').bind('click',function(){              //todo:按学生号注册
+            var obj={}
+            if($('#STUDENT').val()=="")
+                return $.messager.alert('提示','请填写学生号');
+            obj.studentno=$('#STUDENT').val();
+
+            openTabsWindows('学生注册信息','__URL__/xueshengzhuce/studentno/'+$('#STUDENT').val(),'',true)
+         //   var spanList=$('#wd2 span')
+             // ajia('studentNO',obj,'学生号不存在,非法操作！',spanList,wd2,1);
+        })
+
+
+        $('#tj2').bind('click',function(){              //todo:按班级注册
+
+            var obj={}
+            if($('#class').val()=="")
+                return  $.messager.alert('提示','请填写班级号')
+            obj.classno=$('#class').val();
+            ajiakesi('__URL__/regesClass/hasJson/1',obj,function(c){
+                alert(c);
+            })
+        })
+
+
+        $('#tj3').bind('click',function(){              //todo:新生报到按  学号提交
+            var obj={}
+            if($('#NEWSTUDENT').val()=="")
+                return $.messager.alert('提示','请填写学生号')
+            obj.newstudentno=$('#NEWSTUDENT').val();
+
+            openTabsWindows('新生报到','__URL__/xinshengbaodao/newstudentno/'+$('#NEWSTUDENT').val(),'',true)
+         //   var spanList=$('#wd1 span')
+          //  ajia('newStudentNO',obj,'学生号不存在,非法操作！',spanList,wd1,false);
+         //   obj=null;
+        })
+
+        $('#examnotj').bind('click',function(){            //todo:新生报到   按准考证号提交
+            var obj={}
+            if($('#EXAM').val()==""){
+                $.messager.alert('提示','请填写准考证号');
+                return;
+            }
+                obj.examno=$('#EXAM').val();
+            openTabsWindows('新生报到','__URL__/xinshengbaodao/examno/'+$('#EXAM').val(),'',true)
+
+            //       var spanList=$('#wd1 span')
+           // ajia('newStudentNO',obj,'准考证号不存在,非法操作！',spanList,wd1,false);
+         //   obj=null;
+
+        })
+
+        $('#editstudent').bind('click',function(){           //点击编辑学生情况时候 触发的事件
+            var obj={}
+            obj.studentno=$('#STUDENTNO1').html();
+            var spanList=$('#wd3 :text')
+            ajia('studentNO',obj,'学生号不存在,非法操作！',spanList,wd3,2);
+            wd2.window({closed:true})
+            wd3.window({closed:false})
+        //    obj=null;
+        })
+
+        $('#tijiaoinfo').bind('click',function(){                   //提交修改信息的时候
+            var list=$('#wd3 :text');
+            ajiaqu('studentUpdate','wd3',list,'修改成功',2);
+        })
+
+        $('#tijiaoreg').bind('click',function(){                    //提交注册信息用到的方法
+            var obj={};
+            obj.REGCODE=$('#regcode').val();
+            obj.STUDENTNO=$('#STUDENTNO1').html();
+            ajia('updatereg',obj,'修改注册信息成功',null,null,0);
+        })
+
+        $('#tijiao').linkbutton({
+            text:'提交新生报到',
+            iconCls:"icon-add"
+        }).bind('click',function(){
+              ajiakesi('__URL__/Squery',{'Sqlpath':{'count':'status/One_tijiaoxinshengbaodao_c.SQL','select':'status/One_tijiaoxinshengbaodao.SQL'},bind:{':studentno':$('#STUDENTNO').html()}},function(c){
+                  var one=eval(c)
+
+                  $.messager.alert('提示','该生已注册，注册入学时间是'+one.rows[0]['ENTERDATE']);
+
+              })
+
+
+       })
+
+
+
+        function ajiaqu(url,wd,list,str,num){                                                      //取值
+            var obj={};
+            var nm='';
+            for(var i=0;i<list.length;i++){
+                    nm=list[i].id.substring(0,list[i].id.indexOf(num));
+                    obj[nm]=list[i].value;
+            }
+            var select=$('#'+wd+' select')
+
+            for(var i=0;i<select.length;i++){
+                nm=select[i].id.substring(0,select[i].id.indexOf(num));
+                obj[nm]=select[i].value;
+            }
+            $.ajax({
+                type:'post',
+                url:'__URL__/'+url,
+                data:obj,
+                success:function(c){
+                    $.messager.alert('提示',c)
+                }
+            })
+        }
+
+
+        //todo:提交学生注册信息的方法
+        $('#tijiaoreg').bind('click',function(){
+            var obj={}
+            obj.studentno=$('#STUDENTNO1').html();
+            obj.YEAR=$('input[name="Year"]').val();
+            obj.TERM=$('input[name="Term"]').val();
+            obj.REGCODE=$('#regselect').val();
+            ajiakesi('__URL__/insertregcode',obj,function(c){
+                $.messager.alert('提示',c)
+            })
+        })
+    })
+
+ /*   //todo:权限判断函数
+    function qxpanduan(id){
+        var quanxianpd=false;
+        //todo:false代表     按学号注册      ⑵
+        ajiakesi2('__APP__/Book/Book/Bexecute',{':ID':'QUERY','exe':'status/query_Metods.SQL',bind:{':ID':id}},function(c){
+            eval('var o='+c)
+            for(var i=0;i<o[0]['rl'].length;i++){
+                var zz=new RegExp(o[0]['rl'][i])
+                var bool=zz.test(quanxian)
+
+                if(bool){
+                    quanxianpd=true
+                    return;
+                }
+            }
+        })
+
+        return quanxianpd;
+    }
+*/
+
+
+
+/*
+
+    function ajia(url,data,str,list,wd,num){                                    //todo:赋值
+
+        $.ajax({
+            type:'POST',
+            url:'__URL__/'+url,
+            data:data,
+            success:function(content2){
+
+                //todo:如果学生号不存在 不往下执行
+                if(content2=='false'){
+                    return  $.messager.alert('提示',str);
+                };
+                eval('var one='+content2);
+                if(num<2){
+                    alert('123')
+
+                    if(one['regcode']){
+                            alert('111')
+                                       var boo=qxpanduan('SS05','__APP__/Book/Book/Bexecute')
+                                        if(!boo){
+                                            return $.messager.alert('提示','SS05 您没有足够的权限')
+                                        }
+                                       var str2=''          //todo:  #yearterm的内容
+                                       for(var i=0;i<one['regcode'].length;i++){
+                                           str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                                       }
+                                       $('#yearterm').html(str2)
+
+                                       for(var i=0;i<list.length;i++){
+
+                                           var nm=list[i].id;
+                                           $('#'+nm).html(one[nm.substring(0,nm.indexOf(num))]);
+                                       }
+
+
+
+
+
+
+                    }else{
+                        alert('222')
+                        var boo=qxpanduan('SS03','__APP__/Book/Book/Bexecute')
+
+                        if(!boo){
+                            return $.messager.alert('提示','您没有足够的权限')
+                        }
+                        for(var i=0;i<list.length;i++){                                 //todo:true代表    新生报到   ①
+                            var nm=list[i].id;
+                            $('#'+nm).html(one[nm]);
+                        }
+                    }
+            }else{
+                    alert('31')
+                    var str2=''          //todo:  #yearterm的内容
+                    for(var i=0;i<one['regcode'].length;i++){
+                        str2+='<tr><td width="189" align="right" height="22"><font size="2">'+one['regcode'][i]['YEAR']+'学年第'+one['regcode'][i]['TERM']+'学期:</font></td><td width="514" height="22"><font size="2">'+one['regcode'][i]['REGVALUE']+'</font></td></tr>'
+                    }
+                    $('#yearterm2').html(str2)
+
+                    for(var i=0;i<list.length;i++){
+                        var nm=list[i].id;
+                        $('#'+nm).val(one[nm.substring(0,nm.indexOf(num))]);                     //todo: 按学号注册 编辑注册信息的  ⑵。⑵
+                    }
+                    var selectlist=$('#wd3 select')
+                    for(var i=0;i<selectlist.length;i++){
+                        $('#'+selectlist[i].id).val(one[selectlist[i].id.substring(0,selectlist[i].id.indexOf(num))])
+                    }
+                }
+
+                schoolno=one['SCHOOL'];
+
+                wd.window({                                                             //todo:关闭指定窗口
+                    closed:false
+                })
+            }
+        })
+    }
+*/
+
+
+
+</script>
+
+<body style="background-color: #fff">
+
+
+<div id="wd3" title=" " style="display: none">           <!--窗口3-->
+    <include file="xueshengedit" />
+</div>
+<div id="startwd" title="学生报到注册" style="display: none" data-options="collapsible:false,closable:false,draggable:false,resizable:false">
+        <table border="0" cellspacing="2" width="560" style="margin-top:50px" align="center">
+            <tr>
+                <td width="100%">按学号注册，学号：<input type="text" name="STUDENT" id="STUDENT" size="9" maxlength="9"><input type="button" value="提交" name="B2" id="tj1" >
+                    仅注册单个学生。</td>
+            </tr>
+            <tr>
+                <td width="100%">按班级注册，班号：<input type="text" name="CLASS" id="class" size="9" maxlength="7"><input type="button" value="提交" name="B2" id="tj2" >
+                    班上所有学生都被注册。</td>
+            </tr>
+            <tr>
+                <td width="100%">新生报到，&nbsp;&nbsp; 学号：<input type="text" name="NEWSTUDENT" id="NEWSTUDENT" size="9" maxlength="9">
+                    <input type="button" value="按学号提交" name="SubmitStudentNo" id="tj3">
+                    或准考证号：<input type="text" name="EXAM" id="EXAM" size="9"><input type="button" value="按准考证号提交"  id="examnotj"></td>
+            </tr>
+        </table>
+        <form name="MyForm" method="GET" action="/scripts/general.exe/query?" target="_blank">
+            <input type="hidden" name="STUDENTNO" value="">
+            <input type="hidden" name="CLASSNO"  value="">
+            <input type="hidden" name="SCHOOL"  value="">
+            <input type="hidden" name="NEWSTUDENTNO"  value="">
+            <input type="hidden" name="EXAMNO"  value="">
+            <input type="hidden" name=pagename value="">
+            <input type="hidden" name=page value="1">
+            <input type="hidden" name=YEAR value="<#GETYEAR>">
+            <input type="hidden" name=TERM value="<#GETTERM>">
+        </form>
+</div>
+</body>
+
+</html>

@@ -1,0 +1,295 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+    $(function() {
+        $("#YEAR").val(parent.$("#YEAR").val());
+        $("#TERM").val(parent.$("#TERM").val());
+        $("#pDATEOFEXAM").datetimebox();
+        $("#pDEADLINE").datetimebox();
+
+
+
+        var html_COURSENO = $("#wsCOURSENO").html();
+        //数据初始化
+        var datagrid = $('#datagrid').datagrid({
+            toolbar: '#toobar',
+            frozenColumns:[[{field:'ck',checkbox:true}]],
+            onBeforeLoad:function(){
+                $(this).datagrid("unselectAll");
+                return true;
+            },onRowContextMenu:function(e,rowindex,row){
+                datagrid.datagrid('rejectChanges')
+                datagrid.datagrid('unselectAll')
+                var tt=$('#datagrid');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+
+
+
+
+    });
+        var soption = $("select#SCHOOL option[value={$myschool}]");
+        soption.attr('selected','selected');
+        datagrid.datagrid("options").url = "__ROOT__/Exam/Unity/signList/hasJson/true";
+        datagrid.datagrid("load", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()});
+
+        //点击搜索
+        $("#searcher").bind("click",function(){
+            datagrid.datagrid("options").url = "__ROOT__/Exam/Unity/signList/hasJson/true";
+            datagrid.datagrid("load", {YEAR:$("#YEAR").val(),TERM:$("#TERM").val()});
+        });
+
+
+        function eedit(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行编辑！","error");
+                return;
+            }
+
+            setEditFormsVal(rows[0]);
+
+            $("#editForms").css("display","");
+            $("#editForms").window("open");
+        }
+        //编辑统考科目
+        $("#btEdit").bind("click",eedit);
+        $('#admin_edit').bind('click',eedit)
+
+        $("#epOK").bind("click",function(){
+            var row = getEditFormsVal();
+            if(row.RECNO==""){
+                msgShow("系统消息：", "没有取到主键，程序出生异常错误！", "error");
+                return false;
+            }else if(row.DATEOFEXAM==""){
+                msgShow("系统消息：", "考试日期不能为空！", "error");
+                return false;
+            }else if(row.DEADLINE==""){
+                msgShow("系统消息：", "报名截止日期不能为空！", "error");
+                return false;
+            }else if(row.FEE==""){
+                msgShow("系统消息：", "报名费不能为空！", "error");
+                return false;
+            }
+
+            $.post( '__ROOT__/Exam/Unity/signUpdate/hasJson/true', row, function(rsp) {
+                if(rsp){
+                    if(rsp.type=="info"){
+                        $("#editForms").window("close");
+                        datagrid.datagrid("reload");
+                    }
+                    $.messager.alert("系统消息：", rsp.message, rsp.type);
+                }
+            },"JSON");
+        });
+        $("#epCancel").bind("click",function(){
+            $("#editForms").window("close");
+        });
+
+
+        function ddelt(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择任一条记录进行删除！","error");
+                return;
+            }
+
+            var arr = new Array();
+            $.each(rows, function(index,row){
+                arr.push(row.RECNO);
+            });
+
+            $.messager.confirm('系统消息：','如果你删除了一条考试通知，则所有相关的报名条目也将被删除，要继续吗？<br /><br />你只能在本条考试通告未经任何使用前删除它！',function(r){
+                if (r){
+                    $.post("__ROOT__ /Exam/Unity/signDelete/hasJson/true", {RECNO:arr}, function(rsp) {
+                        if(rsp){
+                            $.messager.alert("系统消息：", rsp.message, rsp.type);
+                            datagrid.datagrid("reload");
+                        }
+                    },"JSON");
+                }
+            });
+        }
+        //删除考科目
+        $("#btDelete").bind("click",ddelt);
+        $('#admin_del').bind('click',ddelt)
+
+        //设置值
+        function setEditFormsVal(row){
+            $("#pEXAMNAME").html($.trim(row.EXAMNAME));
+            $("#pTESTCODE").html($.trim(row.TESTCODE));
+            $("#pREM").html($.trim(row.REM));
+            $("#pRECNO").val($.trim(row.RECNO));
+            $("#pDATEOFEXAM").datetimebox("setValue",row.DATEOFEXAM);
+            $("#pDEADLINE").datetimebox("setValue",row.DEADLINE);
+            $("#pFEE").val(row.FEE);
+            $("#newREM").val($.trim(row.NOTIFICATIONNOTE));
+        }
+        function getEditFormsVal(){
+            return {
+                RECNO : $.trim($("#pRECNO").val()),
+                DEADLINE : $.trim($('#pDEADLINE').datetimebox('getValue')),
+                FEE : $.trim($("#pFEE").val()),
+                REM : $.trim($("#newREM").val()),
+                DATEOFEXAM : $.trim($('#pDATEOFEXAM').datetimebox('getValue'))
+            }
+        }
+
+        //当前考试报名
+        function bmm(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行报名！","error");
+                return;
+            }
+            openTabsWindows(rows[0]["EXAMNAME"]+"报名", "__ROOT__/Exam/Unity/signForm/RECNO/"+rows[0]["RECNO"],'',true);
+        }
+        //报名
+        $("#btSign").bind("click",bmm);
+        $('#dangqian').bind('click',bmm)
+
+        //todo:查看报名情况
+        function ckbm(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行报名查看！","error");
+                return;
+            }
+
+            var STUDENTNO = $("#STUDENTNO").val();
+            if(STUDENTNO=="输入学号%") STUDENTNO = "%";
+            openTabsWindows(rows[0]["EXAMNAME"]+"统考报名情况",
+                    "__ROOT__/Exam/Unity/signStudent/RECNO/"+rows[0]["RECNO"]+"?STUDENTNO="+STUDENTNO,
+                    '',true);
+        }
+        //查看报名情况
+        $("#btSignStudent").bind("click",ckbm);
+        $('#bmqk').bind('click',ckbm)
+        //查看报名情况
+        $("#btSignCount").bind("click",function(){
+            var rows = datagrid.datagrid("getSelections");
+            if(rows == null || rows.length==0){
+                msgShow("系统提示：","<br />没有选择可操作的数据！","error");
+                return;
+            }else if(rows.length>1){
+                msgShow("系统提示：","<br />只能选择一条记录进行报名汇总！","error");
+                return;
+            }
+            var SCHOOL = $("#SCHOOL").val();
+            openTabsWindows(rows[0]["EXAMNAME"]+"统考报名汇总表",
+                    "__ROOT__/Exam/Unity/signCount/RECNO/"+rows[0]["RECNO"]+"?SCHOOL="+SCHOOL,
+                    '',true);
+        });
+    });
+
+    function checkLock(value,row,index){
+        return "<input onclick=\"onCheckLock(this,'"+row.RECNO+"')\" value='"+value+"' type='checkbox'"+(value=="1"?" checked='true'":"")+" />"
+    }
+    function dateFormat(value, rowData, rowIndex ){
+        return value.substring(0,10);
+    }
+    //报名开始/终止
+    function onCheckLock(obj,recno){
+        var LOCK = obj.checked ? 1 : 0;
+        $.post( '__ROOT__/Exam/Unity/signLock/hasJson/true', {LOCK:LOCK,RECNO:recno}, function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+            }
+        },"JSON");
+    }
+</script>
+
+<body>
+<div  class="easyui-layout"  data-options="border:false,fit:true" >
+    <!--<div data-options="region:'north',split:false,border:false" style="height:40px;background:#E0ECFF;overflow: hidden">
+        <table style="margin-left:20px" height="40" cellspacing="0" cellpadding="0" >
+            <tr><th align="left">-->
+    <!--</tr>
+</table>-->
+
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="false" fit="true" idField="RECNO"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'EXAMNAME',align:'center',width:150">考试名称</th>
+                <th data-options="field:'TESTCODE',align:'center',width:70">考试代码</th>
+                <th data-options="field:'EXAMREM',align:'center',width:200">考试说明</th>
+                <th data-options="field:'DATEOFEXAM',align:'center',width:100,formatter:dateFormat">考试日期</th>
+                <th data-options="field:'DEADLINE',align:'center',width:100,formatter:dateFormat">报名截止日期</th>
+                <th data-options="field:'FEE',align:'center',width:70">报名费</th>
+                <th data-options="field:'NOTIFICATIONNOTE',align:'center',width:200">本次报考说明</th>
+                <th data-options="field:'LOCK',align:'center',width:70,formatter:checkLock">报名终止</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div id="toobar">
+    <span style="float:left">
+    学年：<input type="text" id="YEAR" size="10">&nbsp;&nbsp;
+</span>
+    <span style="float:left">
+    学期：<input type="text" id="TERM" size="10">&nbsp;&nbsp;
+    </span>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon icon-search"  id="searcher" style="float: left;">搜索</a>
+
+    <a href="#" id="btEdit" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" style="float: left;">修改</a>
+    <a href="#" id="btDelete" class="easyui-linkbutton" data-options="iconCls:'icon-cut',plain:true" style="float: left;">删除</a>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="btSign" class="easyui-linkbutton" data-options="iconCls:'icon-addroom',plain:true" style="float: left;">当前考试报名</a>
+    <a class="datagrid-btn-separator"></a>
+    <span style="float: left;">
+    <a href="#" id="btSignStudent" class="easyui-linkbutton" data-options="iconCls:'icon-addroom',plain:true" >查看报名情况</a>
+    <input id="STUDENTNO" value="输入学号%" style="height:18px" />
+    </span>
+    <a class="datagrid-btn-separator"></a>
+    <a href="#" id="btSignCount" class="easyui-linkbutton" data-options="iconCls:'icon-addroom',plain:true" >报名汇总表</a>
+    <Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="全部学院" file="school/schoolOptions.sql" />
+</div>
+
+<!-- 编辑界面 -->
+<div id="editForms" class="easyui-window" title="编辑科目" style="width:420px;height:240px;display:none" data-options="iconCls:'icon-edit',modal:true,closed:true,minimizable:false,maximizable:false,collapsible:false,resizable:false">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 5px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=2 border="0" cellspacing="0" width="100%">
+                <tr><th align="right">考试科目名称：</th><td colspan="3"><div id="pEXAMNAME"></div></td></tr>
+                <tr><th align="right">考试代码：</th><td  colspan="3"><div id="pTESTCODE"></div></td></tr>
+                <tr><th align="right">考试说明：</th><td colspan="3"><div id="pREM"></div></td></tr>
+                <tr><th align="right" colspan="4"><hr size="1"></th></tr>
+                <tr><th align="right">考试日期：</th><td colspan="3"><input type="text" id="pDATEOFEXAM" style="width:200px;"></td></tr>
+                <tr><th align="right">报名截止日期：</th><td colspan="3"><input type="text" id="pDEADLINE" style="width:200px;"></td></tr>
+                <tr><th align="right">报名费：</th><td><input type="text" id="pFEE" value="0" style="width:60px;"> 元</td>
+                    <th align="right">本次报考说明：</th><td><input type="text" id="newREM" style="width:90px;"></td></tr>
+            </table>
+            <input type="hidden" id="pRECNO" />
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="epOK" class="easyui-linkbutton" icon="icon-ok" >提交修改</a> <a id="epCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+    <div id='dangqian'>当前考试报名</div>
+    <div id="bmqk">查看报名情况</div>
+</div>
+</body>
+
+</html>
+

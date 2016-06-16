@@ -1,0 +1,83 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<form id="queryForm" action="" target="download" method="post">
+	    <div>
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="year" size="8" maxlength="4">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="term" size="4" maxlength="1">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="cSchool" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <label>学生所在学院：</label>
+			   <select class="easyui-combobox" name="school" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检&nbsp;索</a>
+			</div>
+		</form>
+    </div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+<script type="text/javascript">
+$(function(){
+	var datagrid=$('#content').datagrid({
+		fit:true,
+		striped:true,
+        fitColumns:true,
+        singleSelect:true,
+        columns:[[{field:"schoolname",title:"开课学院",width:30,align:"center"},
+                  {field:"courseno",title:"课号",width:30,align:"center"},
+                  {field:"coursename",title:"课名",width:80,align:"center"},
+                  {field:"credits",title:"学分",width:30,align:"center",formatter:function(value,row,index){
+                	  return parseFloat(value);
+  		          }},
+                  {field:"studentno",title:"学号",width:30,align:"center"},
+                  {field:"name",title:"姓名",width:30,align:"center"},
+                  {field:"sName",title:"学生所在学院",width:30,align:"center"}
+                ]],
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+        toolbar:'#tdemo'
+    });
+    
+    /*
+     * 条件查询开始
+     */
+     $('#searcher').linkbutton({iconCls:'icon-search'});//搜索按钮
+     $('#searcher').click(function(){
+     	var year=$.trim($("[name='year']").val());
+     	var term=$.trim($("[name='term']").val());
+     	if(year=="" || term==""){
+     		msgShow("系统提示：","请输入要检索的学年与学期！","error");
+     		return;
+     	}
+     	datagrid.datagrid("options").url = "__URL__/anewSelection/hasJson/1";
+     	datagrid.datagrid('load',{
+     		year:$.trim($("[name='year']").val()),
+     		term:$.trim($("[name='term']").val()),
+     		cSchool:$.trim($("[name='cSchool']").val()),
+     		school:$.trim($("[name='school']").val())
+     	});
+     });
+});
+</script>
+</body>
+</html>

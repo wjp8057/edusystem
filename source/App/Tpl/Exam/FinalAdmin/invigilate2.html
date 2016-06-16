@@ -1,0 +1,274 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        $("[name=year]").val(parent.$("#YEAR").val());
+       $("[name=term]").val(parent.$("#TERM").val());
+        var arr=[];
+        var wd=$('#wd').window(new wind(600,500,false,false,false,false,false));        //todo:默认的页面
+        var course_wd=$('#course_wd').window(new wind(0,0,false,false,false,false,true));
+        var examtype='{$type}'
+        var base=''
+
+
+
+        var dat=$('#daaa').datagrid({
+            fit:true,
+            singleSelect:true,
+            pagination:true,
+            pageList:[10,20,30,40],
+            pageSize:20,
+            onRowContextMenu:function(e,rowindex,row){
+                dat.datagrid('rejectChanges')
+                var tt=$('#daaa');
+
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#admin_access_menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            columns:[[
+                {field:'kh',title:'课号',width:80},
+                {field:'km',title:'课名',width:100},
+                {field:'xkrs',title:'选课人数',width:80},
+                {field:'kcc1',title:'考场1',width:80},
+                {field:'kw1',title:'考位1',width:150},
+                {field:'kcc2',title:'考场2',width:80},
+                {field:'kw2',title:'考位2',width:80},
+                {field:'kcc3',title:'考场3',width:80},
+                {field:'kw3',title:'考位3',width:80}
+            ]],
+            toolbar:'#tdemo'/*[{'text':'安排监考教师',
+                'iconCls':'icon-personal',
+                handler:function(){
+                    var List=$('#daaa').datagrid('getSelections')
+                    if(List.length==0){
+                        return $.messager.alert('提示','请您选择一条进行操作哦')
+                    }
+                    openTabsWindows('监考安排','__URL__/jiankaoanpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/examtype/'+examtype+'/COURSENO/'+List[0].kh+'/R15/'+List[0]['R15'],'',true)
+                }
+
+            }
+            ]*/,
+            view: detailview,
+            detailFormatter: function(rowIndex, rowData){
+                arr[rowData.row]=rowData;
+                return "<div id=a"+rowData.row+" style='width:500px;height:91px'>"+rowData.row+"</div>"
+            },
+            onExpandRow:function(index,row){
+                $('#a'+row.row).html('<table width="880" cellspacing="0" style="border:1px solid #eee"><tr><td  align="center"  style="border:1px solid #aaa;height:25px" width="100" bgcolor="#E0ECFF" ><font size="2">考试时间</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['kssj']+'</font></td></tr><tr id=SLAVE><td  align="center"   bgcolor="#E0ECFF" style="border:1px solid #aaa"><font size="2">监考老师</font></td><td align="left" style="border:1px solid #aaa"><font size="2">考场1:'+arr[row.row]['ST1']+'</font></td><td align="left" style="border:1px solid #aaa"><font size="2">考场2:'+arr[row.row]['ST2']+'</font></td><td align="left" style="border:1px solid #aaa"><font size="2">考场3:'+arr[row.row]['ST3']+'</font></td></tr><tr id=SLAVE><td  align="center" style="border:1px solid #aaa;height:25px"  bgcolor="#E0ECFF"><font size="2">备注</font></td><td align="left" colspan="3" style="border:1px solid #aaa"><font size="2">'+arr[row.row]['rem']+'</font></td></tr></table>')
+            }
+        });
+
+
+
+
+
+
+
+        var daaa=$('#daaa')
+        $('#bt').linkbutton({
+            'text':'核对并输入监考教师',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+            daaa.datagrid('options').url='__APP__/Status/Status/Squery'
+
+                    if(examtype=='C'||examtype=='B'){
+                        daaa.datagrid('load',{'Sqlpath':{'select':'exam/Two_one_select_'+examtype+'.SQL','count':'exam/Two_one_count_'+examtype+'.SQL'},bind:{':COURSESCHOOL':$('[name=school_one]').val(), ':CHANGCI':$('[name=kscc]').val(),':COURSENO':$('[name=courseno]').val(),':examType':examtype,':year':$('[name=year]').val(),':term':$('[name=term]').val()}
+                        })
+                    }else{
+
+                        daaa.datagrid('load',{'Sqlpath':{'select':'exam/Two_one_select.SQL','count':'exam/Two_one_count.SQL'},bind:{':COURSESCHOOL':$('[name=school_one]').val(),':YEAR':$('[name=year]').val(),':TERM':$('[name=term]').val(),':CLASSSCHOOL':$('[name=school_two]').val(),
+                            ':CLASSNO':$('[name=classno]').val(),':CHANGCI':$('[name=kscc]').val(),':COURSENO':$('[name=courseno]').val(),':examType':examtype}
+                        })
+                    }
+
+
+
+        })
+
+        function apjk(){
+            var List=$('#daaa').datagrid('getSelections')
+            if(List.length==0){
+                return $.messager.alert('提示','请您选择一条进行操作哦')
+            }
+            openTabsWindows('监考安排','__URL__/jiankaoanpai/YEAR/'+$('[name=year]').val()+'/TERM/'+$('[name=term]').val()+'/examtype/'+examtype+'/COURSENO/'+List[0].kh+'/R15/'+List[0]['R15'],'',true)
+
+        }
+        $('#e_save').bind('click',apjk)
+        $('#admin_save').bind('click',apjk)
+    })
+</script>
+
+
+<style>
+
+
+    span{border:0px solid red;;vertical-align:middle;}
+
+</style>
+<body style="background-color: #fff">
+<!--<div id="course_wd">
+
+</div>-->
+<!--<div id="wd" title="请输入统一排考课程的查询条件">
+    <table border="0"  width="456" style="margin-top: 40px" align="center">
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>学年:</b></td>
+            <td width="209" height="17"><input name="year" type="text" size='4' value=""><b>*</b></td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>学期:</b></td>
+            <td width="209" height="17"><input type="text" name="term" size="1" value=""><b>*</b></td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>课号:</b></td>
+            <td width="209" height="17"><span><input id="start" type="text" name="courseno" value="%"></span></td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>开课学院:</b></td>
+            <td width="209" height="17">
+                <select name="school_one">
+                    <volist name="schools" id="s">
+                    <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>听课学院:</b></td>
+            <td width="209" height="17">
+                <select name="school_two">
+                    <volist name="schools" id="s">
+                        <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                    </volist>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>考试场次:</b></td>
+            <td width="209" height="17">
+                <select name="kscc">
+                    <option value="">全部</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td width="107"  height="17">
+                <p align="right"><b>上课班号:</b></td>
+            <td  height="5" align="left" ><input type="text" name="classno" value="%"></td>
+        </tr>
+        <tr>
+            <td style="border:0px;" height="17" align="center" colspan="2">
+                <button id="bt">核对并输入监考教师</button> </td>
+        </tr>
+    </table>
+</div>-->
+
+
+
+
+<div id="cc" class="easyui-layout" data-options="fit:true">
+    <div id="tdemo">
+                 <b>学年:</b>
+              <input name="year" type="text" size='4' value="2011"></td>
+                &nbsp &nbsp
+                   <b>学期:</b>
+               <input type="text" name="term" size="1" value="1"></td>
+            &nbsp &nbsp
+               <b>课号:</b>
+                <span><input id="start" type="text" name="courseno" value="%"></span></td>
+            &nbsp &nbsp
+                <b>开课学院:</b>
+
+                    <select name="school_one" class="easyui-combobox">
+                            <option value="%">全部</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+            &nbsp &nbsp
+
+            <b>考试场次:</b>
+
+            <select name="kscc" class="easyui-combobox">
+                <option value="%">全部</option>
+            </select>
+            &nbsp &nbsp     <br>
+                    <b>听课学院:</b>
+
+                    <select name="school_two" class="easyui-combobox">
+                        <option value="%">全部</option>
+                        <volist name="schools" id="s">
+                            <option value="{$s.SCHOOL}">{$s.NAME}</option>
+                        </volist>
+                    </select>
+
+
+
+            &nbsp &nbsp
+
+                    <b>上课班号:</b>
+               <input type="text" name="classno" value="%">
+
+            &nbsp &nbsp
+                    <a href='javascript:void(0)' id="bt">核对并输入监考教师</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-personal"  id="e_save" plain=true>安排监考教师</a>
+    </div>
+    <div data-options="region:'center',border:false" style="padding:0px;background:#eee;">
+        <div id="daaa" >
+        </div>
+    </div>
+
+</div>
+
+<!--todo:历次审核结果 查看详情页面
+<div id="lici_student_wd" title="">
+    <div id="ccstudents" class="easyui-layout" data-options="fit:true">
+        <div data-options="region:'north',title:'',split:false" style="height:80px;font-size:15px">
+            <table width="100%">
+                <tr>
+                    <td align="center">学号:<input type="text" name="r_studentno2">&nbsp&nbsp姓名:<input type="text" name="r_name2" >&nbsp&nbsp班号:<input type="text" name="r_classno2">&nbsp&nbsp<button id="r_search2">查询</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td><hr></td>
+                </tr>
+                <tr>
+                    <td align="center"><span id="tt3"><center><b><span id="s_name2"></span>&nbsp<span id="s_year2"></span>年第<span id="s_term2"></span>学期<span id="s_projectname2"></span><span id="s_ctype2"></span>统一认定审核结果查看</b></center>
+            </span></td>
+                </tr>
+            </table>
+        </div>
+        <div data-options="region:'center',title:'',split:false" style="padding:0px;background:#eee;">
+            <table id="demoHTML" class="easyui-datagrid" data-options="pagination:true,pageList:[10,20,30,40],pageSize:20,fit:true,fitColumns:true,singleSelect:true,toolbar:[{text:'查看学生注册信息',iconCls:'icon-back',handler:function(){var row=$('#demoHTML').datagrid('getSelected');window.open('__APP__/Status/Status/Window_studentregis/STUDENTNO/'+row.studentno)}}]">
+                <thead>
+                <tr>
+                    <th data-options="field:'studentno',width:100">学号</th>
+                    <th data-options="field:'studentname',width:100">姓名</th>
+                    <th data-options="field:'studentclass',width:100,align:'right'">听课方式</th>
+                    <th data-options="field:'cx',width:100,align:'right'">重修</th>
+                    <th data-options="field:'coursetype',width:100,align:'right'">修课方式</th>
+                    <th data-options="field:'kh',width:100,align:'right'">考核</th>
+                    <th data-options="field:'tkfs',width:100,align:'right'">学生班级</th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+    </div>
+</div>-->
+</body>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_save'>安排监考老师</div>
+</div>
+</html>

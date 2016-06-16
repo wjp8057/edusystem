@@ -1,0 +1,158 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    $("#TIME").val($.trim("{$schedulePlan.TIME}"));
+    $("#SCHEDULED").val($.trim("{$schedulePlan.SCHEDULED}"));
+    $("#LOCK").val($.trim("{$schedulePlan.LOCK}"));
+    $("#ROOMTYPE").val($.trim("{$schedulePlan.ROOMTYPE}"));
+    $("#EXAM").val($.trim("{$schedulePlan.EXAM}"));
+    $("#DAYS").val($.trim("{$schedulePlan.DAYS}"));
+    $("#SEATSLOCK").val($.trim("{$schedulePlan.SEATSLOCK}"));
+    $("#AREA").val($.trim("{$schedulePlan.AREA}"));
+    $('[name=degree]').val($.trim("{$schedulePlan.degree}"));
+   // alert($.trim("$schedulePlan.degree"))
+
+    $("#btOK").bind("click",function(){
+        if("{$theacher.SCHOOL}"!="{$schedulePlan.SCHOOL}"&&"{$theacher.SCHOOL}"!='A1') {
+            msgShow("系统提示：","<br />你不可以更改别的学院开设的课程属性！","error");
+            return;
+        }
+        $.post("__ROOT__ /CoursePlan/Timetable/update/hasJson/true", $('#editForm').serialize(), function(rsp) {
+            if(rsp){
+                $.messager.alert("系统消息：", rsp.message, rsp.type);
+                if(rsp.type=="info")
+                    bindMessageErrorEven(rsp.message, closeTopTabs,rsp.type);
+            }
+        },"JSON");
+    })
+});
+</script>
+
+<body bgcolor="#FFFFFF" style="background: #ffffff">
+<p align="center"><font style="font-size: 18pt;" face="隶书">编辑排课计划,课程名称：<LABEL DATASRC=#dsoDATASET DATAFLD=COURSENAME></LABEL></font></p>
+
+<form name="editForm" id="editForm">
+
+<table align=center border="1" width="70%" cellspacing="1" DATASRC=#dsoDATASET style="border-collapse:collapse;font-size:10pt">
+    <tr>
+        <td width="20%" align="right">学年：</td>
+        <td width="20%">{$schedulePlan.YEAR}</td>
+        <td width="20%" align="right">时段要求：</td>
+        <td width="25%"><Cwebs:sqlselect id="TIME" name="TIME" value="CODE" title="NAME" file="course/timeSections.sql" /></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">学期：</td>
+        <td width="20%">{$schedulePlan.TERM}</td>
+        <td width="20%" align="right">是否已排课：</td>
+        <td width="25%">
+            <select name="SCHEDULED" id=SCHEDULED>
+            <option value="Y">是</option>
+            <option value="N">否</option>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">课号：</td>
+        <td width="20%">{$schedulePlan.COURSENO}</td>
+        <td width="20%" align="right">每周讲课学时：</td>
+        <td width="25%"><input type="text" name="LHOURS" size="2" value="{$schedulePlan.LHOURS}" id=LHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">组号：</td>
+        <td width="20%">{$schedulePlan.GROUP}</td>
+        <td width="20%" align="right">每周实验学时：</td>
+        <td width="25%"><input type="text" name="EHOURS" size="2" value="{$schedulePlan.EHOURS}" id=EHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">开课学院：</td>
+        <td width="20%">{$schedulePlan.SCHOOLNAME}</td>
+        <td width="20%" align="right">每周上机学时：</td>
+        <td width="25%"><input type="text" name="CHOURS" size="2" value="{$schedulePlan.CHOURS}" id=CHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">预计修课人数：</td>
+        <td width="20%"><input type="text" name="ESTIMATE" size="6" value="{$schedulePlan.ESTIMATE}" id=ESTIMATE></td>
+        <td width="20%" align="right">每周实训学时：</td>
+        <td width="25%"><input type="text" name="SHOURS" size="2" value="{$schedulePlan.SHOURS}" id=SHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right"> 原预计人数：</td>
+        <td width="20%">{$schedulePlan.OLDESTIMATE}</td>
+        <td width="20%" align="right">每周课堂讨论：</td>
+        <td width="25%"><input type="text" name="KHOURS" size="2" value="{$schedulePlan.KHOURS}" id=KHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">实际修课人数：</td>
+        <td width="20%">{$schedulePlan.ATTENDENTS}</td>
+        <td width="20%" align="right">每周自主学习：</td>
+        <td width="25%"><input type="text" name="ZHOURS" size="2" value="{$schedulePlan.ZHOURS}" id=ZHOURS></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">每次实验人数：</td>
+        <td width="20%"><input type="text" name="EBATCH" size="6" value="{$schedulePlan.EBATCH}" id=EBATCH></td>
+        <td width="20%" align="right">上课周次：</td>
+        <td width="25%">{$schedulePlan.WEEKS}</td>
+    </tr>
+    <tr>
+        <td width="15%" align="right"><font size="2">指定实验室：</font></td>
+        <td width="20%"><input type="text" name="EMPROOM" size="9" id=EMPROOM value="{$schedulePlan.EMPROOM}" maxlength="9">填写教室号</td>
+        <td width="20%" align="right">选课有人数限制：</td>
+        <td width="25%">
+            <select size="1" name="LOCK" id=LOCK>
+            <option value="1">是</option>
+            <option value="0">否</option>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">教室类型要求：</td>
+        <td width="20%"><Cwebs:sqlselect id="ROOMTYPE" name="ROOMTYPE" value="CODE" title="NAME" headerKey="0" headerTitle="无要求" file="common/roomTypeOptions.sql" /></td>
+        <td width="20%" align="right">期末统一排考：</td>
+        <td width="25%">
+            <select size="1" name="EXAM" id=EXAM>
+            <option value="1">是</option>
+            <option value="0" selected>否</option>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">备注：</td>
+        <td width="20%"><input type="text" name="REM" size="20" value="{$schedulePlan.REM|trim}" id=REM></td>
+        <td width="20%" align="right"><font size="2">排课天数：</font></td>
+        <td width="25%">
+            <select size="1" name="DAYS" id=DAYS>
+            <option value="5">5天制</option>
+            <option value="7">7天制</option>
+            </select></td>
+    </tr>
+    <tr>
+        <td width="15%" align="right">选课时不根据座位<br>数调整预计人数：</td>
+        <td width="20%">
+            <select size="1" name="SEATSLOCK" id=SEATSLOCK>
+            <option value="1">是</option>
+            <option value="0" selected>否</option></select></td>
+        <td width="20%" align="right">指定校区：</td>
+        <td width="25%"><Cwebs:sqlselect id="AREA" name="AREA" value="CODE" title="NAME" headerKey="" headerTitle="请选择" file="common/areaOptions.sql" /></td>
+    </tr>
+    <tr>
+        <td align="right">
+            是否学位课
+        </td>
+        <td colspan="3">
+            <select name="degree">
+                <option value="1">学位课</option>
+                <option value="0">非学位课</option>
+            </select>
+            <!--<select>-->
+        </td>
+    </tr>
+</table>
+<input type="hidden" name="RECNO" value="{$schedulePlan.RECNO}">
+</form>
+<p align="center"><input type="button" value="提交数据" id="btOK"></p>
+<p align="center">注：选课如果有人数限制，则在学生选课时，入选的人数不会超过预计修课人数。</p>
+<p align="center">教室类型：如果需要多媒体教室，阶梯教室等，需要加以说明。</p>
+<p align="center">备注：选课过程中学生可以看到，如果为特殊课程，需要在此说明。按周实训需要注明周数。</p>
+<p align="center">　</p>
+
+
+</body>
+</html>

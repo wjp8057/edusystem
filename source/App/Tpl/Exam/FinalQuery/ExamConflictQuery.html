@@ -1,0 +1,75 @@
+<include file=":Include:jqueryHeader" />
+<script src="__ROOT__/thirdparty/jquery/js/func.js"></script>
+<script>
+    $(function(){
+
+        var yyear = $("[name=year]");
+        var tterm = $("[name=term]");
+        var list2 = $('#List2');
+        var sschool = $('#sschool');
+        yyear.val(parent.$("#YEAR").val());
+        tterm.val(parent.$("#TERM").val());
+
+        $('#bt').linkbutton({
+            'text':'检索',
+            'iconCls':'icon-search'
+        }).bind('click',function(){
+                    if(yyear.val()==''||tterm.val()==''){
+                        return $.messager.alert('提示','请您填写学年学期')
+                    }
+
+            list2.datagrid('load',{'bind':{
+                ':YONE':yyear.val(),':TONE':tterm.val(),
+                ':YTWO':yyear.val(),':TTWO':tterm.val(),
+                ':YTHREE':yyear.val(),':TTHREE':tterm.val(),
+                ':YFOUR':yyear.val(),':TFOUR':tterm.val(),
+                ':YFIVE':yyear.val(),':TFIVE':tterm.val(),
+                ':YSIX':yyear.val(),':TSIX':tterm.val(),
+                ':YSEVEN':yyear.val(),':TSEVEN':tterm.val(),
+                ':YEIGHT':yyear.val(),':TEIGHT':tterm.val(),
+                ':YNINE':yyear.val(),':TNINE':tterm.val(),
+                ':YTEN':yyear.val(),':TTEN':tterm.val(),':school':sschool.val()
+
+            }});
+        });
+
+    });
+
+</script>
+<body class="easyui-layout">
+<div id="tdemo">
+    <label for="yyear">学年：</label>
+    <input type="text" name="year" id='yyear' size="4" value="">&nbsp;&nbsp;&nbsp;
+    <label for="tterm">学期：</label>
+    <input type="text" name="term" id='tterm' size="1" value="">&nbsp;&nbsp;&nbsp;
+    <label for="sschool">学院</label>
+        <select id="sschool">
+                <option value="%">所有学院</option>
+            <volist name="schools" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+    <a href="javascript:void(0)" id="bt">检索</a>
+
+</div>
+<div data-options="region:'center',title:'',split:false,border:false" style="padding:0;background:#eee;">
+    <table class="easyui-datagrid" id="List2" toolbar='#tdemo'
+           data-options="url:'__URL__/ExamConflictQuery/tag/getdata',fitColumns:true,fit:true,singleSelect:true,pageList:[75],pagination:true,border:false">
+        <thead>
+        <tr>
+            <th data-options="field:'kssj',width:100,align:'center'">考试时间</th>
+            <th data-options="field:'jsh',width:100,align:'center'">教师号</th>
+            <th data-options="field:'jsxm',width:100,align:'center'">教师姓名</th>
+            <th data-options="field:'szxy',width:50,align:'center'">所在学院</th>
+            <th data-options="field:'cfcs',width:50,align:'center'">重复次数</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+
+
+</div>
+</body>
+
+</html>
+

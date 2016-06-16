@@ -1,0 +1,60 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+
+			   <label>学年：</label><input value="{$yearTerm.YEAR}" name="YEAR" size="8">
+			   <label>学期：</label><input value="{$yearTerm.TERM}" name="TERM" size="2">
+			   <label>开课学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">所有学院</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">统  计</a>
+			</div>
+
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <table id="datagrid" fitColumns="true" width="100%" singleSelect="true" fit="true"
+               pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" >
+            <thead>
+            <tr><th data-options="field:'YEAR',align:'center',width:120" >学年</th>
+                <th data-options="field:'TERM',align:'center',width:120">学期</th>
+                <th data-options="field:'SCHOOL',align:'center',width:120">学院代号</th>
+                <th data-options="field:'NAME',align:'center',width:150">开课学院</th>
+                <th data-options="field:'COUNT',align:'center',width:120">开课门数</th></tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function(){
+	var datagrid = $('#datagrid').datagrid({toolbar:'#tdemo'});
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({});//搜索按钮
+    $('#searcher').click(function(){
+    	var year=$.trim($("[name='YEAR']").val());
+    	var term=$.trim($("[name='TERM']").val());
+    	var school=$.trim($("[name='SCHOOL']").val());
+    	if(year=="" || term==""){
+    		$.messager.alert("提示","统计时学年学期不能为空！");
+    		return;
+    	}
+    	datagrid.datagrid("options").url = "__URL__/beginNine/hasJson/1";
+    	datagrid.datagrid('load',{YEAR:year,TERM:term,SCHOOL:school});
+    });
+});
+</script>
+</body>
+</html>

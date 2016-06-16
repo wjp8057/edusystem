@@ -1,0 +1,334 @@
+<include file=":Include:jqueryHeader" />
+<style>
+.query{}
+legend{margin-left: 20px;}
+.query label{font-weight: bold;margin-left:20px;}
+#searcher{margin-left: 20px;}
+</style>
+<body>
+<div class="easyui-layout"  data-options="border:false,fit:true" >
+    <div id="tdemo" class="query">
+		<div>
+			   <label>教师号（不超过10位）：</label><input name="TEACHERNO" class="txt_" size="20"  value='%'  maxlength="10">
+			   <label>姓名：</label><input name="NAME" class="txt_" size="16" value='%'  maxlength="8">
+			   <label>性别：</label>
+			   <input type="radio" name="SEX" value="%" checked="checked" style="vertical-align:middle;"> <span>全部</span>
+			   <volist name="sex" id="s">
+			   <input type="radio" name="SEX" value="{$s.code}" style="vertical-align:middle;"><span>{$s.name}</span>&nbsp;&nbsp;  
+			   </volist>
+			   <label>职称：</label>
+			   <select name="POSITION" class="easyui-combobox" data-options="editable:false">
+			   <option value="%">全部</option>
+			   <volist name="position" id="p">
+			   <option value="{$p.NAME}">{$p.VALUE}</option>
+			   </volist>
+			   </select>
+			   <label>学院：</label>
+			   <select class="easyui-combobox" name="SCHOOL" data-options="editable:false">
+			     <option value="%">全部</option>
+				 <volist name="school" id="s">
+				 <option value="{$s.SCHOOL}">{$s.NAME}</option>
+				 </volist>
+			   </select>
+			   <a href="javascript:void(0)" id="searcher">检索</a>
+            </div>
+            <div>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cut"  id="e_del" plain=true>删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit"  id="e_edit" plain=true>编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-back"  id="e_back" plain=true>取消编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  id="e_save" plain=true>保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-personal"  id="e_xiugai" plain=true>修改口令</a>
+			</div>
+	</div>
+    <div data-options="region:'center',border:false" style=";background:#eee;">
+        <div id="content"></div>
+    </div>
+</div>
+
+<div id="wd" title="修改口令">
+    <table border="0" align="center" width="90%" style="border-collapse: collapse;">
+        <tr height="25"><td colspan="3"><input type="hidden" name="TEACHERNO"></td></tr>
+        <tr>
+            <td align="right" width="25%">请输入口令：</td>
+            <td align="left" width="45%"><input name="PWD" maxlength="20" size="20"></td>
+            <td><a href="javascript:void(0)" id="editbut">修改</a></td>
+        </tr>
+        <tr height="20">
+            <td align="center" colspan="3" style="padding-top: 5px;">
+            <font color="green" id="prompt">口令由不低于6位字符的大小写英文字母、数字或下划线组成</font></td>
+        </tr>
+    </table>
+</div>
+
+<script type="text/javascript">
+var user_school="{$user_school}";
+eval('one=\'{$sjson}\'');
+eval('two=\'{$pjson}\'');
+eval('three=\'{$tjson}\'');
+$(function(){
+	//修改口令窗口
+	var wd=$('#wd').window({
+        modal:true,
+        height:120,
+        width:450,
+        minimizable:false,
+        maximizable:false,
+        collapsible:false,
+        draggable:false,
+        resizable:false,
+        closed:true
+    });
+	//教师信息列表加载
+    var indexrow=undefined;
+    var dat=$('#content').datagrid({
+		fit:true,
+		striped:true,
+        fitColumns:true,
+        columns:[[{field:'TEACHERNO',checkbox:true},
+                  {field:'YEAR',title:'入校年份',align:'center'},
+                  {field:'TEACHERNUM',title:'教师号',align:'center',formatter:function(value,row,index){
+                	  return row.TEACHERNO;
+  		          }},
+                  {field:'NAME',title:'姓名',width:100,sortable:true,align:'center',editor:{
+                  	type:'validatebox',options:{required:true}} },
+                  {field:'SEX',title:'性别',width:60,sortable:true,align:'center',editor:{type:'combobox',options:{data:eval(one)}} },
+                  {field:'POSITION',title:'职称',width:90,sortable:true,align:'center',editor:{
+                  	type:'combobox',options:{data:eval(two)}} },
+                  {field:'TYPE',title:'类型',width:90,sortable:true,align:'center',editor:{
+                  	type:'combobox',options:{data:eval(three)}} },
+                  {field:'SCHOOLNAME',title:'学院',width:150,align:'center'},
+                  {field:'EDIT',title:'查看详细',align:'center',formatter:function(value,row,index){
+                	  return "<a href=\"javascript:void(0)\" onclick=\"edit('"+row.TEACHERNO+"','"+row.NAME+"')\">详细</a>"; 
+  		          }}]],
+        onRowContextMenu:function(e,rowindex,row){
+            dat.datagrid('rejectChanges')
+            var tt=$('#content');
+
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow',rowindex);
+            $('#admin_access_menu').menu('show',{
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+		pagination:true,
+		pageList:[10,20,30,40,50],
+		pageSize:20,
+		toolbar:'#tdemo',onAfterEdit:function(index,dataRow,changes){
+        	//保存请求的URL地址的
+            var Purl='';
+            var updated=dat.datagrid('getChanges','updated');
+            if(updated.length){
+                Purl='__URL__/update/hasJson/1';
+                $.ajax({
+                    url:Purl,
+                    type:'POST',
+                    data:dataRow,
+                    success:function(content){
+                        alert(content);
+                    	var index = dat.datagrid('getRowIndex', dat.datagrid('getSelected'));
+                    	if(content){
+                            indexrow=undefined;
+                            dat.datagrid('reload');
+                            $.messager.alert('提示','更新成功！','?');
+                        }else{
+                        	$.messager.alert('提示','更新失败！教师名重复','?');
+                        }
+                    }
+                });
+            }
+        }
+    });
+    
+    /*
+     * 条件查询开始
+     */
+    $('#searcher').linkbutton({iconCls: 'icon-search'});//搜索按钮
+    $('#searcher').click(function(){
+    	$('#content').datagrid("options").url = "__URL__/query/hasJson/1";
+    	$('#content').datagrid('load',{
+    		TEACHERNO:$.trim($(".query [name='TEACHERNO']").val()),
+    		NAME:$.trim($(".query [name='NAME']").val()),
+    		SEX:$.trim($(".query [name='SEX']:checked").val()),
+    		POSITION:$.trim($(".query [name='POSITION']").val()),
+    		SCHOOL:$.trim($(".query [name='SCHOOL']").val())
+        });
+    });
+    
+    //提交修改按钮
+    $('#editbut').linkbutton({iconCls: 'icon-edit'});
+	//修改口令
+	$('#editbut').click(function(){
+		var reg=/^[A-Za-z0-9_]{6,20}$/;
+		var pwd=$.trim($("[name='PWD']").val());
+		if(pwd==""){
+			$("#prompt").html("请输入口令");
+			$("#prompt").attr("color","red");
+		}else{
+			if(reg.test(pwd)){
+				var ary={PWD:pwd,TEACHERNO:$.trim($("#wd [name='TEACHERNO']").val())};
+				$.ajax({
+		             url:"__URL__/update/",
+		             type:'POST',
+		             data:ary,
+		             success:function(data){
+		             	if(data){
+		             		$("[name='PWD']").val("");
+		             		$("#wd [name='TEACHERNO']").val("");
+		                    $.messager.alert('提示','修改口令成功！','?');
+		                 }else $.messager.alert('提示','未知错误，修改口令失败！','?');
+		             }
+		        });
+				wd.window({closed:true});
+				$("#prompt").html("口令由不低于6位字符的大小写英文字母、数字及下划线组成");
+				$("#prompt").attr("color","green");
+			}else{
+				$("#prompt").html("输入口令格式错误×");
+				$("#prompt").attr("color","red");
+			}
+		}
+	});
+
+
+    function ddel(){
+        var row1 = dat.datagrid('getSelections');
+        if (row1.length){
+            $.messager.confirm('提示','您确定要删除吗',function(b){
+                if(b){
+                    var infoarr=[];                    //存储删除信息的数组
+                    var j=0;
+                    for(var i=0;i<row1.length;i++){
+                        if(row1[i].SCHOOL==user_school || user_school=="A1"){
+                            infoarr[j]=row1[i].TEACHERNO;
+                            j++;
+                        }
+                    }
+                    if(infoarr.length > 0){
+                        $.ajax({
+                            url:'__URL__/del/hasJson/1',
+                            data:{'in':infoarr},
+                            type:'POST',
+                            success:function(del){
+                                if(del){
+                                    $.messager.alert('提示','删除成功！','?');
+                                    dat.datagrid('reload');
+                                }else{
+                                    $.messager.alert('提示','删除失败,没权限操作','?');
+                                }
+                            }
+                        });
+                    }else{
+                        $.messager.alert('提示','您只能对自己学院教师进行删除操作','?');
+                    }
+                }
+            });
+        }
+    }
+
+    $('#e_del').bind('click',ddel)
+    $('#admin_del').bind('click',ddel)
+    function eedit(){
+        var rowList=dat.datagrid('getSelections');//获取所有被选中的
+        dat.datagrid('removeEditor','TEACHERNO');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行编辑,不能选多条','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要编辑的数据','?');//用户没选择行
+        }else{
+
+            if(rowList[0].SCHOOL==user_school || user_school=="A1"||rowList[0].SCHOOL=='10'){
+                if(indexrow!=undefined){
+                    dat.datagrid('endEdit',indexrow);
+                }
+                var row2 = dat.datagrid('getSelected');//获得被选中的索引
+                var index2 = dat.datagrid('getRowIndex', row2);
+                dat.datagrid('beginEdit', index2);
+                indexrow=index2;
+            }else{
+                $.messager.alert('提示','您只能修改自己学院教师信息','?');
+            }
+
+        }
+    }
+
+    $('#e_edit').bind('click',eedit)
+    $('#admin_edit').bind('click',eedit);
+
+    $('#e_back').bind('click',function(){
+        dat.datagrid('rejectChanges');
+        indexrow=undefined;
+    })
+
+    $('#e_save').bind('click',function(){
+        dat.datagrid('endEdit',indexrow);
+        indexrow=undefined;
+
+    })
+
+
+    function xxiugai(){
+
+        var rowList=dat.datagrid('getSelections');//获取所有被选中的
+        dat.datagrid('removeEditor','TEACHERNO');
+        if(rowList.length>1){
+            $.messager.alert('提示','请选择一条进行修改,不能选多条','?');//用户选了多行编辑
+        }else if(rowList.length<1){
+            $.messager.alert('提示','请选择要修改的数据','?');//用户没选择行
+        }else{
+          //  alert(rowList[0].SCHOOL)
+            if(rowList[0].SCHOOL==user_school || user_school=="A1"||rowList[0].SCHOOL=='10'){
+                $("#wd [name='TEACHERNO']").val(rowList[0].TEACHERNO);
+                wd.window({closed:false});
+            }else{
+                $.messager.alert('提示','您只能修改自己学院教师信息','?');
+            }
+        }
+    }
+    $('#e_xiugai').bind('click',xxiugai)
+
+
+    $('#admin_xiugai').bind('click',xxiugai)
+
+
+
+
+
+
+
+
+});
+
+//跳转到详细页面
+function edit(teacherno,name){
+	var url="__URL__/edit/TEACHERNO/"+teacherno;
+	openTabsWindows("教师「"+name+"」详细信息",url);
+}
+
+$.extend($.fn.datagrid.methods, {
+    addEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item.field);e.editor = item.editor;
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param.field);e.editor = param.editor;
+        }
+    },
+    removeEditor : function(jq, param){
+        if (param instanceof Array){
+            $.each(param, function(index, item){
+                var e = $(jq).datagrid('getColumnOption', item);e.editor = {};
+            });
+        }else{
+            var e = $(jq).datagrid('getColumnOption', param); e.editor = {};
+        }
+    }
+});
+</script>
+<div id="admin_access_menu" class="easyui-menu" style="width:100px;">
+    <div id='admin_del'>删除本条目</div>
+    <div id='admin_edit'>编辑本条目</div>
+    <div id="admin_xiugai">修改口令</div>
+</div>
+</body>
+</html>

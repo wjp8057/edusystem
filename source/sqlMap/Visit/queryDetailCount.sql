@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM [l_VIEW_旁听生选课名单] l WHERE l.[学年]=:year AND l.[学期]=:term AND l.[学号] LIKE :studentno

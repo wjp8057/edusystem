@@ -1,0 +1,1 @@
+select * from TIMELIST where TYPE=:TYPE and PARA=:PARA and YEAR=:YEAR and TERM=:TERM and WHO=:WHO

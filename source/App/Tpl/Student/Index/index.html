@@ -1,0 +1,223 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+var _menus = {
+        "menus": [
+            {"menuid": "1","icon": "icon-sys","menuname": "我的选课",
+                "menus": [
+                    {"menuid": "10","menuname": "班级课表","icon": "icon-classTable","url": "__ROOT__/Student/Timetable/myClassTime",params:"YEAR,TERM"},
+                    {"menuid": "20","menuname": "个人课表","icon": "icon-weekTable","url": "__ROOT__/Student/Timetable/myWeekTime", params:"YEAR,TERM"},
+                    {"menuid": "21","menuname": "学生评教","icon": "icon-evaluate","url": "__ROOT__/Student/Evaluation/index"},
+                    {"menuid": "30","menuname": "选课","icon": "icon-elective","url": "__ROOT__/Student/Course/query", params:"YEAR,TERM"},
+                    {"menuid": "40","menuname": "退课","icon": "icon-retreat","url": "__ROOT__/Student/Course/removeList", params:"YEAR,TERM"},
+                    {"menuid": "50","menuname": "被筛选课程","icon": "icon-filter","url": "__ROOT__/Student/Course/dump", params:"YEAR,TERM"},
+                    {"menuid": "60","menuname": "有空的公选课","icon": "icon-leisure","url": "__ROOT__/Student/Course/free", params:"YEAR,TERM"}]
+            },
+            {"menuid": "10","icon": "icon-sys","menuname": "我的学业",
+                "menus": [
+                    {"menuid": "100","menuname": "学籍信息","icon": "icon-schoolRoll","url": "__ROOT__/Student/Learning/student"},
+                    {"menuid": "110","menuname": "培养方案","icon": "icon-plan","url": "__ROOT__/Student/Learning/program"},
+                    {"menuid": "120","menuname": "课程成绩","icon": "icon-result","url": "__ROOT__/Student/Result/qlist"},
+                    {"menuid": "130","menuname": "学分认定","icon": "icon-evaluate","url": "__ROOT__/Student/Result/account"},
+                    {"menuid": "140","menuname": "等级考试","icon": "icon-level","url": "__ROOT__/Student/Learning/level"},
+                    {"menuid": "150","menuname": "期末考试","icon": "icon-exam","url": "__ROOT__/Student/Exam/qlist", params:"YEAR,TERM"},
+                    {"menuid": "160","menuname": "我的教材","icon": "icon-book","url": "__ROOT__/Student/Learning/mybooks"},
+                    {"menuid": "160","menuname": "我的教材(<font color='red'>new</font>)","icon": "icon-book","url": "__ROOT__/Student/Learning/mybooks_new"}]
+            },
+            {"menuid": "20","icon": "icon-sys","menuname": "学分认定",
+                "menus": [
+                    {"menuid": "200","menuname": "申请认定","icon": "icon-exam","url": "__ROOT__/Student/credit/skill"},
+                    {"menuid": "210","menuname": "查看认定状态","icon": "icon-schoolRoll","url": "__ROOT__/Student/credit/lookprocess"}
+                ]
+            }
+        ]
+    };
+var menuTabs = null;
+
+
+
+
+function reloadTabGrid(title)
+
+{
+    if ($("[name=__mainTabs__]" ).tabs('exists', title)) {
+        $( '[name=__mainTabs__]').tabs('select' , title);
+        window.top.reload_Abnormal_Monitor.call();
+    }
+}
+
+//修改密码
+function serverChangePwd() {
+    var oldPwd = $('#oldPass');
+    var newPwd = $('#newPass');
+    var rePass = $('#rePass');
+
+    if (oldPwd.val() == '') {
+        msgShow('系统提示', '请输入原密码！', 'warning');
+        return false;
+    }
+    if (rePass.val() == '') {
+        msgShow('系统提示', '请在一次输入密码！', 'warning');
+        return false;
+    }
+
+    if (newPwd.val() != rePass.val()) {
+        msgShow('系统提示', '两次密码不一至！请重新输入', 'warning');
+        return false;
+    }
+
+    $.post("__ROOT__/Student/Index/changePwd/hasJson/true", {oldPwd:oldPwd.val(),newPwd:newPwd.val()}, function(rsp) {
+        if(rsp){
+            msgShow("系统消息：", rsp.message, rsp.type);
+            if(rsp.type != "error"){
+                oldPwd.val('');
+                newPwd.val('');
+                rePass.val('');
+                $("#winChangePassword").window('close');
+            }
+        }
+    },"JSON");
+}
+
+$(function() {
+    menuTabs = $("#west").cwebsFrame(_menus, "宁波城市学院欢迎您");
+    $('#loading-mask').fadeOut(); //关闭遮罩
+
+    //绑定退出事件
+    $('#loginOut').click(function() {
+        $.messager.confirm('系统提示', '您确定要退出本次登录吗?', function(r) {
+
+            if (r) {
+                location.href = '__ROOT__/Login/logout';
+            }
+        });
+    });
+
+    //调出修改密码窗口
+    $("#changePassword").bind("click",function(){
+        $("#winChangePassword").window('open');
+    });
+
+    //关闭修改密码窗口
+    $('#btnCancel').click(function(){
+        $("#winChangePassword").window('close');
+    })
+
+    //绑定修改密码
+    $('#btnOK').click(function(){
+        serverChangePwd();
+    })
+});
+
+
+
+</script>
+
+<body class="easyui-layout" style="overflow-y: hidden"  fit="true"   scroll="no">
+<noscript>
+    <div style=" position:absolute; z-index:100000; height:2046px;top:0px;left:0px; width:100%; background:white; text-align:center;">
+        <img src="__ROOT__/thirdparty/jquery/images/noscript.gif" alt='抱歉，请开启脚本支持！' />
+    </div>
+</noscript>
+
+<!-- 正在加载窗口 -->
+<div id="loading-mask" style="position:absolute;top:0px; left:0px; width:100%; height:100%; background:#D2E0F2; z-index:20000">
+    <div id="pageloading" style="position:absolute; top:50%; left:50%; margin:-120px 0px 0px -120px; text-align:center;  border:2px solid #8DB2E3; width:200px; height:34px;  font-size:14px;padding:10px; font-weight:bold; background:#fff; color:#15428B;">
+        <img src="__ROOT__/thirdparty/jquery/images/loading.gif" align="absmiddle" /> 正在加载中,请稍候...
+    </div>
+</div>
+
+<!-- 头部 -->
+<div region="north" split="false" border="false" style="overflow: hidden; height: 31px; background: url(__ROOT__/res/img/bg2.jpg);line-height: 31px;color: #fff; font-family: Verdana, 微软雅黑,黑体">
+    <div style="float:right; padding-right:20px;" class="head">
+        <span style="display:block; width:470px; height:30px; line-height:30px; color:#000000; overflow:hidden; font-family:'宋体'">
+            学年：<input type="text" name="YEAR" value="{$yearTerm.YEAR}" id="YEAR" style="width:50px;height:14px; vertical-align:middle" />
+            学期：<input type="text" name="TERM" value="{$yearTerm.TERM}" id="TERM" style="width:50px;height:14px; vertical-align:middle" />
+            <a href="javascript:void(0)">联系教务处</a> |
+            <a href="javascript:void(0)" id="changePassword">修改密码</a> |
+            <a href="javascript:void(0)" id="loginOut" style="color:red">注销</a>
+        </span>
+        <span style="display:block; width:470px; height:30px; line-height:30px; color:#000000; overflow:hidden; font-family:'宋体'">
+            学号：{$Think.session.S_USER_NAME}
+            姓名：{$Think.session.S_USER_INFO.NAME}
+            班级号：{$Think.session.S_USER_INFO.CLASSNO}
+            班级名：{$Think.session.S_USER_INFO.CLASSNAME}
+        </span>
+        <!--a href="__ROOT__/index.php?m=Index&=index">返回首页</a> <a href="#" id="loginOut">退出</a-->
+    </div>
+    <div style="padding-left:10px; font-size: 16px; "><img src="__ROOT__/res/img/logo2.jpg" align="absmiddle" /></div>
+</div>
+
+<!-- 左侧菜单 -->
+<div region="west" split="true"  title="导航菜单" style="width:180px;" id="west"></div>
+
+<!-- 初始内容页 -->
+<div id="mainPanle" region="center" style="background: #eee; overflow-y:hidden">
+    <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" >
+        <div style="padding:20px;padding-right:0px; padding-top:0px; padding-bottom:0px;overflow:hidden;" >
+                <table width="99%" border="0" cellspacing="0" cellpadding="0" height="100%">
+                    <tr>
+                        <td valign="top" width="80%" style=" border-right: 1px solid #A4BAF7; padding-bottom:10px; "><div class="cent-left" style="">
+
+                                              <h4>选课须知</h4>
+                            <p>
+                                1、预选课时间：2015年6月17日（周三）—2015年6月19日(周五)<BR>[溪口校区：2015年6月18日（周四）—2015年6月19日（周五）]<BR>
+                                2、2015年6月23日-2015年6月29日：公选课系统随机筛选<BR>3、退补选时间2015年6月29日（周一）—2015年7月1日（周三）
+                                <BR>4、选课流程：选课之前进入教学评估，需做好本学期学评教,本次评教需先排名并保存后才能打分，每个老师的分值需与排名对应<BR>4.1
+                                必修课和模块课已由系统统一选， 如不需要该课程可进入“退课”页面进行退选，体育健康、大学体育、14级三年制应用英语课程请根据各安排选课。 <BR>4.2
+                                在选课界面中，检索条件为“08%”或“007%”，可以检索到所有公共选修课，对照自己课表，选择没有冲突的课程，特别注意，公选课每人不得超过3门，否则将被删除所有公选课。<BR>4.3
+                                如果有课程多选，误选，可以进入“退课”页面退选。<BR>5、注意事项：A、一定要保管好自己密码，以免密码泄露造成选课数据被人修改。B、下学期开始前，务必上网查看“我的周课表”，以防止找不到教室。</p>
+								</div></td>
+                        <td valign="top" width="20%">
+                            <div class="cent-right">
+                                <h3>相关文件</h3>
+                                <a href="__APP__/Student/file1/xkxz2014">1 城市学院选课细则 </a><br> <a href="">2 教务管理使用说明 </a><br><a href="">3 2014年第2学期选课须知 </a><br>
+                                <h3>常用表格</h3>
+                                <a href="__APP__/Student/file1/xiazai/name/xuefeihuanjiao/type/doc">1 学费缓交申请表 </a><br>
+                                <a href="__APP__/Student/file1/xiazai/name/xuefendingti/type/doc">2 学分顶替申请表</a><br>
+                                <a href="__APP__/Student/file1/xiazai/name/W020130117368519661486/type/rar">3 创新技能学分认定表 </a><br>
+                                <a href="__APP__/Student/file1/xiazai/name/teshuyuanyin/type/xls">4 特殊原因退、改选汇总表 </a><br>
+                                <a href="__APP__/Student/file1/xiazai/name/bufenmianting/type/doc">5 部分听课、免听申请表 </a><br>
+                                <a href="__APP__/Student/file1/xiazai/name/mianxiushenqing/type/doc">6 免修申请表</a><br>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+        </div>
+    </div>
+</div>
+
+<!--修改密码窗口-->
+<div id="winChangePassword" class="easyui-window" title="修改密码" collapsible="false" minimizable="false" maximizable="false"
+     icon="icon-save" closed="true" modal="true"  style="width: 300px; height: 190px; padding: 5px;background: #fafafa;overflow: hidden;">
+    <div class="easyui-layout" fit="true">
+        <div region="center" border="false" style="overflow: hidden;padding: 10px; background: #fff; border: 1px solid #ccc;">
+            <table cellpadding=3>
+                <tr>
+                    <td align="right">原密码：</td>
+                    <td><input id="oldPass" type="Password"  /></td>
+                </tr>
+                <tr>
+                    <td align="right">新密码：</td>
+                    <td><input id="newPass" type="Password" /></td>
+                </tr>
+                <tr>
+                    <td align="right">确认密码：</td>
+                    <td><input id="rePass" type="Password" /></td>
+                </tr>
+            </table>
+        </div>
+        <div region="south" border="false" style="text-align: right; height: 30px; line-height: 30px;">
+            <a id="btnOK" class="easyui-linkbutton" icon="icon-ok" >
+                确定</a> <a id="btnCancel" class="easyui-linkbutton" icon="icon-cancel">取消</a>
+        </div>
+    </div>
+</div>
+
+<!-- 尾部 -->
+<div region="south" split="true" style="height: 30px; background: #D2E0F2; ">
+    <div class="footer">__COPYRIGHT__</div>
+</div>
+
+</body>
+</html>

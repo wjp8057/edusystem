@@ -1,0 +1,121 @@
+<include file=":Include:jqueryHeader" />
+
+<script type="text/javascript">
+$(function() {
+    $("#YEAR").val(parent.$("#YEAR").val());
+    $("#TERM").val(parent.$("#TERM").val());
+
+    //检索
+    $("#queryGlobal").bind("click",function(){
+        doSearch("检索",1);
+    });
+    //检索教师为空的排课列表
+    $("#teachernull").bind("click",function(){
+        doSearch("检索教师为空的排课列表",2);
+    });
+    //检索初级职称教师的排课列表
+    $("#firstteacher").bind("click",function(){
+        doSearch("检索初级职称教师的排课列表",3);
+    });
+    //检索公选课
+    $("#PlanSelect").bind("click",function(){
+        doSearch("检索公选课",4);
+    });
+
+    function doSearch(title, searchType){
+        openTabsWindows(title,"__ROOT__ /Schedule/Schedule/qlist?"+$('#schForm').serialize(),"",true);
+    }
+});
+</script>
+<body bgcolor="#FFFFFF" style="background: #ffffff">
+
+<p align=center><font face="隶书" style="font-size: 24pt;">检 索 学 期 课 程 表</font></p>
+
+<form name="schForm" id="schForm">
+    <table border="1" cellspacing="1" cellpadding="5" align="center" style="border-collapse:collapse;font-size:10pt">
+        <tr><td width="18%" align="right">学年：</td>
+            <td width="21%"><input type="text" name="YEAR" size="4" id="YEAR" ></td>
+            <td width="11%" align="right">学期：</td>
+            <td width="51%" colspan="3"><input type="text" name="TERM" id="TERM" size="4" ></td>
+        </tr>
+        <tr><td width="18%" align="right">课号：</td>
+            <td width="21%"><input type="text" name="COURSENO" id="COURSENO" size="10" value="%"></td>
+            <td width="11%" align="right">课名：</td>
+            <td width="51%" colspan="3"><input type="text" name="COURSENAME" id="COURSENAME" size="30" value="%"></td>
+        </tr>
+        <tr><td width="18%" align="right">课程组号：</td>
+            <td width="21%"><input type="text" name="GROUP" id="GROUP" size="3" value="%"></td>
+            <td width="11%" align="right">开课学院：</td>
+            <td width="51%" colspan="3"><Cwebs:sqlselect id="SCHOOL" name="SCHOOL" value="CODE" title="NAME" headerKey="%" headerTitle="所有学院" file="school/schoolOptions.sql" /></td>
+        </tr>
+        <tr><td width="18%" align="right">课程类别：</td>
+            <td width="21%"><Cwebs:sqlselect id="COURSETYPE" name="COURSETYPE" value="CODE" title="NAME" headerKey="%" headerTitle="所有类型" file="common/courseTypeOptions2.sql" /></td>
+            <td width="11%" align="right">班号：</td>
+            <td width="11%"><input type="text" name="CLASSNO" id="CLASSNO" size="10" value="%"></td>
+            <td width="8%" align="right">班名：</td>
+            <td width="35%"><input type="text" name="CLASSNAME" id="CLASSNAME" size="20" value="%"></td>
+        </tr>
+        <tr><td width="18%" align="right">修课方式：</td>
+            <td width="21%"><Cwebs:sqlselect id="APPROACHES" name="APPROACHES" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="common/approaches.sql" /></td>
+            <td width="12%" align="right">考核方式：</td>
+            <td width="50%" colspan="3"><Cwebs:sqlselect id="EXAMTYPE" name="EXAMTYPE" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="common/examOptions.sql" /></td>
+        </tr>
+        <tr><td width="18%" align="right">教师号：</td>
+            <td width="21%"><input type="text" name="TEACHERNO" id="TEACHERNO" size="10" value="%"></td>
+            <td width="12%" align="right">教师姓名：</td>
+            <td width="50%" colspan="3"><input type="text" name="TEACHERNAME" id="TEACHERNAME" size="10" value="%"></td>
+        </tr>
+        <tr><td width="18%" align="right">教室类型要求：</td>
+            <td width="21%"><Cwebs:sqlselect id="ROOMR" name="ROOMR" value="CODE" title="NAME" headerKey="%" headerTitle="所有类型" file="common/roomTypeOptions.sql" /></td>
+            <td width="12%" align="right">教室类型：</td>
+            <td width="50%" colspan="3"><Cwebs:sqlselect id="ROOMTYPE" name="ROOMTYPE" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="common/roomTypeOptions.sql" /></td>
+        </tr>
+        <tr><td width="18%" align="right">星期：</td>
+            <td width="21%">
+                <select size="1" name="DAY" id="DAY">
+                    <option value="1">星期一</option>
+                    <option value="2">星期二</option>
+                    <option value="3">星期三</option>
+                    <option value="4">星期四</option>
+                    <option value="5">星期五</option>
+                    <option value="6">星期六</option>
+                    <option value="7">星期天</option>
+                    <option value="0">未排</option>
+                    <option selected value="%">所有情况</option>
+                </select></td>
+            <td width="12%" align="right">时段：</td>
+            <td width="16%" colspan="3"><Cwebs:sqlselect id="TIME" name="TIME" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="course/timeSections.sql" /></td>
+        </tr>
+        <tr><td width="18%" align="right">教室号：</td>
+            <td width="21%"><input type="text" name="ROOMNO" id="ROOMNO" size="9" value="%"></td>
+            <td width="12%" align="right">排课单元：</td>
+            <td width="16%" colspan="3"><Cwebs:sqlselect id="UNIT" name="UNIT" value="CODE" title="NAME" headerKey="%" headerTitle="全部" file="common/unitOptions.sql" /></td>
+        </tr>
+        <tr><td width="18%" align="right">排序方式：</td>
+            <td width="21%" colspan="2">
+                <input type="radio" value="COURSENO" name="ORDER" checked="checked">课号&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="TIME" name="ORDER">时段&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="WEEKS" name="ORDER">周次&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="TEACHERNAME" name="ORDER">任课教师&nbsp;&nbsp;&nbsp;
+                <input type="radio" value="ROOMNAME" name="ORDER">教室
+            </td>
+            <td width="16%" colspan="3">&nbsp;</td>
+        </tr>
+    </table>
+
+    <p align="center">
+        <input type="button" value="检索" id="queryGlobal" />  <input type="reset" value="全部重填" />
+    </p>
+</form>
+
+
+</body>
+
+</html>
+
+
+
+
+
+
+

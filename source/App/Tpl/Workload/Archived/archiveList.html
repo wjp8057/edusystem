@@ -1,0 +1,92 @@
+<include file=":Include:jqueryHeader" />
+<include file="./style" />
+<body class="easyui-layout">
+
+<div data-options="region:'center',border:false" style="padding:3px;">
+    <table id="datagrid" fitColumns="true" width="100%" fit="true"
+           pagination="true" pageSize="20" pageList="[20,40,60]" striped="true" singleSelect="true">
+        <thead>
+        <tr><th data-options="field:'YEAR',align:'center',width:4">学年</th>
+            <th data-options="field:'TERM',align:'center',width:4">学期</th>
+            <th data-options="field:'COURSENO',align:'center',width:6">课号</th>
+            <th data-options="field:'COURSENAME',align:'center',width:15">课名</th>
+            <th data-options="field:'SCHOOLNAME',align:'center',width:10">开课学院</th>
+            <th data-options="field:'NAME',align:'center',width:6">教师姓名</th>
+            <th data-options="field:'TEACHERNO',align:'center',width:5">教师号</th>
+            <th data-options="field:'WORKLOAD',align:'center',width:5">工作量</th>
+            <th data-options="field:'STANDARD',align:'center',width:5">标准班</th>
+            <th data-options="field:'WORKTYPENAME',align:'center',width:10">工作量类型</th>
+            <th data-options="field:'TEACHERSCHOOL',align:'center',width:10">教师所在学院</th></tr>
+        </thead>
+    </table>
+</div>
+<div id="toobar">
+    <form id="queryForm" method="post">
+        <input type="hidden" name="YEAR"><input type="hidden" name="TERM">
+        <label>课名：</label><input name="COURSENAME" value='%'  size="20">
+        <label>课号：</label><input name="COURSENO" value='%'  size="14" maxlength="10">
+        <label>开课学院：</label>
+        <select class="easyui-combobox" id="school" name="SCHOOL" data-options="editable:false">
+            <option value="%">全部</option>
+            <volist name="school" id="s">
+                <option value="{$s.SCHOOL}">{$s.NAME}</option>
+            </volist>
+        </select>
+        <label>教师姓名：</label><input name="NAME" value='%'  size="10">
+        <label>教师号：</label><input name="TEACHERNO" value='%'  size="14">
+        <a href="javascript:void(0)" id="searcher" class="easyui-linkbutton" data-options="iconCls:'icon-search',plain:true">检索</a>
+        <a href="javascript:void(0)" id="exportBut" class="easyui-linkbutton" data-options="iconCls:'icon-excel',plain:true">导出</a>
+    </form>
+</div>
+<script type="text/javascript">
+    var list=null;
+    var datagrid=null;
+    $(function(){
+        var userSchool=parent.$("#userSchool").val();
+        datagrid = $('#datagrid').datagrid({toolbar:'#toobar'});
+        //指定默认学院
+        if(userSchool!="A1") $("#school").combobox('setValue', userSchool);
+        // 条件查询
+        $("#searcher").click(function(){
+            datagrid.datagrid("options").url = "__URL__/archiveList/hasJson/1";
+            datagrid.datagrid("load",getData());
+        });
+        //导出
+        $("#exportBut").click(function(){
+            $("#toobar [name='YEAR']").val(getYear());
+            $("#toobar [name='TERM']").val(getTerm());
+            $("#queryForm").attr("action","__ROOT__/Workload/Excel/expTeacherWork/");
+            $("#queryForm").submit();
+        });
+    });
+    //获取检索条件信息
+    function getData(){
+        var data={
+            "YEAR":getYear(),"TERM":getTerm(),
+            "COURSENO":$.trim($("#toobar [name='COURSENO']").val()),
+            "COURSENAME":$.trim($("#toobar [name='COURSENAME']").val()),
+            "SCHOOL":$.trim($("#toobar [name='SCHOOL']").val()),
+            "NAME":$.trim($("#toobar [name='NAME']").val()),
+            "TEACHERNO":$.trim($("#toobar [name='TEACHERNO']").val())
+        };
+        return data;
+    }
+    function getYear(){
+        return parent.$("#YEAR").val();
+    }
+    function getTerm(){
+        return parent.$("#TERM").val();
+    }
+    //生成加载窗口
+    function Load(){
+        $("<div class=\"datagrid-mask\"></div>").css({ display: "block", width: "100%", height: $(window).height() }).appendTo("body");
+        $("<div class=\"datagrid-mask-msg\"></div>").html("正在运行，请稍候。。。").appendTo("body").css({ display: "block", left: ($(document.body).outerWidth(true) - 190) / 2, top: ($(window).height() - 45) / 2 });
+    }
+    //隐藏加载窗口
+    function dispalyLoad(){
+        $(".datagrid-mask").remove();
+        $(".datagrid-mask-msg").remove();
+    }
+</script>
+</body>
+</html>
