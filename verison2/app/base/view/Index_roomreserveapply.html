@@ -17,13 +17,13 @@
             var purpose = $('#purpose');
             purpose.validatebox({required: true, validType: 'maxLength[25]'});
         }
-        $("#update").click(function() {
+        $("#save").click(function() {
             var weekstring="";
             $("input[id^='week']").each(function () {
                 weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
             });
             var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
-            if($("#myForm").form('validate')&&weeks>0){
+            if($("#myForm").form('validate')&&weeks>0&&$('#roomname').text()!=''){
                 var data=new Object();
                 data["year"]=year.val();
                 data["term"]=term.val();
@@ -42,11 +42,12 @@
                 },'json');
             }
             else{
-                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容及周次！','error');
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容及周次、教室号是否正确！','error');
             }
         });
         //当教室填写完成后。
         roomno.blur(function(){
+            $('#roomname').text('');
             $.post('{$ROOT}/base/room/getroomname',{roomno:roomno.val()},function(result){
                 if (result.status==1){
                     $('#roomname').text(result.info);
@@ -120,6 +121,6 @@
     </table>
     </form>
     <div id="toolbar">
-        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="update">提交申请</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">提交申请</a>
     </div>
 </div>

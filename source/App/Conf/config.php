@@ -4,7 +4,7 @@ return array(
     //'APP_AUTOLOAD_PATH'         =>'@.TagLib',
     //'TAGLIB_BUILD_IN'           =>'Cx,Cwebs',
     'APP_GROUP_LIST' => 'Teacher,Student,System,Classes,Course,Major,Room,Status,Programs,Userinfo,Quality,Archive,Book,Credit,Attendance,Statistic,CoursePlan,Schedule,TeacherSchedules,SemesterTimetable,Results,Workload,CourseManager,Visit,Exam', //项目分组设定
-    'DEFAULT_GROUP'  => 'Teacher', //默认分组
+    'DEFAULT_GROUP'  => 'Home', //默认分组
     'LOG_RECORD' => true, // 开启日志记录
     "LOAD_EXT_FILE" => "right,cwebsSchedule", //自动加载类
     "TRANSACTION_ISOLATION" => SQLSRV_TXN_READ_UNCOMMITTED, //事务级别SQLSRV_TXN_READ_UNCOMMITTED=1，默认为SQLSRV_TXN_READ_COMMITTED=2
