@@ -12,23 +12,30 @@ use app\common\vendor\PHPExcel;
 use app\common\service\R32;
 use app\common\service\ViewScheduleTable;
 
+/**课程
+ * Class Course
+ * @package app\teacher\controller
+ */
 class Course extends MyController{
-    /**读取课程信息
+    /**
      * @param int $page
      * @param int $rows
      * @param $year
      * @param $term
+     * @return \think\response\Json
      */
     public function query($page=1,$rows=20,$year,$term){
+        $result=null;
         try{
             $schedule=new ViewScheduleTable();
             $teacherno= session('S_TEACHERNO');
             $result=$schedule->getTeacherCourseList($page,$rows,$year,$term,$teacherno);
-            return json($result);
+
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
     /*
      * 导出课程选课名单

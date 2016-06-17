@@ -12,16 +12,13 @@
 namespace app\common\service;
 
 
-use app\common\access\MyQuery;
 use app\common\access\MyService;
-use think\Log;
 
 class School extends MyService {
     /**获取学院列表
      * @param int $page
      * @param int $rows
-     * @param int $fail
-     * @return array
+     * @return array|null
      */
     public function getSchoolList($page=1,$rows=20){
         $result=null;

@@ -12,6 +12,7 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Score extends  MyService {
 
@@ -26,7 +27,7 @@ class Score extends  MyService {
      */
     public function getStudentList($page=1,$rows=20,$year='',$term='',$courseno=''){
         if($year==''||$term==''||$courseno=='')
-            throw new \think\Exception('year term courseno is empty', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term courseno is empty', MyException::PARAM_NOT_CORRECT);
 
         $result=null;
         $condition=null;
@@ -131,7 +132,7 @@ class Score extends  MyService {
      */
     public function getCourseExamDate($year='',$term='',$courseno=''){
         if($year==''||$term==''||$courseno=='')
-            throw new \think\Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+            throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
         $condition=null;
         $condition['courseno']=substr($courseno,0,7);
         $condition['group']=substr($courseno,7,2);
@@ -153,7 +154,7 @@ class Score extends  MyService {
      */
     public function getCoursePercent($year='',$term='',$courseno=''){
         if($year==''||$term==''||$courseno=='')
-            throw new \think\Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+            throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
         $condition=null;
         $result=[];
         $condition['courseno']=substr($courseno,0,7);

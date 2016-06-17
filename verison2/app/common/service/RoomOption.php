@@ -17,12 +17,9 @@ use app\common\access\MyService;
 class RoomOption extends MyService{
 
 
-    /**获取班级列表
+    /**
      * @param int $page
      * @param int $rows
-     * @param string $classno 班号
-     * @param string $classname 班名
-     * @param string $school 学院
      * @return array|null
      */
     function getList($page=1,$rows=20){

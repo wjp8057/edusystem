@@ -15,6 +15,7 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Register extends MyService {
 
@@ -33,7 +34,7 @@ class Register extends MyService {
         $result=null;
         $condition=null;
         if($year==''||$term=='')
-            throw new \think\Exception('year or term is empty ', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year or term is empty ', MyException::PARAM_NOT_CORRECT);
         $condition['registries.year']=$year;
         $condition['registries.term']=$term;
         if($studentno!='%') $condition['students.studentno']=array('like',$studentno);

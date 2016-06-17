@@ -16,7 +16,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
-use think\Log;
+use think\Exception;
 
 class Classes extends MyService{
     /**获取班级的所在学院
@@ -29,7 +29,7 @@ class Classes extends MyService{
         $condition['classno']=$classno;
         $data=$this->query->table('classes')->where($condition)->field('rtrim(classes.classname) classname,classes.school')->find();
         if(!is_array($data))
-            throw new \think\Exception('classno'.$classno, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('classno'.$classno, MyException::PARAM_NOT_CORRECT);
         return $data;
     }
 

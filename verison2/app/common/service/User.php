@@ -11,6 +11,8 @@ use app\common\access\MyException;
 use app\common\access\MyLog;
 use app\common\access\MyService;
 use think\db;
+use think\Exception;
+
 class User extends MyService{
     /**验证用户的密码
      * @param $username string 用户名
@@ -23,7 +25,7 @@ class User extends MyService{
 
         $condition=null;
         $condition['username'] = $username;
-        $data=\think\Db::table('users')->join('teachers','teachers.teacherno=users.teacherno')
+        $data=Db::table('users')->join('teachers','teachers.teacherno=users.teacherno')
             ->join('schools','schools.school=teachers.school')
             ->field('schools.manage,rtrim(users.password) as password,teachers.teacherno,rtrim(teachers.name) as teachername,
             teachers.school,rtrim(schools.name) as schoolname,rtrim(users.roles) as roles')
@@ -57,12 +59,12 @@ class User extends MyService{
                 $data['sessionid']=$guid;
                 $data['remoteip']=get_client_ip();
                 $data['logintime']=date('Y-m-d H:i:s');
-                $result=\think\Db::table('sessions')->where($condition)->find();
+                $result=Db::table('sessions')->where($condition)->find();
                 if(is_array($result)){
-                    \think\Db::table('sessions')->where($condition)->update($data);
+                    Db::table('sessions')->where($condition)->update($data);
                 }
                 else
-                    \think\Db::table('sessions')->insert($data);
+                    Db::table('sessions')->insert($data);
                 return true;
             }
             else
@@ -196,7 +198,7 @@ class User extends MyService{
     public function deleteUserByTeacherNo($teacherno)
     {
         if ($teacherno == '')
-            throw new \think\Exception('teacherno is empty', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('teacherno is empty', MyException::PARAM_NOT_CORRECT);
         else {
             $condition = null;
             $condition['teacherno'] = $teacherno;
@@ -218,7 +220,7 @@ class User extends MyService{
         $condition['username']=$username;
         $data=$this->query->table('users')->where($condition)->field('rtrim(roles) roles')->find();
         if(!is_array($data)||count($data)==0){
-            throw new \think\Exception('username'.$username,MyException::USER_NOT_EXISTS);
+            throw new Exception('username'.$username,MyException::USER_NOT_EXISTS);
         }
         $result=str_split($data['roles']);
         return $result;
@@ -247,7 +249,7 @@ class User extends MyService{
      */
     public function changeUserPassword($teacherno='',$password=''){
         if($teacherno==''||$password=='')
-            throw new \think\Exception('teacherno or password is empty', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('teacherno or password is empty', MyException::PARAM_NOT_CORRECT);
 
         //检查教师所在学院，
         if(MyAccess::checkTeacherSchool($teacherno)) {

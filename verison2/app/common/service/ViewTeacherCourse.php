@@ -8,16 +8,16 @@
 
 namespace app\common\service;
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class ViewTeacherCourse extends  MyService {
 
     function getCourseList($page=1,$rows=20,$year='',$term='',$teacherno='')
     {
         if ($year == '' || $term == '' || $teacherno == '')
-            throw new \think\Exception('year term teacherno is empty', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term teacherno is empty', MyException::PARAM_NOT_CORRECT);
 
         $result = array();
         $condition = null;

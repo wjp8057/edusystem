@@ -12,9 +12,9 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class TimeSection extends MyService {
     public function getTimeSectionItem($time)
@@ -22,7 +22,7 @@ class TimeSection extends MyService {
         $condition['name']=$time;
         $result=$this->query->table('timesections')->field('rtrim(value) value,timebits,timebits2')->where($condition)->select();
         if(!is_array($result)||count($result)!=1)
-            throw new \think\Exception('time'.$time, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('time'.$time, MyException::PARAM_NOT_CORRECT);
         return $result[0];
     }
 } 

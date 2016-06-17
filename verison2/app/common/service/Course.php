@@ -9,7 +9,6 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 

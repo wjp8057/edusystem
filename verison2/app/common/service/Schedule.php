@@ -8,10 +8,9 @@
 
 namespace app\common\service;
 
-
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Schedule extends MyService {
     private $oew=array(262143=>'',87381=>'(单周)',174762=>'(双周)');
@@ -137,16 +136,6 @@ dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') classname")
         return $result;
     }
 
-    //todo:获取学生个人未安排时间的课程。
-    private function _getStudentCourseUnschedule($year,$term,$studentno){
-        $result=null;
-        return $result;
-    }
-    //todo:获取班级未安排时间的课程。
-    private function _getClassCourseUnschedule($year,$term,$classno){
-        $result=null;
-        return $result;
-    }
 
     /**获取某个教师指定学年学期的课表，二维数组，第一维为星期第二维为节次
      * @param string $year
@@ -157,7 +146,7 @@ dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') classname")
      */
     public function getTeacherTimeTable($year='',$term='',$teacherno=''){
         if($year==''||$term==''||$teacherno=='')
-            throw new \think\Exception('year term teacherno is empty ',MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term teacherno is empty ',MyException::PARAM_NOT_CORRECT);
 
         $condition=null;
         $result=null;
@@ -200,7 +189,7 @@ classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.c
 
     public function getRoomTimeTable($year='',$term='',$roomno='',$all=false){
         if($year==''||$term==''||$roomno=='')
-            throw new \think\Exception('year term roomno is empty ',MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term roomno is empty ',MyException::PARAM_NOT_CORRECT);
 
         $condition=null;
         $result=null;

@@ -25,16 +25,19 @@ class Room extends MyController
     /**读取校区信息
      * @param int $page
      * @param int $rows
+     * @return \think\response\Json
      */
     public function area($page = 1, $rows = 20)
     {
+        $result=null;
         try {
             $area = new Area();
             $result = $area->getList($page, $rows);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**
@@ -42,28 +45,31 @@ class Room extends MyController
      */
     public function  updatearea()
     {
+        $result=null;
         try {
             $area = new Area();
             $result = $area->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**教室类型
      * @param int $page
      * @param int $rows
+     * @return \think\response\Json
      */
     public function option($page = 1, $rows = 20)
     {
+        $result=null;
         try {
             $option= new RoomOption();
             $result = $option->getList($page, $rows);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**
@@ -71,22 +77,25 @@ class Room extends MyController
      */
     public function updateoption()
     {
+        $result=null;
         try {
             $option= new RoomOption();
             $result = $option->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
     public function updateroom(){
+        $result=null;
         try {
             $option= new Classroom();
             $result = $option->update($_POST);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
     /**获取教室列表
      * @param int $page
@@ -108,16 +117,19 @@ class Room extends MyController
     public function  roomlist($page = 1, $rows = 20, $roomno = '%', $name = '%', $building = '%', $area = '', $equipment = '',
                               $school = '', $status = '', $reserved = '', $seatmin = 0, $seatmax = 1000, $testmin = 0, $testmax = 1000)
     {
+        $result=null;
         try {
             $room = new Classroom();
             $result = $room->getList($page, $rows, $roomno, $name, $building, $area, $equipment, $school, $status, $reserved, $seatmin, $seatmax, $testmin, $testmax);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
     public function  exportroom( $roomno = '%', $name = '%', $building = '%', $area = '', $equipment = '',
                                 $school = '', $status = '', $reserved = '', $seatmin = 0, $seatmax = 1000, $testmin = 0, $testmax = 1000){
+        $result=null;
         try {
             $room = new Classroom();
             $result = $room->getList(1, 10000, $roomno, $name, $building, $area, $equipment, $school, $status, $reserved, $seatmin, $seatmax, $testmin, $testmax);
@@ -135,11 +147,11 @@ class Room extends MyController
             $string=array("roomno");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
             PHPExcel::export2Excel($file,$array);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
     }
+
     /**获取教室使用情况表
      * @param int $page
      * @param int $rows
@@ -156,24 +168,29 @@ class Room extends MyController
      * @param string $weekday
      * @param string $oew
      * @param string $time
+     * @return \think\response\Json
      */
     public function  roomusagelist($page = 1, $rows = 20, $year = '', $term = '', $roomno = '%', $name = '%', $building = '%', $area = '', $equipment = '',
                                    $school = '', $seatmin = 0, $seatmax = 1000, $weekday = '', $oew = '', $time = '')
     {
+        $result=null;
         try {
             $room = new Classroom();
             $result = $room->getUsageList($page, $rows, $year, $term, $roomno, $name, $building, $area, $equipment, $school, $seatmin, $seatmax, $weekday, $oew, $time);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**刷新教室资源时间表
      * @param $year
      * @param $term
+     * @return \think\response\Json
      */
     public function refresh($year,$term){
+        $result=null;
         try {
             $room = new Classroom();
             if($room->refreshTimeList($year,$term))
@@ -183,10 +200,11 @@ class Room extends MyController
             else{
                 $result=['info'=>'刷新失败,未知错误！','status'=>'0'];
             }
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**教室借用列表
@@ -197,15 +215,18 @@ class Room extends MyController
      * @param string $roomno
      * @param string $school
      * @param string $approved
+     * @return \think\response\Json
      */
     public function reservelist($page=1,$rows=20,$year,$term,$roomno='%',$school='',$approved=''){
+        $result=null;
         try {
             $option= new RoomReserve();
             $result = $option->getList($page, $rows,$year,$term,$roomno,$school,$approved);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**导出借用教室列表
@@ -244,35 +265,35 @@ class Room extends MyController
      *
      */
     public function  roomapply($year,$term,$roomno,$day,$time,$weeks,$purpose){
+        $result=null;
         try {
             $reserve= new RoomReserve();
             $result=$reserve->apply($year,$term,$roomno,$day,$time,$weeks,$purpose);
-            return json($result);
-
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     public function updatereserve(){
+        $result=null;
         try {
             $reserve= new RoomReserve();
             $result=$reserve->update($_POST);
-            return json($result);
-
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     public function getroomname($roomno){
+        $result=null;
         try {
             $room= new Classroom();
             $result=$room->getRoomItemByNo($roomno)['name'];
-            return json(["status"=>1,'info'=>$result]);
-
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json(["status"=>1,'info'=>$result]);
     }
 } 

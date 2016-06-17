@@ -20,100 +20,130 @@ use app\common\service\TeacherLevel;
 use app\common\service\TeacherType;
 use app\common\service\User;
 
-class Teacher extends MyController {
+class Teacher extends MyController
+{
     //显示教师类型列表信息
-    public function type($page=1,$rows=20)
+    public function type($page = 1, $rows = 20)
     {
+        $result = null;
         try {
-            $type=new TeacherType();
-            $result =$type->getList($page,$rows);
-            return json($result);
+            $type = new TeacherType();
+            $result = $type->getList($page, $rows);
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //更新教师类型
     public function updatetype()
     {
+        $result = null;
         try {
-            $type=new TeacherType();
+            $type = new TeacherType();
             $result = $type->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //读取职称级别
-    public function level($page=1,$rows=20)
+    public function level($page = 1, $rows = 20)
     {
+        $result = null;
         try {
-            $level=new TeacherLevel();
-            $result =$level->getList($page,$rows);
-            return json($result);
+            $level = new TeacherLevel();
+            $result = $level->getList($page, $rows);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //更新职称级别
     public function updatelevel()
     {
+        $result = null;
         try {
-            $level=new TeacherLevel();
-            $result =$level->update($_POST);
-            return json($result);
+            $level = new TeacherLevel();
+            $result = $level->update($_POST);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //读取职称
-    public function position($page=1,$rows=20){
+    public function position($page = 1, $rows = 20)
+    {
+        $result = null;
         try {
-            $position=new Position();
-            $result =$position->getList($page,$rows);
-            return json($result);
+            $position = new Position();
+            $result = $position->getList($page, $rows);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //更新职称
-    public function updateposition(){
+    public function updateposition()
+    {
+        $result = null;
         try {
-            $position=new Position();
-            $result =$position->update($_POST);
-            return json($result);
+            $position = new Position();
+            $result = $position->update($_POST);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //读取教师列表
-    public function teacherlist($page=1,$rows=20,$teacherno='%',$name='%',$school=''){
+    public function teacherlist($page = 1, $rows = 20, $teacherno = '%', $name = '%', $school = '')
+    {
+        $result = null;
         try {
-            $teacher=new \app\common\service\Teacher();
-            $result=$teacher->getList($page,$rows,$teacherno,$name,$school);
-            return json($result);
+            $teacher = new \app\common\service\Teacher();
+            $result = $teacher->getList($page, $rows, $teacherno, $name, $school);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //更新教师信息
-    public function teacherupdate(){
+    public function teacherupdate()
+    {
+        $result = null;
         try {
-            $teacher=new \app\common\service\Teacher();
-            $result=$teacher->update($_POST);
-            return json($result);
+            $teacher = new \app\common\service\Teacher();
+            $result = $teacher->update($_POST);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
+
     //修改密码
-    public function changepassword($teacherno,$password){
+    public function changepassword($teacherno, $password)
+    {
+        $result = null;
         try {
-            $user=new User();
+            $user = new User();
             $result = $user->changeUserPassword($teacherno, $password);
-            return json($result);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**导出
@@ -121,22 +151,22 @@ class Teacher extends MyController {
      * @param $name
      * @param $school
      */
-    public function export($teacherno,$name,$school){
-        try{
-            $teacher=new \app\common\service\Teacher();
-            $result=$teacher->getList(1,10000,$teacherno,$name,$school);
-            $data=$result['rows'];
-            $file="教师名单";
-            $sheet='全部';
-            $title='';
-            $template= array("teacherno"=>"教师号","name"=>"姓名","sexname"=>"性别","positionname"=>"职称","typename"=>"类型","jobname"=>"岗位","enteryear"=>"入校年份","schoolname"=>"学院","rem"=>"备注");
-            $string=array("teacherno");
-            $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
-            PHPExcel::export2Excel($file,$array);
+    public function export($teacherno, $name, $school)
+    {
+        try {
+            $teacher = new \app\common\service\Teacher();
+            $result = $teacher->getList(1, 10000, $teacherno, $name, $school);
+            $data = $result['rows'];
+            $file = "教师名单";
+            $sheet = '全部';
+            $title = '';
+            $template = array("teacherno" => "教师号", "name" => "姓名", "sexname" => "性别", "positionname" => "职称", "typename" => "类型",
+                "jobname" => "岗位", "enteryear" => "入校年份", "schoolname" => "学院", "rem" => "备注");
+            $string = array("teacherno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file, $array);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
-        }
-
     }
 }

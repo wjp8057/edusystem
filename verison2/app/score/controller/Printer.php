@@ -11,17 +11,20 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\ViewFinalScoreCourse;
 
-class Printer extends  MyController{
+class Printer extends MyController
+{
 
-    public function finalcourselist($page = 1, $rows = 20,$year='',$term='',$courseno='%',$coursename='%',$school='')
+    public function finalcourselist($page = 1, $rows = 20, $year = '', $term = '', $courseno = '%', $coursename = '%', $school = '')
     {
+        $result = null;
         try {
-            $course=new ViewFinalScoreCourse();
-            $result=$course->getList($page,$rows,$year,$term,$courseno,$coursename,$school);
-            return json($result);
+            $course = new ViewFinalScoreCourse();
+            $result = $course->getList($page, $rows, $year, $term, $courseno, $coursename, $school);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
 }

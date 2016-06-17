@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: fangrenfu <fangrenfu@126.com>
+// | Author: fangrenfu <fangrenfu@126.com> 2016/6/17 21:32
 // +----------------------------------------------------------------------
 
 namespace app\common\service;
@@ -14,20 +14,13 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
-class Area extends MyService{
-
-
-    /**
-     * @param int $page
-     * @param int $rows
-     * @return array|null
-     */
-    function getList($page=1,$rows=20){
+class CourseType extends MyService{
+    public function getList($page=1,$rows=20){
         $result=null;
         $condition=null;
-        $data=$this->query->table('areas')->page($page,$rows)
+        $data=$this->query->table('coursetypeoptions')->page($page,$rows)
             ->field('name,rtrim(value) value')->order('name')->select();
-        $count= $this->query->table('areas')->count();
+        $count= $this->query->table('coursetypeoptions')->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
@@ -48,7 +41,7 @@ class Area extends MyService{
                 foreach ($listUpdated as $one) {
                     $data['value'] = $one->value;
                     $data['name'] = $one->name;
-                    $row = $this->query->table('areas')->insert($data);
+                    $row = $this->query->table('coursetypeoptions')->insert($data);
                     if ($row > 0)
                         $insertRow++;
                 }
@@ -60,7 +53,7 @@ class Area extends MyService{
                     $condition = null;
                     $condition['name'] = $one->name;
                     $data['value'] = $one->value;
-                    $updateRow += $this->query->table('areas')->where($condition)->update($data);
+                    $updateRow += $this->query->table('coursetypeoptions')->where($condition)->update($data);
                 }
             }
             //删除部分
@@ -70,7 +63,7 @@ class Area extends MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['name'] = $one->name;
-                    $deleteRow += $this->query->table('areas')->where($condition)->delete();
+                    $deleteRow += $this->query->table('coursetypeoptions')->where($condition)->delete();
                 }
             }
         }
@@ -91,5 +84,4 @@ class Area extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
 } 

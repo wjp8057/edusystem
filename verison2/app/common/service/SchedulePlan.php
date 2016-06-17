@@ -26,8 +26,8 @@ class SchedulePlan extends MyService {
      * @param string $coursename
      * @param string $classno
      * @param string $school
-     * @param array $condtion
-     * @return array
+     * @param array $extracondtion
+     * @return array|null
      */
     public function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$classno='%',$school='',$extracondtion=[]){
         $condition=null;

@@ -15,16 +15,18 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Student extends MyService {
     /**获取学生基本数据信息
-     * @param int $page 页码
-     * @param int $rows 每页记录数
-     * @param string $studentno 学号
-     * @param string $name 姓名
-     * @param string $classno 班号
-     * @param string $school 学院
-     * @param string $status 学籍状态
+     * @param int $page
+     * @param int $rows
+     * @param string $studentno
+     * @param string $name
+     * @param string $classno
+     * @param string $school
+     * @param string $status
+     * @param string $free
      * @return array|null
      */
     function getList($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$school='',$status='',$free=''){
@@ -107,7 +109,7 @@ class Student extends MyService {
      */
     function changePassword($studentno='',$password=''){
         if($studentno==''||$password=='')
-            throw new \think\Exception('studentno or password is empty ', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('studentno or password is empty ', MyException::PARAM_NOT_CORRECT);
 
         if(MyAccess::checkStudentSchool($studentno)) {
             $condition['studentno'] = $studentno;
@@ -153,7 +155,7 @@ class Student extends MyService {
             cast('/pictures/'+substring(students.studentno,1,2)+'/'+students.studentno+'.jpg' as char(40)) as photo")
             ->where($condition)->select();
         if(!is_array($data)||count($data)!=1)
-            throw new \think\Exception('studentno'.$studentno, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('studentno'.$studentno, MyException::PARAM_NOT_CORRECT);
         return $data[0];
     }
 

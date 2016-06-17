@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 
 namespace app\admin\controller;
+
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\Role;
@@ -20,48 +21,56 @@ class User extends MyController
     //显示信息
     public function query($page = 1, $rows = 10, $username = '%', $name = '%', $school = '')
     {
+        $result = null;
         try {
-            $user=new \app\common\service\User();
-            $result =$user->getUserList($page, $rows, $username, $name, $school);
-            return json($result);
+            $user = new \app\common\service\User();
+            $result = $user->getUserList($page, $rows, $username, $name, $school);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     //更新信息
     public function update()
     {
+        $result = null;
         try {
-            $user=new \app\common\service\User();
-            $result =$user->updateUser($_POST);//无法用I('post.')获取二维数组
-            return json($result);
+            $user = new \app\common\service\User();
+            $result = $user->updateUser($_POST);//无法用I('post.')获取二维数组
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     public function role()
     {
+        $result = null;
         try {
             $Obj = new Role();
             $result = $Obj->getRoleList();
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     //更新角色信息
     public function updaterole($username, $role = "*")
     {
+        $result = null;
         try {
-            $user=new \app\common\service\User();
-            $result =$user->updateUserRole($username, $role);//无法用I('post.')获取二维数组
-            return json($result);
+            $user = new \app\common\service\User();
+            $result = $user->updateUserRole($username, $role);//无法用I('post.')获取二维数组
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     /**修改本人密码
@@ -70,23 +79,27 @@ class User extends MyController
      */
     public function resetself($oldpwd = '', $newpwd = '')
     {
+        $result = null;
         try {
-            $user=new \app\common\service\User();
-            $result =$user->changeSelfPassword($oldpwd, $newpwd);
-            return json($result);
+            $user = new \app\common\service\User();
+            $result = $user->changeSelfPassword($oldpwd, $newpwd);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
     public function changepassword($teacherno, $password)
     {
+        $result = null;
         try {
-            $user=new \app\common\service\User();
-            $result =$user->changeUserPassword($teacherno, $password);
-            return json($result);
+            $user = new \app\common\service\User();
+            $result = $user->changeUserPassword($teacherno, $password);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 } 

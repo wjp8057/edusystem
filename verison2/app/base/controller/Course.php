@@ -6,38 +6,34 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: fangrenfu <fangrenfu@126.com>
+// | Author: fangrenfu <fangrenfu@126.com> 2016/6/17 21:31
 // +----------------------------------------------------------------------
 
-namespace app\admin\controller;
+namespace app\base\controller;
+
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\CourseType;
 
-class School extends MyController
-{
-    //显示信息
-    public function query($page = 1, $rows = 20)
+class Course extends MyController {
+    public function type($page = 1, $rows = 20)
     {
-        $result = null;
+        $result=null;
         try {
-            $school = new \app\common\service\School();
-            $result = $school->getSchoolList($page, $rows);
+            $type = new CourseType();
+            $result = $type->getList($page, $rows);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return json($result);
     }
-
-    //更新信息
-    public function update()
-    {
-        $result = null;
+    public function updatetype(){
+        $result=null;
         try {
-            $school = new \app\common\service\School();
-            $result = $school->updateSchool($_POST);
-
+            $type = new CourseType();
+            $result = $type->update($_POST);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

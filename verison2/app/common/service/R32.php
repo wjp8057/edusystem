@@ -9,9 +9,9 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class R32 extends  MyService {
     /**获取课程选修学生列表
@@ -25,7 +25,7 @@ class R32 extends  MyService {
      */
     public function getStudentList($page=1,$rows=20,$year='',$term='',$courseno=''){
         if($year==''||$term==''||$courseno=='')
-            throw new \think\Exception('year term courseno is empty ',MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term courseno is empty ',MyException::PARAM_NOT_CORRECT);
 
         $result=null;
         $condition=null;

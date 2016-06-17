@@ -20,62 +20,86 @@ use app\common\service\SchedulePlan;
 use app\common\service\Student;
 use app\common\service\ViewScheduleTable;
 
-class Setting  extends MyController{
-    public  function  courselist($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$classno='%',$school='',$halflock='',$lock=''){
+class Setting extends MyController
+{
+    public function  courselist($page = 1, $rows = 20, $year, $term, $courseno = '%', $coursename = '%', $classno = '%', $school = '', $halflock = '', $lock = '')
+    {
+        $result = null;
         try {
-            $obj=new SchedulePlan();
-            $condition=null;
-            if($halflock!='') $condition['scheduleplan.halflock']=$halflock;
-            if($lock!='') $condition['scheduleplan.lock']=$lock;
-            $result =$obj->getList($page,$rows,$year,$term,$courseno,$coursename,$classno,$school,$condition);
-            return json($result);
+            $obj = new SchedulePlan();
+            $condition = null;
+            if ($halflock != '') $condition['scheduleplan.halflock'] = $halflock;
+            if ($lock != '') $condition['scheduleplan.lock'] = $lock;
+            $result = $obj->getList($page, $rows, $year, $term, $courseno, $coursename, $classno, $school, $condition);
+
         } catch (\Exception $e) {
-           MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
-    public function courseupdate(){
+
+    public function courseupdate()
+    {
+        $result = null;
         try {
-            $obj=new SchedulePlan();
-            $result =$obj->updateStatus($_POST);
-            return json($result);
+            $obj = new SchedulePlan();
+            $result = $obj->updateStatus($_POST);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
-    public function updateallstatus($year,$term,$halflock,$lock){
+
+    public function updateallstatus($year, $term, $halflock, $lock)
+    {
+        $result = null;
         try {
-            $obj=new SchedulePlan();
-            $result =$obj->updateAllStatus($year,$term,$halflock,$lock);
-            return json($result);
+            $obj = new SchedulePlan();
+            $result = $obj->updateAllStatus($year, $term, $halflock, $lock);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
-    public function studentlist($page=1,$rows=20,$studentno='%',$name='%',$school='',$free=''){
+
+    public function studentlist($page = 1, $rows = 20, $studentno = '%', $name = '%', $school = '', $free = '')
+    {
+        $result = null;
         try {
-            $obj=new Student();
-            $result =$obj->getList($page,$rows,$studentno,$name,'%',$school,'',$free);
-            return json($result);
+            $obj = new Student();
+            $result = $obj->getList($page, $rows, $studentno, $name, '%', $school, '', $free);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
-    public function studentupdate(){
+
+    public function studentupdate()
+    {
+        $result = null;
         try {
-            $obj=new Student();
-            $result =$obj->updateStatus($_POST);
-            return json($result);
+            $obj = new Student();
+            $result = $obj->updateStatus($_POST);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
-    public function synscheduletable($year,$term){
+
+    public function synscheduletable($year, $term)
+    {
+        $result = null;
         try {
-            $obj=new ViewScheduleTable();
-            $result =$obj->update($year,$term);
-            return json($result);
+            $obj = new ViewScheduleTable();
+            $result = $obj->update($year, $term);
+
         } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 }

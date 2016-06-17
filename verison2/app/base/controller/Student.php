@@ -23,46 +23,52 @@ class Student extends MyController {
     //读取学籍状态
     public function status($page=1,$rows=20)
     {
+        $result=null;
         try {
             $status=new Status();
             $result = $status->getList($page,$rows);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
     //更新学籍状态
     public function updatestatus()
     {
+        $result=null;
         try {
             $status=new Status();
             $result = $status->update($_POST);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
     //获取学生注册信息
     public function registerlist($page=1,$rows=20,$year='',$term='',$studentno='%',$classno='%',$school='',$type=0)
     {
+        $result=null;
         try {
             $reg=new Regdata();
             $result = $reg->getList($page,$rows,$year,$term,$studentno,$classno,$school,$type);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
     //更新学生注册信息
     public function register()
     {
+        $result=null;
         try {
             $reg=new Regdata();
             $result = $reg->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**
@@ -77,13 +83,14 @@ class Student extends MyController {
      */
     public function studentlist($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$school='',$status="")
     {
+        $result=null;
         try {
             $student=new \app\common\service\Student();
             $result = $student->getList($page,$rows,$studentno,$name,$classno,$school,$status,'');
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**
@@ -148,13 +155,14 @@ class Student extends MyController {
      *
      */
     public function changepassword($studentno='',$password=''){
+        $result=null;
         try {
             $student=new \app\common\service\Student();
             $result = $student->changePassword($studentno, $password);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**更新学生信息
@@ -162,16 +170,18 @@ class Student extends MyController {
      * @return \think\response\Json
      */
     public function updatedetail($op="update"){
+        $result=null;
         try {
             $student=new \app\common\service\Student();
             if($op=="add")
                 $result = $student->addStudent($_POST);
             else
                 $result = $student->updateDetail($_POST);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**读取学籍异动信息
@@ -186,26 +196,29 @@ class Student extends MyController {
      */
     public function changelist($page=1,$rows=20,$year='',$term='',$studentno='%',$name='%',$infotype="")
     {
+        $result=null;
         try {
             $register=new Register();
             $result = $register->getList($page,$rows,$year,$term,$studentno,$name,$infotype);
-            return json($result);
         } catch (\Exception $e) {
            MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**
      * 更新学籍异动信息
      */
     public function changeupdate(){
+        $result=null;
         try {
             $register=new Register();
             $result = $register->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
+
     }
 
     /**导出异动信息

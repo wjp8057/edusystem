@@ -12,16 +12,16 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class OEW  extends MyService{
     public  function getOEWItem($oew){
         $condition['code']=$oew;
         $result=$this->query->table('oewoptions')->field('rtrim(name) name,timebit,timebit2')->where($condition)->select();
         if(!is_array($result)||count($result)!=1)
-            throw new \think\Exception('oew'.$oew, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('oew'.$oew, MyException::PARAM_NOT_CORRECT);
         return $result[0];
     }
 

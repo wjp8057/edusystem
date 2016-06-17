@@ -9,7 +9,6 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 
@@ -17,6 +16,8 @@ class ViewScheduleTable extends MyService {
     /**更新数据，同步课程总表
      * @param $year
      * @param $term
+     * @return array
+     * @throws \Exception
      */
     public function update($year,$term){
         $condition['year']=$year;

@@ -10,11 +10,10 @@
 // +----------------------------------------------------------------------
 
 namespace app\common\service;
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
-use think\Log;
+use think\Exception;
 use think\Request;
 
 class Action extends MyService{
@@ -29,7 +28,9 @@ class Action extends MyService{
     }
 
     /**获取所有父亲节点
+     * @param $nodes
      * @param $id
+     * @return mixed
      */
     private function appendParentNode($nodes,$id){
         //检查是否已经在了或者为顶级节点
@@ -65,6 +66,7 @@ class Action extends MyService{
         if($action!='%') $condition['action.action']=array('like',$action);
         if($description!='%') $condition['action.description']=array('like',$description);
         $data = $this->query->table('action')->where($condition)->order('rank,action')->select();
+        $nodes=[];
         if (count($data)>0) {
             foreach ($data as $one) {
                 if($nodeArray==null) {
@@ -116,7 +118,7 @@ class Action extends MyService{
      */
     public function getUserAccessMenu($username='',$parentId=1){
         if($username=='')
-            throw new \think\Exception('username'.$username, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('username'.$username, MyException::PARAM_NOT_CORRECT);
         $Obj = new User();
         $result= $Obj->getUserRole($username);
         $menu=array();
@@ -163,7 +165,7 @@ class Action extends MyService{
      */
     public function getActionRole($page=1,$rows=10,$id=''){
         if($id=='')
-            throw new \think\Exception('id'.$id, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('id'.$id, MyException::PARAM_NOT_CORRECT);
         $result = array();
         $condition['actionid'] = $id;
         $data =$this->query->table('actionrole')->join('roles','roles.role=actionrole.role')

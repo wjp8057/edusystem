@@ -12,11 +12,10 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
-use think\Log;
+use think\Exception;
 
 class RoomReserve extends MyService{
 
@@ -25,9 +24,9 @@ class RoomReserve extends MyService{
      * @param int $rows
      * @param $year
      * @param $term
-     * @param string $roomno 教室号
-     * @param string $school 借用学院
-     * @param $approved bool 批准
+     * @param string $roomno
+     * @param string $school
+     * @param string $approved
      * @return array|null
      */
     public function getList($page=1,$rows=20,$year,$term,$roomno='%',$school='',$approved=''){
@@ -69,7 +68,7 @@ class RoomReserve extends MyService{
             rtrim(schools.name) schoolname,rtrim(roomreserve.purpose) purpose,roomreserve.weeks,rtrim(timesections.value) timename')
             ->select();
         if(!is_array($result)||count($result)!=1)
-            throw new \think\Exception('recno'.$recno, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('recno'.$recno, MyException::PARAM_NOT_CORRECT);
         return $result[0];
     }
 
@@ -82,6 +81,7 @@ class RoomReserve extends MyService{
      * @param $weeks
      * @param $purpose
      * @return array
+     * @throws Exception
      */
     public function apply($year,$term,$roomno,$day,$time,$weeks,$purpose){
 
@@ -118,6 +118,8 @@ class RoomReserve extends MyService{
 
     /**
      * @param $roomno
+     * @return bool
+     * @throws Exception
      */
     public function checkRoomFree($roomno){
         $room=new Classroom();
@@ -144,7 +146,7 @@ class RoomReserve extends MyService{
         $condition['day']=$day;
         $condition['roomno']=$roomno;
         if(!is_numeric($weeks)||!is_numeric($timebit))
-            throw new \think\Exception('week'.$weeks.',time'.$timebit, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('week'.$weeks.',time'.$timebit, MyException::PARAM_NOT_CORRECT);
         $result=$this->query->table('schedule')->join('timesections','timesections.name=schedule.time')
             ->join('oewoptions','oewoptions.code=schedule.oew')
             ->field('dbo.GROUP_OR(oewoptions.timebit2&schedule.weeks)&'.$weeks.' as weekbit')
@@ -170,7 +172,7 @@ class RoomReserve extends MyService{
         $condition['day']=$day;
         $condition['roomno']=$roomno;
         if(!is_numeric($weeks)||!is_numeric($timebit))
-            throw new \think\Exception('week'.$weeks.',time'.$timebit, MyException::PARAM_NOT_CORRECT);
+            throw new Exception('week'.$weeks.',time'.$timebit, MyException::PARAM_NOT_CORRECT);
         $result=$this->query->table('roomreserve')->join('timesections','timesections.name=roomreserve.time')
             ->field('dbo.GROUP_OR(roomreserve.weeks)&'.$weeks.' as weekbit')
             ->where($condition)->where('timesections.TIMEBITS&'.$timebit.'!=0')->find();

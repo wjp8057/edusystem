@@ -15,6 +15,7 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Regdata extends MyService{
     /**
@@ -31,7 +32,7 @@ class Regdata extends MyService{
      */
     function getList($page=1,$rows=20,$year='2015',$term='1',$studentno='%',$classno='%',$school='',$type=0){
         if($year==''||$term=='')
-            throw new \think\Exception('year or term is empty ',MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year or term is empty ',MyException::PARAM_NOT_CORRECT);
 
         $result=null;
         $condition=null;
@@ -69,7 +70,7 @@ class Regdata extends MyService{
         $term=$postData["term"];
         $regcode=$postData["regcode"];
         if($year==''||$term==''||$regcode=='')
-            throw new \think\Exception('year term regcode is empty',MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year term regcode is empty',MyException::PARAM_NOT_CORRECT);
         $updateRow=0;
         $info='';
         $status=1;

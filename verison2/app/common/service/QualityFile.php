@@ -9,18 +9,22 @@
 namespace app\common\service;
 
 
-use app\common\access\MyAccess;
 use app\common\access\MyService;
 use app\common\access\MyException;
+use think\Exception;
 
 
 class QualityFile extends MyService{
     /**
-     * 根据教师号获取学评教结果
+     * @param int $page
+     * @param int $rows
+     * @param string $teacherno
+     * @return array|null
+     * @throws \think\Exception
      */
     function getTeacherQualityList($page=1,$rows=20,$teacherno=''){
         if($teacherno=='')
-            throw new \think\Exception('teacherno is empty ', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('teacherno is empty ', MyException::PARAM_NOT_CORRECT);
 
         $result=null;
         $condition=null;

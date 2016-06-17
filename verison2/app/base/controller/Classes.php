@@ -29,26 +29,29 @@ class Classes extends MyController {
      */
     public function classlist($page=1,$rows=20,$classno='%',$classname='%',$school='')
     {
+        $result=null;
         try {
             $class=new \app\common\service\Classes();
             $result =  $class->getList($page,$rows,$classno,$classname,$school);
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     /**
      * 更新班级信息
      */
     public function classupdate(){
+        $result=null;
         try {
             $class=new \app\common\service\Classes();
             $result =  $class->update($_POST);
-            return json($result);
         } catch (\Exception $e) {
              MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+        return json($result);
     }
 
     public function export($classno='%',$classname='%',$school='')
@@ -62,7 +65,7 @@ class Classes extends MyController {
             }
             $file="班级学生名单";
             $student=new Student();
-
+            $array=[];
             foreach($classrows as $one){
                 if($one['amount']>0) { //仅导出有学生的班级
                     $result = $student->getList(1, 10000, '%', '%', $one['classno'], '', '','');

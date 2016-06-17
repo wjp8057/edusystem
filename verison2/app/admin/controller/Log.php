@@ -16,26 +16,32 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\access\MyLog;
 
-class Log extends MyController {
+class Log extends MyController
+{
 
-    public function query($page = 1, $rows = 10,$start='',$end='', $username = '%', $url = '%')
+    public function query($page = 1, $rows = 10, $start = '', $end = '', $username = '%', $url = '%')
     {
+        $result = null;
         try {
-            $log=new MyLog();
-            $result = $log->getList($page, $rows,$start,$end, $username, $url);
-            return json($result);
+            $log = new MyLog();
+            $result = $log->getList($page, $rows, $start, $end, $username, $url);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 
-    public function delete(){
+    public function delete()
+    {
+        $result = null;
         try {
-            $log=new MyLog();
+            $log = new MyLog();
             $result = $log->clear();
-            return json($result);
+
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
     }
 } 

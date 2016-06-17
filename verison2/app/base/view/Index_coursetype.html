@@ -76,7 +76,7 @@
             if(count<=0) //如果没有任何更新，就退出
                 return;
 
-            $.post('{$ROOT}/base/room/updatearea',effectRow,function(result){
+            $.post('{$ROOT}/base/course/updatetype',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
