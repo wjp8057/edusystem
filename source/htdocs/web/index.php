@@ -12,7 +12,7 @@
 // [ 应用入口文件 ]
 //定义被thinkphp删除的几个常量
 define('TITLE','宁波城市学院教务管理系统');
-define('COPYRIGHT','Copyright by keysoft corp. @2016 技术支持：88221932 版本号：20160604');
+define('COPYRIGHT','Copyright by keysoft corp. @2016 技术支持：88221932 版本号：201606017  最佳分辨率：1440*900');
 // 定义应用目录
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../../../verison2/app/');

@@ -43,9 +43,9 @@ class Template extends \think\Controller
 
             $this->assign("TITLE",TITLE);
             $this->assign("COPYRIGHT",COPYRIGHT);
-            MyAccess::checkAccess('R');
+            config('auth')&&MyAccess::checkAccess('R');
             $log=new MyLog();
-            $log->write('R');
+            config('log2db')&&$log->write('R');
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());

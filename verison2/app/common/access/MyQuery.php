@@ -33,7 +33,7 @@ class MyQuery extends  Query
      */
     public function batchQuery($sql = [])
     {
-        MyAccess::checkAccess('E');
+        config('auth')&&MyAccess::checkAccess('E');
         return parent::batchQuery();
     }
 
@@ -48,7 +48,7 @@ class MyQuery extends  Query
      */
     public function insert(array $data, $replace = false, $getLastInsID = false, $sequence = null)
     {
-        MyAccess::checkAccess('A');
+        config('auth')&&MyAccess::checkAccess('A');
         return parent::insert($data,$replace,$getLastInsID,$sequence);
     }
 
@@ -60,7 +60,7 @@ class MyQuery extends  Query
      */
     public function insertAll(array $dataSet)
     {
-        MyAccess::checkAccess('A');
+        config('auth')&&MyAccess::checkAccess('A');
         return parent::insertAll($dataSet);
     }
 
@@ -74,7 +74,7 @@ class MyQuery extends  Query
      */
     public function selectInsert($fields, $table)
     {
-        MyAccess::checkAccess('A');
+        config('auth')&&MyAccess::checkAccess('A');
         return parent::selectInsert($fields,$table);
     }
 
@@ -88,7 +88,7 @@ class MyQuery extends  Query
      */
     public function update(array $data)
     {
-        MyAccess::checkAccess('M');
+        config('auth')&&MyAccess::checkAccess('M');
         return parent::update($data);
     }
 
@@ -103,7 +103,7 @@ class MyQuery extends  Query
      */
     public function select($data = [])
     {
-        MyAccess::checkAccess('R');
+        config('auth')&&MyAccess::checkAccess('R');
         return parent::select($data);
     }
     /**
@@ -117,7 +117,7 @@ class MyQuery extends  Query
      */
     public function find($data = [])
     {
-        MyAccess::checkAccess('R');
+        config('auth')&&MyAccess::checkAccess('R');
         return parent::find($data);
     }
 
@@ -132,7 +132,7 @@ class MyQuery extends  Query
     public function delete($data = [])
     {
 
-        MyAccess::checkAccess('D');
+        config('auth')&&MyAccess::checkAccess('D');
         return parent::delete($data);
     }
 }

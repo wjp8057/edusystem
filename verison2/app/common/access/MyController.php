@@ -20,6 +20,6 @@ class MyController {
     public function  __construct()
     {
         $log=new MyLog();
-        $log->write('R');
+        config('log2db')&&$log->write('R');
     }
 } 

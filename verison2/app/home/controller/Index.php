@@ -22,7 +22,7 @@ class Index extends Controller
     public function index()
     {
         try {
-            MyAccess::checkAccess('R');
+            config('auth')&& MyAccess::checkAccess('R');
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
