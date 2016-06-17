@@ -12,7 +12,7 @@
             school.combobox('select','{$USERINFO.school}');
 
         $('#dg').datagrid({
-            title:'报到注册',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20, url:'{$ROOT}/Base/Student/registerlist',
+            title:'报到注册',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20, url:'{$ROOT}/base/student/registerlist',
             queryParams: {year: $('#year').val(),term: $('#term').val(),school:school.combobox('getValue')},
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
@@ -75,7 +75,7 @@
             effectRow["term"]= $('#term').val();
             effectRow["regcode"]= regcode;
 
-            $.post('{$ROOT}/Base/Student/register',effectRow,function(result){
+            $.post('{$ROOT}/base/student/register',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('clearSelections');
                     tt.datagrid('clearChecked');

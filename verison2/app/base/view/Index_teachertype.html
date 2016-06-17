@@ -2,7 +2,7 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'教室类型',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/Base/Teacher/type',toolbar:'#toolbar',
+            title:'教室类型',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/teacher/type',toolbar:'#toolbar',
             columns:[[
                 {field:'name',title:'代码*',width:60,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[1]',required:true}}},
                 {field:'value',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[20]',required:true}}}
@@ -76,7 +76,7 @@
             if(count<=0) //如果没有任何更新，就退出
                 return;
 
-            $.post('{$ROOT}/Base/Teacher/updatetype',effectRow,function(result){
+            $.post('{$ROOT}/base/teacher/updatetype',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');

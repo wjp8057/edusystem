@@ -2,20 +2,10 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'教师职称',idField:'name', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/teacher/position',toolbar:'#toolbar',
+            title:'课程类型',idField:'name', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/course/type',toolbar:'#toolbar',
             columns:[[
                 {field:'name',title:'代码*',width:60,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[1]',required:true}}},
-                {field:'value',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[20]',required:true}}},
-                {field:'level',title:'级别*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/teacherlevel',valueField:'level',panelHeight:'auto',textField:'name',required:true,
-                    onSelect:function(rec){
-                        var tt=$('#dg');
-                        tt.datagrid('getSelected').levelname=rec.name;
-                    }
-                }},
-                    formatter:function(value,rec){
-                        return rec.levelname;
-                    }
-                }
+                {field:'value',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[20]',required:true}}}
             ]],
             //点击单元格时候的事件
             onClickCell:function(index, field){
@@ -37,7 +27,7 @@
             }
         });
 
-        //著作部分 绑定新建按钮事件
+        // 绑定新建按钮事件
         $("#insert,#menu_insert").click(function(){
             var tt=$('#dg');
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
@@ -48,7 +38,7 @@
                     fail:0
                 }
             });
-            tt.datagrid('startEditing',{field:'role',index:0});
+            tt.datagrid('startEditing',{field:'name',index:0});
             current_datagrid=tt;
         });
         //取消更改
@@ -86,7 +76,7 @@
             if(count<=0) //如果没有任何更新，就退出
                 return;
 
-            $.post('{$ROOT}/base/teacher/updateposition',effectRow,function(result){
+            $.post('{$ROOT}/base/room/updatearea',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');

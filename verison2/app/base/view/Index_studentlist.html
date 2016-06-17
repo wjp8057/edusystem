@@ -84,7 +84,7 @@
             }
             $.messager.prompt('修改', '请输入新密码:', function(password){
                 if (password){
-                    $.post('{$ROOT}/Base/Student/changepassword',{studentno:row.studentno,password:password},function(result){
+                    $.post('{$ROOT}/base/student/changepassword',{studentno:row.studentno,password:password},function(result){
                         if (result.status==1){
                             $.messager.alert('提示',result.info,'info');
                         } else {
@@ -130,9 +130,9 @@
             var school=encodeURI($('#school').combobox('getValue'));
             var status=encodeURI($('#status').combobox('getValue'));
             if(all==true)
-                url="{$ROOT}/Base/Student/exportdetail";
+                url="{$ROOT}/base/student/exportdetail";
             else
-                url="{$ROOT}/Base/Student/exportbase";
+                url="{$ROOT}/base/student/exportbase";
 
             $.fileDownload(url+"?studentno="+studentno+"&classno="+classno+"&name=" +name+
             "&status="+status+'&school='+school, {

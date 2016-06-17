@@ -3,7 +3,7 @@
     $(function(){
         $('#dg').datagrid({
             title:'学籍异动列表',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/Base/Student/changelist',toolbar:'#toolbar',  queryParams: {year: $('#year').val(),term: $('#term').val()},
+            url:'{$ROOT}/base/student/changelist',toolbar:'#toolbar',  queryParams: {year: $('#year').val(),term: $('#term').val()},
             columns:[[
                 {field:'checkbox',title:'选中',checkbox:true},
 /*                {field:'year',title:'学年',width:80,align:'center'},
@@ -119,7 +119,7 @@
                 $.messager.alert('提示','没有数据需要保存！','info')
                 return;
             }
-            $.post('{$ROOT}/Base/Student/changeupdate',effectRow,function(result){
+            $.post('{$ROOT}/base/student/changeupdate',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -177,7 +177,7 @@
             var name=encodeURI($('#name').val());
             var studentno=encodeURI($('#studentno').val());
             var infotype=encodeURI($('#infotype').combobox('getValue'));
-                $.fileDownload("{$ROOT}/Base/Student/exportchange?name=" +name+"&studentno="+studentno+'&infotype='+infotype+'&year='+year+'&term='+term, {
+                $.fileDownload("{$ROOT}/base/student/exportchange?name=" +name+"&studentno="+studentno+'&infotype='+infotype+'&year='+year+'&term='+term, {
                     preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                     dialogOptions: {modal: true, title: '提示'},
                     failCallback: function (html, url) {

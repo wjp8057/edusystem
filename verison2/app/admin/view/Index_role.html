@@ -2,7 +2,7 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'角色管理',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/Admin/Role/query',toolbar:'#toolbar',
+            title:'角色管理',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/admin/role/query',toolbar:'#toolbar',
             columns:[[
                 {field:'role',title:'角色代码*',width:60,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[1]',required:true}}},
                 {field:'name',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[40]',required:true}}}
@@ -87,7 +87,7 @@
                 $.messager.alert('提示','没有需要保存的数据！','info');
                 return;
             }
-            $.post('{$ROOT}/Admin/Role/update',effectRow,function(result){
+            $.post('{$ROOT}/admin/role/update',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');

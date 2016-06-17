@@ -49,7 +49,7 @@
           /*  var obj=$('#print');
             var icon=obj.linkbutton('options')['iconCls'];
             var title=obj.text();
-            addTab('/Teacher/Index/printscore?',title,icon);*/
+            addTab('/teacher/index/printscore?',title,icon);*/
             var year=$('#year').val();
             var term=$('#term').val();
             var row=$('#dg').datagrid('getSelected');
@@ -62,7 +62,7 @@
                 return false;
             }
             var courseno=row.courseno;
-            var url='/Teacher/Index/printscore?';
+            var url='/teacher/index/printscore?';
             window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&courseno="+courseno);
         });
         $("#search").click(function() {
@@ -76,7 +76,7 @@
     });
     //打开成绩输入页面
     function openTeacherInput(title,icon,type){
-        addTab('/Teacher/Index/teacherinput?type='+type+'&',title,icon);
+        addTab('/teacher/index/teacherinput?type='+type+'&',title,icon);
     }
     //验证数据，增加一个新tab
     function addTab(url,title,icon){

@@ -12,7 +12,7 @@
             school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
             title:'教师列表',idField:'teacherno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/Base/Teacher/teacherlist',toolbar:'#toolbar',
+            url:'{$ROOT}/base/teacher/teacherlist',toolbar:'#toolbar',
             queryParams: {school:school.combobox('getValue')},
             pageList:[20,50,100,200],
             columns:[[
@@ -156,7 +156,7 @@
                 $.messager.alert('提示','没有数据需要保存！','info');
                 return;
             }
-            $.post('{$ROOT}/Base/Teacher/teacherupdate',effectRow,function(result){
+            $.post('{$ROOT}/base/teacher/teacherupdate',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -210,7 +210,7 @@
             }
             $.messager.prompt('修改', '请输入新密码:', function(password){
                     if (password){
-                        $.post('{$ROOT}/Base/Teacher/changepassword',{teacherno:row.teacherno,password:password},function(result){
+                        $.post('{$ROOT}/base/teacher/changepassword',{teacherno:row.teacherno,password:password},function(result){
                             if (result.status==1){
                                 $.messager.alert('提示',result.info,'info');
                             } else {
@@ -227,7 +227,7 @@
             var name=encodeURI($('#name').val());
             var teacherno=encodeURI($('#teacherno').val());
             var school=encodeURI($('#school').combobox('getValue'));
-                $.fileDownload("{$ROOT}/Base/Teacher/export?name=" +name+"&teacherno="+teacherno+'&school='+school, {
+                $.fileDownload("{$ROOT}/base/teacher/export?name=" +name+"&teacherno="+teacherno+'&school='+school, {
                     preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                     dialogOptions: {modal: true, title: '提示'},
                     failCallback: function (html, url) {

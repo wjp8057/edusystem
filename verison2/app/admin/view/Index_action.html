@@ -5,13 +5,13 @@
         $('#dg').treegrid({
             idField:'id',treeField:'description', striped:'true',rownumbers:true,singleSelect:true,
             animate: true,lines:true,
-            url:'{$ROOT}/Admin/Action/query',toolbar:'#toolbar',
+            url:'{$ROOT}/admin/action/query',toolbar:'#toolbar',
             columns: [[
                 {field:'description',title:'描述*',width:250,editor:{type:'validatebox',options:{validType:'maxLength[45]'}}},
                 {field:'action',title:'动作*',width:200,editor:{type:'validatebox',options:{validType:'maxLength[45]'}}},
                 {field:'shortname',title:'简称*',width:50,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[10]'}}},
                 {field:'id',title:'ID值',width:50,align:'center'},
-                {field:'image',title:'图标*',width:100, editor:{type:'combobox', options:{url:'{$ROOT}/All/Option/icon',valueField:'name',textField:'name',panelWidth:120,panelHeight:150,required:true,
+                {field:'image',title:'图标*',width:100, editor:{type:'combobox', options:{url:'{$ROOT}/all/option/icon',valueField:'name',textField:'name',panelWidth:120,panelHeight:150,required:true,
                 formatter:function(row){
                     return '<span class="icon '+row.name+'">&nbsp;</span>'+row.name;
                 }}},
@@ -54,7 +54,7 @@
                 var selected=tt.treegrid('getSelected');
                 var node = jQuery.extend({},selected);
                 node.children=undefined;
-                $.post('{$ROOT}/Admin/Action/update',{updated:$.toJSON(selected)},function(result){
+                $.post('{$ROOT}/admin/action/update',{updated:$.toJSON(selected)},function(result){
                     if (result.status==1){
                         $.messager.show({	// show error message
                             title: '成功',
@@ -71,10 +71,10 @@
         //分配部分数据表格
         $('#dg2').datagrid({
             title:'角色分配',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,
-            url:'{$ROOT}/Admin/Action/role',queryParams:{id:0},toolbar:'#toolbar2',pageSize:5,pageList:[5,10],
+            url:'{$ROOT}/admin/action/role',queryParams:{id:0},toolbar:'#toolbar2',pageSize:5,pageList:[5,10],
             columns: [[
                 {field:'role',title:'代码',width:30,align:'center'},
-                {field:'name',title:'角色*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/All/Option/role',valueField:'name',textField:'name',panelWidth:160,panelHeight:400,required:true,
+                {field:'name',title:'角色*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/role',valueField:'name',textField:'name',panelWidth:160,panelHeight:400,required:true,
                     onSelect:function(rec){
                         var tt=$('#dg2');
                         tt.datagrid('getSelected').role=rec.role;
@@ -253,7 +253,7 @@
                 $.messager.alert('提示','没有需要保存的数据！','info');
                 return;
             }
-            $.post('{$ROOT}/Admin/Action/updaterole',effectRow,function(result){
+            $.post('{$ROOT}/admin/action/updaterole',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');

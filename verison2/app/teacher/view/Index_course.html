@@ -3,7 +3,7 @@
     $(function(){
         $('#dg').datagrid({
             title:'课程列表',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/Teacher/Course/query',toolbar:'#toolbar',
+            url:'{$ROOT}/teacher/course/query',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val()
@@ -49,8 +49,8 @@
             var term=$('#term').val();
             var courseno=getCourseNo();
             if(courseno) {
-                // addTab('/Teacher/Index/student?courseno='+courseno+"&",title,icon);
-                var url='/Teacher/Index/student?';
+                // addTab('/teacher/index/student?courseno='+courseno+"&",title,icon);
+                var url='/teacher/index/student?';
                 window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&courseno="+courseno);
             }
         });
@@ -59,10 +59,10 @@
             var icon=obj.linkbutton('options')['iconCls'];
             var title=obj.text();
 
-           // addTab('/Teacher/Index/timetable?',title,icon);*/
+           // addTab('/teacher/index/timetable?',title,icon);*/
             var year=$('#year').val();
             var term=$('#term').val();
-            var url='/Teacher/Index/timetable?';
+            var url='/teacher/index/timetable?';
             window.open('{$ROOT}'+url+'year='+year+"&term="+term);
 
         });
@@ -71,7 +71,7 @@
             var term=$('#term').val();
             var courseno=getCourseNo();
             if(courseno) {
-                $.fileDownload("{$ROOT}/Teacher/Course/export?year=" +year+"&term="+term+'&courseno='+courseno, {
+                $.fileDownload("{$ROOT}/teacher/course/export?year=" +year+"&term="+term+'&courseno='+courseno, {
                     preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                     dialogOptions: {modal: true, title: '提示'},
                     failCallback: function (html, url) {

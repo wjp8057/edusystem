@@ -3,7 +3,7 @@
     $(function(){
         $('#dg').datagrid({
             title:'院系管理',idField:'school', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/Admin/School/query',toolbar:'#toolbar',
+            url:'{$ROOT}/admin/school/query',toolbar:'#toolbar',
             columns:[[
                 {field:'school',title:'院号*',width:80,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[2]',required:true}}},
                 {field:'name',title:'学院/部门名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[45]',required:true}}},
@@ -91,7 +91,7 @@
                 $.messager.alert('提示','没有需要保存的数据！','info');
                 return;
             }
-            $.post('{$ROOT}/Admin/School/update',effectRow,function(result){
+            $.post('{$ROOT}/admin/school/update',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');

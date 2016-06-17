@@ -5,7 +5,7 @@ $(function(){
         var page=getQueryString('page');
         if(page==null)
             page=2;
-        location.href=("{$ROOT}/Teacher/Index/student?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
+        location.href=("{$ROOT}/teacher/index/student?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
     });
     $("#print").click(function(){
         window.print();

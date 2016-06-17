@@ -1,9 +1,14 @@
 .icon-blank{
 	background:url('icons/blank.gif') no-repeat center center;
 }
-
+.icon-add{
+	background:url('icons/edit_add.png') no-repeat center center;
+}
 .icon-edit{
 	background:url('icons/pencil.png') no-repeat center center;
+}
+.icon-clear{
+	background:url('icons/clear.png') no-repeat center center;
 }
 .icon-remove{
 	background:url('icons/edit_remove.png') no-repeat center center;
@@ -50,6 +55,20 @@
 .icon-tip{
 	background:url('icons/tip.png') no-repeat center center;
 }
+.icon-filter{
+	background:url('icons/filter.png') no-repeat center center;
+}
+.icon-man{
+	background:url('icons/man.png') no-repeat center center;
+}
+.icon-lock{
+	background:url('icons/lock.png') no-repeat center center;
+}
+.icon-more{
+	background:url('icons/more.png') no-repeat center center;
+}
+
+
 .icon-mini-add{
 	background:url('icons/mini_add.png') no-repeat center center;
 }
@@ -59,72 +78,19 @@
 .icon-mini-refresh{
 	background:url('icons/mini_refresh.png') no-repeat center center;
 }
-.icon-system{
-    background:url('icons/system.png') no-repeat center center;
+
+.icon-large-picture{
+	background:url('icons/large_picture.png') no-repeat center center;
 }
-.icon-work{
-    background:url('icons/work.png') no-repeat center center;
+.icon-large-clipart{
+	background:url('icons/large_clipart.png') no-repeat center center;
 }
-.icon-loadin{
-    background:url('icons/loadin.png') no-repeat center center;
+.icon-large-shapes{
+	background:url('icons/large_shapes.png') no-repeat center center;
 }
-.icon-shield{
-    background:url('icons/shield.png') no-repeat center center;
+.icon-large-smartart{
+	background:url('icons/large_smartart.png') no-repeat center center;
 }
-.icon-free{
-    background:url('icons/free.png') no-repeat center center;
-}
-.icon-manage{
-    background:url('icons/manage.png') no-repeat center center;
-}
-.icon-audit{
-    background:url('icons/audit.png') no-repeat center center;
-}
-.icon-change{
-    background:url('icons/change.png') no-repeat center center;
-}
-.icon-logout{
-    background:url('icons/logout.png') no-repeat center center;
-}
-.icon-school{
-    background:url('icons/school.png') no-repeat center center;
-}
-.icon-log{
-    background:url('icons/log.png') no-repeat center center;
-}
-.icon-project{
-    background:url('icons/project.png') no-repeat center center;
-}
-.icon-platform{
-    background:url('icons/platform.png') no-repeat center center;
-}
-.icon-subject{
-    background:url('icons/subject.png') no-repeat center center;
-}
-.icon-achievement{
-    background:url('icons/achievement.png') no-repeat center center;
-}
-.icon-thesis{
-    background:url('icons/thesis.png') no-repeat center center;
-}
-.icon-book{
-    background:url('icons/book.png') no-repeat center center;
-}
-.icon-authenticate{
-    background:url('icons/authenticate.png') no-repeat center center;
-}
-.icon-prize{
-    background:url('icons/prize.png') no-repeat center center;
-}
-.icon-patent{
-    background:url('icons/patent.png') no-repeat center center;
-}
-.icon-role{
-    background:url('icons/role.png') no-repeat center center;
-}
-.icon-home{
-    background:url('icons/home.png') no-repeat center center;
-}
-.icon-dict{
-    background:url('icons/dict.png') no-repeat center center;
+.icon-large-chart{
+	background:url('icons/large_chart.png') no-repeat center center;
 }

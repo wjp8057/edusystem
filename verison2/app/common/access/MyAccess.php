@@ -116,7 +116,7 @@ class MyAccess {
 
         $redirect='';
         if($errorCode=='701'||$errorCode=="702")
-            $redirect='<script language="javascript">top.location="'.Request::instance()->root().'/Home/Index/login"</script>';
+            $redirect='<script language="javascript">top.location="'.Request::instance()->root().'/home/index/login"</script>';
         echo '<html><head><meta charset="UTF-8">'.$redirect.'</head><body>'.$errorMessage.'<br/>'.MyAccess::getErrorChineseMessage($errorCode).'</body></html>';
         die();
     }
