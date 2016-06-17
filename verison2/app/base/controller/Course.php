@@ -14,6 +14,7 @@ namespace app\base\controller;
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\CourseForm;
 use app\common\service\CourseType;
 
 class Course extends MyController {
@@ -34,6 +35,29 @@ class Course extends MyController {
         try {
             $type = new CourseType();
             $result = $type->update($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function form($page = 1, $rows = 20)
+    {
+        $result=null;
+        try {
+            $form = new CourseForm();
+            $result = $form->getList($page, $rows);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    public function updateform(){
+        $result=null;
+        try {
+            $form = new CourseForm();
+            $result = $form->update($_POST);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

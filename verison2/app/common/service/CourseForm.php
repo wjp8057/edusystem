@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: fangrenfu <fangrenfu@126.com> 2016/6/17 21:32
+// | Author: fangrenfu <fangrenfu@126.com> 2016/6/17 22:23
 // +----------------------------------------------------------------------
 
 namespace app\common\service;
@@ -14,13 +14,13 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
-class CourseType extends MyService{
+class CourseForm extends MyService{
     public function getList($page=1,$rows=20){
         $result=null;
         $condition=null;
-        $data=$this->query->table('coursetypeoptions')->page($page,$rows)
+        $data=$this->query->table('courseform')->page($page,$rows)
             ->field('name,rtrim(value) value')->order('name')->select();
-        $count= $this->query->table('coursetypeoptions')->count();
+        $count= $this->query->table('courseform')->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
@@ -41,7 +41,7 @@ class CourseType extends MyService{
                     $data = null;
                     $data['value'] = $one->value;
                     $data['name'] = $one->name;
-                    $row = $this->query->table('coursetypeoptions')->insert($data);
+                    $row = $this->query->table('courseform')->insert($data);
                     if ($row > 0)
                         $insertRow++;
                 }
@@ -51,10 +51,10 @@ class CourseType extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $data = null;
+                    $data=null;
                     $condition['name'] = $one->name;
                     $data['value'] = $one->value;
-                    $updateRow += $this->query->table('coursetypeoptions')->where($condition)->update($data);
+                    $updateRow += $this->query->table('courseform')->where($condition)->update($data);
                 }
             }
             //删除部分
@@ -64,7 +64,7 @@ class CourseType extends MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['name'] = $one->name;
-                    $deleteRow += $this->query->table('coursetypeoptions')->where($condition)->delete();
+                    $deleteRow += $this->query->table('courseform')->where($condition)->delete();
                 }
             }
         }
