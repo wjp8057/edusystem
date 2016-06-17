@@ -2,7 +2,7 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,pageList:[20,40,60,100,200], url:'{$ROOT}/Teacher/Score/query',toolbar:'#toolbar',
+            idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,pageList:[20,40,60,100,200], url:'{$ROOT}/teacher/score/query',toolbar:'#toolbar',
             queryParams: {
                 year: getQueryString('year'),
                 term:  getQueryString('term'),
@@ -211,29 +211,36 @@
         var rows;
         rows=tt.datagrid('getChanges','updated');
         var length=rows.length;
-        for(var i=0;i<length;i++){
-            if(rows[i]['lock']==1){
-                $.messager.alert('错误',rows[i]['name']+ '的成绩已经被锁定，请联系教务处开锁！', 'error');
-                return ;
-            }
-        }
-        var count=0;
-        var effectRow = new Object();
-        if(rows.length>0){
-            count+=rows.length;
-            effectRow["updated"]=$.toJSON(rows);
-        }
-        if(count<=0&&lock!=1) { //如果没有任何更新，就退出
-            $.messager.alert('提示', '没有需要提交更改的行！', 'info');
+        if(length<=0&&lock!=1){
+            $.messager.alert('提示', '没有数据需要更新', 'error');
             return;
         }
+        var updateRows=[];
+        for (var i = 0; i < length; i++) {
+            if (rows[i]['lock'] == 1) {
+                $.messager.alert('错误', rows[i]['name'] + '的成绩已经被锁定，请联系教务处开锁！', 'error');
+                return;
+            }
+            else {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno = rows[i].recno;
+                updateObj.score = rows[i].score;
+                updateObj.examscore = rows[i].examscore;
+                updateObj.testscore = rows[i].testscore;
+                updateObj.examrem = rows[i].examrem;
+                updateObj.studentno = rows[i].studentno;
+                updateRows.push(updateObj);
+            }
+        }
+        var effectRow = {};
+        effectRow["updated"]=$.toJSON(updateRows);
         effectRow["examdate"]=$("#examdate").datebox('getValue');
         effectRow["year"]= getQueryString('year');
         effectRow["term"]=getQueryString('term');
         effectRow["courseno"]=getQueryString('courseno');
         if(lock==1)
             effectRow["lock"]=1;
-        $.post('{$ROOT}/Teacher/Score/update',effectRow,function(result){
+        $.post('{$ROOT}/teacher/score/update',effectRow,function(result){
             if (result.status==1){
                 tt.datagrid('acceptChanges');
                 tt.datagrid('reload');

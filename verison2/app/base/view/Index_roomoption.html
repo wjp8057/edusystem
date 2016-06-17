@@ -56,7 +56,7 @@
             var rows=tt.datagrid('getRows');
             rows=tt.datagrid('getChanges','updated');
             var count=0;
-            var effectRow = new Object();
+            var effectRow = {};
             if(rows.length>0){
                 count+=rows.length;
                 effectRow["updated"]=$.toJSON(rows);

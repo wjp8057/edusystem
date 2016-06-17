@@ -98,7 +98,7 @@
         }
         $("#update").click(function() {
             if($("#myForm").form('validate')){
-                var data=new Object();
+                var data={};
                 data["studentno"]=studentno.val();
                 data["name"]=name.val();
                 data["sex"]=sex.combobox('getValue');

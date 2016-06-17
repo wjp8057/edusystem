@@ -24,7 +24,7 @@
             });
             var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
             if($("#myForm").form('validate')&&weeks>0&&$('#roomname').text()!=''){
-                var data=new Object();
+                var data={};
                 data["year"]=year.val();
                 data["term"]=term.val();
                 data['roomno']=roomno.val();
