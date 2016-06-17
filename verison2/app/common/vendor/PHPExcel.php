@@ -76,10 +76,11 @@ class PHPExcel
             $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . (count($data) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
             $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . (count($data) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $PHPExcel->getActiveSheet($sheetIndex)->getColumnDimension()->setAutoSize(true);
+            $PHPExcel->getActiveSheet($sheetIndex)->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
         }
         // Redirect output to a client’s web browser (Excel5)
         header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . iconv("UTF-8", "GB2312", $filename) . '"');
+        header('Content-Disposition: attachment;filename="' . iconv("UTF-8", "GB2312", $filename) . '.xls"');
         header('Cache-Control: max-age=0');
         // If you're serving to IE 9, then the following may be needed
         header('Cache-Control: max-age=1');

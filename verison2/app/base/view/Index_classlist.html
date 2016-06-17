@@ -135,7 +135,7 @@
             rows=tt.datagrid('getChanges','updated');
             if(!checkClassSchool(rows)) return;
             var count=0;
-            var effectRow = new Object();
+            var effectRow ={};
             if(rows.length>0){
                 count+=rows.length;
                 effectRow["updated"]=$.toJSON(rows);
@@ -200,10 +200,10 @@
             var school=$('#school').combobox('getValue');
 
             if(classno=='%'&&classname=='%'&&school==''){
-                $.messager.alert('错误', '无法一次性导出全校班级，请设定检索条件！', 'error');
+                $.messager.alert('错误', '请设置班号、班名、学院！', 'error');
                 return;
             }
-            $.messager.confirm('确认', '本操作将导出检索结果中所有学生数大于零的班级学生名单（最多255个班），班级数较多时请耐性等待。是否继续？', function(r){
+            $.messager.confirm('确认', '本操作将导出检索结果中所有学生数大于零的班级学生名单（最多20个班），班级数较多时请耐性等待。是否继续？', function(r){
                 if (r){
                     classno=encodeURI(classno);
                     classname=encodeURI(classname);

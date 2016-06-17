@@ -61,7 +61,7 @@ class MyLog {
         }
         //如果以上都没有，直接输出_POST内容
         $dataString=$dataString==''?json_encode($_POST):$dataString;
-        $data['data']=$dataString;
+        $data['data']=substr($dataString,0,1000);
         $data['operate']=$operate;
         $data['requesttime']=date("Y-m-d H:i:s");
         $this->query->table('log')->insert($data);

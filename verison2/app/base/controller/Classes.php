@@ -57,8 +57,8 @@ class Classes extends MyController {
             $class=new \app\common\service\Classes();
             $result =  $class->getList(1,10000,$classno,$classname,$school);
             $classrows=$result['rows'];
-            if(count($classrows)>255){
-                throw new \think\Exception('classes amount to export is more than 255',MyException::PARAM_NOT_CORRECT);
+            if(count($classrows)>20){
+                throw new \think\Exception('classes amount to export is more than 20',MyException::PARAM_NOT_CORRECT);
             }
             $file="班级学生名单";
             $student=new Student();

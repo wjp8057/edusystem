@@ -48,7 +48,7 @@
                     }},
                 {field:'day',title:'星期',width:30,align:'center'},
                 {field:'timename',title:'节次',width:60,align:'center'},
-                {field:'weeks',title:'周次',width:140,align:'center',
+                {field:'weeks',title:'周次',width:150,align:'center',
                     formatter:function(value,rec){
                         var string=parseInt(value).toString(2);
                         string=string_reserve(str_pad(string,20,'0',1));
@@ -56,7 +56,7 @@
                     }},
                 {field:'schoolname',title:'借用单位',width:100,align:'center'},
                 {field:'teachername',title:'申请人',width:60,align:'center'},
-                {field:'applydate',title:'申请时间',width:110,align:'center',
+                {field:'applydate',title:'申请时间',width:120,align:'center',
                     formatter:function(value,rec) {
                         return "<a class='blue_link' href='javascript:print(\"" + rec.recno + "\",false)' >" + value+ "</a>";
                     }},
