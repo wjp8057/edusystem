@@ -58,7 +58,7 @@ class Index extends Template
             $title = $year . '学年第' . $term . '学期期末成绩输入(' . $scoreType . ')';
             $this->assign('title', $title);
             $course = new Course();
-            $coursename = $course->getNameByCourseNo(substr($courseno, 0, 7));
+            $coursename = $course->getItemByCourseNo(substr($courseno, 0, 7))['coursename'];
             $course = '课号：' . $courseno . ' 课名：' . $coursename;
             $this->assign('course', $course);
             $score = new Score();
@@ -70,8 +70,13 @@ class Index extends Template
         return $this->fetch();
     }
 
-    /*
+    /**
      * 成绩输入-打印成绩单
+     * @param string $year
+     * @param string $term
+     * @param string $courseno
+     * @param int $page
+     * @return mixed
      */
     function printscore($year = '', $term = '', $courseno = '', $page = 1)
     {

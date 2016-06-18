@@ -11,55 +11,73 @@
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
-            title:'教师列表',idField:'teacherno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/base/teacher/teacherlist',toolbar:'#toolbar',
+            title:'课程列表',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/base/course/courselist',toolbar:'#toolbar',
             queryParams: {school:school.combobox('getValue')},
             pageList:[20,50,100,200],
-            columns:[[
-            {field:'teacherno',title:'教师号*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'equalLength[6]',required:true}}},
-            {field:'name',title:'姓名*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[40]',required:true}}},
-            {field:'sex',title:'性别*',width:80,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/sex',valueField:'sex',textField:'name',panelHeight:'auto',required:true,
-                    onSelect:function(rec) {
-                        var tt=$('#dg');
-                        tt.datagrid('getSelected').sexname=rec.name;
-                    }}},
-                    formatter:function(val,rec){
-                        return rec.sexname;
+            columns: [[
+                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'equalLength[7]',required:true}}},
+                {field: 'coursename', title: '课名', width: 180, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]',required:true}}},
+                {field: 'credits', title: '学分', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'total', title: '总学时', width: 50, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {title: '每周学时', width: 80, align: 'center',colspan:7},
+                {field: 'week', title: '周数', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field: 'school', title: '开课学院', width: 110, align: 'center',rowspan:2,editor: {
+                    type: 'combobox', options: {
+                        url: '{$ROOT}/all/option/school?active=1',
+                        valueField: 'school',
+                        textField: 'name',
+                        required: true,
+                        onSelect: function (rec) {
+                            var tt = $('#dg');
+                            tt.datagrid('getSelected').schoolname = rec.name;
+                        }
+                    }
+                },
+                    formatter: function (val, rec) {
+                        return rec.schoolname;
+                    }
+                },
+                {field: 'type', title: '类型', width: 75, align: 'center',rowspan:2,editor: {
+                    type: 'combobox', options: {
+                        url: '{$ROOT}/all/option/coursetype',
+                        valueField: 'type',
+                        textField: 'name',
+                        panelHeight:'auto',
+                        required: true,
+                        onSelect: function (rec) {
+                            var tt = $('#dg');
+                            tt.datagrid('getSelected').typename = rec.name;
+                        }
+                    }
+                },
+                    formatter: function (val, rec) {
+                        return rec.typename;
                     }},
-            {field:'position',title:'职称*',width:80,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/position',valueField:'position',textField:'name',panelWidth:'100',required:true,
-                onSelect:function(rec) {
-                    var tt=$('#dg');
-                    tt.datagrid('getSelected').positionname=rec.name;
-                }}},
-                formatter:function(val,rec){
-                    return rec.positionname;
-                }},
-            {field:'type',title:'类型*',width:80,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/teachertype',valueField:'type',textField:'name',panelHeight:'auto',required:true,
-                onSelect:function(rec) {
-                    var tt=$('#dg');
-                    tt.datagrid('getSelected').typename=rec.name;
-                }}},
-                formatter:function(val,rec){
-                    return rec.typename;
-                }},
-            {field:'job',title:'岗位*',width:80,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/teacherjob',valueField:'job',textField:'name',panelHeight:'auto',required:true,
-                onSelect:function(rec) {
-                    var tt=$('#dg');
-                    tt.datagrid('getSelected').jobname=rec.name;
-                }}},
-                formatter:function(val,rec){
-                    return rec.jobname;
-                }},
-            {field:'enteryear',title:'入校年份*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'equalLength[4]',required:true}}},
-            {field:'school',title:'学院*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/school',valueField:'school',textField:'name',panelWidth:'120',required:true,
-                onSelect:function(rec) {
-                    var tt=$('#dg');
-                    tt.datagrid('getSelected').schoolname=rec.name;
-                }}},
-            formatter:function(val,rec){
-                return rec.schoolname;
-            }},
-           {field:'rem',title:'备注*',width:100,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[10]'}}}
+                {field: 'form', title: '形式', width: 70, align: 'center',rowspan:2,editor: {
+                    type: 'combobox', options: {
+                        url: '{$ROOT}/all/option/courseform',
+                        valueField: 'form',
+                        textField: 'name',
+                        panelHeight:'auto',
+                        required: true,
+                        onSelect: function (rec) {
+                            var tt = $('#dg');
+                            tt.datagrid('getSelected').formname = rec.name;
+                        }
+                    }
+                },
+                    formatter: function (val, rec) {
+                        return rec.formname;
+                    }}
+            ],[
+                {field: 'lhours', title: '理论', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'experiments', title: '实验', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'computing', title: '上机', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'khours', title: '讨论', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'shours', title: '实训', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'zhours', title: '自学', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'hours', title: '总计', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -72,7 +90,7 @@
                 });
             },
             //点击单元格时候的事件
-            onDblClickCell:function(index, field){
+            onClickCell:function(index, field){
                 var tt=$('#dg');
                 tt.datagrid('startEditing',{field:field,index:index});
                 current_datagrid=tt;
@@ -90,11 +108,11 @@
                 });
             }
         });
-        function checkTeacherSchool(rows){
+        function checkCourseSchool(rows){
             var count=rows.length;
             for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
                 if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
-                    $.messager.alert('错误','你无法修改其他学院的教师信息（'+rows[i].name+'）！','error');
+                    $.messager.alert('错误','你无法修改其他学院的课程信息（'+rows[i].coursename+'）！','error');
                     $("#cancel").click();
                     return false;
                 }
@@ -109,10 +127,9 @@
             tt.datagrid('insertRow',{
                 index: 0,
                 row: {
-
                 }
             });
-            tt.datagrid('startEditing',{field:'teacherno',index:0});
+            tt.datagrid('startEditing',{field:'courseno',index:0});
             current_datagrid=tt;
         });
         //取消更改
@@ -131,7 +148,7 @@
             //获取更改的数据行内容
             var rows=tt.datagrid('getRows');
             rows=tt.datagrid('getChanges','updated');
-            if(!checkTeacherSchool(rows)) return;
+            if(!checkCourseSchool(rows)) return;
             var count=0;
             var effectRow = {};
             if(rows.length>0){
@@ -140,14 +157,14 @@
             }
             //获取删除的行
             rows=tt.datagrid('getChanges','deleted');
-            if(!checkTeacherSchool(rows)) return;
+            if(!checkCourseSchool(rows)) return;
             if(rows.length>0){
                 count+=rows.length;
                 effectRow["deleted"]=$.toJSON(rows);
             }
             //获取添加的行
             rows=tt.datagrid('getChanges','inserted');
-            if(!checkTeacherSchool(rows)) return;
+            if(!checkCourseSchool(rows)) return;
             if(rows.length>0){
                 count+=rows.length;
                 effectRow["inserted"]=$.toJSON(rows);
@@ -156,7 +173,7 @@
                 $.messager.alert('提示','没有数据需要保存！','info');
                 return;
             }
-            $.post('{$ROOT}/base/teacher/teacherupdate',effectRow,function(result){
+            $.post('{$ROOT}/base/course/updatecourse',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -192,42 +209,19 @@
             var tt=$('#dg');
             tt.datagrid('loadData',{total:0,rows:[]});
             tt.datagrid('load', {
-                name: $('#name').val(),
-                teacherno:$('#teacherno').val(),
+                courseno: $('#courseno').val(),
+                coursename:$('#coursename').val(),
                 school:$('#school').combobox('getValue')
             });
         });
-        //右键修改密码
-        $("#menu_changepassword,#changepassword").click(function(){
-            var row=$('#dg').datagrid('getSelected');
-            if(!row){
-                $.messager.alert('错误','请先选择一个教师！','error');
-                return;
-            }
-            if(row.school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1') {
-                $.messager.alert('错误', '你无法修改其它学院的教师密码！（' + row.name + '）！', 'error');
-                return;
-            }
-            $.messager.prompt('修改', '请输入新密码:', function(password){
-                    if (password){
-                        $.post('{$ROOT}/base/teacher/changepassword',{teacherno:row.teacherno,password:password},function(result){
-                            if (result.status==1){
-                                $.messager.alert('提示',result.info,'info');
-                            } else {
-                                $.messager.alert('错误',result.info,'error');
-                            }
-                        },'json');
-                    }
-            });
-        });
         /**
-         * 导出教师名单
+         * 导出课程
          */
         $('#export,#menu_export').click(function(){
-            var name=encodeURI($('#name').val());
-            var teacherno=encodeURI($('#teacherno').val());
+            var courseno=encodeURI($('#courseno').val());
+            var coursename=encodeURI($('#coursename').val());
             var school=encodeURI($('#school').combobox('getValue'));
-                $.fileDownload("{$ROOT}/base/teacher/export?name=" +name+"&teacherno="+teacherno+'&school='+school, {
+                $.fileDownload("{$ROOT}/base/course/export?courseno=" +courseno+"&coursename="+coursename+'&school='+school, {
                     preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                     dialogOptions: {modal: true, title: '提示'},
                     failCallback: function (html, url) {
@@ -243,8 +237,7 @@
         <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">编辑</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
-        <div id='menu_changepassword' data-options="iconCls:'icon icon-shield'">修改密码</div>
-        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出名单</div>
+        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出课程</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
@@ -256,21 +249,20 @@
                 <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete">删除</a>
                 <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
                 <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-                <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="10" value="%"/>
-                <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="10" value="%"/>
+                <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="10" value="%"/>
                 <label for="school">学院：</label>
                 <input id="school">
                 <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出名单</a>
-                <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-shield',plain:'true'" id="changepassword">修改密码</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出课程</a>
             </div>
         </div>
         <table id="dg">
         </table>
-    <div class="information" style="clear:both">
+    <div class="information">
         <ol>说明：
             <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
-            <li>教师号设置后无法修改</li>
+            <li>课号号设置后无法修改</li>
         </ol>
     </div>
 </div>

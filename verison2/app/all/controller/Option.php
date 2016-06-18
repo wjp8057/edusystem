@@ -322,7 +322,25 @@ class Option extends \think\Controller{
         try {
             $condition['major']=$major;
             $result =Db::table('majordirection')->field('rtrim(direction) as direction,rtrim(name) as name')->where($condition)->order('direction')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    public function coursetype(){
+        $result=null;
+        try {
+            $result =Db::table('coursetypeoptions')->field('rtrim(name) as type,rtrim(value) as name')->order('type')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
 
+    public function courseform(){
+        $result=null;
+        try {
+            $result =Db::table('courseform')->field('rtrim(name) as form,rtrim(value) as name')->order('form')->select();
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }

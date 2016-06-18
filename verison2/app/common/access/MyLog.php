@@ -84,7 +84,8 @@ class MyLog {
     }
     public function clear(){
 
-        $rows=$this->query->table('log')->delete();;
+        $rows=$this->query->table('log')->where("1=1")->delete();
+        $this->write('R');
         if($rows>0) {
             $status = 1;
             $info='清除完成！';

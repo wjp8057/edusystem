@@ -13,7 +13,6 @@ namespace app\common\access;
 
 
 use think\Db;
-use think\Log;
 
 class MyController {
     protected $obj;

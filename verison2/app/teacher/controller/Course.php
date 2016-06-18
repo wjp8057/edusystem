@@ -47,7 +47,7 @@ class Course extends MyController{
             $data=$result['rows'];
             $file="课程选课名单";
             $course=new \app\common\service\Course();
-            $coursename=$course->getNameByCourseNo(substr($courseno,0,7));
+            $coursename=$course->getItemByCourseNo(substr($courseno,0,7))['coursename'];
             $sheet=$coursename;
             $title=$year.'年第'.$term.'学期'.$coursename.'('.$courseno.') (共'.count($data).'人)';
             $template= array("studentno"=>"学号","studentname"=>"姓名","sex"=>"性别","classname"=>"班级","schoolname"=>"学院","approachname"=>"修课方式");
