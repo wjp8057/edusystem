@@ -163,5 +163,42 @@ class Classes extends MyService{
         return $result;
     }
 
+    public  function  addStudent($postData){
+        $result=null;
+        $count=0;
+        $classno=$postData["classno"];
+        if(MyAccess::checkClassSchool($classno)) {
+            if (isset($postData["inserted"])) {
+                $updated = $postData["inserted"];
+                $listUpdated = json_decode($updated);
+                $this->query->startTrans();
+                try {
+                    foreach ($listUpdated as $one) {
+                        $data = null;
+                        if(MyAccess::checkStudentSchool($one->studentno)) {
+                            $data['classno'] = $classno;
+                            $condition['studentno'] = $one->studentno;
+                            $this->query->table('students')->where($condition)->update($data);
+                            $count++;
+                        }
+                        else{
+                            $result=array('info'=>'您无法修改其他学院学生的所在班级','status'=>0);
+                            $this->query->rollback();
+                            return $result;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $this->query->rollback();
+                    throw $e;
+                }
+                $this->query->commit();
+                $result=array('info'=>$count.'位学生添加成功','status'=>1);
+            }
+        }
+        else{
+            $result=array('info'=>'您无法修改其他班级的学生名单','status'=>0);
+        }
+        return $result;
+    }
 
 } 

@@ -1,0 +1,252 @@
+<layout name="layout"/>
+<script type="text/javascript">
+    $(function () {
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1')
+            school.combobox('select', '{$USERINFO.school}');
+        $('#dg').datagrid({
+            title: '{$classname}班学生名单',
+            idField: 'studentno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 50,
+            url: '{$ROOT}/base/classes/studentlist',
+            queryParams: {classno: '{$classno}'},
+            toolbar: '#toolbar',
+            pageList: [50, 100, 200],
+            columns: [[
+                {field: 'checkbox', title: '选中', checkbox: true},
+                {field: 'studentno', title: '学号', width: 70, align: 'center',
+                    formatter:function(value,rec){
+                        return "<a class='blue_link' href='javascript:detail(\""+rec.studentno+"\")' >"+rec.studentno+"</a>" ;
+                    }},
+                {field: 'name', title: '姓名', width: 110, align: 'center'},
+                {field: 'classname', title: '班级', width: 110, align: 'center'},
+                {field: 'statusname', title: '学籍状态', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $('#dg2').datagrid({
+            title: '检索新学生',
+            idField: 'studentno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            url: '{$ROOT}/base/classes/searchstudent',
+            queryParams: {studentno: ''},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'checkbox', title: '选中', checkbox: true},
+                {field: 'studentno', title: '学号', width: 70, align: 'center',
+                    formatter:function(value,rec){
+                    return "<a class='blue_link' href='javascript:detail(\""+rec.studentno+"\")' >"+rec.studentno+"</a>" ;
+                }},
+                {field: 'name', title: '姓名', width: 110, align: 'center'},
+                {field: 'classname', title: '班级', width: 110, align: 'center'},
+                {field: 'statusname', title: '学籍状态', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                classno: $('#classno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        function checkStudentSchool(rows) {
+            var count = rows.length;
+            for (var i = 0; i < count; i++) { //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+                if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
+                    $.messager.alert('错误', '你无法修改其他学院的学生信息（' + rows[i].name + '）！', 'error');
+                    $("#cancel").click();
+                    return false;
+                }
+            }
+            return true;
+        }
+        $("#add,#menu_add").click(function () {
+            var tt = $('#dg');
+            var tt2=$('#dg2');
+            var rows=tt2.datagrid('getSelections');
+            var length=rows.length;
+            for(var i=0;i<length;i++){
+                var classrows=tt.datagrid('getRows');
+                var amount=classrows.length;
+                for(var j=0;j<amount;j++){
+                    if(rows[i].studentno==classrows[j].studentno){
+                        $.messager.alert('错误', rows[i].studentno+rows[i].name+'已在班级列表中！' , 'error');
+                        return;
+                    }
+                }
+                tt.datagrid('insertRow', {
+                    index: 0,
+                    row: {
+                        studentno:rows[i].studentno,name:rows[i].name,
+                        classno:rows[i].classno,classname:rows[i].classname,
+                        schoolname:rows[i].schoolname,statusname:rows[i].statusname}
+                });
+            }
+        });
+        $("#remove,#menu_remove").click(function () {
+            var tt = $('#dg');
+            var rows=tt.datagrid('getSelections');
+            var length=rows.length;
+            var message="";
+            for(var i=length-1;i>=0;i--){
+                if(rows[i].classno=='{$classno}'){
+                    message+= rows[i].studentno+rows[i].name+',';
+                }
+                else{
+                    var index=tt.datagrid('getRowIndex',rows[i].studentno);
+                    tt.datagrid('deleteRow',index);
+                }
+
+            }
+            if(message!="")
+                $.messager.alert('提示',message+'是本班学生无移除！', 'info');
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            //获取更改的数据行内容
+            var rows = tt.datagrid('getChanges', 'inserted');
+            if (!checkStudentSchool(rows)) return;
+            var length=rows.length;
+            if (length<= 0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '没有数据需要保存！', 'info');
+                return;
+            }
+            var effectRow = {};
+            var updateRows=[];
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.studentno = rows[i].studentno;
+                updateRows.push(updateObj);
+            }
+
+            effectRow["inserted"] = $.toJSON(updateRows);
+            effectRow["classno"] = '{$classno}';
+            $.post('{$ROOT}/base/classes/studentadd', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+        /**
+         * 导出学生名单
+         */
+        $('#menu_export,#export').click(function () {
+            var classno = '{$classno}';
+            $.fileDownload("{$ROOT}/base/classes/export?classno=" + classno, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误', html, 'error');
+                }
+            });
+        });
+    });
+    function detail(studentno){
+        var url='/base/index/studentdetail?';
+        parent.menuTabs.addTab("学生详情",'{$ROOT}'+url+'studentno='+studentno,"icon icon-student");
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出班级学生名单</div>
+    </div>
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中加入该班</div>
+    </div>
+    <div id="left" style="width:570px;float:left">
+        <div id="toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出学生名单</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存名单</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-redo',plain:'true'" id="remove">将选中学生移出列表</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:680px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中加入该班</a>
+            <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>因为每个学生都需一个班级，将选中学生移出列表无法删除本班学生。</li>
+        </ol>
+    </div>
+</div>

@@ -17,6 +17,7 @@ use app\common\access\MyController;
 use app\common\access\MyException;
 use app\common\vendor\PHPExcel;
 use app\common\service\Student;
+use think\Exception;
 
 class Classes extends MyController {
     /**获取班级列表
@@ -53,7 +54,36 @@ class Classes extends MyController {
         }
         return json($result);
     }
-
+    public function studentlist($page=1,$rows=50,$classno=''){
+        $result=null;
+        try {
+            $student=new Student();
+            $result =  $student->getList($page,$rows,'%','%',$classno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    public function searchstudent($page=1,$rows=50,$studentno='%',$name='%',$classno='%',$school=''){
+        $result=null;
+        try {
+            $student=new Student();
+            $result = $student->getList($page,$rows,$studentno,$name,$classno,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    public function studentadd(){
+        $result=null;
+        try {
+            $class=new \app\common\service\Classes();
+            $result =  $class->addStudent($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     public function export($classno='%',$classname='%',$school='')
     {
         try{
@@ -61,7 +91,7 @@ class Classes extends MyController {
             $result =  $class->getList(1,10000,$classno,$classname,$school);
             $classrows=$result['rows'];
             if(count($classrows)>20){
-                throw new \think\Exception('classes amount to export is more than 20',MyException::PARAM_NOT_CORRECT);
+                throw new Exception('classes amount to export is more than 20',MyException::PARAM_NOT_CORRECT);
             }
             $file="班级学生名单";
             $student=new Student();

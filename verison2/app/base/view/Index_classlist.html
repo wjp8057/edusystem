@@ -218,6 +218,16 @@
                 }
             });
         });
+        $("#student,#menu_student").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                parent.menuTabs.addTab("学生名单","{$ROOT}/base/index/classstudent?classno="+row.classno,"icon icon-class");
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
     });
 </script>
 <div class="container">
@@ -227,7 +237,7 @@
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
         <div class="menu-sep"></div>
-        <div id='menu_student' data-options="iconCls:'icon icon-student'">学生名单</div>
+        <div id='menu_student' data-options="iconCls:'icon icon-class'">学生名单</div>
         <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出班级学生名单</div>
     </div>
     <div id="toolbar">

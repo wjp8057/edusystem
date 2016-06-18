@@ -263,12 +263,13 @@ class Action extends MyService{
         $insertRow = 0;
         //更新部分
         //开始事务
-        $this->query->startTrans();
-        try {
+    /*    $this->query->startTrans();
+        try {*/
             if (isset($postData["updated"])) {
                 $updated = $postData["updated"];
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
+                    $data = null;
                     $condition['id'] = $one->id;
                     $data['actionid'] = $one->actionid;
                     $data['access']=(int)((int)$one->exe|(int)$one->ins|(int)$one->del|(int)$one->modi|(int)$one->que);
@@ -288,8 +289,9 @@ class Action extends MyService{
             if (isset($postData["inserted"])) {
                 $updated = $postData["inserted"];
                 $listUpdated = json_decode($updated);
-                $data = null;
+
                 foreach ($listUpdated as $one) {
+                    $data = null;
                     $data['role'] = $one->role;
                     $data['actionid'] = $one->actionid;
                     $data['access']=(int)((int)$one->exe|(int)$one->ins|(int)$one->del|(int)$one->modi|(int)$one->que);
@@ -298,11 +300,11 @@ class Action extends MyService{
                         $insertRow++;
                 }
             }
-        } catch (\Exception $e) {
+      /*  } catch (\Exception $e) {
             $this->query->rollback();
             throw $e;
         }
-        $this->query->commit();
+        $this->query->commit();*/
         $info = '';
         if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
         if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
