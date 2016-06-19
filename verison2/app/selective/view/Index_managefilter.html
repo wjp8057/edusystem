@@ -10,10 +10,13 @@
         //设置默认学院，非管理部门为本学院
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
-
+        var amount=$('#amount');
+        amount.combobox({
+            panelHeight:'auto'
+        });
         $('#dg').datagrid({
             title:'课程列表',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/selective/setting/courselist',
+            url:'{$ROOT}/selective/manage/courselist',
             queryParams: {  year: $('#year').val(), term: $('#term').val()},
             singleSelect:true,
             toolbar:'#toolbar',pageList:[20,50,100,200],
@@ -63,8 +66,7 @@
                 courseno: $('#courseno').val(),
                 coursename: $('#coursename').val(),
                 school:$('#school').combobox('getValue'),
-                halflock:$('#halflock').combobox('getValue'),
-                lock:$('#lock').combobox('getValue')
+                amount:$('#amount').combobox('getValue')
             });
         });
         $("#save,#menu_save").click(function(){
@@ -106,29 +108,7 @@
                 }
             },'json');
         });
-
-        $("#without_limit").click(function() {
-            $.messager.confirm('确认', "确认要无限制开放所有课程么（选课人数无上限）'", function(r){
-                if (r){
-                    updateAllStatus(0,0);
-                }
-            });
-        });
     });
-    function updateAllStatus(halflock,lock){
-
-        $.post('{$ROOT}/selective/setting/updateallstatus',{year: $('#year').val(),term: $('#term').val(),halflock:halflock,lock:lock},function(result){
-            if (result.status==1){
-                $('#dg').datagrid('reload');
-                $.messager.show({	// show error message
-                    title: '成功',
-                    msg: result.info
-                });
-            } else {
-                $.messager.alert('错误',result.info,'error');
-            }
-        },'json');
-    }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
@@ -141,10 +121,15 @@
         <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="9" value="%"/>
         <label for="school">开课学院：</label>
         <input id="school" size="15">
-        <label for="condtion">选课人数：</label><select id="condtion"><option value="" selected="selected">全部</option></select>
+        <label for="amount">选课人数：</label>
+        <select id="amount">
+            <option value="" selected="selected">全部</option>
+            <option value="A">小于20人</option>
+            <option value="B">大于预计人数</option>
+            <option value="C">小于预计人数</option>
+        </select>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">更新预计人数</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-free',plain:'true'" id="without_limit">无限制开放</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-student',plain:'true'" id="student">查看选课学生</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>
