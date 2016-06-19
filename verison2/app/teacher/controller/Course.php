@@ -6,6 +6,7 @@
  * Time: 10:41
  */
 namespace app\teacher\controller;
+use app\common\access\Item;
 use app\common\access\MyController;
 use app\common\access\MyAccess;
 use app\common\vendor\PHPExcel;
@@ -46,8 +47,7 @@ class Course extends MyController{
             $result=$r32->getStudentList(1,10000,$year,$term,$courseno);
             $data=$result['rows'];
             $file="课程选课名单";
-            $course=new \app\common\service\Course();
-            $coursename=$course->getItemByCourseNo(substr($courseno,0,7))['coursename'];
+            $coursename=Item::getCourseItem(substr($courseno,0,7))['coursename'];
             $sheet=$coursename;
             $title=$year.'年第'.$term.'学期'.$coursename.'('.$courseno.') (共'.count($data).'人)';
             $template= array("studentno"=>"学号","studentname"=>"姓名","sex"=>"性别","classname"=>"班级","schoolname"=>"学院","approachname"=>"修课方式");

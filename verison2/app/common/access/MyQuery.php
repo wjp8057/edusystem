@@ -23,7 +23,6 @@ use think\Paginator;
 
 class MyQuery extends  Query
 {
-
     /**
      * 批处理执行SQL语句
      * 批处理的指令都认为是execute操作

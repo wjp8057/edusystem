@@ -212,21 +212,6 @@ class Classroom extends MyService {
         return $result;
     }
 
-    /**根据教室号获取教室名称
-     * @param string $roomno
-     * @return mixed
-     * @throws \think\Exception
-     */
-    function getRoomItemByNo($roomno){
-        $condition=null;
-        $condition['roomno']=$roomno;
-        $data=$this->query->table('classrooms')->where($condition)->field('rtrim(jsn) name,status,reserved')->select();
-        if(!is_array($data)||count($data)!=1)
-            throw new \think\Exception('roomno'.$roomno, MyException::PARAM_NOT_CORRECT);
-
-        return $result=$data[0];
-    }
-
     /**刷新教室资源时间表
      * @param $year
      * @param $term

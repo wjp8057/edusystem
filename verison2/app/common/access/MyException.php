@@ -21,4 +21,5 @@ class MyException
     const WITH_OUT_PERMISSION = '703'; //无权访问
     const USER_NOT_EXISTS = '704'; //用户不存在
     const PARAM_NOT_CORRECT = '705'; //参数错误
+    const ITEM_NOT_EXISTS ='706';//数据不存在
 }

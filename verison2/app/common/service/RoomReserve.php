@@ -12,6 +12,7 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
@@ -122,8 +123,7 @@ class RoomReserve extends MyService{
      * @throws Exception
      */
     public function checkRoomFree($roomno){
-        $room=new Classroom();
-        $result=$room->getRoomItemByNo($roomno);
+        $result=Item::getRoomItem($roomno);
         if($result['reserved']=="1"||$result['status']=="0")
             return false;
         else

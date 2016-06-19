@@ -285,15 +285,4 @@ class Room extends MyController
         }
         return json($result);
     }
-
-    public function getroomname($roomno){
-        $result=null;
-        try {
-            $room= new Classroom();
-            $result=$room->getRoomItemByNo($roomno)['name'];
-        } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
-        return json(["status"=>1,'info'=>$result]);
-    }
 } 

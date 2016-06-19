@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\base\controller;
 
+use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\Template;
 use app\common\service\Action;
@@ -49,8 +50,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $room = new Classroom();
-            $title['roomname'] = $room->getRoomItemByNo($roomno)['name'];
+            $title['roomname']=Item::getRoomItem($roomno)['name'];
             $this->assign('title', $title);
             $schedule = new Schedule();
             $time = $schedule->getRoomTimeTable($year, $term, $roomno);
@@ -69,8 +69,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $room = new Classroom();
-            $title['roomname'] = $room->getRoomItemByNo($roomno)['name'];
+            $title['roomname']=Item::getRoomItem($roomno)['name'];
             $this->assign('title', $title);
             $schedule = new Schedule();
             $time = $schedule->getRoomTimeTable($year, $term, $roomno, true);

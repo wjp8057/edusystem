@@ -1,5 +1,6 @@
 <layout name="layout" />
 <script type="text/javascript">
+    var roomcheck=true;
     $(function(){
         //数据预处理
         {
@@ -23,7 +24,7 @@
                 weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
             });
             var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
-            if($("#myForm").form('validate')&&weeks>0&&$('#roomname').text()!=''){
+            if(roomcheck&&$("#myForm").form('validate')&&weeks>0){
                 var data={};
                 data["year"]=year.val();
                 data["term"]=term.val();
@@ -48,9 +49,14 @@
         //当教室填写完成后。
         roomno.blur(function(){
             $('#roomname').text('');
-            $.post('{$ROOT}/base/room/getroomname',{roomno:roomno.val()},function(result){
+            $.post('{$ROOT}/all/info/getroomname',{roomno:roomno.val()},function(result){
                 if (result.status==1){
                     $('#roomname').text(result.info);
+                    roomcheck=true;
+                }
+                else{
+                    $('#roomname').html("<div class='warn'>"+result.info+"</div>");
+                    roomcheck=false;
                 }
             },'json');
         });

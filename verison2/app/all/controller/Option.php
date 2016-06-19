@@ -11,17 +11,15 @@
 
 namespace app\all\controller;
 use app\common\access\MyAccess;
-use app\common\access\MyException;
-use app\common\access\MyQuery;
-use app\common\service\Action;
 use app\common\service\Classroom;
-use app\common\service\Schedule;
-use app\common\service\User;
+use think\Controller;
 use think\Db;
-use think\db\Query;
-use think\Request;
 
-class Option extends \think\Controller{
+/**各种下拉菜单
+ * Class Option
+ * @package app\all\controller
+ */
+class Option {
     public function role(){
         $result=null;
         try {

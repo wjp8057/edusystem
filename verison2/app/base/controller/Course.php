@@ -16,6 +16,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\CourseForm;
 use app\common\service\CourseType;
+use app\common\service\Program;
 use app\common\vendor\PHPExcel;
 
 class Course extends MyController {
@@ -106,4 +107,37 @@ class Course extends MyController {
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-    }}
+    }
+
+    public function equalcourselist($page=1,$rows=20,$courseno='%',$equalcourseno='%',$programno='%',$school=''){
+        $result=null;
+        try{
+            $program=new Program();
+            $result =$program->equalCourseList($page,$rows,$courseno,$equalcourseno,$programno,$school);
+
+        }catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function eqexport($courseno='%',$equalcourseno='%',$programno='%',$school='')
+    {
+        try {
+            $program=new Program();
+            $result =$program->equalCourseList(1,10000,$courseno,$equalcourseno,$programno,$school);
+            $data = $result['rows'];
+            $file = "等价课程列表";
+            $sheet = '全部';
+            $title = '';
+            $template = array("programno" => "教学计划号", "progname" => "计划名称","progschoolname"=>"所属学院", "courseno" => "原课号", "coursename" => "原课名",
+                "credits"=>"原学分","schoolname"=>"原课程学院","eqcourseno"=>"等价课号", "eqcoursename"=>"等价课名","eqcredits"=>"等价学分","eqschoolname"=>"等价学院");
+            $string = array("programno,courseno,eqcourseno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file, $array);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+    }
+
+}

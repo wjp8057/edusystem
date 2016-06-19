@@ -1,0 +1,93 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        //数据预处理
+        {
+            var programno = $('#programno');
+            programno.validatebox({required: true, validType: 'equalLength[7]'});
+
+            var courseno = $('#courseno');
+            courseno.validatebox({required: true, validType: 'equalLength[7]'});
+
+            var eqcourseno = $('#eqcourseno');
+            eqcourseno.validatebox({required: true, validType: 'equalLength[7]'});
+
+        }
+        $("#save").click(function() {
+            var weekstring="";
+            $("input[id^='week']").each(function () {
+                weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
+            });
+            var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
+            if($("#myForm").form('validate')&&weeks>0&&$('#roomname').text()!=''){
+                var data={};
+                data["year"]=year.val();
+                data["term"]=term.val();
+                data['roomno']=roomno.val();
+                data['day']=day.combobox('getValue');
+                data['time']=time.combobox('getValue');
+                data['purpose']=purpose.val();
+                data['weeks']=weeks;
+                $.post('{$ROOT}/base/room/roomapply',data,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容及周次、教室号是否正确！','error');
+            }
+        });
+        //当教室填写完成后。
+        programno.blur(function(){
+            $('#programname').text('');
+            $.post('{$ROOT}/base/course/getroomname',{roomno:roomno.val()},function(result){
+                if (result.status==1){
+                    $('#roomname').text(result.info);
+                }
+            },'json');
+        });
+
+        var queryString=getQueryString('roomno');
+        if(queryString!=null){
+            roomno.val(queryString);
+            roomno.blur();
+        }
+        $("#myForm").form('validate');
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">新增等价课程</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="programno">教学计划号</label></th>
+            <td><input id="programno"  size="7"/></td>
+            <th>教学计划名</th>
+            <td><label id="programname"></label></td>
+        </tr>
+        <tr>
+            <th><label for="courseno">课号</label></th>
+            <td><input id="courseno" size="7"/></td>
+            <th>课名</th>
+            <td><label id="coursename"></label></td>
+        </tr>
+        <tr>
+            <th><label for="eqcourseno">等价课号</label></th>
+            <td><input id="eqcourseno" size="7"/></td>
+            <th>等价课名</th>
+            <td><label id="eqcoursename"></label></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存等价信息</a>
+    </div>
+</div>

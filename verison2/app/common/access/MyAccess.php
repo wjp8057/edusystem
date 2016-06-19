@@ -112,7 +112,7 @@ class MyAccess {
         if(MyAccess::getErrorMessage($errorCode)=='not defined error')
             $errorCode='700';
         header('Content-type: text/html; charset=utf-8');
-        header("HTTP/1.1 ".$errorCode." ".$errorMessage.MyAccess::getErrorMessage($errorCode)." ");
+        header("HTTP/1.1 ".$errorCode." ".$errorMessage." ".MyAccess::getErrorMessage($errorCode)." ");
 
         $redirect='';
         if($errorCode=='701'||$errorCode=="702")
@@ -129,9 +129,10 @@ class MyAccess {
             '200'=>'ok',
             '701'=>'you have not login system!',
             '702'=>'your account has been used on another computer!',
-            '703'=>' without permission!',
+            '703'=>'without permission!',
             '704'=>'user is not exist!',
             '705'=>'parameter is not correct!',
+            '706'=>'item is not exist!'
         );
         $result=!isset($error[$errorCode])?'not defined error':$error[$errorCode];
         return $result;
@@ -148,6 +149,7 @@ class MyAccess {
             '703'=>'无权访问！',
             '704'=>'用户不存在!',
             '705'=>'访问参数错误!',
+            '706'=>'数据不存在！'
         );
         $result=!isset($error[$errorCode])?'未定义错误！':$error[$errorCode];
         return $result;

@@ -57,8 +57,7 @@ class Index extends Template
             }
             $title = $year . '学年第' . $term . '学期期末成绩输入(' . $scoreType . ')';
             $this->assign('title', $title);
-            $course = new Course();
-            $coursename = $course->getItemByCourseNo(substr($courseno, 0, 7))['coursename'];
+            $coursename=Item::getCourseItem(substr($courseno,0,7))['coursename'];
             $course = '课号：' . $courseno . ' 课名：' . $coursename;
             $this->assign('course', $course);
             $score = new Score();

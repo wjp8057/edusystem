@@ -12,23 +12,9 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Exception;
 
 class Course  extends  MyService{
-    /**根据课号获取课名
-     * @param string $courseno
-     * @return mixed
-     * @throws \think\Exception
-     */
-    function getItemByCourseNo($courseno=''){
-        $result=null;
-        $condition=null;
-        $condition['courseno']=$courseno;
-        $data=$this->query->table('courses')->where($condition)->field('rtrim(coursename) as coursename')->select();
-        if(!is_array($data)||count($data)!=1)
-            throw new \think\Exception('courseno'.$courseno, MyException::PARAM_NOT_CORRECT);
-        return $data[0];
-    }
-
     function getList($page=1,$rows=20,$courseno='%',$coursename='%',$school=''){
         $result=null;
         $condition=null;
