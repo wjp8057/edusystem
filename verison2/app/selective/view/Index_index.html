@@ -15,15 +15,16 @@
                 }
             });
         });
-        var s=getRequest();
-        if(s!=-1) {
-            var obj=$("a[menuid='"+s+"']")
+        var s=decodeURI(getRequest());
+        if (isNaN(s))
+            menuTabs.menuObj.accordion('select', s);
+        else {
+            var obj = $("a[menuid='" + s + "']");
             obj.click();
-            obj.each(function(){
-                menuTabs.menuObj.accordion('select',$(this).parents('.panel').children().first().text());
+            obj.each(function () {
+                menuTabs.menuObj.accordion('select', $(this).parents('.panel').children().first().text());
             });
         }
-
     });
 </script>
 <noscript>

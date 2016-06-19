@@ -241,7 +241,6 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
                 this.contextMenu.click();
             }
         };
-
         /**
          * 更新一个活页夹
          *
@@ -329,7 +328,7 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
                         return;
                     }
                 })
-            })
+            });
             return icon;
         };
 
@@ -423,7 +422,7 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
                     break;
                 default:break;
             }
-        }
+        };
 
         /**
          *创建一个iframe
@@ -432,7 +431,7 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
          */
         this.createFrame = function(url){
             return '<iframe scrolling="auto" frameborder="0"  src="'+url+'" style="width:100%;height:98%;"></iframe>';
-        }
+        };
 
         this.openTab = function(title){
             this.menuObj.find(".navlist li a").each(function(){
