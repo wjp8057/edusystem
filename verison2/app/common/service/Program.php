@@ -12,10 +12,25 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
+use app\common\access\MyAccess;
 use app\common\access\MyService;
 
+/**教学计划
+ * Class Program
+ * @package app\common\service
+ */
 class Program extends MyService{
-    function equalCourseList($page=1,$rows=20,$courseno='%',$equalcourseno='%',$programno='%',$school=''){
+    /**获取等价课程列表
+     * @param int $page
+     * @param int $rows
+     * @param string $courseno
+     * @param string $equalcourseno
+     * @param string $programno
+     * @param string $school
+     * @return array|null
+     */
+    public function equalCourseList($page=1,$rows=20,$courseno='%',$equalcourseno='%',$programno='%',$school=''){
         $result=null;
         $condition=null;
         if($courseno!='%') $condition['r33.courseno']=array('like',$courseno);
@@ -28,7 +43,7 @@ class Program extends MyService{
             ->join('schools cs','cs.school=c.school')
             ->join('schools eqs','eqs.school=eqc.school')
             ->join('schools s','s.school=programs.school')
-            ->field('programs.programno,rtrim(progname) progname,rtrim(s.name) progschoolname,c.courseno,rtrim(c.coursename) coursename,
+            ->field('programs.programno,rtrim(progname) progname,s.school progschool,rtrim(s.name) progschoolname,c.courseno,rtrim(c.coursename) coursename,
             c.credits,rtrim(cs.name) schoolname,eqc.courseno eqcourseno,rtrim(eqc.coursename) eqcoursename,eqc.credits eqcredits,
             rtrim(eqs.name) eqschoolname')
             ->where($condition)->page($page,$rows)->order('programno')->select();
@@ -37,4 +52,43 @@ class Program extends MyService{
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+
+    public function equalCourseUpdate($postData){
+        //检查输入有效性
+        $result=null;
+        if (isset($postData["inserted"])) {
+            $updated = $postData["inserted"];
+            $updated= json_decode($updated);
+            if(MyAccess::checkProgramSchool($updated->programno)) {
+                Item::getCourseItem($updated->courseno);
+                Item::getCourseItem($updated->eqcourseno);
+                $data['programno'] = $updated->programno;
+                $data['courseno'] = $updated->courseno;
+                $data['eqno'] = $updated->eqcourseno;
+                $this->query->table('r33')->insert($data);
+                $result = ['status' => 1, 'info' => '添加成功'];
+            }
+            else{
+                $result = ['status' => 0, 'info' => '您无法为其他学院教学计划的添加等价课程'];
+            }
+        }
+
+        if (isset($postData["deleted"])) {
+            $updated = $postData["deleted"];
+            $updated= json_decode($updated);
+            if(MyAccess::checkProgramSchool($updated->programno)) {
+                Item::getCourseItem($updated->courseno);
+                Item::getCourseItem($updated->eqcourseno);
+                $condition['programno'] = $updated->programno;
+                $condition['courseno'] = $updated->courseno;
+                $condition['eqno'] = $updated->eqcourseno;
+                $this->query->table('r33')->where($condition)->delete();
+                $result = ['status' => 1, 'info' => '删除成功'];
+            }
+            else
+                $result = ['status' => 0, 'info' => '您无法删除其他学院教学计划的等价课程'];
+        }
+        return json($result);
+    }
+
 } 

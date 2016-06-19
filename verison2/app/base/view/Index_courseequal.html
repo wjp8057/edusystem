@@ -57,21 +57,39 @@
         //右键菜单删除按钮
         $("#menu_delete,#delete").click(function(){
             var tt=$('#dg');
-            for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
-                if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
-                    $.messager.alert('错误','你无法修改其他学院的课程信息（'+rows[i].coursename+'）！','error');
-                    $("#cancel").click();
-                    return false;
-                }
-            }
             var row = tt.datagrid('getSelected');
             if (row) {
-                var rowIndex = tt.datagrid('getRowIndex', row);
-                tt.datagrid('deleteRow', rowIndex);
+                if(row.progschool!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                    $.messager.alert('错误','你无法删除其他学院的等价课程（'+row.progname+'-'+row.courseno+'）！','error');
+                    return false;
+                }
+                $.messager.confirm('确认', "数据删除后无法恢复！您确定删除本条等价记录？", function (r) {
+                    if (r) {
+                        var data = {};
+                        var effectRow = {};
+                        data['programno'] = row.programno;
+                        data['courseno'] = row.courseno;
+                        data['eqcourseno'] = row.eqcourseno;
+                        effectRow["deleted"] = $.toJSON(data);
+                        $.post('{$ROOT}/base/course/equalcourseupdate', effectRow, function (result) {
+                            if (result.status == 1) {
+                                var rowIndex = tt.datagrid('getRowIndex', row);
+                                tt.datagrid('deleteRow', rowIndex);
+                                $.messager.show({	// show error message
+                                    title: '成功',
+                                    msg: result.info
+                                });
+                            } else {
+                                $.messager.alert('错误', result.info, 'error');
+                            }
+                        }, 'json');
+                    }
+                });
             }
             else{
                 $.messager.alert('错误','请先选中一条记录','error')
             }
+
         });
         //检索
         $("#search").click(function(){

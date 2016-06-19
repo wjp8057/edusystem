@@ -1,5 +1,8 @@
 <layout name="layout" />
 <script type="text/javascript">
+    var programcheck=true;
+    var coursecheck=true;
+    var eqcoursecheck=true;
     $(function(){
         //数据预处理
         {
@@ -14,21 +17,18 @@
 
         }
         $("#save").click(function() {
-            var weekstring="";
-            $("input[id^='week']").each(function () {
-                weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
-            });
-            var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
-            if($("#myForm").form('validate')&&weeks>0&&$('#roomname').text()!=''){
+            if(courseno.val()==eqcourseno.val()){
+                $.messager.alert('错误','等价的课号不能相同！','error');
+                return;
+            }
+            if($("#myForm").form('validate')&&programcheck&&coursecheck&&eqcoursecheck){
                 var data={};
-                data["year"]=year.val();
-                data["term"]=term.val();
-                data['roomno']=roomno.val();
-                data['day']=day.combobox('getValue');
-                data['time']=time.combobox('getValue');
-                data['purpose']=purpose.val();
-                data['weeks']=weeks;
-                $.post('{$ROOT}/base/room/roomapply',data,function(result){
+                var effectRow ={};
+                data['programno']=programno.val();
+                data['courseno']=courseno.val();
+                data['eqcourseno']=eqcourseno.val();
+                effectRow["inserted"]=$.toJSON(data);
+                $.post('{$ROOT}/base/course/equalcourseupdate',effectRow,function(result){
                     if (result.status==1){
                         $.messager.alert("成功",result.info,"info");
                     }
@@ -38,24 +38,58 @@
                 },'json');
             }
             else{
-                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容及周次、教室号是否正确！','error');
+                $.messager.alert('错误','输入数据有误，请检查！','error');
             }
         });
-        //当教室填写完成后。
+        //当教学计划号填写完成后。
         programno.blur(function(){
             $('#programname').text('');
-            $.post('{$ROOT}/base/course/getroomname',{roomno:roomno.val()},function(result){
+            if(programno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getprogramname',{programno:programno.val()},function(result){
                 if (result.status==1){
-                    $('#roomname').text(result.info);
+                    $('#programname').text(result.info);
+                    programcheck=true;
+                }
+                else {
+                    $('#roomname').html("<div class='warn'>" + result.info + "</div>");
+                    programcheck = false;
                 }
             },'json');
         });
 
-        var queryString=getQueryString('roomno');
-        if(queryString!=null){
-            roomno.val(queryString);
-            roomno.blur();
-        }
+        courseno.blur(function(){
+            $('#coursename').text('');
+            if(courseno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getcoursename',{courseno:courseno.val()},function(result){
+                if (result.status==1){
+                    $('#coursename').text(result.info);
+                    coursecheck=true;
+                }
+                else {
+                    $('#coursename').html("<div class='warn'>" + result.info + "</div>");
+                    coursecheck = false;
+                }
+            },'json');
+        });
+
+        eqcourseno.blur(function(){
+            $('#eqcoursename').text('');
+            if(eqcourseno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getcoursename',{courseno:eqcourseno.val()},function(result){
+                if (result.status==1){
+                    $('#eqcoursename').text(result.info);
+                    eqcoursecheck=true;
+                }
+                else {
+                    $('#eqcoursename').html("<div class='warn'>" + result.info + "</div>");
+                    eqcoursecheck = false;
+                }
+            },'json');
+        });
+
         $("#myForm").form('validate');
 
     });

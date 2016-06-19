@@ -22,7 +22,6 @@ class Info
         $result = null;
         $status = 1;
         try {
-            dump($courseno);
             $result = Item::getCourseItem($courseno, false);
             if ($result != null) {
                 $result = $result['coursename'];
@@ -48,6 +47,23 @@ class Info
                 $status = 1;
             } else {
                 $result = '该教室不存在!';
+                $status = 0;
+            }
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json(["status" => $status, 'info' => $result]);
+    }
+    public function  getprogramname($programno){
+        $result = null;
+        $status = 1;
+        try {
+            $result = Item::getProgramItem($programno);
+            if ($result != null) {
+                $result = $result['progname'];
+                $status = 1;
+            } else {
+                $result = '该教学计划不存在!';
                 $status = 0;
             }
         } catch (\Exception $e) {

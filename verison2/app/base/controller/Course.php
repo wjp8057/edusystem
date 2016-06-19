@@ -120,6 +120,16 @@ class Course extends MyController {
         }
         return json($result);
     }
+    public function equalcourseupdate(){
+        $result=null;
+        try{
+            $program=new Program();
+            $result=$program->equalCourseUpdate($_POST);
+        }catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 
     public function eqexport($courseno='%',$equalcourseno='%',$programno='%',$school='')
     {

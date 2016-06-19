@@ -136,21 +136,21 @@
         });
 
         $("#without_limit").click(function() {
-            $.messager.confirm('确认', "确认要无限制开放所有课程么（选课人数无上限）'", function(r){
+            $.messager.confirm('确认', "确认要无限制开放所有课程么（选课人数无上限）", function(r){
                 if (r){
                     updateAllStatus(0,0);
                 }
             });
         });
         $("#limit").click(function() {
-            $.messager.confirm('确认', "确认要有限制开放所有课程么（选课人数上限为预计人数）'", function(r){
+            $.messager.confirm('确认', "确认要有限制开放所有课程么（选课人数上限为预计人数）", function(r){
                 if (r){
                     updateAllStatus(0,1);
                 }
             });
         });
         $("#lockall").click(function() {
-            $.messager.confirm('确认', "确认锁定所有课程么'", function(r){
+            $.messager.confirm('确认', "确认锁定所有课程么", function(r){
                 if (r){
                     updateAllStatus(1,1);
                 }

@@ -47,7 +47,7 @@ class Item {
      * @throws Exception
      * @throws \think\exception\DbException
      */
-    public static function getCourseItem($courseno='',$alert=true){
+    public static function getCourseItem($courseno,$alert=true){
         $result=null;
         $condition=null;
         $condition['courseno']=$courseno;
@@ -61,11 +61,11 @@ class Item {
         return $result;
     }
 
-    public static function getProgramItem($programno='',$alert=true){
+    public static function getProgramItem($programno,$alert=true){
         $result=null;
         $condition=null;
-        $condition['courseno']=$programno;
-        $data=Db::table('courses')->where($condition)->field('rtrim(coursename) as coursename')->select();
+        $condition['programno']=$programno;
+        $data=Db::table('programs')->where($condition)->field('rtrim(progname) as progname')->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)
                 throw new Exception('programno:' . $programno, MyException::ITEM_NOT_EXISTS);

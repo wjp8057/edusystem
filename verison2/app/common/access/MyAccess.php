@@ -250,4 +250,19 @@ class MyAccess {
             return false;
         }
     }
+
+    public static function checkProgramSchool($programno=''){
+        $condition=null;
+        $condition['programno']=$programno;
+
+        $data= Db::table('programs')->where($condition)->field('school')->select();
+        if(!is_array($data)||count($data)!=1)
+            throw new Exception('programno:'.$programno, MyException::PARAM_NOT_CORRECT);
+        if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }
