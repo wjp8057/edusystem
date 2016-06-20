@@ -41,7 +41,6 @@ class Option {
                 $all[] = array('school' => '', 'name' => '全部');
                 $result = array_merge($all, $result);
             }
-
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }

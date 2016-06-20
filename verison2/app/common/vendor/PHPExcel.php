@@ -73,8 +73,8 @@ class PHPExcel
                 $rowIndex++;
             }
             //加边框
-            $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . (count($data) + 2))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
-            $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . (count($data) + 2))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . ($rowIndex-1))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle($start . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . ($rowIndex-1))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             $PHPExcel->getActiveSheet($sheetIndex)->getColumnDimension()->setAutoSize(true);
             $PHPExcel->getActiveSheet($sheetIndex)->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
         }

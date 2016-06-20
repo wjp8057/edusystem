@@ -15,8 +15,8 @@ return [
     'type'        => 'sqlsrv',
 
     // 服务器地址
-   /* 'hostname'    => '127.0.0.1',*/
-    'hostname'    => '172.18.0.41',
+    'hostname'    => '127.0.0.1',
+  /*  'hostname'    => '172.18.0.41',*/
     // 数据库名
     'database'    => 'jwgl0516',
     // 数据库用户名
@@ -42,7 +42,7 @@ return [
     // 指定从服务器序号
     'slave_no'    => '',
     // 是否严格检查字段是否存在
-    'fields_strict'  => false,
+    'fields_strict'  => true,
     // 数据集返回类型 array 数组 collection Collection对象
     'resultset_type' => 'array',
     // 是否自动写入时间戳字段

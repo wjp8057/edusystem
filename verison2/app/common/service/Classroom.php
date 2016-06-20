@@ -165,7 +165,7 @@ class Classroom extends MyService {
         $result=null;
         $condition=null;
         if($year==''||$term=='')
-            throw new \think\Exception('year or term is empty', MyException::PARAM_NOT_CORRECT);
+            throw new Exception('year or term is empty', MyException::PARAM_NOT_CORRECT);
 
         if($weekday=='')
             $daystring='(mon|tue|wes|thu|fri|sat|sun)';
@@ -194,9 +194,9 @@ class Classroom extends MyService {
         if($equipment!='') $condition['classrooms.equipment']= $equipment;
         if($school!='') $condition['classrooms.priority']= $school;
         $condition['seats']= array(array('egt',$seatmin),array('elt',$seatmax));
-        $condition2['year']=$year;
-        $condition2['term']=$term;
-        $condition2['type']='R';
+        $condition2['timelist.year']=$year;
+        $condition2['timelist.term']=$term;
+        $condition2['timelist.type']='R';
         $subsql = Db::table('timelist')->where($condition2)->field('*')->buildSql();
         $data=$this->query->table('classrooms')->join('roomoptions ',' roomoptions.name=classrooms.equipment')
             ->join('areas ',' areas.name=classrooms.area')
