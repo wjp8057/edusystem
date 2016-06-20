@@ -68,12 +68,6 @@ class Trace
 
         $info = Debug::getFile(true);
 
-        // 获取调试日志
-        $debug = [];
-        foreach ($log as $line) {
-            $debug[$line['type']][] = $line['msg'];
-        }
-
         // 页面Trace信息
         $trace = [];
         foreach ($this->config['trace_tabs'] as $name => $title) {
@@ -91,11 +85,11 @@ class Trace
                         $names  = explode('|', $name);
                         $result = [];
                         foreach ($names as $name) {
-                            $result = array_merge($result, isset($debug[$name]) ? $debug[$name] : []);
+                            $result = array_merge($result, isset($log[$name]) ? $log[$name] : []);
                         }
                         $trace[$title] = $result;
                     } else {
-                        $trace[$title] = isset($debug[$name]) ? $debug[$name] : '';
+                        $trace[$title] = isset($log[$name]) ? $log[$name] : '';
                     }
             }
         }

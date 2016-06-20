@@ -20,16 +20,22 @@ class File extends SplFileObject
      * @var string
      */
     private $error = '';
+    // 当前完整文件名
+    protected $filename;
     // 文件上传命名规则
     protected $rule = 'date';
+    // 单元测试
+    protected $isTest;
 
     // 上传文件信息
     protected $info;
 
-    public function __construct($filename, $info = [])
+    public function __construct($filename, $info = [], $isTest = false)
     {
         parent::__construct($filename);
-        $this->info = $info;
+        $this->info     = $info;
+        $this->isTest   = $isTest;
+        $this->filename = $this->getRealPath();
     }
 
     /**
@@ -68,7 +74,7 @@ class File extends SplFileObject
     public function getMime()
     {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        return finfo_file($finfo, $this->getRealPath());
+        return finfo_file($finfo, $this->filename);
     }
 
     /**
@@ -88,7 +94,10 @@ class File extends SplFileObject
      */
     public function isValid()
     {
-        return is_uploaded_file($this->getRealPath());
+        if($this->isTest){
+            return is_file($this->filename);
+        }
+        return is_uploaded_file($this->filename);
     }
 
     /**
@@ -106,6 +115,7 @@ class File extends SplFileObject
             return false;
         }
 
+        $path = rtrim($path, DS) . DS;
         // 文件保存命名规则
         $savename = $this->getSaveName($savename);
 
@@ -121,7 +131,9 @@ class File extends SplFileObject
         }
 
         /* 移动文件 */
-        if (!move_uploaded_file($this->getRealPath(), $path . $savename)) {
+        if($this->isTest){
+            rename($this->filename, $path.$savename);
+        } elseif (!move_uploaded_file($this->filename, $path . $savename)) {
             $this->error = '文件上传保存错误！';
             return false;
         }
@@ -143,15 +155,15 @@ class File extends SplFileObject
             } else {
                 switch ($this->rule) {
                     case 'md5':
-                        $md5      = md5_file($this->getRealPath());
+                        $md5      = md5_file($this->filename);
                         $savename = substr($md5, 0, 2) . DS . substr($md5, 2);
                         break;
                     case 'sha1':
-                        $sha1     = sha1_file($this->getRealPath());
+                        $sha1     = sha1_file($this->filename);
                         $savename = substr($sha1, 0, 2) . DS . substr($sha1, 2);
                         break;
                     case 'date':
-                        $savename = date('Y-m-d') . DS . md5(microtime(true));
+                        $savename = date('Ymd') . DS . md5(microtime(true));
                         break;
                     default:
                         $savename = call_user_func($this->rule);

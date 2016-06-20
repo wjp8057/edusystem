@@ -145,13 +145,14 @@ class Merge extends Model
      * @param mixed $data 数据
      * @param array $where 更新条件
      * @param bool $getId 新增的时候是否获取id
+     * @param bool $replace 是否replace
      * @return mixed
      */
-    public function save($data = [], $where = [], $getId = true)
+    public function save($data = [], $where = [], $getId = true, $replace = false)
     {
         if (!empty($data)) {
             // 数据自动验证
-            if (!$this->validateData()) {
+            if (!$this->validateData($data)) {
                 return false;
             }
             // 数据对象赋值
@@ -172,7 +173,7 @@ class Merge extends Model
         }
 
         $db = $this->db();
-        $db->startTrans('merge_save_' . $this->name);
+        $db->startTrans();
         try {
             if ($this->isUpdate) {
                 // 自动写入
@@ -182,10 +183,21 @@ class Merge extends Model
                     return false;
                 }
 
+                if (empty($where) && !empty($this->updateWhere)) {
+                    $where = $this->updateWhere;
+                }
+
+                if (!empty($where)) {
+                    $pk = $this->getPk();
+                    if (is_string($pk) && isset($data[$pk])) {
+                        unset($data[$pk]);
+                    }
+                }
+                          
                 // 处理模型数据
                 $data = $this->parseData($this->name, $this->data);
                 // 写入主表数据
-                $result = $db->strict(false)->update($data);
+                $result = $db->strict(false)->where($where)->update($data);
 
                 // 写入附表数据
                 foreach (static::$relationModel as $key => $model) {
@@ -214,7 +226,7 @@ class Merge extends Model
                 // 处理模型数据
                 $data = $this->parseData($this->name, $this->data);
                 // 写入主表数据
-                $result = $db->name($this->name)->strict(false)->insert($data);
+                $result = $db->name($this->name)->strict(false)->insert($data, $replace);
                 if ($result) {
                     $insertId = $db->getLastInsID();
                     // 写入外键数据
@@ -234,9 +246,9 @@ class Merge extends Model
                 // 新增回调
                 $this->trigger('after_insert', $this);
             }
-            $db->commit('merge_save_' . $this->name);
+            $db->commit();
             return $result;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             $db->rollback();
             return false;
         }
@@ -253,8 +265,8 @@ class Merge extends Model
             return false;
         }
 
-        $db = $this->query;
-        $db->startTrans('merge_delete_' . $this->name);
+        $db = $this->db();
+        $db->startTrans();
         try {
             $result = $db->delete($this->data);
             if ($result) {
@@ -269,7 +281,7 @@ class Merge extends Model
                 }
             }
             $this->trigger('after_delete', $this);
-            $db->commit('merge_delete_' . $this->name);
+            $db->commit();
             return $result;
         } catch (\PDOException $e) {
             $db->rollback();

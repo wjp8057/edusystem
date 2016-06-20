@@ -16,7 +16,7 @@
     .space{height: 30px}
 </style>
 <div class="container">
-    <div class="print_title">学期教室借用批复单</div>
+    <div class="print_title">{$reserve.year}学年第{$reserve.term}学期教室借用批复单</div>
     <div class="column">
         <div class="title">教师使用须知</div>
         <div class="content"><p>教师使用多媒体教室前需参加过操作培训。教师借用后请提前与装备部联系（南区7号实训楼106办公室,短号654335,蒋老师），了解所借多媒体教室的管理规定及操作方法，
@@ -31,7 +31,7 @@
             <div class="title">门卫留存单</div>
             <p style="text-indent: 0">{$reserve.building}门卫：</p>
             <p>现有{$reserve.schoolname}需借用本楼教室{$reserve.roomname}({$reserve.roomno})，</p>
-            <p>使用时间是：{$reserve.timename}；
+            <p>使用时间是：星期{$reserve.day},{$reserve.timename}；
             <p>周次：{$reserve.weeks}</p>
             <p>用途：{$reserve.purpose}</p>
             <p>借用设备：___________________________</p>

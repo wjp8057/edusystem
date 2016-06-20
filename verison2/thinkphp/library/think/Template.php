@@ -11,6 +11,8 @@
 
 namespace think;
 
+use think\exception\TemplateNotFoundException;
+
 /**
  * ThinkPHP分离出来的模板引擎
  * 支持XML标签和普通标签的模板解析
@@ -47,12 +49,11 @@ class Template
         'cache_id'           => '', // 模板缓存ID
         'tpl_replace_string' => [],
         'tpl_var_identify'   => 'array', // .语法变量识别，array|object|'', 为空时自动识别
-        'namespace'          => '\\think\\template\\driver\\',
     ];
 
     private $literal     = [];
     private $includeFile = []; // 记录所有模板包含的文件路径及更新时间
-    protected $storage   = null;
+    protected $storage;
 
     /**
      * 架构函数
@@ -69,7 +70,7 @@ class Template
 
         // 初始化模板编译存储器
         $type          = $this->config['compile_type'] ? $this->config['compile_type'] : 'File';
-        $class         = $this->config['namespace'] . ucwords($type);
+        $class         = strpos($type, '\\') ? $type : '\\think\\template\\driver\\' . ucwords($type);
         $this->storage = new $class();
     }
 
@@ -1066,7 +1067,7 @@ class Template
             $this->includeFile[$template] = filemtime($template);
             return $template;
         } else {
-            throw new Exception('template not exist:' . $template, 10700);
+            throw new TemplateNotFoundException('template not exists:' . $template, $template);
         }
     }
 

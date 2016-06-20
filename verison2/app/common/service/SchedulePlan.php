@@ -15,6 +15,7 @@ namespace app\common\service;
 
 
 use app\common\access\MyService;
+use think\Db;
 
 class SchedulePlan extends MyService {
     /**
@@ -107,4 +108,16 @@ class SchedulePlan extends MyService {
         return $result;
     }
 
+    function updateAttendent($year,$term){
+        $condition = null;
+        $condition['r32.year'] = $year;
+        $condition['r32.term'] = $term;
+        $subsql = $this->query->table('r32')->where($condition)->field('courseno+[group] courseno,count(*) amount ')->group('courseno+[group]')->buildSql();
+
+        $condition = null;
+        $condition['year'] = $year;
+        $condition['term'] = $term;
+        $data['attendents']=array('exp','t.amount');
+        $this->query->table('scheduleplan')->join($subsql.' t','t.courseno=scheduleplan.courseno')->where($condition)->update($data);
+    }
 }

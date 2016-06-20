@@ -15,16 +15,18 @@
             panelHeight:'auto'
         });
         $('#dg').datagrid({
-            title:'课程列表',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/selective/manage/courselist',
-            queryParams: {  year: $('#year').val(), term: $('#term').val()},
+            title:'课号：{$course.courseno} 课名：{$course.coursename} 预计人数：{$course.estimate} 实际人数：{$course.attendents}',
+            idField:'studentno', striped:'true',rownumbers:true,
+            url:'{$ROOT}/selective/manage/coursestudent',
+            queryParams: {  year:'{$course.year}', term: '{$course.term}',courseno:'{$course.courseno}'},
             singleSelect:true,
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
-                {field:'courseno',title:'课号',width:80,align:'center'},
-                {field:'coursename',title:'课名',width:260,align:'center'},
-                {field:'schoolname',title:'开课学院',width:90,align:'center'},
-                {field:'classname',title:'主修班级',width:120,align:'center'},
+                {field:'studentno',title:'学号',width:80,align:'center'},
+                {field:'studentname',title:'姓名',width:80,align:'center'},
+                {field:'sexname',title:'性别',width:50,align:'center'},
+                {field:'classname',title:'班级',width:90,align:'center'},
+                {field:'approachname',title:'主修班级',width:120,align:'center'},
                 {field:'estimate',title:'预计人数*',width:70,align:'center',editor:{type:'numberbox',options:{precision:0,required:true}}},
                 {field:'attendents',title:'已选人数',width:60,align:'center'}
             ]],
@@ -108,49 +110,17 @@
                 }
             },'json');
         });
-        $("#menu_student,#student").click(function(){
-            var year=$("#year").val();
-            var term=$("#term").val();
-            var row= $('#dg').datagrid('getSelected');
-            if(!row){
-                $.messager.alert('错误','请先选择一个课程！','error');
-                return;
-            }
-            parent.menuTabs.addTab("选课学生-"+row.courseno,"{$ROOT}/selective/index/managefilterstudent?courseno="+row.courseno+"&year="+year+"&term="+term,"icon-edit");
-        });
-        $("#syn").click(function() {
-            $.post('{$ROOT}/selective/manage/syncourse',{year:$("#year").val(),term:$("#term").val()},function(result){
-                if (result.status==1){
-                    $.messager.alert('成功',result.info,'info');
-                } else {
-                    $.messager.alert('错误',result.info,'error');
-                }
-            },'json');
-        });
     });
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存修改</div>
-        <div id='menu_student' data-options="iconCls:'icon icon-student'">查看选课学生</div>
     </div>
     <div id="toolbar">
-        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/>
-        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$NEXTYEARTERM.term}"/>
-        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="9" value="%"/>
-        <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="9" value="%"/>
-        <label for="school">开课学院：</label>
-        <input id="school" size="15">
-        <label for="amount">选课人数：</label>
-        <select id="amount">
-            <option value="" selected="selected">全部</option>
-            <option value="A">小于20人</option>
-            <option value="B">大于预计人数</option>
-            <option value="C">小于预计人数</option>
-        </select>
+        <label for="estimate">人数上限：</label><input id="estimate" class="easyui-validatebox" size="4" value="{$course.estimate}"/>
+        <label for="credits">学分上限：</label><input id="credits" class="easyui-validatebox" size="2" value="40"/>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-student',plain:'true'" id="student">查看选课学生</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="syn">同步选课人数与信息</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>

@@ -4,9 +4,11 @@
 namespace app\selective\controller;
 
 
+use app\common\access\Item;
 use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
+use app\common\service\SchedulePlan;
 
 class Index extends  Template{
     public function index(){
@@ -18,6 +20,17 @@ class Index extends  Template{
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return $this->fetch();
+    }
+
+    public function managefilterstudent($year,$term,$courseno){
+      /*  try{*/
+            $result=Item::getSchedulePlanItem($year,$term,$courseno);
+            $this->assign('course',$result);
+       /* }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }*/
         return $this->fetch();
     }
 

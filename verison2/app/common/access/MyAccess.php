@@ -48,7 +48,7 @@ class MyAccess {
             if($session==1){
                 $condition=null;
                 $condition['username']=session('S_USER_NAME');;
-                $role =Db::table('users')->where($condition)->field('rtrim(roles) roles')->find(); //获取用户角色
+                $role =Db::table('users')->where($condition)->field('rtrim(roles) roles')->find();
                 $condition=null;
                 $condition["action.action"] = $action;
                 $actionInfo=Db::table('action')->where($condition)->find();

@@ -46,7 +46,7 @@ class User extends MyService{
                 session("S_ROLES",$data['roles']); //注册角色信息
                 session("S_LOGIN_COUNT", 0);
                 session("S_MANAGE", $data['manage']);
-                $user=array_map("trim", $data);
+                $user['TEACHERNO']=$data['teacherno'];
                 session("S_USER_INFO", $user);
                 $log=new MyLog();
                 $log->write('R');

@@ -74,4 +74,24 @@ class Item {
             $result=$data[0];
         return $result;
     }
+
+    public static function getSchedulePlanItem($year,$term,$courseno,$alert=true){
+        $result=null;
+        $condition=null;
+        $condition['scheduleplan.year']=$year;
+        $condition['scheduleplan.term']=$term;
+        $condition['scheduleplan.courseno+scheduleplan.[group]']=$courseno;
+        $data=Db::table('scheduleplan')
+            ->join('courses','courses.courseno=scheduleplan.courseno')->where($condition)
+            ->field('rtrim(coursename) as coursename,scheduleplan.courseno+scheduleplan.[group] courseno,
+            scheduleplan.estimate,scheduleplan.attendents,scheduleplan.year,scheduleplan.term')
+            ->select();
+        if(!is_array($data)||count($data)!=1) {
+            if($alert)
+                throw new Exception('year:' . $year.',term:'.$term.',courseno'.$courseno, MyException::ITEM_NOT_EXISTS);
+        }
+        else
+            $result=$data[0];
+        return $result;
+    }
 } 

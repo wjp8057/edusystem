@@ -16,7 +16,5 @@ define('COPYRIGHT','Copyright by keysoft corp. @2016 技术支持：88221932 版
 // 定义应用目录
 // 定义应用目录
 define('APP_PATH', __DIR__ . '/../../../verison2/app/');
-// 开启调试模式
-define('APP_DEBUG', true);
 // 加载框架引导文件
 require __DIR__ . '/../../../verison2/thinkphp/start.php';

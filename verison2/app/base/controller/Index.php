@@ -86,6 +86,10 @@ class Index extends Template
 
             $room = new RoomReserve();
             $reserve = $room->getReserveRoomInfo($recno);
+            if($reserve['approved']==0) {
+                echo '教室申请尚未通过审核,无法打印！';
+                exit;
+            }
             $reserve['printdate'] = date("Y-m-d");
             $reserve['weeks'] = implode(' ', str_split(week_dec2bin_reserve($reserve['weeks'], 18), 4));
             $this->assign('reserve', $reserve);

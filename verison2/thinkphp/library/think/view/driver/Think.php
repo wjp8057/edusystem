@@ -11,7 +11,8 @@
 
 namespace think\view\driver;
 
-use think\Exception;
+use think\App;
+use think\exception\TemplateNotFoundException;
 use think\Log;
 use think\Request;
 use think\Template;
@@ -19,7 +20,7 @@ use think\Template;
 class Think
 {
     // 模板引擎实例
-    private $template = null;
+    private $template;
     // 模板引擎参数
     protected $config = [
         // 模板起始路径
@@ -35,8 +36,8 @@ class Think
     public function __construct($config = [])
     {
         $this->config = array_merge($this->config, $config);
-        if (empty($this->config['view_path']) && defined('MODULE_PATH')) {
-            $this->config['view_path'] = MODULE_PATH . 'view' . DS;
+        if (empty($this->config['view_path'])) {
+            $this->config['view_path'] = App::$modulePath . 'view' . DS;
         }
         $this->template = new Template($this->config);
     }
@@ -72,10 +73,10 @@ class Think
         }
         // 模板不存在 抛出异常
         if (!is_file($template)) {
-            throw new Exception('template file not exists:' . $template, 10700);
+            throw new TemplateNotFoundException('template not exists:' . $template, $template);
         }
         // 记录视图信息
-        APP_DEBUG && Log::record('[ VIEW ] ' . $template . ' [ ' . var_export(array_keys($data), true) . ' ]', 'info');
+        App::$debug && Log::record('[ VIEW ] ' . $template . ' [ ' . var_export(array_keys($data), true) . ' ]', 'info');
         $this->template->fetch($template, $data, $config);
     }
 

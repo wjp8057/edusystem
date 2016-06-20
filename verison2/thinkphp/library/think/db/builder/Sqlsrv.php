@@ -12,7 +12,6 @@
 namespace think\db\builder;
 
 use think\db\Builder;
-use think\Log;
 
 /**
  * Sqlsrv数据库驱动
@@ -21,9 +20,9 @@ class Sqlsrv extends Builder
 {
     protected $selectSql = 'SELECT T1.* FROM (SELECT thinkphp.*, ROW_NUMBER() OVER (%ORDER%) AS ROW_NUMBER FROM (SELECT %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%) AS thinkphp) AS T1 %LIMIT%%COMMENT%';
     protected $selectInsertSql = 'SELECT %DISTINCT% %FIELD% FROM %TABLE%%JOIN%%WHERE%%GROUP%%HAVING%';
-   /* protected $deleteSql = 'DELETE FROM %TABLE% %USING% %JOIN% %WHERE% %LIMIT% %LOCK%%COMMENT%';*/
+    protected $updateSql = 'UPDATE %TABLE% SET %SET% FROM %TABLE% %JOIN% %WHERE% %LIMIT% %LOCK%%COMMENT%';
+    protected $deleteSql = 'DELETE FROM %TABLE% %USING% %JOIN% %WHERE% %LIMIT% %LOCK%%COMMENT%';
 
-    protected $updateSql = 'UPDATE %TABLE% SET %SET% %JOIN% %WHERE% %LIMIT% %LOCK%%COMMENT%';
     /**
      * order分析
      * @access protected
@@ -32,7 +31,7 @@ class Sqlsrv extends Builder
      */
     protected function parseOrder($order)
     {
-        return !empty($order) ? ' ORDER BY ' . $order: ' ORDER BY rand()';
+        return !empty($order) ? ' ORDER BY ' . $order : ' ORDER BY rand()';
     }
 
     /**
@@ -80,7 +79,7 @@ class Sqlsrv extends Builder
         }
         return 'WHERE ' . $limitStr;
     }
-    public function selectInsert($fields, $table, $options)
+     public function selectInsert($fields, $table, $options)
     {
         $this->selectSql=$this->selectInsertSql;
         return parent::selectInsert($fields, $table, $options);

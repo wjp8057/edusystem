@@ -11,7 +11,8 @@
 
 namespace think\view\driver;
 
-use think\Exception;
+use think\App;
+use think\exception\TemplateNotFoundException;
 use think\Log;
 use think\Request;
 
@@ -62,10 +63,10 @@ class Php
         }
         // 模板不存在 抛出异常
         if (!is_file($template)) {
-            throw new Exception('template file not exists:' . $template, 10700);
+            throw new TemplateNotFoundException('template not exists:' . $template, $template);
         }
         // 记录视图信息
-        APP_DEBUG && Log::record('[ VIEW ] ' . $template . ' [ ' . var_export(array_keys($data), true) . ' ]', 'info');
+        App::$debug && Log::record('[ VIEW ] ' . $template . ' [ ' . var_export(array_keys($data), true) . ' ]', 'info');
         extract($data, EXTR_OVERWRITE);
         include $template;
     }
@@ -91,8 +92,8 @@ class Php
      */
     private function parseTemplate($template)
     {
-        if (empty($this->config['view_path']) && defined('MODULE_PATH')) {
-            $this->config['view_path'] = MODULE_PATH . 'view' . DS;
+        if (empty($this->config['view_path'])) {
+            $this->config['view_path'] = App::$modulePath . 'view' . DS;
         }
 
         if (strpos($template, '@')) {

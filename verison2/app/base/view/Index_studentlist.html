@@ -104,10 +104,10 @@
                 $.messager.alert('错误', '你无法查看其它学院学生详细信息！（' + row.name + '）！', 'error');
                 return;
             }
-            parent.menuTabs.addTab("编辑学生-"+row.name,"{$ROOT}/Base/Index/studentdetail?studentno="+row.studentno,"icon-edit");
+            parent.menuTabs.addTab("编辑学生-"+row.name,"{$ROOT}/base/index/studentdetail?studentno="+row.studentno,"icon-edit");
         });
         $("#menu_add,#add").click(function(){
-            parent.menuTabs.addTab("添加学生","{$ROOT}/Base/Index/studentdetail?op=add","icon icon-add");
+            parent.menuTabs.addTab("添加学生","{$ROOT}/base/index/studentdetail?op=add","icon icon-add");
         });
         /**
          * 导出学生名单

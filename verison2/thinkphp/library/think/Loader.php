@@ -11,11 +11,14 @@
 
 namespace think;
 
+use think\App;
 use think\exception\HttpException;
+use think\exception\ClassNotFoundException;
 use think\Request;
 
 class Loader
 {
+    protected static $instance = [];
     // 类名映射
     protected static $map = [];
     // 加载列表
@@ -77,7 +80,7 @@ class Loader
             $filename = $path . str_replace('\\', DS, $class) . EXT;
             if (is_file($filename)) {
                 // 开启调试模式Win环境严格区分大小写
-                if (APP_DEBUG && IS_WIN && false === strpos(realpath($filename), $class . EXT)) {
+                if (IS_WIN && false === strpos(realpath($filename), $class . EXT)) {
                     return false;
                 }
                 include $filename;
@@ -144,7 +147,7 @@ class Loader
             foreach ($map as $namespace => $path) {
                 $length = strlen($namespace);
                 if ('\\' !== $namespace[$length - 1]) {
-                    throw new \InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
+                    throw new \InvalidArgumentException("PSR-4 error: A non-empty PSR-4 prefix must end with a namespace separator.");
                 }
                 self::$prefixLengthsPsr4[$namespace[0]][$namespace] = $length;
                 self::$prefixDirsPsr4[$namespace]                   = (array) $path;
@@ -238,7 +241,7 @@ class Loader
                 $baseUrl = self::$namespace[$name];
             } elseif ('@' == $name) {
                 //加载当前模块应用类库
-                $baseUrl = MODULE_PATH;
+                $baseUrl = App::$modulePath;
             } elseif (is_dir(EXTEND_PATH . $name)) {
                 $baseUrl = EXTEND_PATH;
             } else {
@@ -252,7 +255,7 @@ class Loader
         $filename = $baseUrl . $class . $ext;
         if (is_file($filename)) {
             // 开启调试模式Win环境严格区分大小写
-            if (APP_DEBUG && IS_WIN && false === strpos(realpath($filename), $class . $ext)) {
+            if (IS_WIN && false === strpos(realpath($filename), $class . $ext)) {
                 return false;
             }
             include $filename;
@@ -269,12 +272,12 @@ class Loader
      * @param bool $appendSuffix 是否添加类名后缀
      * @param string $common 公共模块名
      * @return Object
+     * @throws ClassNotFoundException
      */
     public static function model($name = '', $layer = 'model', $appendSuffix = false, $common = 'common')
     {
-        static $_model = [];
-        if (isset($_model[$name . $layer])) {
-            return $_model[$name . $layer];
+        if (isset(self::$instance[$name . $layer])) {
+            return self::$instance[$name . $layer];
         }
         if (strpos($name, '/')) {
             list($module, $name) = explode('/', $name, 2);
@@ -289,10 +292,10 @@ class Loader
             if (class_exists($class)) {
                 $model = new $class();
             } else {
-                throw new Exception('class [ ' . $class . ' ] not exists', 10001);
+                throw new ClassNotFoundException('class not exists:' . $class, $class);
             }
         }
-        $_model[$name . $layer] = $model;
+        self::$instance[$name . $layer] = $model;
         return $model;
     }
 
@@ -303,14 +306,10 @@ class Loader
      * @param bool $appendSuffix 是否添加类名后缀
      * @param string $empty 空控制器名称
      * @return Object|false
+     * @throws ClassNotFoundException
      */
     public static function controller($name, $layer = 'controller', $appendSuffix = false, $empty = '')
     {
-        static $_instance = [];
-
-        if (isset($_instance[$name . $layer])) {
-            return $_instance[$name . $layer];
-        }
         if (strpos($name, '/')) {
             list($module, $name) = explode('/', $name);
         } else {
@@ -318,13 +317,11 @@ class Loader
         }
         $class = self::parseClass($module, $layer, $name, $appendSuffix);
         if (class_exists($class)) {
-            $action                    = new $class(Request::instance());
-            $_instance[$name . $layer] = $action;
-            return $action;
+            return new $class(Request::instance());
         } elseif ($empty && class_exists($emptyClass = self::parseClass($module, $layer, $empty, $appendSuffix))) {
             return new $emptyClass(Request::instance());
         } else {
-            throw new HttpException(404, 'class [ ' . $class . ' ] not exists');
+            throw new ClassNotFoundException('class not exists:' . $class, $class);
         }
     }
 
@@ -335,6 +332,7 @@ class Loader
      * @param bool $appendSuffix 是否添加类名后缀
      * @param string $common 公共模块名
      * @return Object|false
+     * @throws ClassNotFoundException
      */
     public static function validate($name = '', $layer = 'validate', $appendSuffix = false, $common = 'common')
     {
@@ -342,10 +340,9 @@ class Loader
         if (empty($name)) {
             return new Validate;
         }
-        static $_instance = [];
 
-        if (isset($_instance[$name . $layer])) {
-            return $_instance[$name . $layer];
+        if (isset(self::$instance[$name . $layer])) {
+            return self::$instance[$name . $layer];
         }
         if (strpos($name, '/')) {
             list($module, $name) = explode('/', $name);
@@ -360,10 +357,10 @@ class Loader
             if (class_exists($class)) {
                 $validate = new $class;
             } else {
-                throw new Exception('class [ ' . $class . ' ] not exists', 10001);
+                throw new ClassNotFoundException('class not exists:' . $class, $class);
             }
         }
-        $_instance[$name . $layer] = $validate;
+        self::$instance[$name . $layer] = $validate;
         return $validate;
     }
 
@@ -402,33 +399,6 @@ class Loader
             return App::invokeMethod([$class, $action . Config::get('action_suffix')], $vars);
         }
     }
-    /**
-     * 取得对象实例 支持调用类的静态方法
-     *
-     * @param string $class  对象类名
-     * @param string $method 类的静态方法名
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    public static function instance($class, $method = '')
-    {
-        static $_instance = [];
-        $identify         = $class . $method;
-        if (!isset($_instance[$identify])) {
-            if (class_exists($class)) {
-                $o = new $class();
-                if (!empty($method) && method_exists($o, $method)) {
-                    $_instance[$identify] = call_user_func_array([ & $o, $method], []);
-                } else {
-                    $_instance[$identify] = $o;
-                }
-            } else {
-                throw new Exception('class not exist :' . $class, 10007);
-            }
-        }
-        return $_instance[$identify];
-    }
 
     /**
      * 字符串命名风格转换
@@ -457,8 +427,17 @@ class Loader
     {
         $name  = str_replace(['/', '.'], '\\', $name);
         $array = explode('\\', $name);
-        $class = self::parseName(array_pop($array), 1) . (CLASS_APPEND_SUFFIX || $appendSuffix ? ucfirst($layer) : '');
+        $class = self::parseName(array_pop($array), 1) . (App::$suffix || $appendSuffix ? ucfirst($layer) : '');
         $path  = $array ? implode('\\', $array) . '\\' : '';
-        return APP_NAMESPACE . '\\' . (APP_MULTI_MODULE ? $module . '\\' : '') . $layer . '\\' . $path . $class;
+        return App::$namespace . '\\' . ($module ? $module . '\\' : '') . $layer . '\\' . $path . $class;
+    }
+
+    /**
+     * 初始化类的实例
+     * @return void
+     */
+    public static function clearInstance()
+    {
+        self::$instance = [];
     }
 }

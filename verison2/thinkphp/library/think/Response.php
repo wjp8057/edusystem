@@ -20,7 +20,7 @@ class Response
     protected static $instance = [];
     // 输出数据的转换方法
     protected $transform;
-    // 输出数据
+    // 原始数据
     protected $data;
     // 输出类型
     protected $type;
@@ -48,18 +48,15 @@ class Response
      * @param string $type 输出类型
      * @param array $options 输出参数
      */
-    public function __construct($data = [], $type = '', $options = [])
+    public function __construct($data = '', $type = '', $options = [])
     {
         $this->data = $data;
-        if (empty($type)) {
-            $isAjax = Request::instance()->isAjax();
-            $type   = $isAjax ? 'json' : 'html';
-        }
-        $this->type = strtolower($type);
+        $this->type = empty($type) ? 'null' : strtolower($type);
 
         if (isset($this->contentTypes[$this->type])) {
             $this->contentType($this->contentTypes[$this->type]);
         }
+
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
@@ -75,16 +72,12 @@ class Response
      * @param array $options 输出参数
      * @return Response
      */
-    public static function create($data = [], $type = '', $options = [])
+    public static function create($data = '', $type = '', $options = [])
     {
-        if (empty($type)) {
-            $isAjax = Request::instance()->isAjax();
-            $type   = $isAjax ? 'json' : 'html';
-        }
-        $type = strtolower($type);
+        $type = empty($type) ? 'null' : strtolower($type);
 
         if (!isset(self::$instance[$type])) {
-            $class = (isset($options['namespace']) ? $options['namespace'] : '\\think\\response\\') . ucfirst($type);
+            $class = strpos($type, '\\') ? $type : '\\think\\response\\' . ucfirst($type);
             if (class_exists($class)) {
                 $response = new $class($data, $type, $options);
             } else {
@@ -98,26 +91,19 @@ class Response
     /**
      * 发送数据到客户端
      * @access public
-     * @param mixed $data 数据
      * @return mixed
-     * @throws Exception
+     * @throws \InvalidArgumentException
      */
-    public function send($data = null)
+    public function send()
     {
-        $data = !is_null($data) ? $data : $this->data;
-
         if (isset($this->contentType)) {
             $this->contentType($this->contentType);
-        }
-
-        if (is_callable($this->transform)) {
-            $data = call_user_func_array($this->transform, [$data]);
         }
 
         defined('RESPONSE_TYPE') or define('RESPONSE_TYPE', $this->type);
 
         // 处理输出数据
-        $data = $this->output($data);
+        $data = $this->getContent();
 
         // 监听response_data
         Hook::listen('response_data', $data, $this);
@@ -137,7 +123,7 @@ class Response
         if (is_scalar($data)) {
             echo $data;
         } elseif (!is_null($data)) {
-            throw new Exception('不支持的数据类型输出：' . gettype($data));
+            throw new \InvalidArgumentException('variable type error：' . gettype($data));
         }
 
         if (function_exists('fastcgi_finish_request')) {
@@ -195,34 +181,19 @@ class Response
     }
 
     /**
-     * 返回封装后的API数据到客户端
-     * @access public
-     * @param mixed $data 要返回的数据
-     * @param integer $code 返回的code
-     * @param string $msg 提示信息
-     * @return mixed
-     */
-    public function result($data, $code = 0, $msg = '')
-    {
-        $result = [
-            'code' => $code,
-            'msg'  => $msg,
-            'time' => $_SERVER['REQUEST_TIME'],
-            'data' => $data,
-        ];
-        return $this->data($result);
-    }
-
-    /**
      * 设置响应头
      * @access public
-     * @param string $name 参数名
+     * @param string|array $name 参数名
      * @param string $value 参数值
      * @return $this
      */
-    public function header($name, $value)
+    public function header($name, $value = null)
     {
-        $this->header[$name] = $value;
+        if (is_array($name)) {
+            $this->header = array_merge($this->header, $name);
+        } else {
+            $this->header[$name] = $value;
+        }
         return $this;
     }
 
@@ -315,12 +286,26 @@ class Response
     }
 
     /**
-     * 获取数据
+     * 获取原始数据
      * @return mixed
      */
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * 获取输出数据
+     * @return mixed
+     */
+    public function getContent()
+    {
+        if (is_callable($this->transform)) {
+            $data = call_user_func_array($this->transform, [$this->data]);
+        }else{
+            $data = $this->data;
+        }
+        return $this->output($data);
     }
 
     /**
@@ -331,4 +316,13 @@ class Response
     {
         return $this->type;
     }
+
+    /**
+     * 获取状态码
+     * @return integer
+     */
+    public function getCode()
+    {
+        return isset($this->header['status']) ? $this->header['status'] : 200;
+    }    
 }

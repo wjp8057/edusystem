@@ -14,7 +14,9 @@ namespace app\selective\controller;
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\R32;
 use app\common\service\SchedulePlan;
+use app\common\service\Selective;
 
 class Manage extends MyController {
     public function  courselist($page = 1, $rows = 20, $year, $term, $courseno = '%', $coursename = '%', $classno = '%', $school = '',$amount='')
@@ -41,6 +43,31 @@ class Manage extends MyController {
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
+        return json($result);
+    }
+
+    public function  coursestudent( $year, $term, $courseno)
+    {
+        $result = null;
+        try {
+            $obj = new R32();
+            $result = $obj->getStudentList(1,10000,$year,$term,$courseno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function syncourse($year,$term){
+        $result = null;
+       /* try {*/
+            $obj=new SchedulePlan();
+            $obj->updateAttendent($year,$term);
+            $obj = new Selective();
+            $result = $obj->update($year,$term);
+      /*  } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }*/
         return json($result);
     }
 

@@ -11,6 +11,8 @@
 
 namespace think;
 
+use think\App;
+
 class Config
 {
     // 配置参数
@@ -40,7 +42,7 @@ class Config
         if (empty($type)) {
             $type = pathinfo($config, PATHINFO_EXTENSION);
         }
-        $class = (false === strpos($type, '\\')) ? '\\think\\config\\driver\\' . ucwords($type) : $type;
+        $class = strpos($type, '\\') ? $type : '\\think\\config\\driver\\' . ucwords($type);
         self::set((new $class())->parse($config), $name, $range);
     }
 
@@ -58,8 +60,6 @@ class Config
             self::$config[$range] = [];
         }
         if (is_file($file)) {
-            // 记录加载信息
-            APP_DEBUG && Log::record('[ CONFIG ] ' . $file, 'info');
             $type = pathinfo($file, PATHINFO_EXTENSION);
             if ('php' != $type) {
                 return self::parse($file, $type, $name, $range);

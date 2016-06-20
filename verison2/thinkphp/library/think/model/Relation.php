@@ -41,6 +41,8 @@ class Relation
     protected $localKey;
     // 数据表别名
     protected $alias;
+    // 当前关联的JOIN类型
+    protected $joinType;
 
     /**
      * 架构函数
@@ -67,6 +69,7 @@ class Relation
             'foreignKey' => $this->foreignKey,
             'localKey'   => $this->localKey,
             'alias'      => $this->alias,
+            'joinType'   => $this->joinType,
         ];
         return $name ? $info[$name] : $info;
     }
@@ -396,15 +399,17 @@ class Relation
      * @param string $foreignKey 关联外键
      * @param string $localKey 关联主键
      * @param array  $alias 别名定义
+     * @param string $joinType JOIN类型
      * @return $this
      */
-    public function hasOne($model, $foreignKey, $localKey, $alias)
+    public function hasOne($model, $foreignKey, $localKey, $alias = [], $joinType = 'INNER')
     {
         $this->type       = self::HAS_ONE;
         $this->model      = $model;
         $this->foreignKey = $foreignKey;
         $this->localKey   = $localKey;
         $this->alias      = $alias;
+        $this->joinType   = $joinType;
 
         // 返回关联的模型对象
         return $this;
@@ -417,9 +422,10 @@ class Relation
      * @param string $foreignKey 关联外键
      * @param string $otherKey 关联主键
      * @param array  $alias 别名定义
+     * @param string $joinType JOIN类型
      * @return $this
      */
-    public function belongsTo($model, $foreignKey, $otherKey, $alias)
+    public function belongsTo($model, $foreignKey, $otherKey, $alias = [], $joinType = 'INNER')
     {
         // 记录当前关联信息
         $this->type       = self::BELONGS_TO;
@@ -427,6 +433,7 @@ class Relation
         $this->foreignKey = $foreignKey;
         $this->localKey   = $otherKey;
         $this->alias      = $alias;
+        $this->joinType   = $joinType;
 
         // 返回关联的模型对象
         return $this;
@@ -608,7 +615,7 @@ class Relation
             $query                    = clone $this->parent->db();
             return $query->table($this->middle)->insert($pivot);
         } else {
-            throw new Exception(' miss relation data');
+            throw new Exception('miss relation data');
         }
     }
 
@@ -673,7 +680,7 @@ class Relation
             }
             return call_user_func_array([$db, $method], $args);
         } else {
-            throw new Exception(__CLASS__ . ':' . $method . ' method not exist');
+            throw new Exception('method not exists:' . __CLASS__ . '->' . $method);
         }
     }
 

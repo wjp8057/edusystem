@@ -12,13 +12,12 @@
 namespace think;
 
 use think\Exception;
-use think\Input;
 use think\Request;
 
 class Validate
 {
     // 实例
-    protected static $instance = null;
+    protected static $instance;
 
     // 自定义的验证类型
     protected static $type = [];
@@ -551,7 +550,7 @@ class Validate
                 $result = is_array($value);
                 break;
             case 'file':
-                $file   = Input::file($value);
+                $file   = Request::instance()->file($value);
                 $result = !empty($file);
                 break;
             default:
@@ -602,7 +601,7 @@ class Validate
      */
     protected function fileExt($value, $rule)
     {
-        $file = Input::file($value);
+        $file = Request::instance()->file($value);
         if (empty($file)) {
             return false;
         }
@@ -630,7 +629,7 @@ class Validate
      */
     protected function fileMime($value, $rule)
     {
-        $file = Input::file($value);
+        $file = Request::instance()->file($value);
         if (empty($file)) {
             return false;
         }
@@ -658,7 +657,7 @@ class Validate
      */
     protected function fileSize($value, $rule)
     {
-        $file = Input::file($value);
+        $file = Request::instance()->file($value);
         if (empty($file)) {
             return false;
         }
@@ -1115,7 +1114,7 @@ class Validate
         if (method_exists($class, $method)) {
             return call_user_func_array([$class, $method], $params);
         } else {
-            throw new Exception(__CLASS__ . ':' . $method . ' method not exist');
+            throw new \BadMethodCallException('method not exists:' . __CLASS__ . '->' . $method);
         }
     }
 }

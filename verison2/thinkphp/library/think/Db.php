@@ -11,6 +11,7 @@
 
 namespace think;
 
+use think\App;
 use think\Collection;
 use think\db\Query;
 
@@ -39,12 +40,6 @@ use think\db\Query;
  */
 class Db
 {
-    // 数组数据集
-    const RESULTSET_ARRAY = 1;
-    // 对象数据集
-    const RESULTSET_COLLECTION = 2;
-    // 自定义对象数据集
-    const RESULTSET_CLASS = 3;
     //  数据库连接实例
     private static $instance = [];
     // 查询次数
@@ -70,11 +65,11 @@ class Db
             // 解析连接参数 支持数组和字符串
             $options = self::parseConfig($config);
             if (empty($options['type'])) {
-                throw new Exception('db type error');
+                throw new \InvalidArgumentException('Underfined db type');
             }
-            $class = (!empty($options['namespace']) ? $options['namespace'] : '\\think\\db\\connector\\') . ucwords($options['type']);
+            $class = strpos($options['type'], '\\') ? $options['type'] : '\\think\\db\\connector\\' . ucwords($options['type']);
             // 记录初始化信息
-            APP_DEBUG && Log::record('[ DB ] INIT ' . $options['type'] . ':' . var_export($options, true), 'info');
+            App::$debug && Log::record('[ DB ] INIT ' . $options['type'] . ':' . var_export($options, true), 'info');
             if (true === $name) {
                 return new $class($options);
             } else {

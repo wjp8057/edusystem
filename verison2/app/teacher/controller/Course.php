@@ -50,7 +50,7 @@ class Course extends MyController{
             $coursename=Item::getCourseItem(substr($courseno,0,7))['coursename'];
             $sheet=$coursename;
             $title=$year.'年第'.$term.'学期'.$coursename.'('.$courseno.') (共'.count($data).'人)';
-            $template= array("studentno"=>"学号","studentname"=>"姓名","sex"=>"性别","classname"=>"班级","schoolname"=>"学院","approachname"=>"修课方式");
+            $template= array("studentno"=>"学号","studentname"=>"姓名","sexname"=>"性别","classname"=>"班级","schoolname"=>"学院","approachname"=>"修课方式");
             $string=array("studentno");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
             PHPExcel::export2Excel($file,$array);

@@ -65,8 +65,8 @@ class RoomReserve extends MyService{
         $result=$this->query->table('roomreserve')->join('classrooms','classrooms.roomno=roomreserve.roomno')
             ->join('schools','schools.school=roomreserve.school')
             ->join('timesections','timesections.name=roomreserve.time')
-            ->where($condition)->field('rtrim(classrooms.building) building,classrooms.roomno,rtrim(classrooms.jsn) roomname,
-            rtrim(schools.name) schoolname,rtrim(roomreserve.purpose) purpose,roomreserve.weeks,rtrim(timesections.value) timename')
+            ->where($condition)->field('roomreserve.year,roomreserve.term,rtrim(classrooms.building) building,classrooms.roomno,rtrim(classrooms.jsn) roomname,
+            rtrim(schools.name) schoolname,rtrim(roomreserve.purpose) purpose,roomreserve.weeks,rtrim(timesections.value) timename,roomreserve.day,roomreserve.approved')
             ->select();
         if(!is_array($result)||count($result)!=1)
             throw new Exception('recno'.$recno, MyException::PARAM_NOT_CORRECT);

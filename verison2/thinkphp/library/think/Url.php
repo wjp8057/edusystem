@@ -11,6 +11,7 @@
 
 namespace think;
 
+use think\App;
 use think\Cache;
 use think\Config;
 use think\Request;
@@ -140,7 +141,7 @@ class Url
             } else {
                 $path       = explode('/', $url);
                 $action     = array_pop($path);
-                $controller = empty($path) ? $controller : (Config::get('url_controller_convert') ? Loader::parseName(array_pop($path)) : array_pop($path));
+                $controller = empty($path) ? $controller : (Config::get('url_convert') ? Loader::parseName(array_pop($path)) : array_pop($path));
                 $module     = empty($path) ? $module : array_pop($path) . '/';
                 $url        = $module . $controller . '/' . $action;
             }
@@ -241,6 +242,7 @@ class Url
             }
             // 检查变量匹配
             $array = $vars;
+            $match = false;
             if ($pattern && self::pattern($pattern, $vars)) {
                 foreach ($pattern as $key => $val) {
                     if (isset($vars[$key])) {
@@ -255,7 +257,7 @@ class Url
             if (empty($pattern) && empty($param)) {
                 // 没有任何变量
                 return $url;
-            } elseif (!empty($match) || (!empty($param) && array_intersect_assoc($param, $array) == $param)) {
+            } elseif ($match && (empty($param) || array_intersect_assoc($param, $array) == $param)) {
                 // 存在变量定义
                 $vars = array_diff_key($array, $param);
                 return $url;
@@ -264,11 +266,11 @@ class Url
         return false;
     }
 
-    // 生成路由别名并缓存
+    // 生成路由映射并缓存
     private static function getRouteAlias()
     {
-        if ($alias = Cache::get('think_route_alias')) {
-            return $alias;
+        if ($item = Cache::get('think_route_map')) {
+            return $item;
         }
         // 获取路由定义
         $rules = Route::getRules();
@@ -290,8 +292,8 @@ class Url
                         list($route, $str) = explode('?', $route, 2);
                         parse_str($str, $param);
                     }
-                    $var             = self::parseVar($rule . '/' . $key);
-                    $alias[$route][] = [$rule . '/' . $key, $var, $param];
+                    $var            = self::parseVar($rule . '/' . $key);
+                    $item[$route][] = [$rule . '/' . $key, $var, $param];
                 }
             } else {
                 $route = $val['route'];
@@ -304,8 +306,8 @@ class Url
                     list($route, $str) = explode('?', $route, 2);
                     parse_str($str, $param);
                 }
-                $var             = self::parseVar($rule);
-                $alias[$route][] = [$rule, $var, $param];
+                $var            = self::parseVar($rule);
+                $item[$route][] = [$rule, $var, $param];
             }
         }
 
@@ -317,10 +319,17 @@ class Url
                 list($route, $str) = explode('?', $route, 2);
                 parse_str($str, $param);
             }
-            $alias[$route][] = [$rule, [], $param];
+            $item[$route][] = [$rule, [], $param];
         }
-        !APP_DEBUG && Cache::set('think_route_alias', $alias);
-        return $alias;
+
+        // 检测路由别名
+        $alias = Route::alias();
+        foreach ($alias as $rule => $route) {
+            $route          = is_array($route) ? $route[0] : $route;
+            $item[$route][] = [$rule, [], []];
+        }
+        !App::$debug && Cache::set('think_route_map', $item);
+        return $item;
     }
 
     // 分析路由规则中的变量
@@ -363,6 +372,6 @@ class Url
     // 清空路由别名缓存
     public static function clearAliasCache()
     {
-        Cache::rm('think_route_alias');
+        Cache::rm('think_route_map');
     }
 }

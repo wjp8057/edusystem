@@ -39,8 +39,8 @@ class R32 extends  MyService {
             ->join('classes  ',' classes.classno=students.classno')
             ->join('sexcode  ',' students.sex=sexcode.code')
             ->join('schools  ',' schools.school=classes.school')
-            ->field('rtrim(approachcode.name) as approachname,rtrim(students.studentno) studentno,
-            rtrim(students.name) studentname,rtrim(classes.classname) classname,rtrim(sexcode.name) sex,rtrim(schools.name) schoolname')
+            ->field('r32.approach,rtrim(approachcode.name) as approachname,rtrim(students.studentno) studentno,
+            rtrim(students.name) studentname,rtrim(classes.classname) classname,rtrim(sexcode.name) sexname,rtrim(students.sex) sex,rtrim(schools.name) schoolname')
             ->order('studentno')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);

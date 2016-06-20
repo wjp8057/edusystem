@@ -11,6 +11,8 @@
 
 namespace think;
 
+use think\App;
+
 class Cache
 {
     protected static $instance = [];
@@ -22,7 +24,7 @@ class Cache
      * @var object
      * @access protected
      */
-    protected static $handler = null;
+    protected static $handler;
 
     /**
      * 连接缓存
@@ -39,10 +41,10 @@ class Cache
         }
 
         if (true === $name || !isset(self::$instance[$name])) {
-            $class = (!empty($options['namespace']) ? $options['namespace'] : '\\think\\cache\\driver\\') . ucwords($type);
+            $class = strpos($type, '\\') ? $type : '\\think\\cache\\driver\\' . ucwords($type);
 
             // 记录初始化信息
-            APP_DEBUG && Log::record('[ CACHE ] INIT ' . $type . ':' . var_export($options, true), 'info');
+            App::$debug && Log::record('[ CACHE ] INIT ' . $type . ':' . var_export($options, true), 'info');
             if (true === $name) {
                 return new $class($options);
             } else {
