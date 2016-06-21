@@ -99,6 +99,7 @@ class Score extends  MyService {
                     $condition['term'] = $term;
                     $data = null;
                     $data['lock'] = 1;
+                    $data['edate'] = $examdate;
                     $this->query->table('scores')->where($condition)->update($data);
                     $info = '课程已最终提交并锁定！';
                 }

@@ -149,6 +149,12 @@ class TeacherAction extends RightAction {
             $Trans=D();
             $Trans->startTrans();
             $Model = new Model(); // 实例化一个model对象 没有对应任何数据表
+
+            $effectRow=$Model->execute("UPDATE WORKTEACHER
+                    SET WORKONE=0
+                    WHERE WORKTEACHER.YEAR=".$year);
+            if( $effectRow>0) $info.= $effectRow.'条工作量初始化！</br>';
+
             $effectRow=$Model->execute("UPDATE WORKTEACHER
                     SET WORKONE=TEMP.WORK
                     FROM  WORKTEACHER INNER JOIN (SELECT WORKDETAIL.TEACHERNO,SUM(WORKDETAIL.WORK*WORKDETAIL.REPEAT) AS WORK FROM WORKS INNER JOIN WORKDETAIL ON WORKDETAIL.MAP=WORKS.ID
@@ -212,6 +218,12 @@ class TeacherAction extends RightAction {
             $Trans=D();
             $Trans->startTrans();
             $Model = new Model(); // 实例化一个model对象 没有对应任何数据表
+            $effectRow=$Model->execute("UPDATE WORKTEACHER
+                    SET WORKTWO=0
+                    WHERE WORKTEACHER.YEAR=".$year);
+            if( $effectRow>0) $info.= $effectRow.'条工作量初始化！</br>';
+
+
             $effectRow=$Model->execute("UPDATE WORKTEACHER
                     SET WORKTWO=TEMP.WORK
                     FROM  WORKTEACHER INNER JOIN (SELECT WORKDETAIL.TEACHERNO,SUM(WORKDETAIL.WORK*WORKDETAIL.REPEAT) AS WORK FROM WORKS INNER JOIN WORKDETAIL ON WORKDETAIL.MAP=WORKS.ID

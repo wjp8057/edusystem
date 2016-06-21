@@ -78,9 +78,9 @@ class RightAction extends CommonAction{
             {
                 header("HTTP/1.0 ".$status." Not Login");
             }
-            else if($actionPath=="Teacher/Index/index")
+            else if($actionPath=="/Teacher/Index/index")
             {
-                redirect("Teacher/Login/index");
+                redirect("/Teacher/Login/index");
             }
             else
             {

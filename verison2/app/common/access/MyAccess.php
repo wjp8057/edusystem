@@ -112,6 +112,7 @@ class MyAccess {
         if(MyAccess::getErrorMessage($errorCode)=='not defined error')
             $errorCode='700';
         header('Content-type: text/html; charset=utf-8');
+        $errorMessage=str_replace(PHP_EOL, '', $errorMessage);
         header("HTTP/1.1 ".$errorCode." ".$errorMessage." ".MyAccess::getErrorMessage($errorCode)." ");
 
         $redirect='';

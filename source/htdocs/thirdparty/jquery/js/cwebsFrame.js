@@ -457,7 +457,7 @@ $.fn.extend({
  */
 jQuery.extend({
     cwebsStatus : function(status, inputMsg){
-        var loginUrl = "/Login";
+        var loginUrl = "/web/home/index/login";
         if(707 == status) {
             var errorMsg = "您还没有登陆系统，请先登陆！";
             $.messager.alert('系统消息',errorMsg, "error");
