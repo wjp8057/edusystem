@@ -1,0 +1,120 @@
+<layout name="layout"/>
+<script type="text/javascript">
+$(function () {
+    var school = $('#school');
+    school.combobox({
+        url: '{$ROOT}/all/option/school?only=0',
+        valueField: 'school',
+        textField: 'name'
+    });
+    $('#dg').datagrid({
+        title: '督导打分列表',
+        idField: 'teacherno',
+        striped: 'true',
+        pagination: 'true',
+        rownumbers: true,
+        singleSelect: true,
+        pageSize: 20,
+        url: '{$ROOT}/quality/expert/expertscorelist',
+        toolbar: '#toolbar',
+        queryParams: {year:$('#year').val(),term:$('#term').val()},
+        pageList: [20, 50, 100, 200],
+        columns: [[
+            {field: 'teacherno', title: '教师号', width: 80, align: 'center'},
+            {field: 'name', title: '姓名*', width: 80, align: 'center'},
+            {field: 'sexname', title: '性别', width: 80, align: 'center'},
+            {field: 'positionname', title: '职称', width: 80, align: 'center'},
+            {field: 'typename', title: '类型', width: 80, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 120, align: 'center'},
+            {field: 'amount', title: '打分数', width: 120, align: 'center'}
+        ]],
+        //标题行右键菜单
+        onHeaderContextMenu: function (e, field) {
+            e.preventDefault();
+            if (!cmenu_obj.cmenu)//没有的话创建一个
+                $('#dg').datagrid('createColumnMenu', cmenu_obj);
+            cmenu_obj.cmenu.menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        //数据行上右键菜单
+        onRowContextMenu: function (e, rowindex, row) {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow', rowindex);
+            $('#menu').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
+
+    //检索
+    $("#search").click(function () {
+        var tt = $('#dg');
+        tt.datagrid('loadData', {total: 0, rows: []});
+        tt.datagrid('load', {
+            year:$('#year').val(),
+            term:$('#term').val(),
+            name: $('#name').val(),
+            expert: $('#teacherno').val(),
+            school: $('#school').combobox('getValue')
+        });
+    });
+    $("#expert,#menu_expert").click(function () {
+        var row= $('#dg').datagrid('getSelected');
+        if(!row){
+            $.messager.alert('错误','请先选择一个教师！','error');
+            return;
+        }
+        if(row.school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1') {
+            $.messager.alert('错误', '你无法增加其他学院的老师为专家！（' + row.name + '）！', 'error');
+            return;
+        }
+        parent.menuTabs.addTab("新增专家打分-"+row.name,"{$ROOT}/quality/index/expertaddscore?teacherno="+row.teacherno,"icon icon-degree");
+    });
+
+    $("#calculate").click(function () {
+        var effectRow = {};
+        effectRow["year"] = $('#year').val();
+        effectRow["term"] = $('#term').val();
+        effectRow['standard']= $('#standard').val();
+        $.post('{$ROOT}/quality/expert/calculateall', effectRow, function (result) {
+            if (result.status == 1) {
+                $.messager.alert('成功', result.info, 'info');
+            } else {
+                $.messager.alert('错误', result.info, 'error');
+            }
+        }, 'json');
+    });
+});
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_expert' data-options="iconCls:'icon icon-degree'">专家新增打分</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="expert">教师号：</label><input id="teacherno" class="easyui-validatebox" size="10" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="10" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school">
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-degree',plain:'true'" id="expert">选中专家查询打分</a>
+            <label for="standard">标准：</label><input id="standard" class="easyui-validatebox" size="2" value="90"/>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-rescue',plain:'true'" id="calculate">计算学期归一分</a>
+        </div>
+    </div>
+    <table id="dg">
+    </table>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>选择一为教师为督导，进入增加评分环节。</li>
+        </ol>
+    </div>
+</div>

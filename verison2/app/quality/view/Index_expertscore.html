@@ -1,0 +1,140 @@
+<layout name="layout"/>
+<script type="text/javascript">
+    $(function () {
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0',
+            valueField: 'school',
+            textField: 'name'
+        });
+        $('#dg').datagrid({
+            title: '任课教师的得分',
+            idField: 'id', striped: 'true', pagination: 'true', singleSelect:true, rownumbers: true, pageSize: 50,
+            url: '{$ROOT}/quality/expert/teacherscorelist',
+            queryParams: {year:$('#year').val()},
+            toolbar: '#toolbar',
+            pageList: [50, 100, 200],
+            columns: [[
+                {field: 'teacherno', title: '教师号', width: 70, align: 'center'},
+                {field: 'teachername', title: '姓名', width: 110, align: 'center'},
+                {field: 'typename', title: '类型', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+                {field: 'score', title: '平均分', width: 50, align: 'center'},
+                {field: 'amount', title: '专家数', width: 50, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onSelect: function (rowindex, row) {
+                var tt = $('#dg2');
+                tt.datagrid('loadData', {total: 0, rows: []});
+                tt.datagrid('load', {
+                    year: $('#year').val(),
+                    term: $('#term').val(),
+                    teacherno: row.teacherno
+                });
+
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $('#dg2').datagrid({
+            title: '专家详细评分',
+            idField: 'teacherno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            url: '{$ROOT}/quality/expert/teacherexpert',
+            queryParams: {year:$('#year').val(),teacherno: ''},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'year', title: '学年', width: 40, align: 'center'},
+                {field: 'term', title: '学期', width: 40, align: 'center'},
+                {field: 'teacherno', title: '教师号', width: 70, align: 'center'},
+                {field: 'teachername', title: '姓名', width: 70, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+                {field: 'score', title: '得分', width: 50, align: 'center'},
+                {field: 'normalscore', title: '归一分', width: 50, align: 'center'},
+                {field: 'rem', title: '备注', width: 110, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                teacherno: $('#teacherno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        $('#menu_export,#export').click(function(){
+            var year= encodeURI($('#year').val());
+            var teacherno= encodeURI($('#teacherno').val());
+            var name=encodeURI($('#name').val());
+            var school=encodeURI($('#school').combobox('getValue'));
+            $.fileDownload("{$ROOT}/quality/expert/exportteacherscore?year="+year+"&teacherno="+teacherno+"&name="+name+"&school"+school, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出数据</div>
+    </div>
+    <div id="left" style="width:620px;float:left">
+        <div id="toolbar">
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="6" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出数据</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:730px;float:left;padding-left:5px;">
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>选中一个老师可以看到专家详细评分</li>
+        </ol>
+    </div>
+</div>

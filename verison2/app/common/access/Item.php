@@ -94,4 +94,18 @@ class Item {
             $result=$data[0];
         return $result;
     }
+
+    public static function getTeacherItem($teacherno,$alert=true){
+        $result=null;
+        $condition=null;
+        $condition['teacherno']=$teacherno;
+        $data=Db::table('teachers')->where($condition)->field('rtrim(name) as teachername,teacherno')->select();
+        if(!is_array($data)||count($data)!=1) {
+            if($alert)
+                throw new Exception('teacherno:' . $teacherno, MyException::ITEM_NOT_EXISTS);
+        }
+        else
+            $result=$data[0];
+        return $result;
+    }
 } 

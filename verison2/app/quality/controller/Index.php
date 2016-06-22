@@ -32,4 +32,14 @@ class Index extends Template
         }
         return $this->fetch();
     }
+
+    public function expertaddscore($teacherno)
+    {
+        try {
+            $this->assign('teacher', Item::getTeacherItem($teacherno));
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

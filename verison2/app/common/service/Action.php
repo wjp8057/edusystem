@@ -187,7 +187,6 @@ class Action extends MyService{
         $updateRow = 0;
         $deleteRow = 0;
         $insertRow = 0;
-
         $this->query->startTrans();
         //更新部分
         try {
@@ -203,6 +202,7 @@ class Action extends MyService{
                     $data['shortname'] = $one->shortname;
                     $data['rank'] = $one->rank;
                     $row = $this->query->table('action')->insert($data);
+
                     if ($row > 0)
                         $insertRow++;
                 }

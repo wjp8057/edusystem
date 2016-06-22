@@ -270,7 +270,7 @@ $(function () {
         tt.datagrid('loadData', {total: 0, rows: []});
         tt.datagrid('load', {
             name: $('#name').val(),
-            teacherno: $('#teacherno').val(),
+            teacherno: $('#expert').val(),
             school: $('#school').combobox('getValue')
         });
     });
@@ -305,7 +305,7 @@ $(function () {
      */
     $('#export,#menu_export').click(function () {
         var name = encodeURI($('#name').val());
-        var teacherno = encodeURI($('#teacherno').val());
+        var teacherno = encodeURI($('#expert').val());
         var school = encodeURI($('#school').combobox('getValue'));
         $.fileDownload("{$ROOT}/base/teacher/export?name=" + name + "&teacherno=" + teacherno + '&school=' + school, {
             preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",

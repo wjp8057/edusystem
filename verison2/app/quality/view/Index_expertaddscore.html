@@ -1,0 +1,258 @@
+<layout name="layout"/>
+<script type="text/javascript">
+    $(function () {
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0',
+            valueField: 'school',
+            textField: 'name'
+        });
+        $('#dg').datagrid({
+            title: '{$teacher.teachername}的评分',
+            idField: 'id', striped: 'true', pagination: 'true', singleSelect:true, rownumbers: true, pageSize: 50,
+            url: '{$ROOT}/quality/expert/scorelist',
+            queryParams: {expert: '{$teacher.teacherno}',year:$('#year').val(),term:$('#term').val()},
+            toolbar: '#toolbar',
+            pageList: [50, 100, 200],
+            columns: [[
+                {field: 'checkbox', title: '选中', checkbox: true},
+                {field: 'teacherno', title: '教师号', width: 70, align: 'center'},
+                {field: 'teachername', title: '姓名', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+                {field: 'score', title: '评分*', width: 50, align: 'center',editor:{type:'numberbox',options:{required:true,min:0,max:100, precision: 0}}},
+                {field: 'normalscore', title: '归一分', width: 50, align: 'center'},
+                {field: 'rem', title: '备注*', width: 110, align: 'center',editor:{type:'validatebox',options:{validType:'maxLength[15]'}}}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $('#dg2').datagrid({
+            title: '检索新教师',
+            idField: 'teacherno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            url: '{$ROOT}/quality/expert/teacherlist',
+            queryParams: {studentno: ''},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'checkbox', title: '选中', checkbox: true},
+                {field: 'teacherno', title: '教师号', width: 70, align: 'center'},
+                {field: 'name', title: '姓名', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                teacherno: $('#teacherno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        $("#add,#menu_add").click(function () {
+            var tt = $('#dg');
+            var tt2=$('#dg2');
+            var rows=tt2.datagrid('getSelections');
+            var length=rows.length;
+            for(var i=0;i<length;i++){
+                var classrows=tt.datagrid('getRows');
+                tt.datagrid('insertRow', {
+                    index: 0,
+                    row: {
+                        teacherno:rows[i].teacherno,teachername:rows[i].name,
+                        schoolname:rows[i].schoolname,score:0,normalscore:0,rem:''}
+                });
+            }
+            tt2.datagrid('clearSelections');
+            tt2.datagrid('clearChecked');
+
+        });
+        $("#remove,#menu_remove").click(function () {
+            var tt = $('#dg');
+            var rows=tt.datagrid('getSelections');
+            var length=rows.length;
+            var message="";
+            for(var i=length-1;i>=0;i--){
+                    var index=tt.datagrid('getRowIndex',rows[i].id);
+                    tt.datagrid('deleteRow',index);
+            }
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function () {
+            var total=0;
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            //获取更改的数据行内容
+            var effectRow = {};
+            var rows = tt.datagrid('getChanges', 'inserted');
+            var length=rows.length;
+            total=length;
+
+            var insertRows=[];
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.teacherno = rows[i].teacherno;
+                updateObj.score = rows[i].score;
+                updateObj.normalscore = rows[i].normalscore;
+                updateObj.rem =rows[i].rem;
+                insertRows.push(updateObj);
+            }
+            effectRow["inserted"] = $.toJSON(insertRows);
+
+            rows = tt.datagrid('getChanges', 'updated');
+            length=rows.length;
+            total+=length;
+            var updateRows=[];
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id = rows[i].id;
+                updateObj.score = rows[i].score;
+                updateObj.normalscore = rows[i].normalscore;
+                updateObj.rem =rows[i].rem;
+                updateRows.push(updateObj);
+            }
+            effectRow["updated"] = $.toJSON(updateRows);
+
+            rows = tt.datagrid('getChanges', 'deleted');
+            length=rows.length;
+            total+=length;
+            var deleteRows=[];
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id = rows[i].id;
+                deleteRows.push(updateObj);
+            }
+            effectRow["deleted"] = $.toJSON(deleteRows);
+
+            if (total<= 0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '没有数据需要保存！', 'info');
+                return;
+            }
+
+            effectRow["expert"] = '{$teacher.teacherno}';
+            effectRow["year"] = $('#year').val();
+            effectRow["term"] = $('#term').val();
+            $.post('{$ROOT}/quality/expert/scoreupdate', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+
+        $("#calculate").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            //获取更改的数据行内容
+            var effectRow = {};
+            effectRow["expert"] = '{$teacher.teacherno}';
+            effectRow["year"] = $('#year').val();
+            effectRow["term"] = $('#term').val();
+            effectRow['standard']= $('#standard').val();
+            $.post('{$ROOT}/quality/expert/calculate', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('reload');
+                    $.messager.alert('成功', result.info, 'info');
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出班级学生名单</div>
+    </div>
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中加入该班</div>
+    </div>
+    <div id="left" style="width:670px;float:left">
+        <div id="toolbar">
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="9" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="9" value="{$YEARTERM.term}"/>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存数据</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">将选中教师删除</a>
+            <label for="standard">标准：</label><input id="standard" class="easyui-validatebox" size="2" value="90"/>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-rescue',plain:'true'" id="calculate">立即计算归一分</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:580px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中加入列表</a>
+            <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li></li>
+        </ol>
+    </div>
+</div>
