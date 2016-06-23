@@ -217,4 +217,24 @@ class Expert extends MyController
         }
 
     }
+
+    public function exportscore($year,$term,$expert='%',$name='%',$school='')
+    {
+        try{
+            $obj = new QualityExpert();
+            $result = $obj->getList(1,10000,$year,$term,$expert,'%',$name,$school);
+            $data = $result['rows'];
+            $file = $year."学年第".$term."学期教师得分表";
+            $sheet = '全部';
+            $title = '';
+            $template = array('expertname'=>'督导',"teacherno" => "教师号", "teachername" => "姓名","typename"=>"类型", "schoolname" => "学院", "score" => "得分",'normalscore'=>'归一分','rem'=>'备注');
+            $string = array("teacherno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file, $array);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+
+    }
 }

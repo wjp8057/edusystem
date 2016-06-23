@@ -20,17 +20,35 @@ use think\Db;
 use think\Exception;
 
 class QualityExpert extends MyService{
-    public function getList($page = 1, $rows = 20,$year,$term, $teacherno)
+    /**获取某督导的具体打分情况
+     * @param int $page
+     * @param int $rows
+     * @param $year
+     * @param $term
+     * @param string $expert
+     * @param string $teacherno
+     * @param string $name
+     * @param string $school
+     * @return array|null
+     */
+    public function getList($page = 1, $rows = 20,$year,$term,$expert='%', $teacherno='%',$name='%',$school='')
     {
         $result=null;
         $condition['year'] = $year;
         $condition['term'] = $term;
-        $condition['expert'] = $teacherno;
+        if($expert!='%') $condition['qualityexpert.expert'] = array('like',$expert);
+        if($teacherno!='%') $condition['qualityexpert.teacherno'] = array('like',$expert);
+        if($name!='%') $condition['expert.name'] = array('like',$expert);
+        if($school!='') $condition['expert.school'] = $school;
+
         $data = $this->query->table('qualityexpert')
+            ->join('teachers expert', 'expert.teacherno=qualityexpert.expert')
             ->join('teachers', 'teachers.teacherno=qualityexpert.teacherno')
             ->join('schools ', ' schools.school=teachers.school')
+            ->join('teachertype ', ' teachertype.name=teachers.type')
             ->page($page, $rows)
-            ->field('qualityexpert.id,teachers.teacherno,rtrim(teachers.name) teachername,schools.school,(schools.name) as schoolname,score,normalscore,qualityexpert.rem')
+            ->field('qualityexpert.id,rtrim(expert.name) as expertname,teachers.teacherno,rtrim(teachers.name) teachername,schools.school,(schools.name) as schoolname,
+            rtrim(teachertype.value) as typename,score,normalscore,qualityexpert.rem')
             ->where($condition)->order('id')->select();
         $count = $this->query->table('qualityexpert')->where($condition)->count();
         if (is_array($data) && count($data) > 0)
@@ -38,6 +56,11 @@ class QualityExpert extends MyService{
         return $result;
     }
 
+    /**更新打分
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     public function update($postData){
         $updateRow = 0;
         $deleteRow = 0;
@@ -110,6 +133,14 @@ class QualityExpert extends MyService{
         return $result;
     }
 
+    /**计算归一分
+     * @param $year
+     * @param $term
+     * @param string $expert
+     * @param $standard
+     * @return array
+     * @throws Exception
+     */
     public function  calculate($year,$term,$expert='%',$standard){
         if(!is_numeric($standard))
             throw new Exception('standard:' .$standard.' is not number',MyException::PARAM_NOT_CORRECT);
@@ -131,7 +162,16 @@ class QualityExpert extends MyService{
         return ['info' => '计算完成', 'status' => "1"];
     }
 
-
+    /**获取督导打分情况汇总
+     * @param int $page
+     * @param int $rows
+     * @param $year
+     * @param $term
+     * @param string $expert
+     * @param string $name
+     * @param string $school
+     * @return array|null
+     */
     public function getScoreSummary($page = 1, $rows = 20,$year,$term, $expert='%',$name='%',$school='')
     {
         $result=null;
@@ -164,6 +204,15 @@ class QualityExpert extends MyService{
         return $result;
     }
 
+    /**教师学年平均分
+     * @param int $page
+     * @param int $rows
+     * @param $year
+     * @param string $teacherno
+     * @param string $name
+     * @param string $school
+     * @return array|null
+     */
     public function getTeacherScore($page = 1, $rows = 20,$year, $teacherno='%',$name='%',$school='')
     {
         $result=null;
@@ -195,7 +244,13 @@ class QualityExpert extends MyService{
         return $result;
     }
 
-
+    /**获取某位教师一学年的督导打分情况
+     * @param int $page
+     * @param int $rows
+     * @param $year
+     * @param $teacherno
+     * @return array|null
+     */
     public function getTeacherExpert($page = 1, $rows = 20,$year,$teacherno)
     {
         $result=null;
