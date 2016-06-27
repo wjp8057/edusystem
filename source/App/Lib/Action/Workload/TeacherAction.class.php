@@ -50,6 +50,7 @@ class TeacherAction extends RightAction {
                 $data['DISABLE']=(int)$one->disable;
                 $data['REM']=$one->rem;
                 $data['LEAVEDAY']=$one->leaveday;
+                $data['EXCEEDADD']=$one->exceedadd;
                 $data['PARTTERM']=$one->partterm;
                 $updaterow+=$Obj->where($condition)->save($data);
 
