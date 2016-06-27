@@ -55,7 +55,7 @@ class TeacherAction extends RightAction {
 
                 if(is_numeric($one->id)){
                 $Model->execute("UPDATE WORKTEACHER
-                  SET PERSONALSTAND=(STAND-120*PARTTERM)*(38-LEAVEDAY/7.0)/38,PERSONALEXCEEDSTAND=(STAND-120*PARTTERM)*(38-LEAVEDAY/7.0)/38*4/3+EXCEEDADD
+                  SET PERSONALSTAND=(STAND-(STAND-120)/2*PARTTERM)*(38-LEAVEDAY/7.0)/38,PERSONALEXCEEDSTAND=(STAND-(STAND-120)/2*PARTTERM)*(38-LEAVEDAY/7.0)/38*4/3+EXCEEDADD
                   WHERE WORKTEACHER.ID=". $one->id);
                 $Model->execute("UPDATE WORKTEACHER
                   SET PERSONALSTAND=0
@@ -111,7 +111,7 @@ class TeacherAction extends RightAction {
             if( $effectRow>0) $info.= $effectRow.'条教师信息更新！</br>';
 
             $effectRow=$Model->execute("UPDATE WORKTEACHER
-                    SET PERSONALSTAND=(STAND-120*PARTTERM)*(38-LEAVEDAY/7.0)/38,PERSONALEXCEEDSTAND=(STAND-120*PARTTERM)*(38-LEAVEDAY/7.0)/38*4/3+EXCEEDADD
+                    SET PERSONALSTAND=(STAND-(STAND-120)/2*PARTTERM)*(38-LEAVEDAY/7.0)/38,PERSONALEXCEEDSTAND=(STAND-(STAND-120)/2*PARTTERM)*(38-LEAVEDAY/7.0)/38*4/3+EXCEEDADD
                     WHERE WORKTEACHER.YEAR=".$year);
             if( $effectRow>0) $info.= $effectRow.'条考核标准更新！</br>';
 

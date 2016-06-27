@@ -50,6 +50,7 @@ class User extends MyService{
                 session("S_USER_INFO", $user);
                 $log=new MyLog();
                 $log->write('R');
+                $roles=trim($data['roles']);
                 //记录当次ip 时间，以便下次登陆用
                 $data=null;
                 $condition=null;
@@ -65,13 +66,16 @@ class User extends MyService{
                 }
                 else
                     Db::table('sessions')->insert($data);
-                return true;
+
+                if($roles=="B*"||$roles=="*B")
+                    return 2; //如果纯粹教师，返回状态2
+                return 1; //管理员教师返回状态1
             }
             else
-                return false;
+                return 0;
         }
         else
-            return false;
+            return 0;
     }
 
     /**获取用户列表
