@@ -168,7 +168,7 @@ class Classroom extends MyService {
             throw new Exception('year or term is empty', MyException::PARAM_NOT_CORRECT);
 
         if($weekday=='')
-            $daystring='(mon|tue|wes|thu|fri|sat|sun)';
+            $daystring='(isnull(mon,0)|isnull(tue,0)|isnull(wes,0)|isnull(thu,0)|isnull(fri,0)|isnull(sat,0)|isnull(sun,0))';
         else
             $daystring=$weekday;
 
@@ -186,7 +186,7 @@ class Classroom extends MyService {
         else{
             $timestring='0';
         }
-        $section='~((~'.$daystring.')|(~('.$timestring.'&'.$oewstring.')))=0';
+        $section='~((~isnull('.$daystring.',0))|(~('.$timestring.'&'.$oewstring.')))=0';
         if($roomno!='%') $condition['classrooms.roomno']=array('like',$roomno);
         if($name!='%') $condition['classrooms.jsn']=array('like',$name);
         if($building!='%') $condition['classrooms.building']=array('like',$building);
@@ -222,9 +222,13 @@ class Classroom extends MyService {
     function refreshTimeList($year,$term){
         $this->query->startTrans();
         try {
-            $condition['year']=$year;
-            $condition['term']=$term;
+            $condition=null;
+            $condition['timelist.year']=$year;
+            $condition['timelist.term']=$term;
             $this->query->table('timelist')->where($condition)->where("type='R'")->delete();//清除原有记录。
+            $condition=null;
+            $condition['schedule.year']=$year;
+            $condition['schedule.term']=$term;
             $subsql_mon = Db::table('schedule')->join('oewoptions ',' oewoptions.code=schedule.oew')
                 ->join('timesections ',' timesections.name=schedule.time')
                 ->field('schedule.roomno,dbo.group_or(timesections.timebits2&oewoptions.timebit) mon')
@@ -253,7 +257,9 @@ class Classroom extends MyService {
                 ->join('timesections ',' timesections.name=schedule.time')
                 ->field('schedule.roomno,dbo.group_or(timesections.timebits2&oewoptions.timebit) sun')
                 ->where($condition)->group('schedule.roomno')->where('schedule.day=7')->buildSql();
-
+            $condition=null;
+            $condition['schedule.year']=$year;
+            $condition['schedule.term']=$term;
             $this->query->table('schedule')
                 ->join($subsql_mon.' t1','t1.roomno=schedule.roomno','LEFT')
                 ->join($subsql_tue.' t2','t2.roomno=schedule.roomno','LEFT')

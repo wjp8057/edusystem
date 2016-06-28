@@ -16,6 +16,23 @@ require ROOT_PATH . '/vendor/PHPExcel/PHPExcel.php';
 
 class PHPExcel
 {
+    static private function save2File($filename,$PHPExcel){
+        // Redirect output to a client’s web browser (Excel5)
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="' . iconv("UTF-8", "GB2312", $filename) . '.xls"');
+        header('Cache-Control: max-age=0');
+        // If you're serving to IE 9, then the following may be needed
+        header('Cache-Control: max-age=1');
+        header('Set-Cookie: fileDownload=true; path=/'); //与fileDownload配合，否则无法出发成功事件
+        // If you're serving to IE over SSL, then the following may be needed
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
+        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+        header('Pragma: public'); // HTTP/1.0
+        $objWriter = \PHPExcel_IOFactory::createWriter($PHPExcel, 'Excel5'); //设置保存的excel
+        $objWriter->save('php://output');
+        exit;
+    }
     /**将一个数据集导出为excel表
      * @param string $filename 保存的文件名
      * @param array $array 包含$filename保存的文件，$sheet表名，$title表格标题，$template字段模板，$data数据集，$string需要以字符存储的数组
@@ -78,20 +95,22 @@ class PHPExcel
             $PHPExcel->getActiveSheet($sheetIndex)->getColumnDimension()->setAutoSize(true);
             $PHPExcel->getActiveSheet($sheetIndex)->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
         }
-        // Redirect output to a client’s web browser (Excel5)
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . iconv("UTF-8", "GB2312", $filename) . '.xls"');
-        header('Cache-Control: max-age=0');
-        // If you're serving to IE 9, then the following may be needed
-        header('Cache-Control: max-age=1');
-        header('Set-Cookie: fileDownload=true; path=/'); //与fileDownload配合，否则无法出发成功事件
-        // If you're serving to IE over SSL, then the following may be needed
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-        header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-        header('Pragma: public'); // HTTP/1.0
-        $objWriter = \PHPExcel_IOFactory::createWriter($PHPExcel, 'Excel5'); //设置保存的excel
-        $objWriter->save('php://output');
-        exit;
+        PHPExcel::save2File($filename,$PHPExcel);
+    }
+
+    /**打印学籍表 todo:1
+     * @param string $file
+     * @param array $data
+     */
+   static function  printStudent($file='',$data=[]){
+
+   }
+
+    /**打印成绩单 todo:2
+     * @param string $file
+     * @param array $data
+     */
+    static function  printScore($file='',$data=[]){
+
     }
 }
