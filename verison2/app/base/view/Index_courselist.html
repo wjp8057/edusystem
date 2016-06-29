@@ -13,7 +13,7 @@
         $('#dg').datagrid({
             title:'课程列表',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
             url:'{$ROOT}/base/course/courselist',toolbar:'#toolbar',
-            queryParams: {school:school.combobox('getValue')},
+            queryParams: {school:school.combobox('getValue'),courseno:''},
             pageList:[20,50,100,200],
             columns: [[
                 {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'equalLength[7]',required:true}}},

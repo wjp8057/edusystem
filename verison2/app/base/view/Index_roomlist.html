@@ -46,7 +46,7 @@
         $('#dg').datagrid({
             title:'教室列表',idField:'roomno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/base/room/roomlist',
-            queryParams: {area:area.combobox('getValue')},
+            queryParams: {area:area.combobox('getValue'),roomno:''},
             singleSelect:true,
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
