@@ -263,6 +263,7 @@
             tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {
+                tt.datagrid('endEditing');
                 var rowIndex = tt.datagrid('getRowIndex', row);
                 tt.datagrid('deleteRow', rowIndex);
             }
