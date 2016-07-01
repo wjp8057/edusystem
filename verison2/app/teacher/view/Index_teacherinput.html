@@ -1,8 +1,11 @@
 <layout name="layout" />
 <script type="text/javascript">
     $(function(){
+        var type=getQueryString('type');
+        if(type!='t')
+            $('#all').hide();
         $('#dg').datagrid({
-            idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,pageList:[20,40,60,100,200], url:'{$ROOT}/teacher/score/query',toolbar:'#toolbar',
+            idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:60,pageList:[60,120,240], url:'{$ROOT}/teacher/score/query',toolbar:'#toolbar',
             queryParams: {
                 year: getQueryString('year'),
                 term:  getQueryString('term'),
@@ -100,6 +103,22 @@
             required:true,
             value: "{$examdate}"
         });
+        $("#all").click(function(){
+            var tt= $('#dg');
+            var rows=tt.datagrid('getRows');
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                tt.datagrid('updateRow', {
+                    index: i,
+                    row: {
+                        testscore: '合格',
+                        examscore: 0,
+                        score: '合格',
+                        examrem: 'N'
+                    }
+                });
+            }
+        });
     });
     var FIVE={
         1:'优秀',
@@ -121,7 +140,7 @@
         1:'Q',
         2:'W',
         3:'A'
-    }
+    };
     function formatByType(val,rec){
         var type=getQueryString('type');
         for(var i=1;i<=3;i++) {
@@ -133,6 +152,7 @@
             }
 
         }
+        //两级制
         if(type=='t'){
             for( i=0;i<=1;i++) {
                 if (TWO[i] == val) {
@@ -270,6 +290,7 @@
         <div id="toolbar">
             <label for="examdate">考试日期：</label><input id="examdate"/>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存本页</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pen',plain:'true'" id="all">全部合格</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-shield',plain:'true'" id="saveFinal">最终提交并锁定课程</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印成绩单</a>
