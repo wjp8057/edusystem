@@ -37,7 +37,7 @@ class Index extends Controller
         return $this->fetch();
     }
 
-    public function  changepwd(){
+    public function  _empty(){
         return $this->fetch();
     }
 }
