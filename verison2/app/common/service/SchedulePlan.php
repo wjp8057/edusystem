@@ -58,7 +58,7 @@ class SchedulePlan extends MyService {
         return $result;
     }
 
-    function updateStatus($postData){
+    public function updateStatus($postData){
         $updateRow=0;
         //更新部分
         //开始事务
@@ -92,7 +92,7 @@ class SchedulePlan extends MyService {
         return $result;
     }
 
-    function updateAllStatus($year,$term,$halflock,$lock){
+    public function updateAllStatus($year,$term,$halflock,$lock){
         try {
             $condition['year']=$year;
             $condition['term']=$term;
@@ -108,7 +108,7 @@ class SchedulePlan extends MyService {
         return $result;
     }
 
-    function updateAttendent($year,$term){
+    public function updateAttendent($year,$term){
         $condition = null;
         $condition['r32.year'] = $year;
         $condition['r32.term'] = $term;

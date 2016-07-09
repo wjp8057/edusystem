@@ -86,19 +86,20 @@ class User extends MyService{
      * @param string $school
      * @return array
      */
-    public function getUserList($page=1,$rows=10,$username='%',$name='%',$school=''){
+    public function getUserList($page=1,$rows=10,$username='%',$name='%',$school='',$role='%'){
         $result=array();
         $condition=null;
         if($school!='') $condition['teachers.school']= $school;
         if($name!='%') $condition['teachers.name']=array('like',$name);
         if($username!='%')  $condition['users.username']=array('like',$username);
+        if($role!='%')  $condition['users.roles']=array('like',$role);
         $data=$this->query->table('users')->join('teachers','teachers.teacherno=users.teacherno')
             ->join('sessions','sessions.username=users.username','LEFT')
             ->join('schools ',' schools.school=teachers.school')
             ->join('sexcode','sexcode.code=teachers.sex')
             ->field('rtrim(users.roles) as role,rtrim(users.username) as username,teachers.sex,lock,
             users.teacherno,rtrim(teachers.name) as name,schools.school,schools.name as schoolname,
-            remoteip,logintime,modifydate,enteryear,rtrim(sexcode.name) sexname ')
+            remoteip,convert(varchar(100),logintime,20) logintime,convert(varchar(100),modifydate,20) modifydate,enteryear,rtrim(sexcode.name) sexname ')
             ->where($condition)->page($page,$rows)->order('username')->select();
         $count=$this->query->table('users')->join('teachers ',' teachers.teacherno=users.teacherno')
             ->join('schools ','schools.school=teachers.school')->where($condition)->count();

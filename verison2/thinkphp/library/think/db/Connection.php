@@ -330,7 +330,7 @@ abstract class Connection
         }
         // 根据参数绑定组装最终的SQL语句
         $this->queryStr = $this->getRealSql($sql, $bind);
-
+        config('app_debug')&&Log::record($this->queryStr);
         //释放前次的查询结果
         if (!empty($this->PDOStatement)) {
             $this->free();
@@ -374,7 +374,7 @@ abstract class Connection
         }
         // 根据参数绑定组装最终的SQL语句
         $this->queryStr = $this->getRealSql($sql, $bind);
-
+        config('app_debug')&&Log::record($this->queryStr);
         //释放前次的查询结果
         if (!empty($this->PDOStatement)) {
             $this->free();

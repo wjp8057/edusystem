@@ -16,7 +16,7 @@ use app\common\access\MyService;
 class Role extends MyService{
     public function getRoleList($page=1,$rows=1000){
         $result=null;
-        $data=$this->query->table('roles')->order('role')->field("role,rtrim(description) as name,'' as checked")->page($page,$rows)->select();
+        $data=$this->query->table('roles')->field("role,rtrim(description) as name,'' as checked")->page($page,$rows)->select();
         $count=$this->query->table('roles')->count();
         if(is_array($data)&&count($data)>0){ //小于0的话就不返回内容，防止IE下无法解析rows为NULL时的错误。
             $result=array('total'=>$count,'rows'=>$data);
