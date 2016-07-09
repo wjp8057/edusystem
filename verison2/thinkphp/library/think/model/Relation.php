@@ -197,7 +197,7 @@ class Relation
                     if (!empty($range)) {
                         // 查询关联数据
                         $data = $this->eagerlyManyToMany($model, [
-                            'pivot.' . $foreignKey => [
+                            'pivot.' . $localKey => [
                                 'in',
                                 $range,
                             ],
@@ -277,7 +277,7 @@ class Relation
                     if (isset($result->$pk)) {
                         $pk = $result->$pk;
                         // 查询管理数据
-                        $data = $this->eagerlyManyToMany($model, ['pivot.' . $foreignKey => $pk], $relation, $subRelation);
+                        $data = $this->eagerlyManyToMany($model, ['pivot.' . $localKey => $pk], $relation, $subRelation);
 
                         // 关联数据封装
                         if (!isset($data[$pk])) {
@@ -302,23 +302,22 @@ class Relation
      */
     protected function match($model, $relation, &$result)
     {
-        $modelName = Loader::parseName(basename(str_replace('\\', '/', $model)));
         // 重新组装模型数据
         foreach ($result->toArray() as $key => $val) {
             if (strpos($key, '__')) {
                 list($name, $attr) = explode('__', $key, 2);
-                if ($name == $modelName) {
+                if ($name == $relation) {
                     $list[$name][$attr] = $val;
                     unset($result->$key);
                 }
             }
         }
 
-        if (!isset($list[$modelName])) {
+        if (!isset($list[$relation])) {
             // 设置关联模型属性
-            $list[$modelName] = [];
+            $list[$relation] = [];
         }
-        $result->setAttr($relation, new $model($list[$modelName]));
+        $result->setAttr($relation, (new $model($list[$relation]))->isUpdate(true));
     }
 
     /**
@@ -375,7 +374,7 @@ class Relation
                 }
             }
             $set->pivot                = new Pivot($pivot, $this->middle);
-            $data[$set->$foreignKey][] = $set;
+            $data[$pivot[$localKey]][] = $set;
         }
         return $data;
     }

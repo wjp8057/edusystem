@@ -44,7 +44,7 @@ class Merge extends Model
      * @param bool      $cache 是否缓存
      * @return \think\Model
      */
-    public static function get($data = '', $with = [], $cache = false)
+    public static function get($data = null, $with = [], $cache = false)
     {
         $query = self::parseQuery($data, $with, $cache);
         $query = self::attachQuery($query);
@@ -106,7 +106,7 @@ class Merge extends Model
      * @param string    $with 关联预查询
      * @return array|false|string
      */
-    public static function all($data = [], $with = [], $cache = false)
+    public static function all($data = null, $with = [], $cache = false)
     {
         $query = self::parseQuery($data, $with, $cache);
         $query = self::attachQuery($query);
@@ -193,7 +193,7 @@ class Merge extends Model
                         unset($data[$pk]);
                     }
                 }
-                          
+
                 // 处理模型数据
                 $data = $this->parseData($this->name, $this->data);
                 // 写入主表数据
@@ -250,7 +250,7 @@ class Merge extends Model
             return $result;
         } catch (\Exception $e) {
             $db->rollback();
-            return false;
+            throw $e;
         }
     }
 
@@ -283,9 +283,9 @@ class Merge extends Model
             $this->trigger('after_delete', $this);
             $db->commit();
             return $result;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             $db->rollback();
-            return false;
+            throw $e;
         }
     }
 

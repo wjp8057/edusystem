@@ -9,25 +9,9 @@
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
 
-/**
- * Ini配置测试
- * @author    7IN0SAN9 <me@7in0.me>
- */
+namespace {%namespace%};
 
-namespace tests\thinkphp\library\think\config\driver;
-
-use think\config;
-
-class iniTest extends \PHPUnit_Framework_TestCase
+class {%className%} {%extend%}
 {
-    public function testParse()
-    {
-        Config::parse('inistring=1', 'ini');
-        $this->assertEquals(1, Config::get('inistring'));
-        Config::reset();
-        Config::parse(__DIR__ . '/fixtures/config.ini');
-        $this->assertTrue(Config::has('inifile'));
-        $this->assertEquals(1, Config::get('inifile'));
-        Config::reset();
-    }
+{%content%}
 }

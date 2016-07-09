@@ -19,6 +19,8 @@ return [
     'app_namespace'          => 'app',
     // 应用调试模式
     'app_debug'              => true,
+    // 应用Trace
+    'app_trace'              => false,
     // 应用模式状态
     'app_status'             => '',
     // 是否支持多模块
@@ -95,10 +97,8 @@ return [
     'url_domain_deploy'      => false,
     // 域名根，如.thinkphp.cn
     'url_domain_root'        => '',
-    // 是否自动转换URL中的控制器名
-    'url_controller_convert' => true,
-    // 是否自动转换URL中的操作名
-    'url_action_convert'     => true,
+    // 是否自动转换URL中的控制器和操作名
+    'url_convert'            => true,
     // 默认的访问控制器层
     'url_controller_layer'   => 'controller',
     // 表单请求类型伪装变量
@@ -144,6 +144,9 @@ return [
     'error_message'          => '页面错误！请稍后再试～',
     // 显示错误信息
     'show_error_msg'         => false,
+    // 异常处理handle类 留空使用 \think\exception\Handle
+    'exception_handle'       => '',
+
 
     // +----------------------------------------------------------------------
     // | 日志设置
@@ -223,8 +226,8 @@ return [
         'type' => 'sqlsrv',
         // 数据库连接DSN配置
         // 服务器地址
-    //    'hostname' => '127.0.0.1',
-       'hostname'    => '172.18.0.41',
+        'hostname' => '127.0.0.1',
+    //   'hostname'    => '172.18.0.41',
         // 数据库名
         'database' => 'logdb',
         // 数据库用户名

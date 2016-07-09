@@ -38,8 +38,8 @@ class File
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
-        if (substr($this->options['path'], -1) != '/') {
-            $this->options['path'] .= '/';
+        if (substr($this->options['path'], -1) != DS) {
+            $this->options['path'] .= DS;
         }
         $this->init();
     }
@@ -74,7 +74,7 @@ class File
             $dir = '';
             $len = $this->options['path_level'];
             for ($i = 0; $i < $len; $i++) {
-                $dir .= $name{$i} . '/';
+                $dir .= $name{$i} . DS;
             }
             if (!is_dir($this->options['path'] . $dir)) {
                 mkdir($this->options['path'] . $dir, 0755, true);
@@ -101,7 +101,7 @@ class File
         $content = file_get_contents($filename);
         if (false !== $content) {
             $expire = (int) substr($content, 8, 12);
-            if (0 != $expire && time() > filemtime($filename) + $expire) {
+            if (0 != $expire && $_SERVER['REQUEST_TIME'] > filemtime($filename) + $expire) {
                 //缓存过期删除缓存文件
                 $this->unlink($filename);
                 return false;

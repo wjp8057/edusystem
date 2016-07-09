@@ -138,8 +138,6 @@ abstract class Builder
     {
         if (is_string($value)) {
             $value = strpos($value, ':') === 0 && $this->query->isBind(substr($value, 1)) ? $value : $this->connection->quote($value);
-        } elseif (is_array($value) && is_string($value[0]) && strtolower($value[0]) == 'exp') {
-            $value = $value[1];
         } elseif (is_array($value)) {
             $value = array_map([$this, 'parseValue'], $value);
         } elseif (is_bool($value)) {
@@ -340,13 +338,13 @@ abstract class Builder
             } else {
                 $whereStr .= $exp . ' (' . $value . ')';
             }
-        } elseif (in_array($exp, ['< TIME', '> TIME'])){
-            $whereStr .= $key . ' ' . substr($exp,0,1) . ' ' . $this->parseDateTime($value, $field);
-        } elseif (in_array($exp, ['BETWEEN TIME', 'NOT BETWEEN TIME'])){
-            if(is_string($value)){
-                $value = explode(',',$value);
+        } elseif (in_array($exp, ['< TIME', '> TIME'])) {
+            $whereStr .= $key . ' ' . substr($exp, 0, 1) . ' ' . $this->parseDateTime($value, $field);
+        } elseif (in_array($exp, ['BETWEEN TIME', 'NOT BETWEEN TIME'])) {
+            if (is_string($value)) {
+                $value = explode(',', $value);
             }
-            $whereStr .= $key . ' ' . substr($exp,0,-4) . $this->parseDateTime($value[0], $field) . ' AND ' . $this->parseDateTime($value[1], $field);
+            $whereStr .= $key . ' ' . substr($exp, 0, -4) . $this->parseDateTime($value[0], $field) . ' AND ' . $this->parseDateTime($value[1], $field);
         }
         return $whereStr;
     }
@@ -370,17 +368,17 @@ abstract class Builder
     {
         // 获取时间字段类型
         $type = $this->query->getTableInfo('', 'type');
-        if(isset($type[$key])){
+        if (isset($type[$key])) {
             $value = strtotime($value) ?: $value;
-            if(preg_match('/(datetime|timestamp)/is', $type[$key])){
+            if (preg_match('/(datetime|timestamp)/is', $type[$key])) {
                 // 日期及时间戳类型
                 $value = date('Y-m-d H:i:s', $value);
-            }elseif(preg_match('/(date)/is', $type[$key])){
+            } elseif (preg_match('/(date)/is', $type[$key])) {
                 // 日期及时间戳类型
                 $value = date('Y-m-d', $value);
             }
         }
-        return is_int($value)? $value : $this->connection->quote($value);
+        return is_int($value) ? $value : $this->connection->quote($value);
     }
 
     /**
@@ -625,7 +623,7 @@ abstract class Builder
             $value    = array_values($data);
             $values[] = 'SELECT ' . implode(',', $value);
         }
-        $fields = array_map([$this, 'parseKey'], array_keys($dataSet[0]));
+        $fields = array_map([$this, 'parseKey'], array_keys(reset($dataSet)));
         $sql    = str_replace(
             ['%TABLE%', '%FIELD%', '%DATA%', '%COMMENT%'],
             [

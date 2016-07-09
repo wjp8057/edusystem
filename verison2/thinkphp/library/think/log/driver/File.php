@@ -45,7 +45,7 @@ class File
 
         //检测日志文件大小，超过配置大小则备份日志文件重新生成
         if (is_file($destination) && floor($this->config['file_size']) <= filesize($destination)) {
-            rename($destination, dirname($destination) . DS . time() . '-' . basename($destination));
+            rename($destination, dirname($destination) . DS . $_SERVER['REQUEST_TIME'] . '-' . basename($destination));
         }
 
         // 获取基本信息
@@ -54,11 +54,10 @@ class File
         } else {
             $current_uri = "cmd:" . implode(' ', $_SERVER['argv']);
         }
-        $runtime    = microtime(true) - START_TIME;
-        $reqs       = number_format(1 / number_format($runtime, 8), 2);
-        $runtime    = number_format($runtime, 6);
+        $runtime    = number_format(microtime(true), 8, '.', '') - THINK_START_TIME;
+        $reqs       = number_format(1 / $runtime, 2);
         $time_str   = " [运行时间：{$runtime}s] [吞吐率：{$reqs}req/s]";
-        $memory_use = number_format((memory_get_usage() - START_MEM) / 1024, 2);
+        $memory_use = number_format((memory_get_usage() - THINK_START_MEM) / 1024, 2);
         $memory_str = " [内存消耗：{$memory_use}kb]";
         $file_load  = " [文件加载：" . count(get_included_files()) . "]";
 
@@ -67,7 +66,7 @@ class File
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);
-                }                
+                }
                 $info .= '[ ' . $type . ' ] ' . $msg . "\r\n";
             }
         }

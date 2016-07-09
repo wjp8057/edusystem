@@ -16,11 +16,11 @@ use PDOStatement;
 use think\App;
 use think\Collection;
 use think\Db;
+use think\db\exception\BindParamException;
 use think\db\Query;
 use think\Debug;
 use think\Exception;
 use think\exception\PDOException;
-use think\db\exception\BindParamException;
 use think\Log;
 
 abstract class Connection
@@ -102,7 +102,7 @@ abstract class Connection
 
     // PDO连接参数
     protected $params = [
-        PDO::ATTR_CASE              => PDO::CASE_LOWER,
+        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
         PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
@@ -188,7 +188,7 @@ abstract class Connection
      * @param array $info 字段信息
      * @return array
      */
-    protected function fieldCase($info)
+    public function fieldCase($info)
     {
         // 字段大小写转换
         switch ($this->attrCase) {
@@ -330,7 +330,7 @@ abstract class Connection
         }
         // 根据参数绑定组装最终的SQL语句
         $this->queryStr = $this->getRealSql($sql, $bind);
-        
+
         //释放前次的查询结果
         if (!empty($this->PDOStatement)) {
             $this->free();
@@ -341,7 +341,6 @@ abstract class Connection
             // 调试开始
             $this->debug(true);
             // 预处理
-
             $this->PDOStatement = $this->linkID->prepare($sql);
             // 参数绑定
             $this->bindValue($bind);
@@ -352,7 +351,6 @@ abstract class Connection
             $procedure = 0 === strpos(strtolower(substr(trim($sql), 0, 4)), 'call');
             return $this->getResult($class, $procedure);
         } catch (\PDOException $e) {
-            Log::record($this->queryStr);
             throw new PDOException($e, $this->config, $this->queryStr);
         }
     }
@@ -387,7 +385,6 @@ abstract class Connection
             // 调试开始
             $this->debug(true);
             // 预处理
-
             $this->PDOStatement = $this->linkID->prepare($sql);
             // 参数绑定操作
             $this->bindValue($bind);
@@ -405,7 +402,6 @@ abstract class Connection
             }
             return $this->numRows;
         } catch (\PDOException $e) {
-            Log::record($this->queryStr);
             throw new PDOException($e, $this->config, $this->queryStr);
         }
     }
@@ -478,6 +474,7 @@ abstract class Connection
             return $this->PDOStatement;
         }
         if ($procedure) {
+            // 存储过程返回结果
             return $this->procedure($class);
         }
         $result        = $this->PDOStatement->fetchAll($this->fetchType);
@@ -486,11 +483,10 @@ abstract class Connection
         if (!empty($class)) {
             // 返回指定数据集对象类
             $result = new $class($result);
-        } elseif ('collection' == $this->resultSetType){
+        } elseif ('collection' == $this->resultSetType) {
             // 返回数据集Collection对象
             $result = new Collection($result);
         }
-
         return $result;
     }
 
@@ -555,7 +551,7 @@ abstract class Connection
 
         ++$this->transTimes;
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->beginTransaction();
         } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {
             $this->linkID->exec(
@@ -574,7 +570,7 @@ abstract class Connection
     {
         $this->initConnect(true);
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->commit();
         }
 
@@ -591,7 +587,7 @@ abstract class Connection
     {
         $this->initConnect(true);
 
-        if ($this->transTimes == 1) {
+        if (1 == $this->transTimes) {
             $this->linkID->rollBack();
         } elseif ($this->transTimes > 1 && $this->supportSavepoint()) {
             $this->linkID->exec(
@@ -651,9 +647,9 @@ abstract class Connection
             }
             // 提交事务
             $this->commit();
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             $this->rollback();
-            return false;
+            throw $e;
         }
         return true;
     }
