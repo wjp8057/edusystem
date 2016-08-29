@@ -22,6 +22,9 @@
                 else if(result.status==2){
                     location="{$ROOT}/teacher/";
                 }
+                else if(result.status==3){
+                    location="/Student/Index/index";
+                }
                 else {
                     $.messager.alert("错误",result.info,"error",pwdselect);
                 }

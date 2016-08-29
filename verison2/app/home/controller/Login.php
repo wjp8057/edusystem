@@ -33,4 +33,19 @@ class Login
         session(null);
         header('Location:'.Request::instance()->root().'/home/index/login');
     }
+
+    public function caslogin(){
+
+        try {
+            $Obj=new User();
+            $username="";
+            $Obj->signInAsUser($username);
+            header('Location:'.Request::instance()->root().'/home/index/index');
+
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+
+    }
 }
