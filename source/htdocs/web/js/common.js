@@ -505,9 +505,21 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
             while(i++ < lenth) string = string +fix;
         return string;
     }
+    /**
+     * 字符反向
+     * @param string
+     * @returns {string}
+     */
     function string_reserve(string) {
         return  string.split('').reverse().join('');
     }
+    /**
+     * 分组
+     * @param string
+     * @param separate
+     * @param amount
+     * @returns {string}
+     */
     function str_split(string,separate,amount){
         var len=string.length;
         var perlen=Math.ceil(len/amount);
