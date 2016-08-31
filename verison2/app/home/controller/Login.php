@@ -8,6 +8,7 @@
 namespace app\home\controller;
 use app\common\access\MyAccess;
 use app\common\service\User;
+use app\common\vendor\CAS;
 use think\Request;
 
 class Login
@@ -34,18 +35,25 @@ class Login
         header('Location:'.Request::instance()->root().'/home/index/login');
     }
 
-    public function caslogin(){
-
-        try {
-            $Obj=new User();
-            $username="";
-            $Obj->signInAsUser($username);
-            header('Location:'.Request::instance()->root().'/home/index/index');
-
+    /**
+     *统一登录
+     */
+    public function caslogin($ticket=""){
+        $status=CAS::signinNormal($ticket);
+        echo $status;
+        switch($status){
+            case 1:
+                header('Location:'.Request::instance()->root().'/home/index/index');
+                break;
+            case 2:
+                header('Location:'.Request::instance()->root().'/teacher/index/index');
+                break;
+            case 3:
+                header('Location:/Student/Index/index');
+                break;
+            default:
+                echo "登录失败";
+                break;
         }
-        catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(),$e->getMessage());
-        }
-
     }
 }
