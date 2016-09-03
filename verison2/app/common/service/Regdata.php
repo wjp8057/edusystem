@@ -41,24 +41,26 @@ class Regdata extends MyService{
         //全部信息
         $str="(regdata.year is null or regdata.year=:year) and (regdata.term is null or regdata.term=:term) and students.status in ('A','C','H')";
         if($type==1)
-            $str="(regdata.year is null or regdata.year=:year) and (regdata.term is null or regdata.term=:term) and students.status in ('A','C','H')
+            $str="(regdata.year=:year) and (regdata.term=:term) and students.status in ('A','C','H')
             and regdata.regcode is not null";
         else if($type==2)
             $str="(regdata.year is null) and (regdata.term is null) and students.status in ('A','C','H')";
 
         if($school!='') $condition['classes.school']=$school;;
-        $data=$this->query->table('regdata')->join('students ',' students.studentno=regdata.studentno','RIGHT')
+        $data=$this->query->table('students')
             ->join('classes ',' classes.classno=students.classno')
             ->join('schools ',' schools.school=classes.school')
             ->join('statusoptions ',' statusoptions.name=students.status')
-            ->join('regcodeoptions ',' regcodeoptions.name=regdata.regcode')
+            ->join('regdata ',' students.studentno=regdata.studentno','LEFT')
+            ->join('regcodeoptions ',' regcodeoptions.name=regdata.regcode','LEFT')
             ->page($page,$rows)->field("students.name,students.studentno,rtrim(classes.classname) classname,
             rtrim(schools.name) schoolname,rtrim(statusoptions.value) statusname,regdata.regcode,isnull(rtrim(regcodeoptions.value),'未注册') regname,regdata.regdate")
             ->where($str)->bind(['year'=>$year,'term'=>$term])->where($condition)
             ->select();
-        $count= $this->query->table('regdata')->join('students ',' students.studentno=regdata.studentno','RIGHT')
+        $count= $this->query->table('students')
             ->join('classes ',' classes.classno=students.classno')
             ->join('schools ',' schools.school=classes.school')
+            ->join('regdata ',' students.studentno=regdata.studentno','LEFT')
             ->where($str)->bind(['year'=>$year,'term'=>$term])->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
