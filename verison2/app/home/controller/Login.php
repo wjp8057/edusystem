@@ -40,7 +40,6 @@ class Login
      */
     public function caslogin($ticket=""){
         $status=CAS::signinNormal($ticket);
-        echo $status;
         switch($status){
             case 1:
                 header('Location:'.Request::instance()->root().'/home/index/index');
