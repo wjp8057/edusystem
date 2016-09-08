@@ -67,6 +67,7 @@ class Course  extends  MyService{
                     $data['zhours'] = $one->zhours;
                     $data['type'] = $one->type;
                     $data['form'] = $one->form;
+                    $data['type2'] = $one->form;
                     if ($data['school'] != session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
                         $info .= '无法为其它学院添加课程'.$one->coursename .'</br>';
                         $status=0;
@@ -100,6 +101,7 @@ class Course  extends  MyService{
                     $data['zhours'] = $one->zhours;
                     $data['type'] = $one->type;
                     $data['form'] = $one->form;
+                    $data['type2'] = $one->form;
                     if(MyAccess::checkCourseSchool($one->courseno))
                         $updateRow += $this->query->table('courses')->where($condition)->update($data);
                     else{
