@@ -1,0 +1,70 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'调课课时统计',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/plan/change/summary',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                status:$('#status').combobox('getValue')
+            },
+            columns:[[
+                {field:'school',title:'院号',width:80,align:'center'},
+                {field:'schoolname',title:'院名',width:200,align:'center'},
+                {field:'times',title:'次数',width:200,align:'center'},
+                {field:'hours',title:'课时数',width:200,align:'center'}
+            ]],
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                status:$('#status').combobox('getValue')
+            });
+        });
+
+        $('#menu_export,#export').click(function(){
+            var year=$('#year').val();
+            var term=$('#term').val();
+            var status=$('#status').combobox('getValue');
+            if(courseno) {
+                $.fileDownload("{$ROOT}/teacher/course/export?year=" +year+"&term="+term+'&courseno='+courseno, {
+                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                    dialogOptions: {modal: true, title: '提示'},
+                    failCallback: function (html, url) {
+                        $.messager.alert('错误',html,'error');
+                    }
+                });
+            }
+            return false; //this is critical to stop the click event which will trigger a normal file download!
+        });
+    });
+
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_student' data-options="iconCls:'icon icon-excel'">导出</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="8" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="3" value="{$YEARTERM.term}"/>
+        <label for="status">状态：</label>
+        <select class="easyui-combobox" id="status" data-options="panelHeight:'auto'" >
+        <option selected="selected" value="1">已审批</option>
+        <option value="">全部</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索数据</a>
+    </div>
+    <table id="dg"></table>
+</div>
