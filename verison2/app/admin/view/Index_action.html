@@ -54,7 +54,16 @@
                 var selected=tt.treegrid('getSelected');
                 var node = jQuery.extend({},selected);
                 node.children=undefined;
-                $.post('{$ROOT}/admin/action/update',{updated:$.toJSON(selected)},function(result){
+                var obj={};  //easyui 在1.4.5增加了checkbox属性，导致行直接toJson的时候格式错误。
+                obj.id=selected.id;
+                obj.description=selected.description;
+                obj.action=selected.action;
+                obj.rank=selected.rank;
+                obj.image=selected.image;
+                obj.ismenu=selected.ismenu;
+                obj.parentid=selected.parentid;
+                obj.shortname=selected.shortname;
+                $.post('{$ROOT}/admin/action/update',{updated:$.toJSON(obj)},function(result){
                     if (result.status==1){
                         $.messager.show({	// show error message
                             title: '成功',

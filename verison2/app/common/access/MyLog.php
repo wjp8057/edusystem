@@ -42,22 +42,27 @@ class MyLog {
         $data['remoteip']=get_client_ip();
         $dataString='';
         //获得插入的内容
-        if(isset($_POST["inserted"])){
-            $string=is_array($_POST["inserted"])?json_decode($_POST["inserted"]):$_POST["inserted"];
-            $dataString.='insert:'.$string;
-            $operate.='A';
-        }
-        //获得更新的内容
-        if(isset($_POST["updated"])){
-            $string=is_array($_POST["updated"])?json_decode($_POST["updated"]):$_POST["updated"];
-            $dataString.='update'.$string;
-            $operate.='M';
-        }
-        //获得删除的内容
-        if(isset($_POST["deleted"])){
-            $string=is_array($_POST["deleted"])?json_decode($_POST["deleted"]):$_POST["deleted"];
-            $dataString.='delete'.$string;
-            $operate.='M';
+        try {
+            if (isset($_POST["inserted"])) {
+                $string = is_array($_POST["inserted"]) ? json_decode($_POST["inserted"]) : $_POST["inserted"];
+                $dataString .= 'insert:' . $string;
+                $operate .= 'A';
+            }
+            //获得更新的内容
+            if (isset($_POST["updated"])) {
+                $string = is_array($_POST["updated"]) ? json_decode($_POST["updated"]) : $_POST["updated"];
+                $dataString .= 'update' . $string;
+                $operate .= 'M';
+            }
+            //获得删除的内容
+            if (isset($_POST["deleted"])) {
+                $string = is_array($_POST["deleted"]) ? json_decode($_POST["deleted"]) : $_POST["deleted"];
+                $dataString .= 'delete' . $string;
+                $operate .= 'M';
+            }
+        }catch (\Exception $e) {
+            $dataString='';
+                //捕捉异常
         }
         //如果以上都没有，直接输出_POST内容
         $dataString=$dataString==''?json_encode($_POST):$dataString;

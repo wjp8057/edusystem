@@ -14,6 +14,7 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
 use think\Exception;
+use think\Log;
 use think\Request;
 
 class Action extends MyService{
@@ -192,6 +193,8 @@ class Action extends MyService{
         try {
             if (isset($postData["updated"])) {
                 $one=json_decode($postData["updated"]);
+                Log::log($postData["updated"]);
+                Log::log($one);
                 if($one->id==0){
                     $data=null;
                     $data['ismenu'] = (int)$one->ismenu;
