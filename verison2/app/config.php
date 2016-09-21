@@ -25,6 +25,8 @@ return [
     'app_status'             => '',
     // 是否支持多模块
     'app_multi_module'       => true,
+    // 入口自动绑定模块
+    'auto_bind_module'       => false,
     // 注册的根命名空间
     'root_namespace'         => [],
     // 扩展配置文件
@@ -85,17 +87,17 @@ return [
     'url_html_suffix'        => 'html',
     // URL普通方式参数 用于自动生成
     'url_common_param'       => false,
-    //url禁止访问的后缀
-    'url_deny_suffix'        => 'ico|png|gif|jpg',
     // URL参数方式 0 按名称成对解析 1 按顺序解析
     'url_param_type'         => 0,
     // 是否开启路由
     'url_route_on'           => true,
+    // 路由配置文件（支持配置多个）
+    'route_config_file'      => ['route'],
     // 是否强制使用路由
     'url_route_must'         => false,
     // 域名部署
     'url_domain_deploy'      => false,
-    // 域名根，如.thinkphp.cn
+    // 域名根，如thinkphp.cn
     'url_domain_root'        => '',
     // 是否自动转换URL中的控制器和操作名
     'url_convert'            => true,
@@ -147,17 +149,27 @@ return [
     // 异常处理handle类 留空使用 \think\exception\Handle
     'exception_handle'       => '',
 
-
     // +----------------------------------------------------------------------
     // | 日志设置
     // +----------------------------------------------------------------------
 
     'log'                    => [
-        // 日志记录方式，支持 file socket trace sae
-        'type' => 'File',
+        // 日志记录方式，内置 file socket 支持扩展
+        'type'  => 'File',
         // 日志保存目录
-        'path' => LOG_PATH,
+        'path'  => LOG_PATH,
+        // 日志记录级别
+        'level' => [],
     ],
+
+    // +----------------------------------------------------------------------
+    // | Trace设置 开启 app_trace 后 有效
+    // +----------------------------------------------------------------------
+    'trace'                  => [
+        // 内置Html Console 支持扩展
+        'type' => 'Html',
+    ],
+
 
     // +----------------------------------------------------------------------
     // | 缓存设置
@@ -219,6 +231,10 @@ return [
     // +----------------------------------------------------------------------
     // | 自定义设置设置
     // +----------------------------------------------------------------------
+    'site'=>[
+        'title'=>'宁波城市学院教务管理系统',
+        'copyright'=>'Copyright by keysoft corp. ©2016 软件开发：方仁富/88221932 版本号：20160622  最佳分辨率：1440*900'
+    ],
     'auth' => true,//是否验证操作权限
     'log2db' => true, //操作日志是否记录到数据库
     'logdb' => [
@@ -226,8 +242,8 @@ return [
         'type' => 'sqlsrv',
         // 数据库连接DSN配置
         // 服务器地址
-      //  'hostname' => '127.0.0.1',
-       'hostname'    => '172.18.0.41',
+        'hostname' => '127.0.0.1',
+      // 'hostname'    => '172.18.0.41',
         // 数据库名
         'database' => 'logdb',
         // 数据库用户名
@@ -237,7 +253,9 @@ return [
         // 数据库连接端口
         'hostport' => '1433',
         // 数据库连接参数
-        'params' => [],
+        'params' => [
+            \PDO::ATTR_CASE         => \PDO::CASE_LOWER,
+        ],
         // 数据库编码默认采用utf8
         'charset' => 'utf8',
         // 数据库表前缀

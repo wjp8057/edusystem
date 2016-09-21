@@ -29,7 +29,7 @@ class Teacher extends MyController
         try {
             $type = new TeacherType();
             $result = $type->getList($page, $rows);
-        } catch (\Exception $e) {
+       } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return json($result);

@@ -100,7 +100,7 @@ class MyQuery extends  Query
      * @throws Exception
      * @throws PDOException
      */
-    public function select($data = [])
+    public function select($data= null)
     {
         config('auth')&&MyAccess::checkAccess('R');
         return parent::select($data);
@@ -114,7 +114,7 @@ class MyQuery extends  Query
      * @throws Exception
      * @throws PDOException
      */
-    public function find($data = [])
+    public function find($data= null)
     {
         config('auth')&&MyAccess::checkAccess('R');
         return parent::find($data);
@@ -128,7 +128,7 @@ class MyQuery extends  Query
      * @throws Exception
      * @throws PDOException
      */
-    public function delete($data = [])
+    public function delete($data =null)
     {
 
         config('auth')&&MyAccess::checkAccess('D');

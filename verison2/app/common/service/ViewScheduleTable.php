@@ -66,13 +66,21 @@ class ViewScheduleTable extends MyService {
         $data=$this->query->table('viewscheduletable')->join('courses ',' courses.courseno=viewscheduletable.courseno')
             ->join('coursetypeoptions2 ',' coursetypeoptions2.name=courses.type2')
             ->where($condition)->page($page,$rows)->group('coursenogroup,coursetype,examtype,attendents,courses.coursename,courses.credits,schoolname,coursetypeoptions2.value')
-            ->field("coursenogroup courseno,schoolname,courses.coursename,courses.credits,coursetype as studytype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),',') as classname,
-dbo.GROUP_CONCAT(distinct rtrim(dayntime),',') as time,attendents,coursetypeoptions2.value coursetype")->select();
+            ->field("coursenogroup courseno,schoolname,courses.coursename,courses.credits,coursetype as studytype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),'，') as classname,
+dbo.GROUP_CONCAT(distinct rtrim(dayntime),'，') time,attendents,coursetypeoptions2.value coursetype")->select();
+        //这里有奇怪的错误，英文“,”号出现两次，第二个无法正确解析
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
 
+    /**获取开课课程课程基本信息
+     * @param string $year
+     * @param string $term
+     * @param string $courseno
+     * @return array|false|\PDOStatement|string|\think\Model
+     * @throws \think\Exception
+     */
     function getCourseInfo($year='',$term='',$courseno=''){
         if($year==''||$term==''||$courseno=='')
             throw new \think\Exception('year term courseno is empty', MyException::PARAM_NOT_CORRECT);
@@ -83,8 +91,8 @@ dbo.GROUP_CONCAT(distinct rtrim(dayntime),',') as time,attendents,coursetypeopti
         $condition['term']=$term;
         $condition['coursenogroup']=$courseno;
         $data=$this->query->table('viewscheduletable')->where($condition)->group('coursenogroup,coursetype,examtype,attendents,coursename,credits,schoolname')
-            ->field("coursenogroup courseno,schoolname,coursename,credits,coursetype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),',') as classname,
-dbo.GROUP_CONCAT(distinct rtrim(teachername),',') as teachername,attendents")->find();
+            ->field("coursenogroup courseno,schoolname,coursename,credits,coursetype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),'，') as classname,
+dbo.GROUP_CONCAT(distinct rtrim(teachername),'，') as teachername,attendents")->find();
         return $data;
     }
 

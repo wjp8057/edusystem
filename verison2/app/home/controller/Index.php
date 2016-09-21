@@ -15,8 +15,8 @@ class Index extends Controller
         $this->assign("ROOT", $root);
         $this->assign("ACTION",$action);
 
-        $this->assign("TITLE", TITLE);
-        $this->assign("COPYRIGHT", COPYRIGHT);
+        $this->assign("TITLE",config('site.title'));
+        $this->assign("COPYRIGHT",config('site.copyright'));
     }
 
     public function index()

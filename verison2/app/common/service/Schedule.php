@@ -167,7 +167,7 @@ dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') classname")
             ->join('courses ',' courses.courseno=schedule.courseno')
             ->join('taskoptions ',' taskoptions.code=teacherplan.task')
             ->join('timesections ',' timesections.name=schedule.time')
-            ->field("dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') as classname,dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,
+            ->field("dbo.GROUP_CONCAT(distinct rtrim(classes.classname),'，') as classname,dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,
 classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.coursename,schedule.day,schedule.time,taskoptions.name taskname,timesections.value as timename")
             ->group('classrooms.jsn,schedule.courseno+schedule.[group],courses.coursename,taskoptions.name,schedule.day,schedule.time,timesections.value')->where($condition)->select();
         foreach($data as $one){
@@ -210,7 +210,7 @@ classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.c
             ->join('taskoptions ',' taskoptions.code=teacherplan.task')
             ->join('timesections ',' timesections.name=schedule.time')
             ->join('teachers','teachers.teacherno=teacherplan.teacherno')
-            ->field("dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') as classname,dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,
+            ->field("dbo.GROUP_CONCAT(distinct rtrim(classes.classname),'，') as classname,dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,
             rtrim(teachers.name) teachername,schedule.courseno+schedule.[group] as courseno,rtrim(courses.coursename) coursename,schedule.day,
             schedule.time,rtrim(taskoptions.name) taskname,rtrim(timesections.value) as timename")
             ->group('teachers.name,schedule.courseno+schedule.[group],courses.coursename,taskoptions.name,schedule.day,schedule.time,timesections.value')->where($condition)->select();

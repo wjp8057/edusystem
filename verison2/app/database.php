@@ -14,8 +14,8 @@ return [
     // 数据库类型
     'type'        => 'sqlsrv',
     // 服务器地址
-//    'hostname'    => '127.0.0.1',
-   'hostname'    => '172.18.0.41',
+    'hostname'    => '127.0.0.1',
+//   'hostname'    => '172.18.0.41',
     // 数据库名
     'database'    => 'jwgl0516',
     // 数据库用户名
@@ -24,8 +24,12 @@ return [
     'password'    => 'comefirstfangrenfu@0',
     // 数据库连接端口
     'hostport'    => '1433',
+    // 连接dsn
+    'dsn'            => '',
     // 数据库连接参数
-    'params'      => [],
+    'params' => [
+        \PDO::ATTR_CASE         => \PDO::CASE_LOWER
+    ],
     // 数据库编码默认采用utf8
     'charset'     => 'utf8',
     // 数据库表前缀
