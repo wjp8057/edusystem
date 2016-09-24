@@ -33,19 +33,17 @@ class MyAccess {
         return 'id:'.$id.'<br/>action:'.$action . '<br/>'.$operation[$operate];
     }
 
-    /**检查是否有读取权限
-     * @param string $operate 操作类型：R读取、M修改、D删除、A增加、E执行，默认为读取
-     * @return bool
+    /**s数据库中读取操作的权限信息
      * @throws Exception
-     * @throws \think\exception\DbException
      */
-    public static  function checkAccess($operate='R'){
+    public static function  getAccess(){
         $request = Request::instance();
         $action='/'.$request->module().'/'.$request->controller().'/'.$request->action();
         $session=session("S_LOGIN_TYPE");
-        if($session){
+        session('S_ACCESS', 0);
+        if($session) {
             //首先检查用户权限表
-            if($session==1){
+            if ($session == 1) {
                 $condition=null;
                 $condition['username']=session('S_USER_NAME');;
                 $role =Db::table('users')->where($condition)->field('rtrim(roles) roles')->find();
@@ -53,55 +51,67 @@ class MyAccess {
                 $condition["action.action"] = $action;
                 $actionInfo=Db::table('action')->where($condition)->find();
                 if(is_array($role)&&is_array($actionInfo)) {
+                    session('S_ACTIONID', $actionInfo['id']);
+                    session('S_ACTION', $action);
                     $roles = str_split($role['roles']);
-                    $condition=null;
+                    $condition = null;
                     $condition["action.action"] = $action;
                     $condition['actionrole.role'] = array('in', $roles);
-                    $data = Db::table('action')->join('actionrole','actionrole.actionid=action.id')
+                    $data = Db::table('action')->join('actionrole', 'actionrole.actionid=action.id')
                         ->where($condition)->field('access')->select();
                     $result = 0;
                     if (is_array($data) && count($data) > 0) {
                         foreach ($data as $one) {
                             $result = $result | $one['access'];
                         }
-                        switch ($operate) {
-                            case 'R':
-                                if (($result & 1) == 1)
-                                    return true;
-                                break;
-                            case 'M':
-                                if (($result & 2) == 2)
-                                    return true;
-                                break;
-                            case 'D':
-                                if (($result & 4) == 4)
-                                    return true;
-                                break;
-                            case 'A':
-                                if (($result & 8) == 8)
-                                    return true;
-                                break;
-                            case 'E':
-                                if (($result & 16) == 16)
-                                    return true;
-                                break;
-                            default:
-                                throw new Exception($action . ' undefined operation',MyException::WITH_OUT_PERMISSION);
-                                break;
-                        }
                     }
-                    throw new Exception(MyAccess::buildMessage($actionInfo['id'],$action,$operate), MyException::WITH_OUT_PERMISSION);
-
+                    session('S_ACCESS', $result);
                 }
                 else{
                     throw new Exception($action . ' is not found!', MyException::WITH_OUT_PERMISSION);
                 }
             }
-
         }
         else
             throw new Exception('',MyException::NOT_LOGIN);
-        return false;
+    }
+    /**检查是否有读取权限
+     * @param string $operate 操作类型：R读取、M修改、D删除、A增加、E执行，默认为读取
+     * @return bool
+     * @throws Exception
+     * @throws \think\exception\DbException
+     */
+    public static  function checkAccess($operate='R'){
+        $result=session("S_ACCESS");
+        if($result){
+            //首先检查用户权限表
+            switch ($operate) {
+                case 'R':
+                    if (($result & 1) == 1)
+                        return true;
+                    break;
+                case 'M':
+                    if (($result & 2) == 2)
+                        return true;
+                    break;
+                case 'D':
+                    if (($result & 4) == 4)
+                        return true;
+                    break;
+                case 'A':
+                    if (($result & 8) == 8)
+                        return true;
+                    break;
+                case 'E':
+                    if (($result & 16) == 16)
+                        return true;
+                    break;
+                default:
+                    throw new Exception('undefined operation:'.$operate,MyException::WITH_OUT_PERMISSION);
+                    break;
+            }
+         }
+        throw new Exception(MyAccess::buildMessage(session("S_ACTIONID"),session("S_ACTION"),$operate), MyException::WITH_OUT_PERMISSION);
     }
 
     /**抛出错误信息

@@ -19,6 +19,7 @@ class Template extends \think\Controller
             //实现父层验证功能。
             //替换模板信息
             //用户基本信息
+            MyAccess::getAccess();
             $userinfo=null;
             $userinfo['username']=session('S_USER_NAME');//用户名登录名
             $userinfo['realname']=session('S_TEACHER_NAME');//真实姓名

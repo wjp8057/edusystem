@@ -152,7 +152,7 @@ class Student extends MyService {
             rtrim(personal.midschool) midschool,rtrim(personal.address) address,rtrim(tel) tel,rtrim(origin) as origin,
             cast('20'+substring(classes.classno,1,2) as char(4)) as grade,students.enterdate,personal.class classcode,
             rtrim(classcode.name) classcodename,personal.postcode,
-            cast('/pictures/'+substring(students.studentno,1,2)+'/'+students.studentno+'.jpg' as char(40)) as photo")
+            cast('/photo/'+rtrim(students.studentno)+'.jpg' as char(40)) as photo")
             ->where($condition)->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('studentno'.$studentno, MyException::PARAM_NOT_CORRECT);

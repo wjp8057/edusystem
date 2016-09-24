@@ -18,6 +18,7 @@ class MyController {
     protected $obj;
     public function  __construct()
     {
+        MyAccess::getAccess();
         $log=new MyLog();
         config('log2db')&&$log->write('R');
     }
