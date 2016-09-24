@@ -21,14 +21,14 @@ class User extends MyController
     //显示信息
     public function query($page = 1, $rows = 10, $username = '%', $name = '%',$school = '', $role='%')
     {
-        $result = null;
-        try {
+       /* $result = null;
+        try {*/
             $user = new \app\common\service\User();
             $result = $user->getUserList($page, $rows, $username, $name, $school,$role);
 
-        } catch (\Exception $e) {
+       /* } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
+        }*/
         return json($result);
     }
 
