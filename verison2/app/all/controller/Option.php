@@ -355,16 +355,20 @@ class Option {
       //  $result =Db::table('users')->field("isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t")->limit(1)->select();
       //  $result =Db::table('sessions')->field("convert(varchar(100),logintime,20) as a,convert(varchar(100),modifydate,20) as b")->limit(1)->select();
     //    $string="convert(varchar(100),logintime,20) as a,convert(varchar(100),modifydate,20) as b";
+        $start=microtime(true);
+        echo $start."<br/>";
         $result="isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t";
      //   $result="isnull(convert(varchar(100),logintime,20),0) as a,convert(varchar(100),modifydate,20) as b";
-        for($i=0;$i<5;$i++)
-            $result=preg_replace("/(\()([^\(]*?)(,)([^\),\(]*?)([\),])/",'$1$2##$4$5',$result);
-        Log::write($result);
-        $result = array_map('trim', explode(',', $result));
-        Log::write($result);
-        $result=preg_replace("/##/",',',$result);
-        Log::write($result);
-        return json($result);
+        for($i=0;$i<10;$i++) {
+            for($j=0;$j<3;$j++){
+                $result="isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t";
+                $result = array_map('trim', explode(',', $result));
+                $result=preg_replace("/##/",',',$result);
+            }
+        }
+       $end=microtime(true);
+        echo $end."<br/>";;
+        echo $end-$start;
 
     }
 }

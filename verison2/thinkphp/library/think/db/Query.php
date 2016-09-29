@@ -735,9 +735,12 @@ class Query
         }
         if (is_string($field)) {
             //正则表达式临时替换函数内的逗号
+            //todo:这是自己加上的，官方没有，字符串方式传递带两个参数的field内容是存在bug
             for($i=0;$i<3;$i++)
                 $field=preg_replace("/(\()([^\(]*?)(,)([^\),\(]*?)([\),])/",'$1$2##$4$5',$field);
+
             $field = array_map('trim', explode(',', $field));
+            //todo:这是自己加上的，官方没有，字符串方式传递带两个参数的field内容是存在bug
             //将临时替换的逗号转换回来
             $field=preg_replace("/##/",',',$field);
         }
