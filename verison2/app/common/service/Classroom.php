@@ -279,4 +279,57 @@ class Classroom extends MyService {
         $this->query->commit();
         return true;
     }
+
+    /**教室使用率
+     * @param int $page
+     * @param int $rows
+     * @param string $year
+     * @param string $term
+     * @param string $roomno
+     * @param string $name
+     * @param string $building
+     * @param string $area
+     * @param string $equipment
+     * @param string $school
+     * @param int $seatmin
+     * @param int $seatmax
+     * @param string $weekday
+     * @param string $oew
+     * @param string $time
+     * @return array|null
+     * @throws Exception
+     */
+
+    function getUsageRate($page=1,$rows=20,$year='',$term='',$roomno='%',$name='%',$building='%',$area='',$equipment='',$school='',$seatmin=0,$seatmax=1000){
+        $result=null;
+        $condition=null;
+        if($year==''||$term=='')
+            throw new Exception('year or term is empty', MyException::PARAM_NOT_CORRECT);
+
+        if($roomno!='%') $condition['classrooms.roomno']=array('like',$roomno);
+        if($name!='%') $condition['classrooms.jsn']=array('like',$name);
+        if($building!='%') $condition['classrooms.building']=array('like',$building);
+        if($area!='') $condition['classrooms.area']=$area;
+        if($equipment!='') $condition['classrooms.equipment']= $equipment;
+        if($school!='') $condition['classrooms.priority']= $school;
+        $condition['seats']= array(array('egt',$seatmin),array('elt',$seatmax));
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $data=$this->query->table('classrooms')->join('schedule','schedule.roomno=classrooms.roomno')
+            ->join('roomoptions ',' roomoptions.name=classrooms.equipment')
+            ->join('areas ',' areas.name=classrooms.area')
+            ->join('timesectors','timesectors.name=schedule.time')
+            ->page($page,$rows)
+            ->field("classrooms.roomno,rtrim(classrooms.jsn) roomname,classrooms.no,classrooms.building ,classrooms.seats,roomoptions.value equipmentname,areas.value areaname,sum(timesectors.sxjunit) used")
+            ->where($condition)->group('classrooms.roomno,classrooms.jsn,classrooms.no,classrooms.building ,classrooms.seats,roomoptions.value ,areas.value')
+            ->order('roomno')->select();
+        $count= $this->query->table('classrooms')->join('schedule','schedule.roomno=classrooms.roomno')
+            ->join('roomoptions ',' roomoptions.name=classrooms.equipment')
+            ->join('areas ',' areas.name=classrooms.area')
+            ->join('timesectors','timesectors.name=schedule.time')
+            ->where($condition)->count('distinct schedule.roomno');
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
 } 

@@ -38,7 +38,7 @@ class MyAccess {
      */
     public static function  getAccess(){
         $request = Request::instance();
-        $action='/'.$request->module().'/'.$request->controller().'/'.$request->action();
+        $action= strtolower('/'.$request->module().'/'.$request->controller().'/'.$request->action());
         $session=session("S_LOGIN_TYPE");
         session('S_ACCESS', 0);
         if($session) {

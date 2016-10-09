@@ -13,11 +13,10 @@ use app\common\access\Item;
 use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
-use app\common\service\Course;
 use app\common\service\R32;
 use app\common\service\Schedule;
 use app\common\service\Score;
-use app\common\service\ViewScheduleTable;
+use app\common\service\ViewSchedule;
 
 class Index extends Template
 {
@@ -84,7 +83,7 @@ class Index extends Template
             //头部信息
             $this->assign('year', $year);
             $this->assign('term', $term);
-            $schedule = new ViewScheduleTable();
+            $schedule = new ViewSchedule();
             $course = $schedule->getCourseInfo($year, $term, $courseno);
             $this->assign('course', $course);
             //成绩信息
@@ -121,7 +120,7 @@ class Index extends Template
             //头部信息
             $this->assign('year', $year);
             $this->assign('term', $term);
-            $schedule = new ViewScheduleTable();
+            $schedule = new ViewSchedule;
             $course = $schedule->getCourseInfo($year, $term, $courseno);
 
             $this->assign('course', $course);

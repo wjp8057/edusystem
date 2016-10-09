@@ -18,8 +18,13 @@ class MyController {
     protected $obj;
     public function  __construct()
     {
-        MyAccess::getAccess();
-        $log=new MyLog();
-        config('log2db')&&$log->write('R');
+        try {
+            MyAccess::getAccess();
+            $log=new MyLog();
+            config('log2db')&&$log->write('R');
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
     }
 } 

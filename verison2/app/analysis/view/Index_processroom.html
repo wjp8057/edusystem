@@ -1,0 +1,151 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        var equipment=$('#equipment');
+        equipment.combobox({
+            url:'{$ROOT}/all/option/equipment?only=0',
+            valueField:'equipment',
+            textField:'name'
+        });
+        var area=$('#area');
+        area.combobox({
+            url:'{$ROOT}/all/option/area?only=0',
+            valueField:'area',
+            textField:'name'
+        });
+        //默认为高教园区南区
+        area.combobox('setValue','4');
+        if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
+            area.combobox('setValue','3');
+
+
+        $('#dg').datagrid({
+            title:'教室列表',idField:'roomno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/analysis/process/room',
+            queryParams: {year: $('#year').val(),term: $('#term').val(),area:area.combobox('getValue'),roomno:''},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'roomno',title:'教室号',width:80,align:'center'},
+                {field:'no',title:'房间号',width:50,align:'center'},
+                {field:'roomname',title:'名称',width:140,align:'center'},
+                {field:'building',title:'楼名',width:70,align:'center'},
+                {field:'areaname',title:'校区',width:100,align:'center'},
+                {field:'seats',title:'座位',width:40,align:'center'},
+                {field:'equipmentname',title:'设施',width:110,align:'center'},
+                {field:'used',title:'周课时',width:110,align:'center'},
+                {field:'rate',title:'利用率（%）',width:110,align:'center',
+                    formatter:function(val,rec){
+                    return rec.used*100/$('#base').val();
+                }}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                roomno: $('#roomno').val(),
+                name: $('#name').val(),
+                building: $('#building').val(),
+                area:$('#area').combobox('getValue'),
+                equipment:$('#equipment').combobox('getValue'),
+                seatmin: $('#seatmin').val(),
+                seatmax: $('#seatmax').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        //显示更多项目
+        $("#more").click(function() {
+            var toolbar=$("#toolbar_hide");
+            if(toolbar.is(":hidden")){
+                toolbar.show();
+            }else{
+                toolbar.hide();     //如果元素为显现,则将其隐藏
+            }
+        });
+        $("#toolbar_hide").hide();
+        //导出教室信息
+        $('#menu_export,#export').click(function(){
+            var year=encodeURI($('#year').val());
+            var term=encodeURI($('#term').val());
+            var base=encodeURI($('#base').val());
+            var roomno = encodeURI($('#roomno').val());
+            var name = encodeURI($('#name').val());
+            var building = encodeURI($('#building').val());
+            var area = encodeURI($('#area').combobox('getValue'));
+            var equipment = encodeURI($('#equipment').combobox('getValue'));
+            var seatmin = encodeURI($('#seatmin').val());
+            var seatmax = encodeURI($('#seatmax').val());
+            var school = encodeURI($('#school').combobox('getValue'));
+            $.fileDownload("{$ROOT}/analysis/process/exportroom?roomno="+roomno+"&name="+name+"&building=" +building+
+            "&area="+area+'&equipment='+equipment+'&seatmin='+seatmin+'&seatmax='+seatmax+'&school='+school+'&year='+year+'&term='+term+'&base='+base, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出信息</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-system',plain:'true'" id="more">更多</a>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="area">校区：</label><input id="area" size="15">
+            <label for="equipment">设施：</label><input id="equipment" size="15">
+            <label for="base">满课时：</label><input id="base" size="2" value="40">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出信息</a>
+        </div>
+        <span id="toolbar_hide">
+            <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
+            <label for="school">优先学院：</label><input id="school" size="15">
+            <label for="building">楼名：</label><input id="building" class="easyui-validatebox" size="6" value="%"/>
+              <label for="name">名称：</label><input id="name" class="easyui-validatebox" size="8" value="%"/>
+        </span>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>点击“更多”按钮可以设置全部检索条件！</li>
+        </ol>
+    </div>
+</div>
