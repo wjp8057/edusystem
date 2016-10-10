@@ -1,0 +1,133 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+        $('#dg').datagrid({
+            title:'课程列表',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/score/record/begincourse',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                courseno: $('#courseno').val(),
+                school:school.combobox('getValue')
+            },
+            columns:[[
+                {field:'courseno',title:'课号',width:80,align:'center'},
+                {field:'coursename',title:'课名',width:200,align:'center'},
+                {field:'schoolname',title:'开课学院',width:200,align:'center'},
+                {field:'amount',title:'补考人数',width:200,align:'center'},
+                {field:'uninput',title:'未输入数',width:200,align:'center'}
+            ]],
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $('#menu_hundred,#hundred').click(function(){
+            var obj=$('#hundred');
+            var icon=obj.linkbutton('options')['iconCls'];
+            var title=obj.text();
+            openTeacherInput(title,icon,"h");
+        });
+        $('#menu_five,#five').click(function(){
+            var obj=$('#five');
+            var icon=obj.linkbutton('options')['iconCls'];
+            var title=obj.text();
+            openTeacherInput(title,icon,"f");
+        });
+        $('#menu_two,#two').click(function(){
+            var obj=$('#two');
+            var icon=obj.linkbutton('options')['iconCls'];
+            var title=obj.text();
+            openTeacherInput(title,icon,"t");
+        });
+        $("#menu_print,#print").click(function(){
+          /*  var obj=$('#print');
+            var icon=obj.linkbutton('options')['iconCls'];
+            var title=obj.text();
+            addTab('/teacher/index/printscore?',title,icon);*/
+            var year=$('#year').val();
+            var term=$('#term').val();
+            var row=$('#dg').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('错误','请选择一条课程记录', 'info');
+                return false;
+            }
+            if(row.uninput!=0){
+                $.messager.alert('错误','成绩未输入完毕，无法打印', 'error');
+                return false;
+            }
+            var courseno=row.courseno;
+            var url='/score/index/recordbeginprint?';
+            window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&courseno="+courseno);
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                courseno: $('#courseno').val(),
+                school:school.combobox('getValue'),
+                type: $('#type').combobox('getValue')
+            });
+         });
+    });
+    //打开成绩输入页面
+    function openTeacherInput(title,icon,type){
+        addTab('/score/index/recordbegininput?type='+type+'&',title,icon);
+    }
+    //验证数据，增加一个新tab
+    function addTab(url,title,icon){
+        var year=$('#year').val();
+        var term=$('#term').val();
+        var row=$('#dg').datagrid('getSelected');
+        if(!row){
+            $.messager.alert('错误','请选择一条课程记录', 'info');
+            return false;
+        }
+        var courseno=row.courseno;
+        parent.menuTabs.addTab(title,'{$ROOT}'+url+'year='+year+"&term="+term+"&courseno="+courseno,icon);
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_hundred' data-options="iconCls:'icon icon-ten'">按百分制输入</div>
+        <div id='menu_five' data-options="iconCls:'icon icon-five'">按五级制输入</div>
+        <div id='menu_two' data-options="iconCls:'icon icon-two'">按两级制输入</div>
+        <div class="menu-sep"></div>
+        <div id='menu_print' data-options="iconCls:'icon icon-print'">打印成绩单</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="8" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="3" value="{$YEARTERM.term}"/>
+        <label for="courseno">学期：</label><input id="courseno" class="easyui-validatebox" size="3" value="%"/>
+        <label for="term">学院：</label><input id="school" size="18"/>
+        <label for="type">输入情况：</label>
+        <select class="easyui-combobox" id="type" data-options="panelHeight:'auto'" >
+            <option selected="selected" value="">全部</option>
+            <option value="1">未完成</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索课程</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-ten',plain:'true'" id="hundred">按百分制输入</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-five', plain:'true'" id="five">按五级制输入</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-two', plain:'true'" id="two">按两级制输入</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印成绩单</a>
+    </div>
+    <table id="dg"></table>
+</div>

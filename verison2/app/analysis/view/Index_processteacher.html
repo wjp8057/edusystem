@@ -1,0 +1,131 @@
+<layout name="layout"/>
+<script type="text/javascript">
+$(function () {
+    var school = $('#school');
+    school.combobox({
+        url: '{$ROOT}/all/option/school?only=0',
+        valueField: 'school',
+        textField: 'name'
+    });
+    //设置默认学院，非管理部门为本学院
+    if ('{$USERINFO.manage}' != '1')
+        school.combobox('select', '{$USERINFO.school}');
+    $('#dg').datagrid({
+        title: '教师列表',
+        idField: 'teacherno',
+        striped: 'true',
+        pagination: 'true',
+        rownumbers: true,
+        singleSelect: true,
+        pageSize: 20,
+        url: '{$ROOT}/base/teacher/teacherlist',
+        toolbar: '#toolbar',
+        queryParams: {school: school.combobox('getValue'),teacherno:''},
+        pageList: [20, 50, 100, 200],
+        columns: [[
+            {field: 'teacherno', title: '教师号', width: 80, align: 'center'},
+            {field: 'name', title: '姓名*', width: 80, align: 'center'},
+            {field: 'sexname', title: '性别', width: 80, align: 'center'},
+            {field: 'positionname', title: '职称', width: 80, align: 'center'},
+            {field: 'typename', title: '类型', width: 80, align: 'center'},
+            {field: 'jobname', title: '岗位', width: 80, align: 'center'},
+            {field: 'enteryear', title: '入校年份', width: 80, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+            {field: 'rem', title: '备注', width: 100, align: 'center'}
+        ]],
+        //标题行右键菜单
+        onHeaderContextMenu: function (e, field) {
+            e.preventDefault();
+            if (!cmenu_obj.cmenu)//没有的话创建一个
+                $('#dg').datagrid('createColumnMenu', cmenu_obj);
+            cmenu_obj.cmenu.menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        //数据行上右键菜单
+        onRowContextMenu: function (e, rowindex, row) {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow', rowindex);
+            $('#menu').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
+
+    //检索
+    $("#search").click(function () {
+        var tt = $('#dg');
+        tt.datagrid('loadData', {total: 0, rows: []});
+        tt.datagrid('load', {
+            name: $('#name').val(),
+            teacherno: $('#teacherno').val(),
+            school: $('#school').combobox('getValue')
+        });
+    });
+    //打印课表
+    $('#menu_timetable,#timetable').click(function(){
+        var year=$('#year').val();
+        var term=$('#term').val();
+        var teacherno=getTeacherNo();
+        var url='/analysis/index/processtable?';
+        window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&teacherno="+teacherno);
+
+    });
+
+    $('#menu_course,#course').click(function(){
+        var year=$('#year').val();
+        var term=$('#term').val();
+        var teacherno=getTeacherNo();
+        var url='/analysis/index/processtablecourse?';
+        var tt=$('#dg');
+        var row = tt.datagrid('getSelected');
+        if (row) {
+            parent.menuTabs.addTab(row.name+"的课程",'{$ROOT}'+url+'year='+year+"&term="+term+"&teacherno="+teacherno,"icon icon-class");
+        }
+        else{
+            $.messager.alert('错误','请先选中一条记录','error')
+        }
+
+    });
+    function getTeacherNo(){
+        var row=$('#dg').datagrid('getSelected');
+        if(!row){
+            $.messager.alert('错误','请选择一一位教师', 'info');
+            return false;
+        }
+        return row.teacherno;
+    }
+});
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_course' data-options="iconCls:'icon icon-book'">查看课程列表</div>
+        <div id='menu_ttimetable' data-options="iconCls:'icon icon-print'">打印学期课表</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="10" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="10" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school">
+            <a href="javascript:void(0)" class="easyui-linkbutton"
+               data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-book',plain:'true'"
+               id="course">查看课程列表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"
+               data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">打印学期课表</a>
+        </div>
+    </div>
+    <table id="dg">
+    </table>
+    <div class="information" style="clear:both">
+
+    </div>
+</div>

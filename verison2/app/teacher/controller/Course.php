@@ -27,15 +27,15 @@ class Course extends MyController{
      */
     public function query($page=1,$rows=20,$year,$term){
         $result=null;
-      //  try{
+        try{
             $schedule=new ViewScheduleTable();
             $teacherno= session('S_TEACHERNO');
             $result=$schedule->getTeacherCourseList($page,$rows,$year,$term,$teacherno);
 
-      /*  }
+        }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
-        }*/
+        }
         return json($result);
     }
     /*

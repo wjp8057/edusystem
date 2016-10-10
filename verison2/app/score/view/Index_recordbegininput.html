@@ -1,0 +1,312 @@
+<layout name="layout" />
+<script type="text/javascript">
+    $(function(){
+        var type=getQueryString('type');
+        if(type!='t')
+            $('#all').hide();
+        $('#dg').datagrid({
+            idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:60,pageList:[60,120,240], url:'{$ROOT}/score/record/beginstudent',toolbar:'#toolbar',
+            queryParams: {
+                year: getQueryString('year'),
+                term:  getQueryString('term'),
+                courseno: getQueryString('courseno')
+            },
+            columns:[[
+                {field:'lock',title:'状态',width:60,align:'center', formatter:function(val,rec){
+                    if(val==1)
+                        return '锁';
+                }},
+                {field:'studentno',title:'学号',width:100,align:'center'},
+                {field:'name',title:'姓名',width:140,align:'center'},
+                {field:'approachname',title:'修课方式',width:140,align:'center'},
+                {field:'score',title:'成绩',width:190,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[5]'}},
+                    formatter:function(val,rec){
+                        if(val==undefined||val=='')
+                            return;
+                        val=val.toLowerCase();
+                        switch(val){
+                            case 'h':
+                                rec.testscore='';
+                                rec.examrem='Q';
+                                rec.examscore=0;
+                                rec.score='缓考';
+                                return '缓考';
+                                break;
+                            case 'q':
+                                rec.testscore='';
+                                rec.examscore=0;
+                                rec.examrem='A';
+                                rec.score='缺考';
+                                return '缺考';
+                                break;
+                            case 'w':
+                                rec.testscore='';
+                                rec.examscore=0;
+                                rec.examrem='W';
+                                rec.score='违纪';
+                                return '违纪';
+                                break;
+                            default :
+                                return formatByType(val,rec);
+                                break;
+                        }
+                    }
+                }/*
+                {field:'examscore',title:'考试成绩',width:80,align:'center'},
+                {field:'testscore',title:'考查成绩',width:80,align:'center'},
+                {field:'examrem',title:'考试备注',width:80,align:'center'}*/
+            ]] ,
+            onClickCell:function(index, field){
+                var tt= $('#dg');
+                tt.datagrid('startEditing',{index:index,field:field});
+                current_datagrid=tt;
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onBeforeLoad:function(param){
+                var tt=$('#dg');
+                var rows=tt.datagrid('getChanges','updated');
+                if(rows.length>0) {
+                    $.messager.alert('警告！','本页成绩尚未保存，直接翻页会导致输入无效，请先点击“保存本页”按钮', 'info');
+                    return false;
+                }
+            }
+        });
+        $("#menu_save,#save").click(function(){
+                saveScore(0);
+        });
+        $("#menu_saveFinal,#saveFinal").click(function(){
+            $.messager.confirm('确认', '你确定最终提交并锁定课程么?', function(r){
+                if (r){
+                    saveScore(1);
+                }
+            });
+        });
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        $("#print").click(function(){
+            window.open("{$ROOT}/score/index/recordbeginprint?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno'));
+        });
+        $('#examdate').datebox({
+            required:true,
+            value: "{$examdate}"
+        });
+        $("#all").click(function(){
+            var tt= $('#dg');
+            var rows=tt.datagrid('getRows');
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                tt.datagrid('updateRow', {
+                    index: i,
+                    row: {
+                        testscore: '合格',
+                        examscore: 0,
+                        score: '合格',
+                        examrem: 'N'
+                    }
+                });
+            }
+        });
+    });
+    var FIVE={
+        1:'优秀',
+        2:'良好',
+        3:'中等',
+        4:'及格',
+        5:'不及格'
+    };
+    var TWO={
+        0:'不合格',
+        1:'合格'
+    };
+    var SPC={
+        1:'缓考',
+        2:'违纪',
+        3:'缺考'
+    };
+    var SPCODE={
+        1:'Q',
+        2:'W',
+        3:'A'
+    };
+    function formatByType(val,rec){
+        var type=getQueryString('type');
+        for(var i=1;i<=3;i++) {
+            if (SPC[i] == val){
+                rec.testscore = '';
+                rec.examscore = 0;
+                rec.examrem=SPCODE[i];
+                return val;
+            }
+
+        }
+        //两级制
+        if(type=='t'){
+            for( i=0;i<=1;i++) {
+                if (TWO[i] == val) {
+                    rec.testscore = val;
+                    rec.examscore = 0;
+                    rec.examrem='N';
+                    return val;
+                }
+            }
+        }
+        else if(type=='f'){
+            for(i=1;i<=5;i++)
+                if(FIVE[i]==val) {
+                    rec.testscore = val;
+                    rec.examscore = 0;
+                    rec.examrem='N';
+                    return val;
+                }
+        }
+        if(!IsNum(val)) {
+            $.messager.alert('错误', '您输入的数据不规范，不是数字且不是h、q、w字母,<br/>该数据自动被清除！', 'error');
+            rec.score='';
+            return '';
+        }
+        switch(type){
+            case 'h':
+                    if(val>=0&&val<=100) {
+                        rec.testscore = '';
+                        rec.examscore = val;
+                        rec.examrem='N';
+                        return val;
+                    }
+                    else {
+                        $.messager.alert('错误', '百分制成绩应该在0-100之间', 'error');
+                        rec.score=''
+                    }
+                break;
+            case 'f':
+                    val=parseInt(val);
+                    if(val>=1&&val<=5) {
+                        rec.examscore=0;
+                        rec.testscore=FIVE[val];
+                        rec.score=rec.testscore;
+                        rec.examrem='N';
+                        return  rec.testscore;
+                    }
+                    else {
+                        $.messager.alert('错误', '五级制成绩应该在1-5之间', 'error');
+                        rec.score=''
+                    }
+                break;
+            case 't':
+                val=parseInt(val);
+                if(val>=0&&val<=1) {
+                    rec.examscore=0;
+                    rec.testscore=TWO[val];
+                    rec.score=rec.testscore;
+                    rec.examrem='N';
+                    return  rec.testscore;
+                }
+                else {
+                    $.messager.alert('错误', '两级制成绩应该在0-1之间', 'error');
+                    rec.score=''
+                }
+                break;
+            default :
+                break;
+        }
+    }
+
+    function saveScore(lock){
+        var tt=$('#dg');
+        tt.datagrid('endEditing');
+        if(tt.datagrid('editIndex')!=undefined) return;
+        //获取更改的数据行内容
+        var rows;
+        rows=tt.datagrid('getChanges','updated');
+        var length=rows.length;
+        if(length<=0&&lock!=1){
+            $.messager.alert('提示', '没有数据需要更新', 'error');
+            return;
+        }
+        var updateRows=[];
+        for (var i = 0; i < length; i++) {
+            if (rows[i]['lock'] == 1) {
+                $.messager.alert('错误', rows[i]['name'] + '的成绩已经被锁定，请联系教务处开锁！', 'error');
+                return;
+            }
+            else {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno = rows[i].recno;
+                updateObj.score = rows[i].score;
+                updateObj.examscore = rows[i].examscore;
+                updateObj.testscore = rows[i].testscore;
+                updateObj.examrem = rows[i].examrem;
+                updateObj.studentno = rows[i].studentno;
+                updateRows.push(updateObj);
+            }
+        }
+        var effectRow = {};
+        effectRow["updated"]=$.toJSON(updateRows);
+        effectRow["examdate"]=$("#examdate").datebox('getValue');
+        effectRow["year"]= getQueryString('year');
+        effectRow["term"]=getQueryString('term');
+        effectRow["courseno"]=getQueryString('courseno');
+        if(lock==1)
+            effectRow["lock"]=1;
+        $.post('{$ROOT}/score/record/beginupdate',effectRow,function(result){
+            if (result.status==1){
+                tt.datagrid('acceptChanges');
+                tt.datagrid('reload');
+                $.messager.show({	// show error message
+                    title: '成功',
+                    msg: result.info
+                });
+            } else {
+                $.messager.alert('错误',result.info,'error');
+            }
+        },'json');
+    }
+</script>
+<style type="text/css">
+    .title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";}
+    .course{text-align: center;font-size: 11pt;line-height:30px;height: 30px;}
+</style>
+<div class="container">
+    <div class="title">{$title}</div>
+    <div class="course">{$course}</div>
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存本页</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div id='menu_saveFinal' data-options="iconCls:'icon icon-shield'">最终提交并锁定课程</div>
+    </div>
+    <div id="score" style="width:800px;float: left">
+        <div id="toolbar">
+            <label for="examdate">考试日期：</label><input id="examdate"/>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存本页</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pen',plain:'true'" id="all">全部合格</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-shield',plain:'true'" id="saveFinal">最终提交并锁定课程</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印成绩单</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div class="information" style="float: left;width:500px;">
+        <ol>填写说明：
+            <li>状态栏显示“锁”的记录为已输入过成绩而锁定，如需再次修改请联系教务处开放课程。</li>
+            <li>百分制输入时成绩应为0-100之间或者使用字母（q、h、w)；</li>
+            <li>五级制输入时成绩1-5之间或者使用字母（q、h、w)，数字对应成绩如下：1-优秀，2-良好，3-中等，4-及格，5-不及格；</li>
+            <li>二级制输入时成绩为数值0-1或者使用字母（q、h、w)，1-合格，0-不合格;</li>
+            <li>字母对应字符如下:q-缺考，h-缓考，w-违纪；</li>
+            <li>按Tab键或者Enter键可切换到到下一条成绩.</li>
+            <li>成绩可能会分多页，每页输入完成后，都需点击<span class="warn">“保存本页”</span>，您可以修改成绩单下方每页显示条数，让一页显示更多的学生记录。</li>
+            <li>成绩完全输入后，为防止帐号密码泄露，<span class="warn">请务必点击“最终提交并锁定课程”</span> </li>
+        </ol>
+    </div>
+</div>
