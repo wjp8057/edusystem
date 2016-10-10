@@ -16,13 +16,13 @@
             queryParams: {school:school.combobox('getValue'),courseno:''},
             pageList:[20,50,100,200],
             columns: [[
-                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'equalLength[7]',required:true}}},
-                {field: 'coursename', title: '课名', width: 180, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]',required:true}}},
-                {field: 'credits', title: '学分', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'total', title: '总学时', width: 50, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field: 'courseno', title: '课号*', width: 60, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'equalLength[7]',required:true}}},
+                {field: 'coursename', title: '课名*', width: 180, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]',required:true}}},
+                {field: 'credits', title: '学分*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'total', title: '总学时*', width: 50, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
                 {title: '每周学时', width: 80, align: 'center',colspan:7},
-                {field: 'week', title: '周数', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
-                {field: 'school', title: '开课学院', width: 110, align: 'center',rowspan:2,editor: {
+                {field: 'week', title: '周数*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field: 'school', title: '开课学院*', width: 110, align: 'center',rowspan:2,editor: {
                     type: 'combobox', options: {
                         url: '{$ROOT}/all/option/school?active=1',
                         valueField: 'school',
@@ -38,7 +38,7 @@
                         return rec.schoolname;
                     }
                 },
-                {field: 'type', title: '类型', width: 75, align: 'center',rowspan:2,editor: {
+                {field: 'type', title: '类型*', width: 75, align: 'center',rowspan:2,editor: {
                     type: 'combobox', options: {
                         url: '{$ROOT}/all/option/coursetype',
                         valueField: 'type',
@@ -54,7 +54,7 @@
                     formatter: function (val, rec) {
                         return rec.typename;
                     }},
-                {field: 'form', title: '形式', width: 70, align: 'center',rowspan:2,editor: {
+                {field: 'form', title: '形式*', width: 70, align: 'center',rowspan:2,editor: {
                     type: 'combobox', options: {
                         url: '{$ROOT}/all/option/courseform',
                         valueField: 'form',
@@ -71,13 +71,13 @@
                         return rec.formname;
                     }}
             ],[
-                {field: 'lhours', title: '理论', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'experiments', title: '实验', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'computing', title: '上机', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'khours', title: '讨论', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'shours', title: '实训', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'zhours', title: '自学', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
-                {field: 'hours', title: '总计', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}}
+                {field: 'lhours', title: '理论*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'experiments', title: '实验*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'computing', title: '上机*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'khours', title: '讨论*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'shours', title: '实训*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'zhours', title: '自学*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
+                {field: 'hours', title: '总计*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -127,6 +127,21 @@
             tt.datagrid('insertRow',{
                 index: 0,
                 row: {
+                    credits:0,
+                    lhours:0,
+                    experiments:0,
+                    computing:0,
+                    khours:0,
+                    shours:0,
+                    zhours:0,
+                    hours:0,
+                    week:17,
+                    school:'{$USERINFO.school}',
+                    schoolname:'{$USERINFO.schoolname}',
+                    form:'A',
+                    formname:'纯理论',
+                    type:'E',
+                    typename:'普通课'
                 }
             });
             tt.datagrid('startEditing',{field:'courseno',index:0});

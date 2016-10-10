@@ -43,9 +43,10 @@ class Process extends MyController
             $data = $result['rows'];
             $file = $year."学年第".$term."学期教室利用率（".$base."课时基准)";
             $sheet = '全部';
-            $title = '';
-            foreach ($data as $one) {
-                $one['rate']=$one['used'];
+            $title = $file;
+            $length=count($data);
+            for($i=0;$i<$length;$i++){
+                $data[$i]['rate']= $data[$i]['used']*100/40;
             }
             $template = array("roomno" => "教室号", "no" => "房间号","roomname"=>"名称", "building" => "楼名", "areaname" => "校区","seats"=>"座位数",
                 "equipmentname"=>"设施", "used"=>"周课时","rate"=>"利用率");

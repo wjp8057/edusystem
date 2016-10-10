@@ -320,7 +320,8 @@ class Classroom extends MyService {
             ->join('areas ',' areas.name=classrooms.area')
             ->join('timesectors','timesectors.name=schedule.time')
             ->page($page,$rows)
-            ->field("classrooms.roomno,rtrim(classrooms.jsn) roomname,classrooms.no,classrooms.building ,classrooms.seats,roomoptions.value equipmentname,areas.value areaname,sum(timesectors.sxjunit) used")
+            ->field("classrooms.roomno,rtrim(classrooms.jsn) roomname,rtrim(classrooms.no) no,rtrim(classrooms.building) building ,classrooms.seats,rtrim(roomoptions.value) equipmentname,
+            rtrim(areas.value) areaname,sum(timesectors.sxjunit) used")
             ->where($condition)->group('classrooms.roomno,classrooms.jsn,classrooms.no,classrooms.building ,classrooms.seats,roomoptions.value ,areas.value')
             ->order('roomno')->select();
         $count= $this->query->table('classrooms')->join('schedule','schedule.roomno=classrooms.roomno')
