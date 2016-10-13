@@ -72,7 +72,7 @@ class Schedule extends MyService {
                 $result[$one['day']][5].=$string;
                 break;
             case 'J':
-                $result[$one['day']][5].=$string;
+                $result[$one['day']][6].=$string;
                 break;
             case 'K':
                 $result[$one['day']][3].=$string;

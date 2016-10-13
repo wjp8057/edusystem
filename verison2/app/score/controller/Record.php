@@ -72,4 +72,17 @@ class Record extends MyController
         }
         return json($result);
     }
+    public function beginunlock($year,$term,$courseno)
+    {
+        $result = null;
+        try {
+            $score = new Makeup();
+            $result = $score->unlockCourse($year,$term,$courseno);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
 }

@@ -44,16 +44,18 @@ class Course extends MyController{
     public function export($year,$term,$courseno){
         try{
             $r32=new R32();
-            $result=$r32->getStudentList(1,10000,$year,$term,$courseno);
-            $data=$result['rows'];
-            $file="课程选课名单";
-            $coursename=Item::getCourseItem(substr($courseno,0,7))['coursename'];
-            $sheet=$coursename;
-            $title=$year.'年第'.$term.'学期'.$coursename.'('.$courseno.') (共'.count($data).'人)';
-            $template= array("studentno"=>"学号","studentname"=>"姓名","sexname"=>"性别","classname"=>"班级","schoolname"=>"学院","approachname"=>"修课方式");
-            $string=array("studentno");
-            $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
-            PHPExcel::export2Excel($file,$array);
+            $r32->exportCheckInByCourseno($year,$term,$courseno);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+    }
+
+    public function exportall($year,$term){
+        try{
+            $r32=new R32();
+            $teacherno= session('S_TEACHERNO');
+            $r32->exportCheckInByTeacherno($year,$term,$teacherno);
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());

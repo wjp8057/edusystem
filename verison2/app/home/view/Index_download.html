@@ -3,6 +3,11 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>浏览器版本过低</title>
+    <script language="JavaScript" type="text/javascript">
+        if (navigator.userAgent.indexOf('MSIE') < 0) {
+            location.href="/";
+        }
+    </script>
 </head>
 <body>
 您的浏览器是IE，且版本过低（IE9以下），请使用更高的版本。<br/>

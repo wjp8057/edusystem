@@ -12,6 +12,7 @@ namespace app\common\service;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
+use app\common\vendor\PHPExcel;
 
 class R32 extends  MyService {
     /**获取课程选修学生列表
@@ -45,5 +46,55 @@ class R32 extends  MyService {
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
+    }
+
+    /**根据课号导出考勤表
+     * @param $year
+     * @param $term
+     * @param $courseno
+     * @throws Exception
+     */
+    public function exportCheckInByCourseno($year,$term,$courseno)
+    {
+        $file = "考勤表";
+        $array=[];
+        $result = $this->getStudentList(1, 10000, $year, $term, $courseno);
+        $data = $result['rows'];
+        $title = "宁波城市学院课堂考勤记录表";
+        $schedule = new ViewSchedule();
+        $course = $schedule->getCourseInfo($year, $term, $courseno);
+        $sheet = $course['coursename'];
+        $info = "课号:" . $course['courseno'] . '  课名:' . $course['coursename'] .
+            '   教师:' . $course['teachername'] . '   班级:' . $course['classname'] . " 人数:" . $course['attendents'];
+
+        $template = array("studentno" => "学号", "studentname" => "姓名", "classname" => "班级");
+        $string = array("studentno");
+        $array[] = array("sheet" => $sheet, "title" => $title, "info" => $info, "template" => $template, "data" => $data, "string" => $string);
+        PHPExcel::printCourseCheckIn($file,$array);
+    }
+
+    public function exportCheckInByTeacherno($year,$term,$teacherno)
+    {
+        $file = "考勤表";
+        $array=[];
+        $schedule=new ViewScheduleTable();
+        $result=$schedule->getTeacherCourseList(1,1000,$year,$term,$teacherno);
+        $courserows=$result['rows'];
+        foreach($courserows as $one) {
+            $courseno=$one['courseno'];
+            $result = $this->getStudentList(1, 10000, $year, $term, $courseno);
+            $data = $result['rows'];
+            $title = "宁波城市学院课堂考勤记录表";
+            $schedule = new ViewSchedule();
+            $course = $schedule->getCourseInfo($year, $term, $courseno);
+            $sheet = $course['coursename'];
+            $info = "课号:" . $course['courseno'] . '  课名:' . $course['coursename'] .
+                '   教师:' . $course['teachername'] . '   班级:' . $course['classname'] . " 人数:" . $course['attendents'];
+
+            $template = array("studentno" => "学号", "studentname" => "姓名", "classname" => "班级");
+            $string = array("studentno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "info" => $info, "template" => $template, "data" => $data, "string" => $string);
+        }
+        PHPExcel::printCourseCheckIn($file,$array);
     }
 }

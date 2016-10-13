@@ -51,7 +51,7 @@ class Item {
         $result=null;
         $condition=null;
         $condition['courseno']=$courseno;
-        $data=Db::table('courses')->where($condition)->field('rtrim(coursename) as coursename')->select();
+        $data=Db::table('courses')->where($condition)->field('rtrim(coursename) as coursename,courseno')->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)
                 throw new Exception('courseno:' . $courseno, MyException::ITEM_NOT_EXISTS);

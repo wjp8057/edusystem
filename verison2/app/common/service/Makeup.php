@@ -249,12 +249,46 @@ class Makeup extends  MyService {
         }
         return $result;
     }
+
+    /**获取学期初补考课程信息
+     * @param string $year
+     * @param string $term
+     * @param string $courseno
+     * @return mixed
+     * @throws Exception
+     */
     public function getCourseInfo($year='',$term='',$courseno='')
     {
         if ($year == '' || $term == '' || $courseno == '')
             throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+        $condition['makeup.courseno']=$courseno;
+        $condition['makeup.year']=$year;
+        $condition['makeup.term']=$term;
+        $data=$this->query->table('makeup')->join('courses','courses.courseno=makeup.courseno')
+            ->join('schools','schools.school=courses.school')->where($condition)->group('makeup.courseno,coursename,schools.name')
+            ->field('makeup.courseno,rtrim(coursename) coursename,rtrim(schools.name) schoolname,count(*) attendents')->select();
+        $result=$data[0];
+        return $result;
+    }
 
-  //todo:未完成
-        return ;
+    public function  unlockCourse($year,$term,$courseno){
+        $condition=null;
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $condition['course']=$courseno;
+        $data=null;
+        $data['lock']=1;
+        $effectRow=$this->query->table('makeup')->where($condition)->update($data);
+        if($effectRow>=0)
+        {
+            $info="开锁成功！";
+            $status=0;
+        }
+        else {
+            $info="没有开锁！";
+            $status=1;
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
     }
 }

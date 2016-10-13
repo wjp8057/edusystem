@@ -41,18 +41,20 @@
                 term: $('#term').val()
             });
         });
-        $('#menu_student,#student').click(function(){
-/*            var obj=$('#student');
-            var icon=obj.linkbutton('options')['iconCls'];
-            var title=obj.text();*/
+        $('#menu_exportAll,#exportAll').click(function(){
             var year=$('#year').val();
             var term=$('#term').val();
             var courseno=getCourseNo();
             if(courseno) {
-                // addTab('/teacher/index/student?courseno='+courseno+"&",title,icon);
-                var url='/teacher/index/student?';
-                window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&courseno="+courseno);
+                $.fileDownload("{$ROOT}/teacher/course/exportall?year=" +year+"&term="+term, {
+                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                    dialogOptions: {modal: true, title: '提示'},
+                    failCallback: function (html, url) {
+                        $.messager.alert('错误',html,'error');
+                    }
+                });
             }
+            return false; //this is critical to stop the click event which will trigger a normal file download!
         });
         $('#menu_timetable,#timetable').click(function(){
       /*      var obj=$('#timetable');
@@ -97,9 +99,9 @@
     }
 </script>
 <div class="container">
-    <div id="menu" class="easyui-menu" style="width:100px;">
-        <div id='menu_student' data-options="iconCls:'icon icon-print'">打印课堂考勤表</div>
-        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出选课名单</div>
+    <div id="menu" class="easyui-menu" style="width:200px;">
+        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出课堂考勤表</div>
+        <div id='menu_exportAll' data-options="iconCls:'icon icon-excel'">导出全部课堂考勤表</div>
         <div class="menu-sep"></div>
         <div id='menu_timetable' data-options="iconCls:'icon icon-print'">打印学期课表</div>
     </div>
@@ -107,8 +109,8 @@
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="8" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="3" value="{$YEARTERM.term}"/>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索课程</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="student">打印课堂考勤表</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出选课名单</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出课堂考勤表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="exportAll">导出全部课堂考勤表</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">打印学期课表</a>
     </div>
     <table id="dg"></table>

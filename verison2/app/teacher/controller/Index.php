@@ -110,42 +110,6 @@ class Index extends Template
         return $this->fetch();
 
     }
-
-    /*
-     * 课程学生信息页面
-     */
-    function student($year = '', $term = '', $courseno = '', $page = 1)
-    {
-        try {
-            //头部信息
-            $this->assign('year', $year);
-            $this->assign('term', $term);
-            $schedule = new ViewSchedule;
-            $course = $schedule->getCourseInfo($year, $term, $courseno);
-
-            $this->assign('course', $course);
-            //学生名单
-            $r32 = new R32();
-            $student = $r32->getStudentList($page, 45, $year, $term, $courseno);
-            $result = $student['rows'];
-            $amount = count($result);//当前页行数
-            $score = '';
-            for ($i = 0; $i < 45; $i++) {
-                $score .= '<tr>';
-                $score .= $i < $amount ? '<td>' . $result[$i]["studentno"] . '</td><td>' . $result[$i]["studentname"] . '</td><td>' . $result[$i]["classname"] . '</td>'
-                    : '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
-                for ($j = 0; $j < 17; $j++)
-                    $score .= '<td>&nbsp;</td>';
-                $score .= '</tr>';
-            }
-            $this->assign('student', $score);
-
-        } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
-        return $this->fetch();
-    }
-
     /*
      * 教师课表页面
      */
