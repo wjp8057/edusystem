@@ -16,6 +16,7 @@ use app\common\service\Action;
 use app\common\service\Schedule;
 use app\common\service\ViewSchedule;
 use app\common\service\R32;
+use app\common\service\ViewScheduleTable;
 
 class Index extends Template
 {
@@ -77,35 +78,33 @@ class Index extends Template
         return $this->fetch();
     }
 
-    function processcoursestudent($year = '', $term = '', $courseno = '', $page = 1)
-    {
-        try {
+    function processcoursestudent($year='',$term='',$courseno='',$page=1){
+        try{
             //头部信息
-            $this->assign('year', $year);
-            $this->assign('term', $term);
-            $schedule = new ViewSchedule();
-            $course = $schedule->getCourseInfo($year, $term, $courseno);
-
-            $this->assign('course', $course);
-            //学生名单
-            $r32 = new R32();
-            $student = $r32->getStudentList($page, 45, $year, $term, $courseno);
-            $result = $student['rows'];
-            $amount = count($result);//当前页行数
-            $score = '';
-            for ($i = 0; $i < 45; $i++) {
-                $score .= '<tr>';
-                $score .= $i < $amount ? '<td>' . $result[$i]["studentno"] . '</td><td>' . $result[$i]["studentname"] . '</td><td>' . $result[$i]["classname"] . '</td>'
-                    : '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
-                for ($j = 0; $j < 17; $j++)
-                    $score .= '<td>&nbsp;</td>';
-                $score .= '</tr>';
+            $this->assign('year',$year);
+            $this->assign('term',$term);
+            $schedule=new ViewScheduleTable();
+            $course=$schedule->getCourseInfo($year,$term,$courseno);
+            $this->assign('course',$course);
+            //成绩信息
+            $score=new \app\common\service\Score();
+            $student=$score->getStudentList($page,120,$year,$term,$courseno);
+            $result=$student['rows'];
+            $amount=count($result);//当前页行数
+            $scorestring='';
+            for($i=0;$i<40;$i++){
+                $scorestring.='<tr>';
+                $scorestring.=$i<$amount?'<td>'.$result[$i]["studentno"].'</td><td>'.$result[$i]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.=($i+40)<$amount?'<td>'.$result[$i+40]["studentno"].'</td><td>'.$result[$i+40]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.=($i+80)<$amount?'<td>'.$result[$i+80]["studentno"].'</td><td>'.$result[$i+80]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.='</tr>';
             }
-            $this->assign('student', $score);
-
-        } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(), $e->getMessage());
+            $this->assign('score',$scorestring);
+            return $this->fetch();
         }
-        return $this->fetch();
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+
     }
 }

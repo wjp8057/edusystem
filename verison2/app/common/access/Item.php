@@ -61,6 +61,12 @@ class Item {
         return $result;
     }
 
+    /**获取教学计划
+     * @param $programno
+     * @param bool $alert
+     * @return null
+     * @throws Exception
+     */
     public static function getProgramItem($programno,$alert=true){
         $result=null;
         $condition=null;
@@ -75,6 +81,14 @@ class Item {
         return $result;
     }
 
+    /**获取开课计划
+     * @param $year
+     * @param $term
+     * @param $courseno
+     * @param bool $alert
+     * @return null
+     * @throws Exception
+     */
     public static function getSchedulePlanItem($year,$term,$courseno,$alert=true){
         $result=null;
         $condition=null;
@@ -95,6 +109,12 @@ class Item {
         return $result;
     }
 
+    /**获取教师
+     * @param $teacherno
+     * @param bool $alert
+     * @return null
+     * @throws Exception
+     */
     public static function getTeacherItem($teacherno,$alert=true){
         $result=null;
         $condition=null;
@@ -103,6 +123,26 @@ class Item {
         if(!is_array($data)||count($data)!=1) {
             if($alert)
                 throw new Exception('teacherno:' . $teacherno, MyException::ITEM_NOT_EXISTS);
+        }
+        else
+            $result=$data[0];
+        return $result;
+    }
+
+    /**获取班级信息
+     * @param $classno
+     * @param bool $alert
+     * @return null
+     * @throws Exception
+     */
+    public static function getClassItem($classno,$alert=true){
+        $result=null;
+        $condition=null;
+        $condition['classno']=$classno;
+        $data=Db::table('classes')->where($condition)->field('rtrim(classname) as classname,classno,school')->select();
+        if(!is_array($data)||count($data)!=1) {
+            if($alert)
+                throw new Exception('classno:' . $classno, MyException::ITEM_NOT_EXISTS);
         }
         else
             $result=$data[0];

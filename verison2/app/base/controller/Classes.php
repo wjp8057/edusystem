@@ -12,6 +12,7 @@
 namespace app\base\controller;
 
 
+use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\access\MyException;
@@ -84,6 +85,12 @@ class Classes extends MyController {
         }
         return json($result);
     }
+
+    /**导出所有班级学生名单
+     * @param string $classno
+     * @param string $classname
+     * @param string $school
+     */
     public function export($classno='%',$classname='%',$school='')
     {
         try{
@@ -96,11 +103,13 @@ class Classes extends MyController {
             $file="班级学生名单";
             $student=new Student();
             $array=[];
+            $amount=0;
             foreach($classrows as $one){
                 if($one['amount']>0) { //仅导出有学生的班级
+                    $amount++;
                     $result = $student->getList(1, 10000, '%', '%', $one['classno'], '', '','');
-                    $class = new \app\common\service\Classes();
-                    $classname = $class->getClassInfo($one['classno'])['classname'];
+                    $class = Item::getClassItem($classno,true);
+                    $classname = $class['classname'];
                     $data = $result['rows'];
                     $sheet = str_replace("*", "", $classname);
                     $title = $classname . '学生名单';
@@ -109,11 +118,13 @@ class Classes extends MyController {
                     $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
                 }
             }
+            if($amount<=0){
+                throw new Exception('all classes have no student!',MyException::ITEM_NOT_EXISTS);
+            }
             PHPExcel::export2Excel($file,$array);
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
-
     }
 } 

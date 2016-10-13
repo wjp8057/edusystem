@@ -15,6 +15,10 @@ namespace app\common\vendor;
 use app\common\service\User;
 
 class CAS {
+    /**统一身份登录。
+     * @param string $ticket
+     * @return int
+     */
     static public function signinNormal($ticket=""){
         $service= 'http://'.$_SERVER["SERVER_NAME"]."/web/home/login/caslogin";
         $ssoURL="http://ids.nbcc.cn/sso/";

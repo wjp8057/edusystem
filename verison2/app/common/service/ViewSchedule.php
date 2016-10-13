@@ -61,7 +61,7 @@ dbo.GROUP_CONCAT(distinct rtrim(dayntime),',') time,attendents,coursetypeoptions
         $condition['term']=$term;
         $condition['coursenogroup']=$courseno;
         $data=$this->query->table('viewschedule')->where($condition)->group('coursenogroup,coursetype,examtype,attendents,coursename,credits,schoolname')
-            ->field("coursenogroup courseno,schoolname,coursename,credits,coursetype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),'，') as classname,
+            ->field("coursenogroup courseno,rtrim(schoolname) schoolname,rtrim(coursename)coursename,credits,coursetype,examtype,dbo.GROUP_CONCAT(distinct rtrim(classname),'，') as classname,
 dbo.GROUP_CONCAT(distinct rtrim(teachername),'，') as teachername,attendents")->find();
         return $data;
     }
