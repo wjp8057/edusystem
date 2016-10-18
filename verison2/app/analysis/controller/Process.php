@@ -120,7 +120,7 @@ class Process extends MyController
     public function exportcoursecheckin($year,$term,$teacherno){
       try{
           $student=new R32();
-          $student->exportCheckInByCourseno($year,$term,$teacherno);
+          $student->exportCheckInByTeacherno($year,$term,$teacherno);
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
