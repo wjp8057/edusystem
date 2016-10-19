@@ -169,18 +169,20 @@ class PHPExcel
                 $PHPExcel->getActiveSheet($sheetIndex)->getColumnDimensionByColumn($j+3)->setWidth(3);
             }
             $rowIndex+=3;
-            foreach ($data as $row) {
-                $colIndex = 0;
-                foreach ($template as $k => $v) {
-                    $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(2, $rowIndex, 3, $rowIndex);
-                    if (in_array($k, $string)) //字段名在字符串格式化列表中
-                        $PHPExcel->getActiveSheet($sheetIndex)->setCellValueExplicitByColumnAndRow($colIndex, $rowIndex, $row[$k], \PHPExcel_Cell_DataType::TYPE_STRING);
-                    else {
-                        $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colIndex, $rowIndex, $row[$k]);
+            if(count($data)>0) {
+                foreach ($data as $row) {
+                    $colIndex = 0;
+                    foreach ($template as $k => $v) {
+                        $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(2, $rowIndex, 3, $rowIndex);
+                        if (in_array($k, $string)) //字段名在字符串格式化列表中
+                            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueExplicitByColumnAndRow($colIndex, $rowIndex, $row[$k], \PHPExcel_Cell_DataType::TYPE_STRING);
+                        else {
+                            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colIndex, $rowIndex, $row[$k]);
+                        }
+                        $colIndex++;
                     }
-                    $colIndex++;
+                    $rowIndex++;
                 }
-                $rowIndex++;
             }
             //加边框
             $PHPExcel->getActiveSheet($sheetIndex)->getStyle($datastart . ':' . \PHPExcel_Cell::stringFromColumnIndex($colCount - 1) . ($rowIndex-1))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);

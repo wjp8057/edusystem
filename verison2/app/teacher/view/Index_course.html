@@ -44,16 +44,13 @@
         $('#menu_exportAll,#exportAll').click(function(){
             var year=$('#year').val();
             var term=$('#term').val();
-            var courseno=getCourseNo();
-            if(courseno) {
-                $.fileDownload("{$ROOT}/teacher/course/exportall?year=" +year+"&term="+term, {
-                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
-                    dialogOptions: {modal: true, title: '提示'},
-                    failCallback: function (html, url) {
-                        $.messager.alert('错误',html,'error');
-                    }
-                });
-            }
+            $.fileDownload("{$ROOT}/teacher/course/exportall?year=" +year+"&term="+term, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
             return false; //this is critical to stop the click event which will trigger a normal file download!
         });
         $('#menu_timetable,#timetable').click(function(){
