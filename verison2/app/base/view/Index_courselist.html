@@ -21,7 +21,7 @@
                 {field: 'credits', title: '学分*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
                 {field: 'total', title: '总学时*', width: 50, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
                 {title: '每周学时', width: 80, align: 'center',colspan:7},
-                {field: 'week', title: '周数*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field: 'week', title: '周数*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
                 {field: 'school', title: '开课学院*', width: 110, align: 'center',rowspan:2,editor: {
                     type: 'combobox', options: {
                         url: '{$ROOT}/all/option/school?active=1',
@@ -69,7 +69,8 @@
                 },
                     formatter: function (val, rec) {
                         return rec.formname;
-                    }}
+                    }}  ,
+                {field: 'quarter', title: '开设学期*', width: 70, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[2]'}}}
             ],[
                 {field: 'lhours', title: '理论*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
                 {field: 'experiments', title: '实验*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
@@ -154,7 +155,6 @@
             tt.datagrid('rejectChanges');
             current_datagrid=null;
         });
-
 
         //绑定点击保存按钮事件
         $("#save,#menu_save").click(function(){

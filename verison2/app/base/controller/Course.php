@@ -100,7 +100,7 @@ class Course extends MyController {
             $title = '';
             $template = array("courseno" => "课号", "coursename" => "课名","schoolname"=>"开课学院", "credits" => "学分", "total" => "总学时","week"=>"周数",
                 "hours"=>"每周总学时", "lhours"=>"每周理论","experiments"=>"每周实验","computing"=>"每周上机","khours"=>"每周讨论","shours"=>"每周实训",
-                "zhours"=>"每周自主", "typename" => "类型","formname"=>"形式");
+                "zhours"=>"每周自主", "typename" => "类型","formname"=>"形式","quarter"=>"开课学期");
             $string = array("courseno");
             $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
             PHPExcel::export2Excel($file, $array);

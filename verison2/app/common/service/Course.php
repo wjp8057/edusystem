@@ -26,9 +26,12 @@ class Course  extends  MyService{
             ->join('coursetypeoptions','coursetypeoptions.name=courses.type')
             ->join('courseform','courseform.name=courses.form','LEFT')
             ->page($page,$rows)
-            ->field('rtrim(courses.courseno) courseno,rtrim(courses.coursename) coursename,courses.total,credits,hours,
-            lhours,experiments,computing,khours,shours,zhours,week,rtrim(schools.name) schoolname,schools.school,
-            rtrim(coursetypeoptions.value) typename,courses.type,rtrim(courseform.value) formname,courses.form')
+            ->field('rtrim(courses.courseno) courseno,rtrim(courses.coursename) coursename,courses.total,
+            convert(varchar(10),credits) credits,hours,
+            convert(varchar(10),lhours) lhours,convert(varchar(10),experiments) experiments,
+            convert(varchar(10),computing) computing,convert(varchar(10),khours) khours,convert(varchar(10),shours) shours,
+            convert(varchar(10),zhours) zhours, convert(varchar(10),week) week,rtrim(schools.name) schoolname,schools.school,
+            rtrim(coursetypeoptions.value) typename,courses.type,rtrim(courseform.value) formname,courses.form,quarter')
             ->where($condition)->order('courseno')->select();
         $count= $this->query->table('courses')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
@@ -68,6 +71,7 @@ class Course  extends  MyService{
                     $data['type'] = $one->type;
                     $data['form'] = $one->form;
                     $data['type2'] = $one->form;
+                    $data['quarter'] = $one->quarter;
                     if ($data['school'] != session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
                         $info .= '无法为其它学院添加课程'.$one->coursename .'</br>';
                         $status=0;
@@ -102,6 +106,7 @@ class Course  extends  MyService{
                     $data['type'] = $one->type;
                     $data['form'] = $one->form;
                     $data['type2'] = $one->form;
+                    $data['quarter'] = $one->quarter;
                     if(MyAccess::checkCourseSchool($one->courseno))
                         $updateRow += $this->query->table('courses')->where($condition)->update($data);
                     else{

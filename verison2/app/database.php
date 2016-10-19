@@ -29,6 +29,7 @@ return [
     // 数据库连接参数
     'params' => [
         \PDO::ATTR_CASE         => \PDO::CASE_LOWER
+
     ],
     // 数据库编码默认采用utf8
     'charset'     => 'utf8',

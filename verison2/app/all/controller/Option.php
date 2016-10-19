@@ -345,30 +345,10 @@ class Option {
         return json($result);
     }
     public function test(){
-/*        $result =Db::table('users')->join('sessions','users.username=sessions.username')
-            ->field([
-                'convert(varchar(100),logintime,20)'=> 'logintime',
-                'convert(varchar(100),modifydate,20)'=>'modifydate',
-                ])
-            ->field('teacherno')->limit(1)->select();*/
-     //   $result =Db::query('select top 1 convert(varchar(100),logintime,20) logintime,convert(varchar(100),modifydate,20) modifydate from users LEFT JOIN sessions ON sessions.username=users.username ');
-      //  $result =Db::table('users')->field("isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t")->limit(1)->select();
-      //  $result =Db::table('sessions')->field("convert(varchar(100),logintime,20) as a,convert(varchar(100),modifydate,20) as b")->limit(1)->select();
-    //    $string="convert(varchar(100),logintime,20) as a,convert(varchar(100),modifydate,20) as b";
-        $start=microtime(true);
-        echo $start."<br/>";
-        $result="isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t";
-     //   $result="isnull(convert(varchar(100),logintime,20),0) as a,convert(varchar(100),modifydate,20) as b";
-        for($i=0;$i<10;$i++) {
-            for($j=0;$j<3;$j++){
-                $result="isnull(username,0) mon,isnull(teacherno,0) tue,isnull(password,0) as t";
-                $result = array_map('trim', explode(',', $result));
-                $result=preg_replace("/##/",',',$result);
-            }
-        }
-       $end=microtime(true);
-        echo $end."<br/>";;
-        echo $end-$start;
+        $condition['courseno']='080A01A';
+        $result =Db::table('courses')->field('convert(varchar(10),khours) lhours')->where($condition)->select();
+        dump($result);
+
 
     }
 }
