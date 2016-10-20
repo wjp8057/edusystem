@@ -27,7 +27,7 @@ class Course  extends  MyService{
             ->join('courseform','courseform.name=courses.form','LEFT')
             ->page($page,$rows)
             ->field('rtrim(courses.courseno) courseno,rtrim(courses.coursename) coursename,courses.total,
-            convert(varchar(10),credits) credits,hours,
+            convert(varchar(10),credits) credits, convert(varchar(10),hours) hours,
             convert(varchar(10),lhours) lhours,convert(varchar(10),experiments) experiments,
             convert(varchar(10),computing) computing,convert(varchar(10),khours) khours,convert(varchar(10),shours) shours,
             convert(varchar(10),zhours) zhours, convert(varchar(10),week) week,rtrim(schools.name) schoolname,schools.school,
