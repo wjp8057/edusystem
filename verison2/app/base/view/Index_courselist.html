@@ -1,4 +1,4 @@
-<layout name="layout" />
+<layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
         var school=$('#school');
@@ -70,7 +70,8 @@
                     formatter: function (val, rec) {
                         return rec.formname;
                     }}  ,
-                {field: 'quarter', title: '开设学期*', width: 70, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[2]'}}}
+                {field: 'quarter', title: '开设学期*', width: 70, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[2]'}}},
+                {field: 'rem', title: '备注*', width: 120, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]'}}}
             ],[
                 {field: 'lhours', title: '理论*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},
                 {field: 'experiments', title: '实验*', width: 40, align: 'center',editor:{type:'numberbox',options:{required:true, precision: 1}}},

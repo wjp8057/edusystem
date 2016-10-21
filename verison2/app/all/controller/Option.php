@@ -325,6 +325,10 @@ class Option {
         }
         return json($result);
     }
+
+    /**课程类型
+     * @return \think\response\Json
+     */
     public function coursetype(){
         $result=null;
         try {
@@ -335,6 +339,9 @@ class Option {
         return json($result);
     }
 
+    /**课程形式
+     * @return \think\response\Json
+     */
     public function courseform(){
         $result=null;
         try {
@@ -344,11 +351,52 @@ class Option {
         }
         return json($result);
     }
+
+    /**专业代码
+     * @return \think\response\Json
+     */
+    public function majorcode(){
+        $result=null;
+        try {
+            $result =Db::table('majorcode')->field('rtrim(code) as code,rtrim(name) as name')->order('name')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    /**学科列表
+     * @return \think\response\Json
+     */
+    public function branch(){
+        $result=null;
+        try {
+            $result =Db::table('branchcode')->field('rtrim(code) as code,rtrim(name) as name')->order('name')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    /**学位
+     * @return \think\response\Json
+     */
+    public function degree(){
+        $result=null;
+        try {
+            $result =Db::table('degreeoptions')->field('rtrim(code) as code,rtrim(name) as name')->order('name')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    /**
+     * 测试专用
+     */
     public function test(){
         $condition['courseno']='080A01A';
         $result =Db::table('courses')->field('convert(varchar(10),khours) lhours')->where($condition)->select();
         dump($result);
-
-
     }
 }

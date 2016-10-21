@@ -18,101 +18,100 @@ $(function () {
         rownumbers: true,
         singleSelect: true,
         pageSize: 20,
-        url: '{$ROOT}/base/teacher/teacherlist',
+        url: '{$ROOT}/major/major/majorschool',
         toolbar: '#toolbar',
-        queryParams: {school: school.combobox('getValue'),teacherno:''},
+        queryParams: {school: school.combobox('getValue')},
         pageList: [20, 50, 100, 200],
         columns: [[
             {
-                field: 'teacherno',
-                title: '教师号*',
-                width: 80,
+                field: 'majorschool',
+                title: '专业号*',
+                width: 60,
                 align: 'center',
                 editor: {type: 'validatebox', options: {validType: 'equalLength[6]', required: true}}
             },
             {
-                field: 'name',
-                title: '姓名*',
-                width: 80,
+                field: 'majorno', title: '专业名*', width: 150, align: 'center', editor: {
+                type: 'combobox', options: {
+                    url: '{$ROOT}/all/option/majorcode',
+                    valueField: 'code',
+                    textField: 'name',
+                    panelHeight: '150',
+                    required: true,
+                    onSelect: function (rec) {
+                        var tt = $('#dg');
+                        tt.datagrid('getSelected').majorname = rec.name;
+
+                    }
+                }
+            },
+                formatter: function (val, rec) {
+                    return rec.majorname;
+                }
+            },
+            {
+                field: 'direction', title: '专业方向*', width: 150, align: 'center', editor: {
+                type: 'combobox', options: {
+                    valueField: 'direction', textField: 'name', required: true,panelHeight: 'auto',
+                    loader:function(param,success,error){
+                        $.post('{$ROOT}/all/option/majordirection',{major:$('#dg').datagrid('getSelected').majorno},function(result){
+                            success(result);
+                        },'json');
+                    },
+                    onSelect: function (rec) {
+                        var tt = $('#dg');
+                        tt.datagrid('getSelected').directionname = rec.name;
+                    }
+                }
+            },
+                formatter: function (val, rec) {
+                    return rec.directionname;
+                }
+            },
+            {
+                field: 'years',
+                title: '学制*',
+                width: 40,
                 align: 'center',
-                editor: {type: 'validatebox', options: {validType: 'maxLength[40]', required: true}}
+                editor: {type: 'validatebox', options: {validType: 'equalLength[1]', required: true}}
             },
             {
-                field: 'sex', title: '性别*', width: 80, align: 'center', editor: {
+                field: 'branch', title: '学科*', width: 80, align: 'center', editor: {
                 type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/sex',
-                    valueField: 'sex',
+                    url: '{$ROOT}/all/option/branch',
+                    valueField: 'code',
+                    textField: 'name',
+                    panelHeight: '150',
+                    required: true,
+                    onSelect: function (rec) {
+                        var tt = $('#dg');
+                        tt.datagrid('getSelected').branchname = rec.name;
+                    }
+                }
+            },
+                formatter: function (val, rec) {
+                    return rec.branchname;
+                }
+            },
+            {
+                field: 'degree', title: '学位*', width: 80, align: 'center', editor: {
+                type: 'combobox', options: {
+                    url: '{$ROOT}/all/option/degree',
+                    valueField: 'code',
                     textField: 'name',
                     panelHeight: 'auto',
                     required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
-                        tt.datagrid('getSelected').sexname = rec.name;
+                        tt.datagrid('getSelected').degreename = rec.name;
                     }
                 }
             },
                 formatter: function (val, rec) {
-                    return rec.sexname;
+                    return rec.degreename;
                 }
             },
-            {
-                field: 'position', title: '职称*', width: 80, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/position',
-                    valueField: 'position', textField: 'name', panelWidth: '100', required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').positionname = rec.name;
-                    }
-                }
-            },
-                formatter: function (val, rec) {
-                    return rec.positionname;
-                }
-            },
-            {
-                field: 'type', title: '类型*', width: 80, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/teachertype',
-                    valueField: 'type',
-                    textField: 'name',
-                    panelHeight: 'auto',
-                    required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').typename = rec.name;
-                    }
-                }
-            },
-                formatter: function (val, rec) {
-                    return rec.typename;
-                }
-            },
-            {
-                field: 'job', title: '岗位*', width: 80, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/teacherjob',
-                    valueField: 'job',
-                    textField: 'name',
-                    panelHeight: 'auto',
-                    required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').jobname = rec.name;
-                    }
-                }
-            },
-                formatter: function (val, rec) {
-                    return rec.jobname;
-                }
-            },
-            {
-                field: 'enteryear',
-                title: '入校年份*',
-                width: 80,
-                align: 'center',
-                editor: {type: 'validatebox', options: {validType: 'equalLength[4]', required: true}}
-            },
+
             {
                 field: 'school', title: '学院*', width: 100, align: 'center', editor: {
                 type: 'combobox', options: {
@@ -172,7 +171,7 @@ $(function () {
         var count = rows.length;
         for (var i = 0; i < count; i++) { //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
             if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
-                $.messager.alert('错误', '你无法修改其他学院的教师信息（' + rows[i].name + '）！', 'error');
+                $.messager.alert('错误', '你无法修改其他学院的开设专业信息（' + rows[i].name + '）！', 'error');
                 $("#cancel").click();
                 return false;
             }
@@ -270,45 +269,19 @@ $(function () {
         var tt = $('#dg');
         tt.datagrid('loadData', {total: 0, rows: []});
         tt.datagrid('load', {
-            name: $('#name').val(),
-            teacherno: $('#teacherno').val(),
+            majorname: $('#majorname').val(),
+            years: $('#years').val(),
             school: $('#school').combobox('getValue')
         });
     });
-    //右键修改密码
-    $("#menu_changepassword,#changepassword").click(function () {
-        var row = $('#dg').datagrid('getSelected');
-        if (!row) {
-            $.messager.alert('错误', '请先选择一个教师！', 'error');
-            return;
-        }
-        if (row.school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
-            $.messager.alert('错误', '你无法修改其它学院的教师密码！（' + row.name + '）！', 'error');
-            return;
-        }
-        $.messager.prompt('修改', '请输入新密码:', function (password) {
-            if (password) {
-                $.post('{$ROOT}/base/teacher/changepassword', {
-                    teacherno: row.teacherno,
-                    password: password
-                }, function (result) {
-                    if (result.status == 1) {
-                        $.messager.alert('提示', result.info, 'info');
-                    } else {
-                        $.messager.alert('错误', result.info, 'error');
-                    }
-                }, 'json');
-            }
-        });
-    });
     /**
-     * 导出教师名单
+     * 导出
      */
     $('#export,#menu_export').click(function () {
         var name = encodeURI($('#name').val());
         var teacherno = encodeURI($('#teacherno').val());
         var school = encodeURI($('#school').combobox('getValue'));
-        $.fileDownload("{$ROOT}/base/teacher/export?name=" + name + "&teacherno=" + teacherno + '&school=' + school, {
+        $.fileDownload("{$ROOT}/major/major/majorschoolexport?name=" + name + "&teacherno=" + teacherno + '&school=' + school, {
             preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
             dialogOptions: {modal: true, title: '提示'},
             failCallback: function (html, url) {
@@ -324,34 +297,24 @@ $(function () {
         <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">编辑</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
-        <div id='menu_changepassword' data-options="iconCls:'icon icon-shield'">修改密码</div>
-        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出名单</div>
+        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出专业</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
     </div>
     <div id="toolbar">
         <div>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"
-               id="insert">新增</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">编辑</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'"
-               id="save">保存</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-            <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="10" value="%"/>
-            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="10" value="%"/>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'" id="insert">新增</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">编辑</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
+            <label for="majorname">专业名：</label><input id="majorname" class="easyui-validatebox" size="10" value="%"/>
+            <label for="years">学制：</label><input id="years" class="easyui-validatebox" size="1" value=""/>
             <label for="school">学院：</label>
             <input id="school">
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'"
-               id="export">导出名单</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-shield',plain:'true'" id="changepassword">修改密码</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出专业</a>
         </div>
     </div>
     <table id="dg">
@@ -359,7 +322,7 @@ $(function () {
     <div class="information" style="clear:both">
         <ol>说明：
             <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
-            <li>教师号设置后无法修改</li>
+            <li>专业号根据校内规则编写，第1、2位为学院代号，第3位为学制，4-6位为序号。</li>
         </ol>
     </div>
 </div>

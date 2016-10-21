@@ -1,0 +1,278 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'专业代码',idField:'code', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/major/major/query',toolbar:'#toolbar',
+            columns:[[
+            {field:'code',title:'代码*',width:50,align:'center',editor:{type:'validatebox',options:{validType:'equalLength[6]',required:true}}},
+            {field:'name',title:'名称*',width:150,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[12]',required:true}}},
+            {field:'englishname',title:'英文名*',width:250,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[50]'}}}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onSelect:function(index,row){
+                var tt=$('#dg2');
+                tt.datagrid('getPanel').panel('setTitle','"'+row.name+'"拥有以下方向：');
+                tt.datagrid('load',{ major: $('#dg').datagrid('getSelected').code});
+            }
+        });
+        //分配部分数据表格
+        $('#dg2').datagrid({
+            title:'专业方向',idField:'direction', striped:'true',rownumbers:true,singleSelect:true,
+            url:'{$ROOT}/major/major/direction',toolbar:'#toolbar2',  queryParams: {major:''},
+            columns:[[
+                {field:'major',title:'专业代码',width:80,align:'center'},
+                {field:'direction',title:'方向代码*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[8]',required:true}}},
+                {field:'name',title:'名称*',width:250,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]',required:true}}}
+            ]],
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+
+                var tt=$('#dg2');
+                tt.datagrid('selectRow',index);
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+
+            },
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg2');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();
+                tt.datagrid('selectRow',rowindex);
+                $('#menu2').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        //插入
+        $("#insert,#menu_insert").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            tt.datagrid('insertRow',{
+                index: 0,
+                row: {
+                }
+            });
+            tt.datagrid('startEditing',{field:'code',index:0});
+            current_datagrid=tt;
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(rows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(rows);
+            }
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["inserted"]=$.toJSON(rows);
+            }
+            if(count<=0) {
+                $.messager.alert('提示','没有需要保存的数据！','info');
+                return;
+            }
+            $.post('{$ROOT}/major/major/update',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+
+        //插入
+        $("#insert2,#menu_insert2").click(function(){
+            var tt=$('#dg2');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            var row = $('#dg').datagrid('getSelected');
+            if (row) {
+                tt.datagrid('insertRow', {
+                    index: 0,
+                    row: {
+                        major:row.code
+                    }
+                });
+                tt.datagrid('startEditing', {field: 'direction', index: 0});
+                current_datagrid = tt;
+            }
+            else{
+                $.messager.alert('错误','请在左边先选中一个专业代码','error')
+            }
+        });
+        //取消更改
+        $("#cancel2,#menu_cancel2").click(function(){
+            var tt= $('#dg2');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        $("#save2,#menu_save2").click(function(){
+            var tt=$('#dg2');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(rows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(rows);
+            }
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["inserted"]=$.toJSON(rows);
+            }
+            if(count<=0) {
+                $.messager.alert('提示','没有需要保存的数据！','info');
+                return;
+            }
+            $.post('{$ROOT}/major/major/updatedirection',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete2,#delete2").click(function(){
+            tt=$('#dg2');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+
+    });
+</script>
+<div class="container" style="width:1225px">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="menu2" class="easyui-menu" style="width:100px;">
+        <div id='menu_insert2' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_save2' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete2' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel2' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="left" style="width:605px;float:left">
+        <div id="toolbar">
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"  id="insert">新增</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete">删除</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+        </div>
+        <table id="dg">
+        </table>
+    </div>
+    <div id="right" style="width:610px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"  id="insert2">新增</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete2">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save2">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel2">取消</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>专业代码和方向代码设置后无法修改</li>
+        </ol>
+    </div>
+</div>
