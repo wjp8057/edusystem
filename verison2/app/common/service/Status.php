@@ -14,6 +14,10 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**学籍
+ * Class Status
+ * @package app\common\service
+ */
 class Status extends MyService
 {
     /**读取学籍状态
@@ -32,6 +36,11 @@ class Status extends MyService
         return $result;
     }
 
+    /**更新
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     public function  update($postData)
     {
         $updateRow = 0;

@@ -12,6 +12,10 @@ namespace app\major\controller;
 use app\common\access\Template;
 use app\common\service\Action;
 class Index extends Template{
+    /**首页
+     * @return mixed
+     * @throws \think\Exception
+     */
     public function index(){
         $obj=new Action();
         $menuJson=array('menus'=>$obj->getUserAccessMenu(session('S_USER_NAME'),1417));

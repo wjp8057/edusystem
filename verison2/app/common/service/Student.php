@@ -17,6 +17,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**学生信息
+ * Class Student
+ * @package app\common\service
+ */
 class Student extends MyService {
     /**获取学生基本数据信息
      * @param int $page
@@ -285,6 +289,11 @@ class Student extends MyService {
         return $result;
     }
 
+    /**更新锁定状态
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     function updateStatus($postData){
         $updateRow=0;
         //更新部分

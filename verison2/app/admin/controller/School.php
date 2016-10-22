@@ -22,7 +22,7 @@ class School extends MyController
         $result = null;
         try {
             $school = new \app\common\service\School();
-            $result = $school->getSchoolList($page, $rows);
+            $result = $school->getList($page, $rows);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -36,7 +36,7 @@ class School extends MyController
         $result = null;
         try {
             $school = new \app\common\service\School();
-            $result = $school->updateSchool($_POST);
+            $result = $school->update($_POST);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

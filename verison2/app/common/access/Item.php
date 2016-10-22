@@ -148,4 +148,31 @@ class Item {
             $result=$data[0];
         return $result;
     }
-} 
+
+    /**获取单双周信息
+     * @param $oew
+     * @return mixed
+     * @throws Exception
+     */
+    public static  function getOEWItem($oew){
+        $condition['code']=$oew;
+        $result=Db::table('oewoptions')->field('rtrim(name) name,timebit,timebit2')->where($condition)->select();
+        if(!is_array($result)||count($result)!=1)
+            throw new Exception('oew'.$oew, MyException::ITEM_NOT_EXISTS);
+        return $result[0];
+    }
+
+    /**获取时间段信息
+     * @param $time
+     * @return mixed
+     * @throws Exception
+     */
+    public static function getTimeSectionItem($time)
+    {
+        $condition['name']=$time;
+        $result=Db::table('timesections')->field('rtrim(value) value,timebits,timebits2')->where($condition)->select();
+        if(!is_array($result)||count($result)!=1)
+            throw new Exception('time'.$time,  MyException::ITEM_NOT_EXISTS);
+        return $result[0];
+    }
+}

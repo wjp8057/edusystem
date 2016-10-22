@@ -17,6 +17,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**学籍异动
+ * Class Register
+ * @package app\common\service
+ */
 class Register extends MyService {
 
     /**获取学生学籍异动信息

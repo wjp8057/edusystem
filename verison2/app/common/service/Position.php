@@ -11,10 +11,16 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**职称信息
+ * Class Position
+ * @package app\common\service
+ */
 class Position extends  MyService {
-    /*
-* 读取职称列表
-*/
+    /**读取
+     * @param int $page
+     * @param int $rows
+     * @return array|null
+     */
     function getList($page=1,$rows=20){
         $result=null;
         $condition=null;
@@ -25,8 +31,11 @@ class Position extends  MyService {
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-    /*
-     * 更新职称信息
+
+    /**更新
+     * @param $postData
+     * @return array
+     * @throws \Exception
      */
     public function  update($postData){
         $updateRow=0;

@@ -35,7 +35,7 @@ class CAS {
         $userid=($vals[2]["value"]);
         $user=new User();
 
-        $result=$user->signInAsTeacher($userid);
+        $result=$user->signInAsTeacherNo($userid);
         if($result==0)
             $result=$user->signInAsStudent($userid);
         return $result;

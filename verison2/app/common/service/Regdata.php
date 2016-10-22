@@ -17,6 +17,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**注册信息
+ * Class Regdata
+ * @package app\common\service
+ */
 class Regdata extends MyService{
     /**
      * @param int $page 页码

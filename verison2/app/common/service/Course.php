@@ -14,7 +14,19 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**课程
+ * Class Course
+ * @package app\common\service
+ */
 class Course  extends  MyService{
+    /**读取
+     * @param int $page
+     * @param int $rows
+     * @param string $courseno
+     * @param string $coursename
+     * @param string $school
+     * @return array|null
+     */
     function getList($page=1,$rows=20,$courseno='%',$coursename='%',$school=''){
         $result=null;
         $condition=null;

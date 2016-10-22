@@ -17,8 +17,12 @@ namespace app\common\service;
 use app\common\access\MyService;
 use think\Db;
 
+/**排课计划
+ * Class SchedulePlan
+ * @package app\common\service
+ */
 class SchedulePlan extends MyService {
-    /**
+    /**获取
      * @param int $page
      * @param int $rows
      * @param $year
@@ -27,7 +31,7 @@ class SchedulePlan extends MyService {
      * @param string $coursename
      * @param string $classno
      * @param string $school
-     * @param array $extracondtion
+     * @param array $extracondtion 额外条件
      * @return array|null
      */
     public function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$classno='%',$school='',$extracondtion=[]){

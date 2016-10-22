@@ -11,8 +11,18 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**工作量存档
+ * Class WorkFile
+ * @package app\common\service
+ */
 class WorkFile extends  MyService {
-    function getTeacherWorkList($page=1,$rows=20,$teacherno){
+    /**获取教师工作量详细表
+     * @param int $page
+     * @param int $rows
+     * @param $teacherno
+     * @return array|null
+     */
+    function getList($page=1,$rows=20,$teacherno){
         $result=null;
         $condition=null;
         $condition['teacherno']=$teacherno;

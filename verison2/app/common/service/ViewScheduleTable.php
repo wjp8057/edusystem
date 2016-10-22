@@ -12,6 +12,10 @@ namespace app\common\service;
 use app\common\access\MyException;
 use app\common\access\MyService;
 
+/**排课情况视图存为表
+ * Class ViewScheduleTable
+ * @package app\common\service
+ */
 class ViewScheduleTable extends MyService {
     /**更新数据，同步课程总表
      * @param $year

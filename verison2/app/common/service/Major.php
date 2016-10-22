@@ -14,6 +14,10 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**校内开设专业
+ * Class Major
+ * @package app\common\service
+ */
 class Major extends MyService{
 
     /**获取开设专业列表

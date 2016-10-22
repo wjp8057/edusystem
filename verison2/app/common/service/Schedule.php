@@ -12,6 +12,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**排课
+ * Class Schedule
+ * @package app\common\service
+ */
 class Schedule extends MyService {
     private $oew=array(262143=>'',87381=>'(单周)',174762=>'(双周)');
 

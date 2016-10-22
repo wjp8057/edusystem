@@ -14,10 +14,17 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**调停课
+ * Class Schedulechange
+ * @package app\common\service
+ */
 class Schedulechange extends MyService{
-    /**
+    /**调停课统计
      * @param int $page
      * @param int $rows
+     * @param $year
+     * @param $term
+     * @param string $status 是否已经审批，默认仅仅审批部分
      * @return array|null
      */
     function getSummary($page=1,$rows=20,$year,$term,$status=''){

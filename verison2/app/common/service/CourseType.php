@@ -14,7 +14,12 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**课程类型
+ * Class CourseType
+ * @package app\common\service
+ */
 class CourseType extends MyService{
+    //读取
     public function getList($page=1,$rows=20){
         $result=null;
         $condition=null;
@@ -25,7 +30,7 @@ class CourseType extends MyService{
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-
+   //更新
     public function update($postData){
         $updateRow=0;
         $deleteRow=0;

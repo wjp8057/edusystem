@@ -17,6 +17,10 @@ namespace app\common\service;
 use app\common\access\MyService;
 use think\Db;
 
+/**学生公选课、创新技能学分获得情况
+ * Class Selective
+ * @package app\common\service
+ */
 class Selective extends MyService
 {
     public function  update($year, $term, $studentno = '%')

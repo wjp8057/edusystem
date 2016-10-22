@@ -22,7 +22,7 @@ class Role extends MyController
         $result = null;
         try {
             $role = new \app\common\service\Role();
-            $result = $role->getRoleList($page, $rows);
+            $result = $role->getList($page, $rows);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -36,7 +36,7 @@ class Role extends MyController
         $result = null;
         try {
             $role = new \app\common\service\Role();
-            $result = $role->updateRole($_POST);//无法用I('post.')获取二维数组
+            $result = $role->update($_POST);//无法用I('post.')获取二维数组
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

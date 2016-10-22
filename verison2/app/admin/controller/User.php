@@ -51,7 +51,7 @@ class User extends MyController
         $result = null;
         try {
             $Obj = new Role();
-            $result = $Obj->getRoleList();
+            $result = $Obj->getList();
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

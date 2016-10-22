@@ -14,6 +14,10 @@ use app\common\access\MyService;
 use think\Exception;
 use app\common\vendor\PHPExcel;
 
+/**选课记录
+ * Class R32
+ * @package app\common\service
+ */
 class R32 extends  MyService {
     /**获取课程选修学生列表
      * @param int $page
@@ -73,6 +77,12 @@ class R32 extends  MyService {
         PHPExcel::printCourseCheckIn($file,$array);
     }
 
+    /**根据教师号导出考勤表
+     * @param $year
+     * @param $term
+     * @param $teacherno
+     * @throws Exception
+     */
     public function exportCheckInByTeacherno($year,$term,$teacherno)
     {
         $file = "考勤表";

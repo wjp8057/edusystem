@@ -12,13 +12,21 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
 use think\Exception;
-use think\Log;
-
+/**教室
+ * Class Classroom
+ * @package app\common\service
+ */
 class Classroom extends MyService {
+    /**更新
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     function update($postData){
         $updateRow=0;
         $deleteRow=0;
@@ -157,8 +165,11 @@ class Classroom extends MyService {
      * @param string $school
      * @param int $seatmin
      * @param int $seatmax
+     * @param string $weekday
+     * @param string $oew
+     * @param string $time
      * @return array|null
-     * @throws \think\Exception
+     * @throws Exception
      */
     function getUsageList($page=1,$rows=20,$year='',$term='',$roomno='%',$name='%',$building='%',$area='',$equipment='',
                            $school='',$seatmin=0,$seatmax=1000,$weekday='',$oew='',$time=''){
@@ -173,15 +184,13 @@ class Classroom extends MyService {
             $daystring=$weekday;
 
         if($oew!=''){
-            $oewobj=new OEW();
-            $oewstring=$oewobj->getOEWItem($oew)['timebit'];
+            $oewstring=Item::getOEWItem($oew)['timebit'];
         }
         else{
             $oewstring='0';
         }
         if($time!=''){
-            $timeobj=new TimeSection();
-            $timestring=$timeobj->getTimeSectionItem($time)['timebits2'];
+            $timestring=Item::getTimeSectionItem($time)['timebits2'];
         }
         else{
             $timestring='0';

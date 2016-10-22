@@ -14,6 +14,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**成绩
+ * Class Score
+ * @package app\common\service
+ */
 class Score extends  MyService {
 
     /**获取课程学生成绩列表

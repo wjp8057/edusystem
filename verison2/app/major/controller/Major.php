@@ -18,7 +18,7 @@ use app\common\service\Majordirection;
 
 class Major extends MyController
 {
-//显示信息
+      //读取专业代码
     public function query($page = 1, $rows = 20)
     {
         $result = null;
@@ -32,7 +32,7 @@ class Major extends MyController
         return json($result);
     }
 
-    //更新信息
+    //更新专业代码
     public function update()
     {
         $result = null;
@@ -44,7 +44,7 @@ class Major extends MyController
         }
         return json($result);
     }
-
+   //读取专业方向
     public function direction($page = 1, $rows = 20,$major)
     {
         $result = null;
@@ -58,7 +58,7 @@ class Major extends MyController
         return json($result);
     }
 
-    //更新信息
+    //更新专业方向
     public function updatedirection()
     {
         $result = null;
@@ -70,7 +70,7 @@ class Major extends MyController
         }
         return json($result);
     }
-
+    //读取开设专业
     public function majorschool($page = 1, $rows = 20,$years='',$school='',$majorname='%')
     {
         $result = null;

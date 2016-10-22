@@ -14,10 +14,14 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**专业代码
+ * Class Majorcode
+ * @package app\common\service
+ */
 class Majorcode extends MyService{
 
 
-    /**
+    /**读取专业代码
      * @param int $page
      * @param int $rows
      * @return array|null
@@ -33,6 +37,11 @@ class Majorcode extends MyService{
         return $result;
     }
 
+    /**更新专业代码
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     function update($postData){
         $updateRow=0;
         $deleteRow=0;

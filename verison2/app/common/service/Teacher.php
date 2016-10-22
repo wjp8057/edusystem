@@ -12,9 +12,20 @@ namespace app\common\service;
 use app\common\access\MyAccess;
 use app\common\access\MyService;
 
+/**教师信息
+ * Class Teacher
+ * @package app\common\service
+ */
 class Teacher extends  MyService
 {
-
+    /**读取
+     * @param int $page
+     * @param int $rows
+     * @param $teacherno
+     * @param $name
+     * @param $school
+     * @return array|null
+     */
     function getList($page = 1, $rows = 20, $teacherno, $name, $school)
     {
         $result = null;

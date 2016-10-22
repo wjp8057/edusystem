@@ -14,6 +14,10 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**专业方向
+ * Class Majordirection
+ * @package app\common\service
+ */
 class Majordirection extends MyService{
 
 

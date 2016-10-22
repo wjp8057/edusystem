@@ -20,9 +20,9 @@ use app\common\service\ViewScheduleTable;
 
 class Index extends Template
 {
-    /*
-   * 教师个人信息页面首页
-   */
+    /**首页
+     * @return mixed
+     */
     public function index()
     {
         try {

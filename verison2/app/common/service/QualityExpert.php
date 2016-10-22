@@ -19,6 +19,10 @@ use app\common\access\MyService;
 use think\Db;
 use think\Exception;
 
+/**专家评教得分
+ * Class QualityExpert
+ * @package app\common\service
+ */
 class QualityExpert extends MyService{
     /**获取某督导的具体打分情况
      * @param int $page

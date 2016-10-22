@@ -18,6 +18,10 @@ use app\common\access\MyService;
 use think\Db;
 use think\Exception;
 
+/**班级信息
+ * Class Classes
+ * @package app\common\service
+ */
 class Classes extends MyService{
     /**获取班级的所在学院
      * @param string $classno

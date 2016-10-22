@@ -7,13 +7,14 @@
  */
 
 namespace app\common\service;
-
-
 use app\common\access\MyService;
 use app\common\access\MyException;
 use think\Exception;
 
-
+/**教学评估存档
+ * Class QualityFile
+ * @package app\common\service
+ */
 class QualityFile extends MyService{
     /**
      * @param int $page

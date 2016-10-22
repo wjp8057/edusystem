@@ -24,7 +24,7 @@ class Work extends MyController
         try {
             $work = new WorkFile();
             $teacherno = session('S_TEACHERNO');
-            $result = $work->getTeacherWorkList($page, $rows, $teacherno);
+            $result = $work->getList($page, $rows, $teacherno);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

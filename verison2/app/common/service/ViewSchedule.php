@@ -12,6 +12,10 @@ namespace app\common\service;
 use app\common\access\MyException;
 use app\common\access\MyService;
 
+/**排课情况视图
+ * Class ViewSchedule
+ * @package app\common\service
+ */
 class ViewSchedule extends MyService {
 
     /**获取教师课程信息

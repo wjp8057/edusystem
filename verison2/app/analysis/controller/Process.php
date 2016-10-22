@@ -20,10 +20,23 @@ use app\common\service\ViewScheduleTable;
 use app\common\service\R32;
 use app\common\access\Item;
 
-
 class Process extends MyController
 {
-
+    /**教室使用率
+     * @param int $page
+     * @param int $rows
+     * @param $year
+     * @param $term
+     * @param string $roomno
+     * @param string $name
+     * @param string $building
+     * @param string $area
+     * @param string $equipment
+     * @param string $school
+     * @param int $seatmin
+     * @param int $seatmax
+     * @return \think\response\Json
+     */
     public function  room($page = 1, $rows = 20,$year,$term, $roomno = '%', $name = '%', $building = '%', $area = '', $equipment = '',
                               $school = '', $seatmin = 0, $seatmax = 1000)
     {

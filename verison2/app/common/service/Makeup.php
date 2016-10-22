@@ -15,7 +15,22 @@ use app\common\access\MyService;
 use think\Db;
 use think\Exception;
 
+/**补考信息
+ * Class Makeup
+ * @package app\common\service
+ */
 class Makeup extends  MyService {
+    /**获取补考课程
+     * @param int $page
+     * @param int $rows
+     * @param string $year
+     * @param string $term
+     * @param string $courseno
+     * @param string $school
+     * @param string $type 是否已经输入完成
+     * @return array|null
+     * @throws Exception
+     */
     public function getCourseList($page=1,$rows=20,$year='',$term='',$courseno='%',$school='',$type=''){
         if($year==''||$term=='')
             throw new Exception('year term is empty', MyException::PARAM_NOT_CORRECT);
@@ -82,7 +97,7 @@ class Makeup extends  MyService {
         return $result;
     }
 
-    /**更新期末考试成绩
+    /**更新考试成绩
      * @param $postData
      * 数据格式范例
     {updated:[{"lock": "0",  "score": "不合格", "recno": "1900821", "studentno": "133030702","testscore": "不合格", "examscore": 0, "approachname": "正常修课", "examrem": "N", "row_number": "1"}]
@@ -271,6 +286,12 @@ class Makeup extends  MyService {
         return $result;
     }
 
+    /**开锁补考课程
+     * @param $year
+     * @param $term
+     * @param $courseno
+     * @return array
+     */
     public function  unlockCourse($year,$term,$courseno){
         $condition=null;
         $condition['year']=$year;

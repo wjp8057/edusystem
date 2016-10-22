@@ -13,6 +13,10 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**期末成绩视图
+ * Class ViewFinalScoreCourse
+ * @package app\common\service
+ */
 class ViewFinalScoreCourse extends MyService{
     function getList($page=1,$rows=20,$year='',$term='',$courseno='%',$coursename='%',$school=''){
         if($year==''||$term=='')

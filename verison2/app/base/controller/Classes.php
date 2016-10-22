@@ -20,6 +20,10 @@ use app\common\vendor\PHPExcel;
 use app\common\service\Student;
 use think\Exception;
 
+/**班级管理
+ * Class Classes
+ * @package app\base\controller
+ */
 class Classes extends MyController {
     /**获取班级列表
      * @param int $page
@@ -55,6 +59,13 @@ class Classes extends MyController {
         }
         return json($result);
     }
+
+    /**学生列表
+     * @param int $page
+     * @param int $rows
+     * @param string $classno
+     * @return \think\response\Json
+     */
     public function studentlist($page=1,$rows=50,$classno=''){
         $result=null;
         try {
@@ -65,6 +76,16 @@ class Classes extends MyController {
         }
         return json($result);
     }
+
+    /**检索学生
+     * @param int $page
+     * @param int $rows
+     * @param string $studentno
+     * @param string $name
+     * @param string $classno
+     * @param string $school
+     * @return \think\response\Json
+     */
     public function searchstudent($page=1,$rows=50,$studentno='%',$name='%',$classno='%',$school=''){
         $result=null;
         try {
@@ -75,6 +96,10 @@ class Classes extends MyController {
         }
         return json($result);
     }
+
+    /**添加学生
+     * @return \think\response\Json
+     */
     public function studentadd(){
         $result=null;
         try {

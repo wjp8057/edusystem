@@ -19,7 +19,16 @@ use app\common\service\CourseType;
 use app\common\service\Program;
 use app\common\vendor\PHPExcel;
 
+/**课程管理
+ * Class Course
+ * @package app\base\controller
+ */
 class Course extends MyController {
+    /**课程类型
+     * @param int $page
+     * @param int $rows
+     * @return \think\response\Json
+     */
     public function type($page = 1, $rows = 20)
     {
         $result=null;
@@ -32,6 +41,10 @@ class Course extends MyController {
         }
         return json($result);
     }
+
+    /**更新课程类型
+     * @return \think\response\Json
+     */
     public function updatetype(){
         $result=null;
         try {

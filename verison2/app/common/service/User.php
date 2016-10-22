@@ -13,7 +13,16 @@ use app\common\access\MyService;
 use think\db;
 use think\Exception;
 
+/**用户信息
+ * Class User
+ * @package app\common\service
+ */
 class User extends MyService{
+    /**更新数据库session表
+     * @param $username
+     * @param $guid
+     * @throws Exception
+     */
     private  function updateSession($username,$guid){
         //记录当次ip 时间，以便下次登陆用
         $data = null;
@@ -30,11 +39,39 @@ class User extends MyService{
             Db::table('sessions')->insert($data);
     }
 
-    /**以用户身份写入登录信息
+    /**设置用户的session 信息
+     * @param $data
      * @param $username
+     * @param $guid
      * @return int
      */
-    public function signInAsUser($username){
+    private  function  setSession($data,$username,$guid){
+        $roles = trim($data['roles']);
+        session(null);
+        session('S_USER_SCHOOL', $data['school']);
+        session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
+        session("S_LOGIN_TYPE", 1); //注册用户为教师
+        session("S_USER_NAME", $username); //注册用户
+        session("S_TEACHERNO", $data['teacherno']); //注册用户
+        session("S_TEACHER_NAME", $data['teachername']); //注册用户
+        session("S_GUID", $guid); //注册GUID
+        session("S_ROLES", $roles); //注册角色信息
+        session("S_LOGIN_COUNT", 0);
+        session("S_MANAGE", $data['manage']);
+        $user['TEACHERNO'] = $data['teacherno'];
+        session("S_USER_INFO", $user);
+        $log = new MyLog();
+        $log->write('R');
+        if ($roles == "B*" || $roles == "*B")
+            return 2; //如果纯粹教师，返回状态2
+        return 1; //管理员教师返回状态1
+
+    }
+    /**根据用户名写入登录信息
+     * @param $username
+     * @return int  0为找不到，1为管理员，2为普通教师
+     */
+    public function signInAsUserName($username){
         $condition = null;
         $condition['username'] = $username;
 
@@ -45,32 +82,16 @@ class User extends MyService{
             ->where($condition)->find();
         if (is_array($data) && count($data) > 0) {
             $guid = getGUID(session_id()); //获得GUID
-            $roles = trim($data['roles']);
             $this->updateSession($username, $guid);
-            session(null);
-            session('S_USER_SCHOOL', $data['school']);
-            session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
-            session("S_LOGIN_TYPE", 1); //注册用户为教师
-            session("S_USER_NAME", $username); //注册用户
-            session("S_TEACHERNO", $data['teacherno']); //注册用户
-            session("S_TEACHER_NAME", $data['teachername']); //注册用户
-            session("S_GUID", $guid); //注册GUID
-            session("S_ROLES", $roles); //注册角色信息
-            session("S_LOGIN_COUNT", 0);
-            session("S_MANAGE", $data['manage']);
-            $user['TEACHERNO'] = $data['teacherno'];
-            session("S_USER_INFO", $user);
-            $log = new MyLog();
-            $log->write('R');
-            if ($roles == "B*" || $roles == "*B")
-                return 2; //如果纯粹教师，返回状态2
-            return 1; //管理员教师返回状态1
+            return $this->setSession($data,$username,$guid);
         }
         return 0;
-
     }
-
-    public function signInAsTeacher($teacherno){
+    /**根据教师号写入登录信息
+     * @param $teacherno
+     * @return int  0为找不到，1为管理员，2为普通教师
+     */
+    public function signInAsTeacherNo($teacherno){
         $condition = null;
         $condition['teachers.teacherno'] = $teacherno;
 
@@ -81,27 +102,9 @@ class User extends MyService{
             ->where($condition)->find();
         if (is_array($data) && count($data) > 0) {
             $guid = getGUID(session_id()); //获得GUID
-            $roles = trim($data['roles']);
             $username=trim($data['username']);
             $this->updateSession($username, $guid);
-            session(null);
-            session('S_USER_SCHOOL', $data['school']);
-            session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
-            session("S_LOGIN_TYPE", 1); //注册用户为教师
-            session("S_USER_NAME", $username); //注册用户
-            session("S_TEACHERNO", $data['teacherno']); //注册用户
-            session("S_TEACHER_NAME", $data['teachername']); //注册用户
-            session("S_GUID", $guid); //注册GUID
-            session("S_ROLES", $roles); //注册角色信息
-            session("S_LOGIN_COUNT", 0);
-            session("S_MANAGE", $data['manage']);
-            $user['TEACHERNO'] = $data['teacherno'];
-            session("S_USER_INFO", $user);
-            $log = new MyLog();
-            $log->write('R');
-            if ($roles == "B*" || $roles == "*B")
-                return 2; //如果纯粹教师，返回状态2
-            return 1; //管理员教师返回状态1
+            return $this->setSession($data,$username,$guid);
         }
         return 0;
 
@@ -120,11 +123,16 @@ class User extends MyService{
             ->where($condition)->find();
         if (is_array($data) && count($data) > 0) {
             if (md5(md5($data['password']) . session('S_GUID')) == $password) {
-                return $this->signInAsUser($username);
+                return $this->signInAsUserName($username);
             }
         }
         return 0;
     }
+
+    /**以学生身份登录信息
+     * @param $studentno
+     * @return int 3为学生成功，0为失败
+     */
     public  function  signInAsStudent($studentno){
             $condition = null;
             $condition['studentno'] = $studentno;
@@ -153,7 +161,7 @@ class User extends MyService{
      * @param $password
      * @return int
      */
-    private  function loginAsStudent($studentno,$password){
+    public   function loginAsStudent($studentno,$password){
         $condition = null;
         $condition['studentno'] = $studentno;
         $data = Db::table('students')

@@ -12,8 +12,20 @@ use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
 
+/**教师课程情况
+ * Class ViewTeacherCourse
+ * @package app\common\service
+ */
 class ViewTeacherCourse extends  MyService {
-
+    /**教师成绩输入情况
+     * @param int $page
+     * @param int $rows
+     * @param string $year
+     * @param string $term
+     * @param string $teacherno
+     * @return array
+     * @throws Exception
+     */
     function getCourseList($page=1,$rows=20,$year='',$term='',$teacherno='')
     {
         if ($year == '' || $term == '' || $teacherno == '')

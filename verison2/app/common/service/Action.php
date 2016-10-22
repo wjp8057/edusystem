@@ -17,6 +17,10 @@ use think\Exception;
 use think\Log;
 use think\Request;
 
+/**操作代码表
+ * Class Action
+ * @package app\common\service
+ */
 class Action extends MyService{
     /**判断该节点是否有子节点
      * @param $id

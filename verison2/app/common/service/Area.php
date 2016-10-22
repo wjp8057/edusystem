@@ -14,10 +14,14 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
+/**校区
+ * Class Area
+ * @package app\common\service
+ */
 class Area extends MyService{
 
 
-    /**
+    /**读取
      * @param int $page
      * @param int $rows
      * @return array|null
@@ -33,6 +37,11 @@ class Area extends MyService{
         return $result;
     }
 
+    /**更新
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
     function update($postData){
         $updateRow=0;
         $deleteRow=0;
