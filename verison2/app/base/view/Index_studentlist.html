@@ -19,7 +19,7 @@
             school.combobox('select','{$USERINFO.school}');
 
         $('#dg').datagrid({
-            title:'在校学生',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/base/student/studentlist',
             queryParams: {studentno:''},
             singleSelect:true,

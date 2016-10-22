@@ -26,7 +26,7 @@
 
 
         $('#dg').datagrid({
-            title:'教室列表',idField:'roomno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'roomno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/analysis/process/room',
             queryParams: {year: $('#year').val(),term: $('#term').val(),area:area.combobox('getValue'),roomno:''},
             singleSelect:true,

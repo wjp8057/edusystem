@@ -16,7 +16,7 @@
         approved.combobox('setValue','0');
 
         $('#dg').datagrid({
-            title:'教室借用',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/base/room/reservelist',singleSelect:true,
             queryParams: {year:$("#year").val(),term:$("#term").val(),approved:approved.combobox('getValue')},
             toolbar:'#toolbar',pageList:[20,50,100,200],

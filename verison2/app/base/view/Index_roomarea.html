@@ -2,7 +2,7 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'校区管理',idField:'name', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/room/area',toolbar:'#toolbar',
+            title:'',idField:'name', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/room/area',toolbar:'#toolbar',
             columns:[[
                 {field:'name',title:'代码*',width:60,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[1]',required:true}}},
                 {field:'value',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[20]',required:true}}}

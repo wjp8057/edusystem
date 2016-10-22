@@ -2,7 +2,7 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'教师级别',idField:'level', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/teacher/level',toolbar:'#toolbar',
+            title:'',idField:'level', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/base/teacher/level',toolbar:'#toolbar',
             columns:[[
                 {field:'level',title:'代码*',width:60,align:'center',editor:{type:'validatebox',options:{validType:' equalLength[1]',required:true}}},
                 {field:'name',title:'名称*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[20]',required:true}}}

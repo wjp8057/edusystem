@@ -64,7 +64,7 @@
 
 
         $('#dg').datagrid({
-            title:'教室使用情况表',idField:'roomno', striped:'true',pagination:'true',rownumbers:false,pageSize:20,
+            title:'',idField:'roomno', striped:'true',pagination:'true',rownumbers:false,pageSize:20,
             url:'{$ROOT}/base/room/roomusagelist',
             queryParams: {area:area.combobox('getValue') ,year:$('#year').val(),term:$('#term').val()},
             singleSelect:true,

@@ -11,7 +11,7 @@
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
-            title:'等价课程列表',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            title:'',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
             url:'{$ROOT}/base/course/equalcourselist',toolbar:'#toolbar',
             queryParams: {programschool:school.combobox('getValue')},
             pageList:[20,50,100,200],
@@ -149,7 +149,6 @@
     <div class="information">
         <ol>说明：
             <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
-            <li>课号号设置后无法修改</li>
         </ol>
     </div>
 </div>

@@ -11,7 +11,7 @@ $(function () {
     if ('{$USERINFO.manage}' != '1')
         school.combobox('select', '{$USERINFO.school}');
     $('#dg').datagrid({
-        title: '教师列表',
+        title: '',
         idField: 'teacherno',
         striped: 'true',
         pagination: 'true',
@@ -20,7 +20,7 @@ $(function () {
         pageSize: 20,
         url: '{$ROOT}/base/teacher/teacherlist',
         toolbar: '#toolbar',
-        queryParams: {school: school.combobox('getValue'),teacherno:''},
+        queryParams: {school: school.combobox('getValue')},
         pageList: [20, 50, 100, 200],
         columns: [[
             {field: 'teacherno', title: '教师号', width: 80, align: 'center'},

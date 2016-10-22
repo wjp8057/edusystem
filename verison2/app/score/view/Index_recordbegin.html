@@ -11,7 +11,7 @@
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
-            title:'课程列表',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/score/record/begincourse',toolbar:'#toolbar',
+            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/score/record/begincourse',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val(),
@@ -114,9 +114,9 @@
         <div id='menu_print' data-options="iconCls:'icon icon-print'">打印成绩单</div>
     </div>
     <div id="toolbar">
-        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="8" value="{$YEARTERM.year}"/>
-        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="3" value="{$YEARTERM.term}"/>
-        <label for="courseno">学期：</label><input id="courseno" class="easyui-validatebox" size="3" value="%"/>
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="8" value="%"/>
         <label for="term">学院：</label><input id="school" size="18"/>
         <label for="type">输入情况：</label>
         <select class="easyui-combobox" id="type" data-options="panelHeight:'auto'" >

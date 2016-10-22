@@ -78,6 +78,12 @@ class Index extends Template
         return $this->fetch();
     }
 
+    /**课程学生列表
+     * @param string $year
+     * @param string $term
+     * @param string $courseno
+     * @param int $page
+     */
     function processcoursestudent($year='',$term='',$courseno='',$page=1){
         try{
             //头部信息

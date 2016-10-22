@@ -11,7 +11,7 @@
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
-            title:'班级列表',idField:'classno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'classno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/base/classes/classlist',singleSelect:true,
             queryParams: {classno:''},
             toolbar:'#toolbar',pageList:[20,50,100,200],
@@ -30,7 +30,7 @@
                 {field:'students',title:'预计人数*',width:60,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision: 0}}},
                 {field:'amount',title:'实际人数',width:60,align:'center'},
                 {field:'year',title:'入校时间*',width:100,align:'center',editor:{type:'datebox',options:{required:true}}},
-                {field:'major',title:'专业*',width:150,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/major',valueField:'major',textField:'name',required:true,
+                {field:'major',title:'专业*',width:150,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/major',valueField:'major',textField:'name',
                     onSelect:function(rec) {
                         var tt=$('#dg');
                         tt.datagrid('getSelected').majorname=rec.name;
@@ -38,7 +38,7 @@
                     formatter:function(val,rec){
                         return rec.majorname;
                     }},
-                {field:'direction',title:'专业方向*',width:250,align:'center', editor:{type:'combobox', options:{valueField:'direction',textField:'name',required:true,panelHeight:'auto',
+                {field:'direction',title:'专业方向*',width:250,align:'center', editor:{type:'combobox', options:{valueField:'direction',textField:'name',panelHeight:'auto',
                     loader:function(param,success,error){
                         var tt=$('#dg');
                         var major=tt.datagrid('getSelected').major;
