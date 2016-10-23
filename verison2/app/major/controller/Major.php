@@ -15,6 +15,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\Majorcode;
 use app\common\service\Majordirection;
+use app\common\vendor\PHPExcel;
 
 class Major extends MyController
 {
@@ -83,6 +84,26 @@ class Major extends MyController
         return json($result);
     }
 
+    public function majorschoolexport($years='',$school='',$majorname='%')
+    {
+        $result = null;
+        try {
+            $major=new \app\common\service\Major();
+            $result = $major->getList(1, 1000,$years,$school,$majorname);
+            $file="我校开设专业";
+            $data = $result['rows'];
+            $sheet = '全部';
+            $title = '';
+            $template = array("majorschool" => "专业号", "majorno" => "专业代码", "majorname" => "专业名", "direction" => "方向代码","directionname"=>"专业方向",
+            "branchname"=>"学科","years"=>"学制","degreename"=>"学位","schoolname"=>"所属学院","rem" => "备注");
+            $string = array("majorschool","majorno","direction");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file,$array);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 
 
 } 
