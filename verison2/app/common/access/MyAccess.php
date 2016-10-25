@@ -246,7 +246,7 @@ class MyAccess {
             return false;
         }
     }
-
+    //检查课程所在学院是否有权限
     public static function checkCourseSchool($courseno=''){
         $condition=null;
         $condition['courseno']=$courseno;
@@ -254,6 +254,21 @@ class MyAccess {
         $data= Db::table('courses')->where($condition)->field('school')->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('courseno:'.$courseno, MyException::PARAM_NOT_CORRECT);
+        if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    //检查开设专业权限
+    public static function checkMajorSchool($majorschool=''){
+        $condition=null;
+        $condition['majorschool']=$majorschool;
+
+        $data= Db::table('majors')->where($condition)->field('school')->select();
+        if(!is_array($data)||count($data)!=1)
+            throw new Exception('majorschool:'.$majorschool, MyException::PARAM_NOT_CORRECT);
         if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
             return true;
         }

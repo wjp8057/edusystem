@@ -83,7 +83,20 @@ class Major extends MyController
         }
         return json($result);
     }
-
+    //更新开设专业信息
+    //更新专业方向
+    public function  majorschoolupdate()
+    {
+        $result = null;
+        try {
+            $major=new \app\common\service\Major();
+            $result = $major->update($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //导出开设专业
     public function majorschoolexport($years='',$school='',$majorname='%')
     {
         $result = null;

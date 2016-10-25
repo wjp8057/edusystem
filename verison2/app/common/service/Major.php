@@ -12,6 +12,7 @@
 namespace app\common\service;
 
 
+use app\common\access\MyAccess;
 use app\common\access\MyService;
 
 /**校内开设专业
@@ -56,6 +57,9 @@ class Major extends MyService{
         $updateRow=0;
         $deleteRow=0;
         $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
         //更新部分
         //开始事务
         $this->query->startTrans();
@@ -65,12 +69,24 @@ class Major extends MyService{
                 $listUpdated = json_decode($updated);
                 $data = null;
                 foreach ($listUpdated as $one) {
-                    $data['code'] = $one->code;
-                    $data['name'] = $one->name;
-                    $data['englishname'] = $one->englishname;
-                    $row = $this->query->table('majorcode')->insert($data);
-                    if ($row > 0)
-                        $insertRow++;
+                    $data['majorno'] = $one->majorno;
+                    $data['years'] = $one->years;
+                    $data['branch'] = $one->branch;
+                    $data['school'] = $one->school;
+                    $data['degree'] = $one->degree;
+                    $data['rem'] = $one->rem;
+                    $data['direction'] = $one->direction;
+                    $data['majorschool'] = $one->majorschool;
+                    if ($data['school'] != session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
+                        $info .= '无法为其它学院添加专业'.$one->majorschool .'</br>';
+                        $status=0;
+                        $errorRow++;
+                    }
+                    else {
+                        $row = $this->query->table('majors')->insert($data);
+                        if ($row > 0)
+                            $insertRow++;
+                    }
                 }
             }
             if (isset($postData["updated"])) {
@@ -78,10 +94,21 @@ class Major extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['code'] = $one->code;
-                    $data['name'] = $one->name;
-                    $data['englishname'] = $one->englishname;
-                    $updateRow += $this->query->table('majorcode')->where($condition)->update($data);
+                    $condition['majorschool'] = $one->majorschool;
+                    $data['majorno'] = $one->majorno;
+                    $data['years'] = $one->years;
+                    $data['branch'] = $one->branch;
+                    $data['school'] = $one->school;
+                    $data['degree'] = $one->degree;
+                    $data['rem'] = $one->rem;
+                    $data['direction'] = $one->direction;
+                    if(MyAccess::checkMajorSchool($one->majorschool))
+                        $updateRow += $this->query->table('majors')->where($condition)->update($data);
+                    else{
+                        $info.=$one->majorschool.'无法修改其他学院专业</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
                 }
             }
             //删除部分
@@ -90,8 +117,15 @@ class Major extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['code'] = $one->code;
-                    $deleteRow += $this->query->table('majorcode')->where($condition)->delete();
+                    $condition['majorschool'] = $one->majorschool;
+                    if(MyAccess::checkMajorSchool($one->majorschool))
+                        $deleteRow += $this->query->table('majors')->where($condition)->delete();
+                    else{
+                        $info.=$one->majorschool.'不是本学院专业，无法删除</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
+
                 }
             }
         }
@@ -100,14 +134,14 @@ class Major extends MyService{
             throw $e;
         }
         $this->query->commit();
-        $info='';
-        if($updateRow>0) $info.=$updateRow.'条更新！</br>';
-        if($deleteRow>0) $info.=$deleteRow.'条删除！</br>';
-        if($insertRow>0) $info.=$insertRow.'条添加！</br>';
-        $status=1;
-        if($info=='') {
-            $info="没有数据被更新";
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
             $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;
