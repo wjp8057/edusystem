@@ -21,6 +21,133 @@ use app\common\access\MyService;
  * @package app\common\service
  */
 class Program extends MyService{
+    /**获取教学计划列表
+     * @param int $page
+     * @param int $rows
+     * @param string $programno
+     * @param string $programname
+     * @param string $school
+     * @return array|null
+     */
+    public function  getList($page=1, $rows=20,$programno="%",$programname="%",$school=''){
+        $result=null;
+        $condition=null;
+        if($programno!='%') $condition['programs.programno']=array('like',$programno);
+        if($programname!='%') $condition['programs.progname']=array('like',$programname);
+        if($school!='') $condition['programs.school']=$school;
+        $data= $this->query->table('programs')
+            ->join('schools','schools.school=programs.school')
+            ->join('zo','zo.name=programs.valid')
+            ->join('programtype','programtype.name=programs.type')
+            ->field('rtrim(programno) programno,rtrim(progname) progname,date,valid,rtrim(zo.value) validname,schools.school,rtrim(schools.name) schoolname,type,rtrim(programtype.value) typename,
+            rtrim(url) url,rtrim(rem) rem')
+            ->where($condition)->page($page,$rows)->order('programno')->select();
+        $count= $this->query->table('programs')->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
+    /**更新教学计划
+     * @param $postData
+     * @return array
+     * @throws \Exception
+     */
+    public function  update($postData){
+        $updateRow=0;
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            if (isset($postData["inserted"])) {
+                $updated = $postData["inserted"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $data = null;
+                    $data['programno'] = $one->programno;
+                    $data['progname'] = $one->progname;
+                    $data['date'] = $one->date;
+                    $data['valid'] = $one->valid;
+                    $data['type'] = $one->type;
+                    $data['school'] = $one->school;
+                    $data['url'] = $one->url;
+                    $data['rem'] = $one->rem;
+                    if ($data['school'] != session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
+                        $info .= '无法为其它学院添加教学计划'.$one->progname .'</br>';
+                        $status=0;
+                        $errorRow++;
+                    }
+                    else {
+                        $row = $this->query->table('programs')->insert($data);
+                        if ($row > 0)
+                            $insertRow++;
+                    }
+                }
+            }
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $data = null;
+                    $condition['programno'] = $one->programno;
+                    $data['progname'] = $one->progname;
+                    $data['date'] = $one->date;
+                    $data['valid'] = $one->valid;
+                    $data['type'] = $one->type;
+                    $data['school'] = $one->school;
+                    $data['url'] = $one->url;
+                    $data['rem'] = $one->rem;
+                    if(MyAccess::checkProgramSchool($one->programno))
+                        $updateRow += $this->query->table('programs')->where($condition)->update($data);
+                    else{
+                        $info.=$one->name.'不是本学院教学计划，无法更改信息</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
+
+                }
+            }
+            //删除部分
+            if (isset($postData["deleted"])) {
+                $updated = $postData["deleted"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['programno'] = $one->programno;
+                    if(MyAccess::checkProgramSchool($one->programno))
+                        $deleteRow += $this->query->table('programs')->where($condition)->delete();
+                    else{
+                        $info.=$one->name.'不是本学院教学计划，无法删除</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
+    }
+
     /**获取等价课程列表
      * @param int $page
      * @param int $rows

@@ -390,7 +390,16 @@ class Option {
         }
         return json($result);
     }
-
+    //教学计划类型
+    public function programtype(){
+        $result=null;
+        try {
+            $result =Db::table('programtype')->field('rtrim(name) as type,rtrim(value) as name')->order('type')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     /**
      * 测试专用
      */

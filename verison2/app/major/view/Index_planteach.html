@@ -12,131 +12,55 @@ $(function () {
         school.combobox('select', '{$USERINFO.school}');
     $('#dg').datagrid({
         title: '',
-        idField: 'teacherno',
+        idField: 'programno',
         striped: 'true',
         pagination: 'true',
         rownumbers: true,
         singleSelect: true,
         pageSize: 20,
-        url: '{$ROOT}/major/major/majorschool',
+        url: '{$ROOT}/major/plan/programlist',
         toolbar: '#toolbar',
         queryParams: {school: school.combobox('getValue')},
         pageList: [20, 50, 100, 200],
         columns: [[
-            {
-                field: 'majorschool',
-                title: '专业号*',
-                width: 60,
-                align: 'center',
-                editor: {type: 'validatebox', options: {validType: 'equalLength[6]', required: true}}
-            },
-            {
-                field: 'majorno', title: '专业名*', width: 150, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/majorcode',
-                    valueField: 'code',
-                    textField: 'name',
-                    panelHeight: '150',
-                    required: true,
+            {field: 'programno', title: '计划号*', width: 60, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[7]', required: true}}},
+            {field: 'progname', title: '教学计划名称*', width: 250, align: 'center',editor: {type: 'validatebox', options: {validType: 'maxLength[22]', required: true}}},
+            {field: 'date', title: '制定日期*', width: 90, align: 'center',editor:{type:'datebox',options:{required:true}}},
+            {field: 'valid', title: '有效*', width: 50, align: 'center',
+                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/zo', valueField: 'zo', textField: 'name', panelHeight: 'auto', required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
-                        tt.datagrid('getSelected').majorname = rec.name;
-
-                    }
-                }
-            },
+                        tt.datagrid('getSelected').validname = rec.name;
+                    }}},
                 formatter: function (val, rec) {
-                    return rec.majorname;
+                    return rec.validname;
                 }
             },
             {
-                field: 'direction', title: '专业方向*', width: 150, align: 'center', required: true,editor: {
-                type: 'combobox', options: {
-                    valueField: 'direction', textField: 'name', required: true,panelHeight: 'auto',
-                    loader:function(param,success,error){
-                        $.post('{$ROOT}/all/option/majordirection',{major:$('#dg').datagrid('getSelected').majorno},function(result){
-                            success(result);
-                        },'json');
-                    },
+                field: 'type', title: '类型*', width: 80, align: 'center',
+                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/programtype', valueField: 'type', textField: 'name', panelHeight: 'auto', required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
-                        tt.datagrid('getSelected').directionname = rec.name;
-                    }
-                }
-            },
+                        tt.datagrid('getSelected').typename = rec.name;
+                    }}},
                 formatter: function (val, rec) {
-                    return rec.directionname;
-                }
-            },
-            {
-                field: 'years',
-                title: '学制*',
-                width: 40,
-                align: 'center',
-                editor: {type: 'validatebox', options: {validType: 'equalLength[1]', required: true}}
-            },
-            {
-                field: 'branch', title: '学科*', width: 80, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/branch',
-                    valueField: 'code',
-                    textField: 'name',
-                    panelHeight: '150',
-                    required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').branchname = rec.name;
-                    }
-                }
-            },
-                formatter: function (val, rec) {
-                    return rec.branchname;
-                }
-            },
-            {
-                field: 'degree', title: '学位*', width: 80, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/degree',
-                    valueField: 'code',
-                    textField: 'name',
-                    panelHeight: 'auto',
-                    required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').degreename = rec.name;
-                    }
-                }
-            },
-                formatter: function (val, rec) {
-                    return rec.degreename;
+                    return rec.typename;
                 }
             },
 
             {
-                field: 'school', title: '学院*', width: 100, align: 'center', editor: {
-                type: 'combobox', options: {
-                    url: '{$ROOT}/all/option/school',
-                    valueField: 'school',
-                    textField: 'name',
-                    panelWidth: '120',
-                    required: true,
+                field: 'school', title: '学院*', width: 100, align: 'center',
+                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/school?active=1', valueField: 'school', textField: 'name', panelWidth: '120', required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
                         tt.datagrid('getSelected').schoolname = rec.name;
-                    }
-                }
-            },
+                    }}},
                 formatter: function (val, rec) {
                     return rec.schoolname;
                 }
             },
-            {
-                field: 'rem',
-                title: '备注*',
-                width: 100,
-                align: 'center',
-                editor: {type: 'validatebox', options: {validType: 'maxLength[10]'}}
-            }
+            {field: 'url', title: '网址*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}},
+            {field: 'rem', title: '备注*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}}
         ]],
         //标题行右键菜单
         onHeaderContextMenu: function (e, field) {
@@ -191,7 +115,7 @@ $(function () {
                 schoolname:'{$USERINFO.schoolname}'
             }
         });
-        tt.datagrid('startEditing', {field: 'majorschool', index: 0});
+        tt.datagrid('startEditing', {field: 'programno', index: 0});
         current_datagrid = tt;
     });
     //取消更改
@@ -235,7 +159,7 @@ $(function () {
             $.messager.alert('提示', '没有数据需要保存！', 'info');
             return;
         }
-        $.post('{$ROOT}/major/major/majorschoolupdate', effectRow, function (result) {
+        $.post('{$ROOT}/major/plan/programupdate', effectRow, function (result) {
             if (result.status == 1) {
                 tt.datagrid('acceptChanges');
                 tt.datagrid('reload');
@@ -272,8 +196,8 @@ $(function () {
         var tt = $('#dg');
         tt.datagrid('loadData', {total: 0, rows: []});
         tt.datagrid('load', {
-            majorname: $('#majorname').val(),
-            years: $('#years').val(),
+            programno: $('#programno').val(),
+            progname: $('#progname').val(),
             school: $('#school').combobox('getValue')
         });
     });
@@ -281,10 +205,10 @@ $(function () {
      * 导出
      */
     $('#export,#menu_export').click(function () {
-        var name = encodeURI($('#name').val());
-        var teacherno = encodeURI($('#teacherno').val());
+        var programno = encodeURI($('#programno').val());
+        var progname = encodeURI($('#progname').val());
         var school = encodeURI($('#school').combobox('getValue'));
-        $.fileDownload("{$ROOT}/major/major/majorschoolexport?name=" + name + "&teacherno=" + teacherno + '&school=' + school, {
+        $.fileDownload("{$ROOT}/major/plan/programexport?progname=" + progname + "&programno=" + programno + '&school=' + school, {
             preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
             dialogOptions: {modal: true, title: '提示'},
             failCallback: function (html, url) {
@@ -300,7 +224,7 @@ $(function () {
         <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">编辑</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
-        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出专业</div>
+        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
@@ -312,12 +236,12 @@ $(function () {
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-            <label for="majorname">专业名：</label><input id="majorname" class="easyui-validatebox" size="10" value="%"/>
-            <label for="years">学制：</label><input id="years" class="easyui-validatebox" size="1" value=""/>
+            <label for="programno">教学计划号：</label><input id="programno" class="easyui-validatebox" size="4" value="%"/>
+            <label for="progname">教学计划名：</label><input id="progname" class="easyui-validatebox" size="10" value="%"/>
             <label for="school">学院：</label>
             <input id="school">
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出专业</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
         </div>
     </div>
     <table id="dg">
