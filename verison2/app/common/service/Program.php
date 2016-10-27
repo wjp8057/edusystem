@@ -215,7 +215,7 @@ class Program extends MyService{
             else
                 $result = ['status' => 0, 'info' => '您无法删除其他学院教学计划的等价课程'];
         }
-        return json($result);
+        return $result;
     }
 
 } 

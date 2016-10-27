@@ -21,6 +21,7 @@ use think\Log;
  * @package app\all\controller
  */
 class Option {
+    //角色
     public function role(){
         $result=null;
         try {
@@ -248,11 +249,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**是否
-     * @param int $only
-     * @return \think\response\Json
-     */
+    //是否
     public function zo($only=1){
         $result=null;
         try {
@@ -267,11 +264,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**读取一周第几天列表
-     * @param int $only
-     * @return \think\response\Json
-     */
+    //第几天
     public function  weekday($only=1){
         $result=null;
         try {
@@ -286,7 +279,7 @@ class Option {
         }
         return json($result);
     }
-
+    //单双周
     public function oew($only=1){
         $result=null;
         try {
@@ -301,6 +294,7 @@ class Option {
         }
         return json($result);
     }
+    //节次
     public function timesection($only=1){
         $result=null;
         try {
@@ -315,6 +309,7 @@ class Option {
         }
         return json($result);
     }
+    //专业方向
     public function majordirection($major=''){
         $result=null;
         try {
@@ -325,10 +320,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**课程类型
-     * @return \think\response\Json
-     */
+    //课程类型
     public function coursetype(){
         $result=null;
         try {
@@ -338,10 +330,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**课程形式
-     * @return \think\response\Json
-     */
+    //课程形式
     public function courseform(){
         $result=null;
         try {
@@ -351,10 +340,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**专业代码
-     * @return \think\response\Json
-     */
+    //专业代码
     public function majorcode(){
         $result=null;
         try {
@@ -364,10 +350,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**学科列表
-     * @return \think\response\Json
-     */
+     //学科列表
     public function branch(){
         $result=null;
         try {
@@ -377,10 +360,7 @@ class Option {
         }
         return json($result);
     }
-
-    /**学位
-     * @return \think\response\Json
-     */
+     //学位
     public function degree(){
         $result=null;
         try {
@@ -395,6 +375,46 @@ class Option {
         $result=null;
         try {
             $result =Db::table('programtype')->field('rtrim(name) as type,rtrim(value) as name')->order('type')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //必修、模块、选修
+    public function courseapproach(){
+        $result=null;
+        try {
+            $result =Db::table('courseapproaches')->field('rtrim(name) as approach,rtrim(value) as name')->order('approach')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //考核方式 考试、考查、考核
+    public function examoption(){
+        $result=null;
+        try {
+            $result =Db::table('examoptions')->field('rtrim(name) as exam,rtrim(value) as name')->order('exam')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //考核方式 考试、考查、考核
+    public function coursecat(){
+        $result=null;
+        try {
+            $result =Db::table('coursecat')->field('rtrim(name) as category,rtrim(value) as name')->order('category')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //考试级别 国家统考，教师自考
+    public function testlevel(){
+        $result=null;
+        try {
+            $result =Db::table('testlevel')->field('rtrim(name) as level,rtrim(value) as name')->order('level')->select();
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }

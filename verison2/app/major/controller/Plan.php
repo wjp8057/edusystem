@@ -16,6 +16,7 @@ use app\common\access\MyController;
 use app\common\service\Majorcode;
 use app\common\service\Majordirection;
 use app\common\service\Program;
+use app\common\service\R12;
 use app\common\vendor\PHPExcel;
 
 class Plan extends MyController
@@ -68,5 +69,28 @@ class Plan extends MyController
         return json($result);
     }
 
-
+    //读取教学计划
+    public function programcourselist($page = 1, $rows = 20,$programno,$courseno='%',$coursename='%',$school='')
+    {
+        $result = null;
+        try {
+            $program=new R12();
+            $result = $program->getList($page, $rows,$programno,$courseno,$coursename,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+   //更新教学计划中的课程信息
+    public function  programcourseupdate()
+    {
+        $result = null;
+        try {
+            $obj=new R12();
+            $result = $obj->update($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 } 
