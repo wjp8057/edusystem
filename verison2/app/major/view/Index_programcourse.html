@@ -100,18 +100,6 @@ $(function () {
             });
         }
     });
-    function checkTeacherSchool(rows) {
-        var count = rows.length;
-        for (var i = 0; i < count; i++) { //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
-            if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
-                $.messager.alert('错误', '你无法修改其他学院的开设专业信息（' + rows[i].name + '）！', 'error');
-                $("#cancel").click();
-                return false;
-            }
-        }
-        return true;
-    }
-
     $("#menu_edit,#edit").click(function(){
         var row= $('#dg').datagrid('getSelected');
         if(!row){

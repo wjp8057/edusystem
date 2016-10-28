@@ -276,7 +276,7 @@ class MyAccess {
             return false;
         }
     }
-
+    //检测教学计划的所属学院
     public static function checkProgramSchool($programno=''){
         $condition=null;
         $condition['programno']=$programno;
@@ -291,4 +291,5 @@ class MyAccess {
             return false;
         }
     }
+
 }

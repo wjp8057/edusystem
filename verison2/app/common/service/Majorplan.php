@@ -59,6 +59,9 @@ class Majorplan extends MyService{
         $updateRow=0;
         $deleteRow=0;
         $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
         //更新部分
         //开始事务
         $this->query->startTrans();
@@ -68,6 +71,7 @@ class Majorplan extends MyService{
                 $listUpdated = json_decode($updated);
                 $data = null;
                 foreach ($listUpdated as $one) {
+
                     $data['map'] = $one->map;
                     $data['year'] = $one->year;
                     $data['majorschool'] = $one->majorschool;
@@ -75,9 +79,16 @@ class Majorplan extends MyService{
                     $data['credits'] = $one->credits;
                     $data['mcredits'] = $one->mcredits;
                     $data['rem'] = $one->rem;
-                    $row = $this->query->table('majorplan')->insert($data);
-                    if ($row > 0)
-                        $insertRow++;
+                    if(MyAccess::checkMajorSchool($one->majorschool)) {
+                        $row=$this->query->table('majorplan')->insert($data);
+                        if ($row > 0)
+                            $insertRow++;
+                    }
+                    else{
+                        $info.=$one->majorschool.'不是本学院专业，无法添加培养计划</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
                 }
             }
             if (isset($postData["updated"])) {
@@ -91,7 +102,14 @@ class Majorplan extends MyService{
                     $data['credits'] = $one->credits;
                     $data['mcredits'] = $one->mcredits;
                     $data['rem'] = $one->rem;
-                    $updateRow += $this->query->table('majorplan')->where($condition)->update($data);
+                    if(MyAccess::checkMajorSchool($one->majorschool)) {
+                        $updateRow += $this->query->table('majorplan')->where($condition)->update($data);
+                    }
+                    else{
+                        $info.=$one->majorschool.'不是本学院专业，无法修改培养计划</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
                 }
             }
             //删除部分
@@ -101,7 +119,14 @@ class Majorplan extends MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['id'] = $one->id;
-                    $deleteRow += $this->query->table('majorplan')->where($condition)->delete();
+                    if(MyAccess::checkMajorSchool($one->majorschool)) {
+                        $deleteRow += $this->query->table('majorplan')->where($condition)->delete();
+                    }
+                    else{
+                        $info.=$one->majorschool.'不是本学院专业，无法删除培养计划</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
                 }
             }
         }
@@ -110,14 +135,14 @@ class Majorplan extends MyService{
             throw $e;
         }
         $this->query->commit();
-        $info='';
-        if($updateRow>0) $info.=$updateRow.'条更新！</br>';
-        if($deleteRow>0) $info.=$deleteRow.'条删除！</br>';
-        if($insertRow>0) $info.=$insertRow.'条添加！</br>';
-        $status=1;
-        if($info=='') {
-            $info="没有数据被更新";
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
             $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;
