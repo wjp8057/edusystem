@@ -49,13 +49,13 @@
         //当教室填写完成后。
         roomno.blur(function(){
             $('#roomname').text('');
-            $.post('{$ROOT}/all/info/getroomname',{roomno:roomno.val()},function(result){
+            $.post('{$ROOT}/all/info/getroominfo',{roomno:roomno.val()},function(result){
                 if (result.status==1){
-                    $('#roomname').text(result.info);
+                    $('#roomname').text(result.roomname);
                     roomcheck=true;
                 }
                 else{
-                    $('#roomname').html("<div class='warn'>"+result.info+"</div>");
+                    $('#roomname').html("<div class='warn'>"+result.roomname+"</div>");
                     roomcheck=false;
                 }
             },'json');
@@ -107,7 +107,7 @@
                 <label for="week7">7</label> <input type="checkbox" id="week7">
                 <label for="week8">8</label> <input type="checkbox" id="week8">
                 <label for="week9">9</label> <input type="checkbox" id="week9">
-                <label for="week10">10</label> <input type="checkbox" id="week10">
+                <label for="week10">10</label> <input type="checkbox" id="week10"> <br />
                 <label for="week11">11</label> <input type="checkbox" id="week11">
                 <label for="week12">12</label> <input type="checkbox" id="week12">
                 <label for="week13">13</label> <input type="checkbox" id="week13">

@@ -46,13 +46,13 @@
             $('#programname').text('');
             if(programno.val()=='')
                 return;
-            $.post('{$ROOT}/all/info/getprogramname',{programno:programno.val()},function(result){
+            $.post('{$ROOT}/all/info/getprograminfo',{programno:programno.val()},function(result){
                 if (result.status==1){
-                    $('#programname').text(result.info);
+                    $('#programname').text(result.progname);
                     programcheck=true;
                 }
                 else {
-                    $('#roomname').html("<div class='warn'>" + result.info + "</div>");
+                    $('#roomname').html("<div class='warn'>" + result.progname + "</div>");
                     programcheck = false;
                 }
             },'json');
@@ -62,13 +62,13 @@
             $('#coursename').text('');
             if(courseno.val()=='')
                 return;
-            $.post('{$ROOT}/all/info/getcoursename',{courseno:courseno.val()},function(result){
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:courseno.val()},function(result){
                 if (result.status==1){
-                    $('#coursename').text(result.info);
+                    $('#coursename').text(result.coursename);
                     coursecheck=true;
                 }
                 else {
-                    $('#coursename').html("<div class='warn'>" + result.info + "</div>");
+                    $('#coursename').html("<div class='warn'>" + result.coursename + "</div>");
                     coursecheck = false;
                 }
             },'json');
@@ -78,13 +78,13 @@
             $('#eqcoursename').text('');
             if(eqcourseno.val()=='')
                 return;
-            $.post('{$ROOT}/all/info/getcoursename',{courseno:eqcourseno.val()},function(result){
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:eqcourseno.val()},function(result){
                 if (result.status==1){
-                    $('#eqcoursename').text(result.info);
+                    $('#eqcoursename').text(result.coursename);
                     eqcoursecheck=true;
                 }
                 else {
-                    $('#eqcoursename').html("<div class='warn'>" + result.info + "</div>");
+                    $('#eqcoursename').html("<div class='warn'>" + result.coursename + "</div>");
                     eqcoursecheck = false;
                 }
             },'json');

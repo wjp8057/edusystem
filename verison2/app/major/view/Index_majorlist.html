@@ -1,0 +1,101 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+$(function () {
+    var school = $('#school');
+    school.combobox({
+        url: '{$ROOT}/all/option/school?only=0',
+        valueField: 'school',
+        textField: 'name'
+    });
+    //设置默认学院，非管理部门为本学院
+    if ('{$USERINFO.manage}' != '1')
+        school.combobox('select', '{$USERINFO.school}');
+    $('#dg').datagrid({
+        title: '请选择需要增加的培养计划所属专业',
+        idField: 'teacherno',
+        striped: 'true',
+        pagination: 'true',
+        rownumbers: true,
+        singleSelect: true,
+        pageSize: 20,
+        url: '{$ROOT}/major/plan/majorschool',
+        toolbar: '#toolbar',
+        queryParams: {school: school.combobox('getValue')},
+        pageList: [20, 50, 100, 200],
+        columns: [[
+            {field: 'majorschool', title: '专业号', width: 60, align: 'center'},
+            {field: 'majorname', title: '专业名', width: 150, align: 'center'},
+            {field: 'directionname', title: '专业方向', width: 150, align: 'center', required: true},
+            {field: 'years', title: '学制', width: 40, align: 'center'},
+            {field: 'branchname', title: '学科', width: 80, align: 'center'},
+            {field: 'degreename', title: '学位', width: 80, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+            {field: 'rem', title: '备注', width: 100, align: 'center'}
+        ]],
+        //标题行右键菜单
+        onHeaderContextMenu: function (e, field) {
+            e.preventDefault();
+            if (!cmenu_obj.cmenu)//没有的话创建一个
+                $('#dg').datagrid('createColumnMenu', cmenu_obj);
+            cmenu_obj.cmenu.menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        //数据行上右键菜单
+        onRowContextMenu: function (e, rowindex, row) {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+            tt.datagrid('selectRow', rowindex);
+            $('#menu').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
+    //下一步
+    $("#next,#menu_next").click(function () {
+        var row= $('#dg').datagrid('getSelected');
+        if(!row){
+            $.messager.alert('提示','请先选择一个专业！','info');
+            return;
+        }
+        location="{$ROOT}/major/index/majorplandetail?majorschool="+row.majorschool;
+    });
+    //检索
+    $("#search").click(function () {
+        var tt = $('#dg');
+        tt.datagrid('loadData', {total: 0, rows: []});
+        tt.datagrid('load', {
+            majorname: $('#majorname').val(),
+            years: $('#years').val(),
+            school: $('#school').combobox('getValue')
+        });
+    });
+});
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_next' data-options="iconCls:'icon icon-ok'">下一步</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <label for="majorname">专业名：</label><input id="majorname" class="easyui-validatebox" size="10" value="%"/>
+            <label for="years">学制：</label><input id="years" class="easyui-validatebox" size="1" value=""/>
+            <label for="school">学院：</label>
+            <input id="school">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-ok',plain:'true'" id="next">下一步</a>
+        </div>
+    </div>
+    <table id="dg">
+    </table>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
+            <li>专业号根据校内规则编写，第1、2位为学院代号，第3位为学制，4-6位为序号,添加后无法修改。</li>
+        </ol>
+    </div>
+</div>

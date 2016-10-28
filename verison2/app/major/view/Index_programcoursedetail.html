@@ -1,0 +1,182 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var coursecheck=true;
+    $(function(){
+        //数据预处理
+        {
+            $('#programno').text('{$program.programno}');
+            $('#progname').text('{$program.progname}');
+            var courseno = $('#courseno');
+            courseno.validatebox({required: true, validType: 'equalLength[7]'});
+            courseno.val("{$course.courseno}");
+            $('#coursename').text('{$course.coursename}');
+            $('#credits').text('{$course.credits}');
+            $('#hours').text('{$course.hours}');
+
+            var year = $('#year');
+            year.validatebox({required: true, validType: 'equalLength[1]'});
+            year.val("{$course.year}");
+            var term = $('#term');
+            term.validatebox({required: true, validType: 'equalLength[1]'});
+            term.val("{$course.term}");
+            var approach = $('#approach');
+            approach.combobox({required: true, editable:false, url: '{$ROOT}/all/option/courseapproach', valueField: 'approach', textField: 'name',panelHeight: 'auto'});
+            approach.combobox('setValue',"{$course.coursetype}");
+            var examtype=$('#examtype');
+            examtype.combobox({required: true, editable:false,url: '{$ROOT}/all/option/examoption', valueField: 'exam', textField: 'name',panelHeight: 'auto'});
+            examtype.combobox('setValue',"{$course.examtype}");
+            var testlevel=$('#testlevel');
+            testlevel.combobox({required: true, editable:false,url: '{$ROOT}/all/option/testlevel', valueField: 'level', textField: 'name',panelHeight: 'auto'});
+            testlevel.combobox('setValue',"{$course.test}");
+            var category=$('#category');
+            category.combobox({required: true, editable:false,url: '{$ROOT}/all/option/coursecat', valueField: 'category', textField: 'name',panelHeight: 'auto'});
+            category.combobox('setValue',"{$course.category}");
+            var weeks="{$course.weeks}";
+            if(weeks!="") {
+                $("input[id^='week']").each(function () {
+                    var thisweek = weeks % 2;
+                    alert(thisweek);
+                    weeks = Math.floor(weeks / 2);
+                    if (thisweek == 1)
+                        $(this).prop('checked', 'true');
+                });
+            }
+            $("#myForm").form('validate');
+        }
+        courseno.blur(function(){
+            $('#coursename').text('');
+            $('#credits').text('');
+            $('#hours').text('');
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:courseno.val()},function(result){
+                if (result.status==1){
+                    $('#coursename').text(result.coursename);
+                    $('#credits').text(result.credits);
+                    $('#hours').text(result.hours);
+                    coursecheck=true;
+                }
+                else{
+                    $('#coursename').html("<div class='warn'>"+result.coursename+"</div>");
+                    coursecheck=false;
+                }
+            },'json');
+        });
+        $("#update").click(function() {
+            var weekstring="";
+            $("input[id^='week']").each(function () {
+                weekstring = $(this).prop('checked') ? '1' + weekstring : '0' + weekstring;
+            });
+            var weeks=(parseInt(weekstring,2)); //将字符串作为二进制转化为数字
+            if(coursecheck&&$("#myForm").form('validate')){
+                var data={};
+                var effectRow={};
+                var updateRows=[];
+                var insertRows=[];
+                effectRow['programno']=getQueryString('programno');
+                data["courseno"]=courseno.val();
+                data["oldcourseno"]="{$course.courseno}";
+                data["programno"]="{$program.programno}";
+                data["year"]=year.val();
+                data["term"]=term.val();
+                data['coursetype']=approach.combobox('getValue');
+                data['examtype']=examtype.combobox('getValue');
+                data['test']=testlevel.combobox('getValue');
+                data['category']=category.combobox('getValue');
+                data['weeks']=weeks;
+                if("{$course.courseno}"!=''){
+                    updateRows.push(data);
+                    effectRow["updated"]=$.toJSON(updateRows);
+                }
+                else
+                {
+                    insertRows.push(data);
+                    effectRow["inserted"]=$.toJSON(insertRows);
+                }
+                $.post('{$ROOT}/major/plan/programcourseupdate',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容！','error');
+            }
+
+        });
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">{$operate}</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>教学计划号</th>
+            <td><lable id="programno"></lable></td>
+            <th>教学计划名</th>
+            <td><lable id="progname"></lable></td>
+        </tr>
+        <tr>
+            <th>课号</th>
+            <td><input id="courseno" size="7"/></td>
+            <th>课名</th>
+            <td><lable id="coursename"></lable></td>
+        </tr>
+        <tr>
+            <th>学分</th>
+            <td><lable id="credits"></lable></td>
+            <th>周课时</th>
+            <td><lable id="hours"></lable></td>
+        </tr>
+        <tr>
+            <th>学年</th>
+            <td><input id="year" size="1"/></td>
+            <th>学期</th>
+            <td><input id="term" size="1"/></td>
+        </tr>
+        <tr>
+            <th>类别</th>
+            <td><input id="approach"/></td>
+            <th>考核方式</th>
+            <td><input id="examtype"/></td>
+        </tr>
+        <tr>
+            <th>考试级别</th>
+            <td><input id="testlevel"/></td>
+            <th>课程门类</th>
+            <td><input id="category"/></td>
+        </tr>
+        <tr>
+            <th>周次</th>
+            <td colspan="3">
+                <label for="week1">1</label> <input type="checkbox" id="week1">
+                <label for="week2">2</label> <input type="checkbox" id="week2">
+                <label for="week3">3</label> <input type="checkbox" id="week3">
+                <label for="week4">4</label> <input type="checkbox" id="week4">
+                <label for="week5">5</label> <input type="checkbox" id="week5">
+                <label for="week6">6</label> <input type="checkbox" id="week6">
+                <label for="week7">7</label> <input type="checkbox" id="week7">
+                <label for="week8">8</label> <input type="checkbox" id="week8">
+                <label for="week9">9</label> <input type="checkbox" id="week9">
+                <label for="week10">10</label> <input type="checkbox" id="week10"> <br />
+                <label for="week11">11</label> <input type="checkbox" id="week11">
+                <label for="week12">12</label> <input type="checkbox" id="week12">
+                <label for="week13">13</label> <input type="checkbox" id="week13">
+                <label for="week14">14</label> <input type="checkbox" id="week14">
+                <label for="week15">15</label> <input type="checkbox" id="week15">
+                <label for="week16">16</label> <input type="checkbox" id="week16">
+                <label for="week17">17</label> <input type="checkbox" id="week17">
+                <label for="week18">18</label> <input type="checkbox" id="week18">
+            </td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="update">保存数据</a>
+    </div>
+</div>

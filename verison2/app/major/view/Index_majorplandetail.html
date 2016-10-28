@@ -1,0 +1,112 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var coursecheck=true;
+    $(function(){
+        //数据预处理
+        {
+            $('#majorschool').text('{$major.majorschool}');
+            $('#schoolname').text('{$major.schoolname}');
+            $('#directionname').text('{$major.directionname}');
+            $('#majorname').text('{$major.majorname}');
+            $('#direction').text('{$major.direction}');
+            $('#majorno').text('{$major.majorno}');
+            var year = $('#year');
+            year.validatebox({required: true, validType: 'equalLength[4]'});
+            var module = $('#module');
+            module.validatebox({required: true, validType: 'maxLength[25]'});
+            var credits = $('#credits');
+            credits.numberbox({required: true,precision:2});
+            var mcredits = $('#mcredits');
+            mcredits.numberbox({required: true,precision:2});
+            var rem = $('#rem');
+            rem.validatebox({validType: 'maxLength[25]'});
+            $("#myForm").form('validate');
+
+        }
+        $("#update").click(function() {
+            if(coursecheck&&$("#myForm").form('validate')){
+                var data={};
+                var effectRow={};
+                var updateRows=[];
+                var insertRows=[];
+                data['majorschool']='{$major.majorschool}';
+                data['map']='{$major.rowid}';
+                data['year']=year.val();
+                data['module']=module.val();
+                data['credits']=credits.val();
+                data['mcredits']=mcredits.val();
+                data['rem']=rem.val();
+                if(getQueryString("id")!=null){
+                    updateRows.push(data);
+                    data['id']=getQueryString("id");
+                    effectRow["updated"]=$.toJSON(updateRows);
+                }
+                else
+                {
+                    insertRows.push(data);
+                    effectRow["inserted"]=$.toJSON(insertRows);
+                }
+                $.post('{$ROOT}/major/plan/majorplanupdate',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容！','error');
+            }
+
+        });
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">{$operate}</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>专业号</th>
+            <td><lable id="majorschool"></lable></td>
+            <th>学院</th>
+            <td><lable id="schoolname"></lable></td>
+        </tr>
+        <tr>
+            <th>专业代码</th>
+            <td><lable id="majorno"></lable></td>
+            <th>专业名称</th>
+            <td><lable id="majorname"></lable></td>
+        </tr>
+        <tr>
+            <th>方向代码</th>
+            <td><lable id="direction"></lable></td>
+            <th>方向名称</th>
+            <td><lable id="directionname"></lable></td>
+        </tr>
+        <tr>
+            <th>年级</th>
+            <td><input id="year" size="4"/> (例：2014）</td>
+            <th>模块方向</th>
+            <td><input id="module" size="20"/></td>
+        </tr>
+        <tr>
+            <th>总学分</th>
+            <td><input id="credits"  size="4" value="0"/></td>
+            <th>必修学分</th>
+            <td><input id="mcredits" size="4" value="0"/></td>
+        </tr>
+        <tr>
+            <th>备注</th>
+            <td colspan="3"><input id="rem"  size="20"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="update">保存数据</a>
+    </div>
+</div>

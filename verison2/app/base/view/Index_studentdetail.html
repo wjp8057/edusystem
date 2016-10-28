@@ -1,5 +1,6 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
+    var classcheck=true;
     $(function(){
         //数据预处理
         {
@@ -22,6 +23,8 @@
             var birthday = $('#birthday');
             birthday.datebox({required: true, editable:false});
             birthday.datebox('setValue', '{$student.birthday}');
+
+            $('#photo').prop("src","{$ROOT}{$student.photo}");
             var nationality = $('#nationality');
             nationality.combobox({
                 required: true, editable:false,
@@ -96,8 +99,23 @@
             status.combobox('setValue', '{$student.status}');
             $("#myForm").form('validate');
         }
+        classno.blur(function(){
+            $('#classname').text('');
+            $('#schoolname').text('');
+            $.post('{$ROOT}/all/info/getclassinfo',{classno:classno.val()},function(result){
+                if (result.status==1){
+                    $('#classname').text(result.classname);
+                    $('#schoolname').text(result.schoolname);
+                    classcheck=true;
+                }
+                else{
+                    $('#classname').html("<div class='warn'>"+result.classname+"</div>");
+                    classcheck=false;
+                }
+            },'json');
+        });
         $("#update").click(function() {
-            if($("#myForm").form('validate')){
+            if(classcheck&&$("#myForm").form('validate')){
                 var data={};
                 data["studentno"]=studentno.val();
                 data["name"]=name.val();
@@ -148,7 +166,7 @@
             <td><input id="studentno"/></td>
             <th>姓名</th>
             <td><input id="name"/></td>
-            <td rowspan="5" align="center" valign="middle"><img src="{$ROOT}{$student.photo}" height="150px"/></td>
+            <td rowspan="5" align="center" valign="middle"><img id="photo" src="#" height="150px"/></td>
         </tr>
         <tr>
             <th>性别</th>

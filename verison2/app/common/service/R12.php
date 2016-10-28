@@ -12,6 +12,7 @@
 namespace app\common\service;
 
 
+use app\common\access\MyAccess;
 use app\common\access\MyService;
 
 /**教学计划课程
@@ -40,8 +41,8 @@ class R12 extends MyService{
             ->join('coursecat','coursecat.name=r12.category')
             ->join('testlevel','testlevel.name=r12.test')
             ->page($page,$rows)
-            ->field('r12.courseno,rtrim(courses.coursename) coursename,convert(varchar(10),courses.credits) credits,convert(varchar(10),courses.hours)  hours,
-                schools.school,(schools.name) schoolname,r12.year ,r12.term,r12.examtype,rtrim(et.value) examtypename,r12.coursetype,rtrim(ct.value) coursetypename,test,
+            ->field('r12.courseno,r12.courseno oldcourseno,rtrim(courses.coursename) coursename,convert(varchar(10),courses.credits) credits,convert(varchar(10),courses.hours)  hours,
+                schools.school,rtrim(schools.name) schoolname,r12.year ,r12.term,r12.examtype,rtrim(et.value) examtypename,r12.coursetype,rtrim(ct.value) coursetypename,test,
                 rtrim(testlevel.value) testname,category,rtrim(coursecat.value) categoryname,r12.weeks')
             ->where($condition)->order('year,term,courseno')->select();
         $count= $this->query->table('r12')->join('courses','courses.courseno=r12.courseno')->where($condition)->count();
@@ -60,6 +61,10 @@ class R12 extends MyService{
         $deleteRow=0;
         $insertRow=0;
         $programno=$postData["programno"];
+        if(!MyAccess::checkProgramSchool($programno))
+        {
+            return array('info'=>'无法为其他学院的教学计划更新课程','status'=>0);
+        }
         //更新部分
         //开始事务
         $this->query->startTrans();
@@ -69,8 +74,15 @@ class R12 extends MyService{
                 $listUpdated = json_decode($updated);
                 $data = null;
                 foreach ($listUpdated as $one) {
-                    $data['value'] = $one->value;
-                    $data['name'] = $one->name;
+                    $data['programno'] = $programno;
+                    $data['courseno'] = $one->courseno;
+                    $data['year'] = $one->year;
+                    $data['term'] = $one->term;
+                    $data['coursetype'] = $one->coursetype;
+                    $data['examtype'] = $one->examtype;
+                    $data['test'] = $one->test;
+                    $data['category'] = $one->category;
+                    $data['weeks'] = $one->weeks;
                     $row = $this->query->table('r12')->insert($data);
                     if ($row > 0)
                         $insertRow++;
@@ -82,7 +94,8 @@ class R12 extends MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['programno'] = $programno;
-                    $condition['courseno'] = $one->courseno;
+                    $condition['courseno'] = $one->oldcourseno;
+                    $data['courseno'] = $one->courseno;
                     $data['year'] = $one->year;
                     $data['term'] = $one->term;
                     $data['coursetype'] = $one->coursetype;

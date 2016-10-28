@@ -12,67 +12,28 @@ $(function () {
         school.combobox('select', '{$USERINFO.school}');
     $('#dg').datagrid({
         title: '',
-        idField: 'courseno',
+        idField: 'id',
         striped: 'true',
         pagination: 'true',
         rownumbers: true,
         singleSelect: true,
-        pageSize: 50,
-        url: '{$ROOT}/major/plan/programcourselist',
+        pageSize: 20,
+        url: '{$ROOT}/major/plan/majorplanlist',
         toolbar: '#toolbar',
-        queryParams: {school: school.combobox('getValue'),programno:getQueryString('programno')},
-        pageList: [50, 100, 200],
+        queryParams: {school: school.combobox('getValue')},
+        pageList: [20, 50, 100, 200],
         columns: [[
-            {field: 'courseno', title: '课号', width: 70, align: 'center'},
-            {field: 'coursename', title: '课名', width: 250, align: 'center'},
-            {field: 'credits', title: '学分', width: 30, align: 'center'},
-            {field: 'hours', title: '周课时', width: 50, align: 'center'},
-            {field: 'schoolname', title: '开课学院', width: 90, align: 'center'},
-            {field: 'year', title: '学年*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
-            {field: 'term', title: '学期*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
-            {field: 'coursetype', title: '类别*', width: 50, align: 'center',
-                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/courseapproach', valueField: 'approach', textField: 'name', panelHeight: 'auto', required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').coursetypename = rec.name;
-                    }}},
-                formatter: function (val, rec) {
-                    return rec.coursetypename;
-                }},
-            {field: 'examtype', title: '考核方式*', width: 60, align: 'center',
-                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/examoption', valueField: 'exam', textField: 'name', panelHeight: 'auto', required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').examtypename = rec.name;
-                    }}},
-                formatter: function (val, rec) {
-                    return rec.examtypename;
-                }},
-            {field: 'test', title: '考试级别*', width: 70, align: 'center',
-                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/testlevel', valueField: 'level', textField: 'name', panelHeight: 'auto', required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').testname = rec.name;
-                    }}},
-                formatter: function (val, rec) {
-                    return rec.testname;
-                }},
-            {field: 'category', title: '课程门类*', width: 80, align: 'center',
-                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/coursecat', valueField: 'category', textField: 'name', panelHeight: 'auto', required: true,
-                    onSelect: function (rec) {
-                        var tt = $('#dg');
-                        tt.datagrid('getSelected').categoryname = rec.name;
-                    }}},
-                formatter: function (val, rec) {
-                    return rec.categoryname;
-                }},
-
-            {field: 'weeks', title: '周次', width: 140, align: 'center',
-                formatter:function(value,rec){
-                    var string=parseInt(value).toString(2);
-                    string=string_reserve(str_pad(string,18,'0',1));
-                    return  str_split(string,' ',5);
-                }}
+            {field: 'majorschool', title: '专业号', width: 50, align: 'center'},
+            {field: 'majorno', title: '专业代码', width: 60, align: 'center'},
+            {field: 'majorname', title: '专业名', width: 140, align: 'center'},
+            {field: 'direction', title: '方向代码', width: 60, align: 'center'},
+            {field: 'directionname', title: '专业方向', width: 140, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 90, align: 'center'},
+            {field: 'year', title: '年级*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[4]', required: true}}},
+            {field: 'module', title: '模块方向*', width: 150, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}},
+            {field: 'credits', title: '总学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
+            {field: 'mcredits', title: '必修学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
+            {field: 'rem', title: '备注*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}}
         ]],
         //标题行右键菜单
         onHeaderContextMenu: function (e, field) {
@@ -117,18 +78,7 @@ $(function () {
 
     // 绑定新建按钮事件
     $("#insert,#menu_insert").click(function () {
-        var tt = $('#dg');
-        tt.datagrid('endEditing');
-        if (tt.datagrid('editIndex') != undefined) return;
-        tt.datagrid('insertRow', {
-            index: 0,
-            row: {
-                school:'{$USERINFO.school}',
-                schoolname:'{$USERINFO.schoolname}'
-            }
-        });
-        tt.datagrid('startEditing', {field: 'programno', index: 0});
-        current_datagrid = tt;
+        parent.menuTabs.addTab("新增培养计划","{$ROOT}/major/index/majorlist","icon icon-add");
     });
     //取消更改
     $("#cancel,#menu_cancel").click(function () {
@@ -149,7 +99,6 @@ $(function () {
         if (!checkTeacherSchool(rows)) return;
         var count = 0;
         var effectRow = {};
-        effectRow['programno']=getQueryString('programno');
         if (rows.length > 0) {
             count += rows.length;
             effectRow["updated"] = $.toJSON(rows);
@@ -172,7 +121,7 @@ $(function () {
             $.messager.alert('提示', '没有数据需要保存！', 'info');
             return;
         }
-        $.post('{$ROOT}/major/plan/programcourseupdate', effectRow, function (result) {
+        $.post('{$ROOT}/major/plan/majorplanupdate', effectRow, function (result) {
             if (result.status == 1) {
                 tt.datagrid('acceptChanges');
                 tt.datagrid('reload');
@@ -198,20 +147,12 @@ $(function () {
             $.messager.alert('错误', '请先选中一条记录', 'error')
         }
     });
-    $("#edit,#menu_edit").click(function () {
-        var tt = $('#dg');
-        var index = tt.datagrid('getRowIndex', tt.datagrid('getSelected'));
-        tt.datagrid('startEditing', {field: 'name', index: index});
-        current_datagrid = tt;
-    });
     //检索
     $("#search").click(function () {
         var tt = $('#dg');
         tt.datagrid('loadData', {total: 0, rows: []});
         tt.datagrid('load', {
-            programno:getQueryString('programno'),
-            courseno: $('#courseno').val(),
-            coursename: $('#coursename').val(),
+            year: $('#year').val(),
             school: $('#school').combobox('getValue')
         });
     });
@@ -219,10 +160,9 @@ $(function () {
      * 导出
      */
     $('#export,#menu_export').click(function () {
-        var programno = encodeURI($('#programno').val());
-        var progname = encodeURI($('#progname').val());
+        var year = encodeURI($('#year').val());
         var school = encodeURI($('#school').combobox('getValue'));
-        $.fileDownload("{$ROOT}/major/plan/programexport?progname=" + progname + "&programno=" + programno + '&school=' + school, {
+        $.fileDownload("{$ROOT}/major/plan/majorplanexport?year=" +year+ '&school=' + school, {
             preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
             dialogOptions: {modal: true, title: '提示'},
             failCallback: function (html, url) {
@@ -235,9 +175,10 @@ $(function () {
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:100px;">
         <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
-        <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">修改周次</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
+        <div id='menu_class' data-options="iconCls:'icon icon-class'">绑定班级列表</div>
+        <div id='menu_student' data-options="iconCls:'icon icon-person'">绑定学生列表</div>
         <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
@@ -246,15 +187,15 @@ $(function () {
     <div id="toolbar">
         <div>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'" id="insert">新增</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">修改周次</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-            <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="4" value="%"/>
-            <label for="progname">课名：</label><input id="progname" class="easyui-validatebox" size="6" value="%"/>
+            <label for="year">年级：</label><input id="year" class="easyui-validatebox" size="4" value=""/>
             <label for="school">学院：</label>
             <input id="school">
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-class',plain:'true'" id="class">绑定班级列表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-person',plain:'true'" id="student">绑定学生列表</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
         </div>
     </div>
@@ -263,6 +204,7 @@ $(function () {
     <div class="information" style="clear:both">
         <ol>说明：
             <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
+            <li>专业号根据校内规则编写，第1、2位为学院代号，第3位为学制，4-6位为序号,添加后无法修改。</li>
         </ol>
     </div>
 </div>
