@@ -35,7 +35,7 @@ class Register extends MyService {
      * @throws \think\Exception
      */
     function getList($page=1,$rows=20,$year='',$term='',$studentno='%',$name='%',$infotype=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($year==''||$term=='')
             throw new Exception('year or term is empty ', MyException::PARAM_NOT_CORRECT);

@@ -242,8 +242,8 @@ return [
         'type' => 'sqlsrv',
         // 数据库连接DSN配置
         // 服务器地址
-     //   'hostname' => '127.0.0.1',
-        'hostname'    => '172.18.0.41',
+        'hostname' => '127.0.0.1',
+     //   'hostname'    => '172.18.0.41',
         // 数据库名
         'database' => 'logdb',
         // 数据库用户名

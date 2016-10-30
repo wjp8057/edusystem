@@ -103,9 +103,7 @@ class Index extends Template
     function classstudent($classno)
     {
         try {
-
-            $class=new Classes();
-            $classname = $class->getClassInfo($classno)['classname'];
+            $classname =Item::getClassItem($classno)['classname'];
             $this->assign('classname', $classname);
             $this->assign('classno', $classno);
 

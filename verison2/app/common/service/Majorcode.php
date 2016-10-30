@@ -27,7 +27,7 @@ class Majorcode extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('majorcode')->page($page,$rows)
             ->field('code,rtrim(name) name,rtrim(englishname) englishname')->order('name')->select();

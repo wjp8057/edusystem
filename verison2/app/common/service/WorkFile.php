@@ -23,7 +23,7 @@ class WorkFile extends  MyService {
      * @return array|null
      */
     function getList($page=1,$rows=20,$teacherno){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['teacherno']=$teacherno;
         $count= $this->query->table('workfile')->where($condition)->count();// 查询满足要求的总记录数

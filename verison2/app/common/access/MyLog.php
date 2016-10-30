@@ -74,11 +74,11 @@ class MyLog {
 
     public function getList($page=1, $rows=20,$start='',$end='', $username='%', $url='%'){
         $condition=null;
+        $result=['total'=>0,'rows'=>[]];
         if($start!='') $condition['requesttime']=array('egt',$start);
         if($end!='') $condition['requesttime']=array('elt',$end);
         if($username!='%') $condition['username']=array('like',$username);
         if($url!='%') $condition['url']=array('like',$url);
-        $result=array();
         $data=$this->query->table('log')->field("host,username,name,role,operate,url,remoteip,data,requesttime")
             ->page($page,$rows)->order('requesttime desc')->where($condition)->select();
         $count=$this->query->table('log')->count();

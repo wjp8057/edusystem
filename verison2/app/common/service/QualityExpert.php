@@ -37,7 +37,7 @@ class QualityExpert extends MyService{
      */
     public function getList($page = 1, $rows = 20,$year,$term,$expert='%', $teacherno='%',$name='%',$school='')
     {
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition['year'] = $year;
         $condition['term'] = $term;
         if($expert!='%') $condition['qualityexpert.expert'] = array('like',$expert);

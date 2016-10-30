@@ -30,7 +30,7 @@ class Major extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20,$years='',$school='',$majorname='%'){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($years!='') $condition['majors.years']=$years;
         if($school!='') $condition['majors.school']=$school;

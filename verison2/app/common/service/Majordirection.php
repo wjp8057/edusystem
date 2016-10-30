@@ -27,7 +27,7 @@ class Majordirection extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20,$major=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['major']=$major;
         $data=$this->query->table('majordirection')->page($page,$rows)

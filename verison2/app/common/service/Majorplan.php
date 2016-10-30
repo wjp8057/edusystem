@@ -29,19 +29,19 @@ class Majorplan extends MyService{
      * @param string $id
      * @return array|null
      */
-    function getList($page=1,$rows=20,$year='',$school='',$id=0){
-        $result=null;
+    function getList($page=1,$rows=20,$year='',$school='',$rowid=''){
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($year!='') $condition['majorplan.year']=$year;
         if($school!='') $condition['majors.school']=$school;
-        if($id!=0)  $condition['majorplan.id']=$id;
+        if($rowid!='')  $condition['majorplan.rowid']=$rowid;
         $data=$this->query->table('majorplan')
             ->join('majors','majors.majorschool=majorplan.majorschool')
             ->join('majorcode', 'majorcode.code=majors.majorno')
             ->join('majordirection','majordirection.direction=majors.direction')
             ->join('schools','schools.school=majors.school')
             ->page($page,$rows)
-            ->field('year,rtrim(majorplan.rem) rem,majorplan.id ,mcredits,credits,rtrim(module) module,majorno,rtrim(majorcode.name) majorname,
+            ->field('years,year,rtrim(majorplan.rem) rem,majorplan.rowid ,mcredits,credits,rtrim(module) module,majorno,rtrim(majorcode.name) majorname,
             rtrim(majors.direction) direction,rtrim(majordirection.name) directionname,schools.school,rtrim(schools.name) schoolname,majors.majorschool')
             ->where($condition)->order('year,majorschool')->select();
         $count= $this->query->table('majorplan')  ->join('majors','majors.majorschool=majorplan.majorschool')->where($condition)->count();
@@ -71,7 +71,6 @@ class Majorplan extends MyService{
                 $listUpdated = json_decode($updated);
                 $data = null;
                 foreach ($listUpdated as $one) {
-
                     $data['map'] = $one->map;
                     $data['year'] = $one->year;
                     $data['majorschool'] = $one->majorschool;
@@ -96,7 +95,7 @@ class Majorplan extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['id'] = $one->id;
+                    $condition['rowid'] = $one->rowid;
                     $data['module'] = $one->module;
                     $data['year'] = $one->year;
                     $data['credits'] = $one->credits;
@@ -118,7 +117,7 @@ class Majorplan extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['id'] = $one->id;
+                    $condition['rowid'] = $one->rowid;
                     if(MyAccess::checkMajorSchool($one->majorschool)) {
                         $deleteRow += $this->query->table('majorplan')->where($condition)->delete();
                     }

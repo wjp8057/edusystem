@@ -12,7 +12,7 @@ $(function () {
         school.combobox('select', '{$USERINFO.school}');
     $('#dg').datagrid({
         title: '',
-        idField: 'id',
+        idField: 'rowid',
         striped: 'true',
         pagination: 'true',
         rownumbers: true,
@@ -28,6 +28,7 @@ $(function () {
             {field: 'majorname', title: '专业名', width: 140, align: 'center'},
             {field: 'direction', title: '方向代码', width: 60, align: 'center'},
             {field: 'directionname', title: '专业方向', width: 140, align: 'center'},
+            {field: 'years', title: '学制', width: 40, align: 'center'},
             {field: 'schoolname', title: '学院', width: 90, align: 'center'},
             {field: 'year', title: '年级*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[4]', required: true}}},
             {field: 'module', title: '模块方向*', width: 150, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}},
@@ -76,26 +77,21 @@ $(function () {
         return true;
     }
     $("#menu_edit,#edit").click(function(){
-        var row= $('#dg').datagrid('getSelected');
-        if(!row){
-            $.messager.alert('提示','请先选择一个培养方案！','info');
-            return;
-        }
-        parent.menuTabs.addTab(row.majorschool+"-编辑详情","{$ROOT}/major/index/majorplandetail?majorschool="+row.majorschool+"&id="+row.id,"icon-edit");
+        var row= getSelectedRow();
+        if(row!=null)
+            parent.menuTabs.addTab(row.majorschool+"-编辑详情","{$ROOT}/major/index/majorplandetail?majorschool="+row.majorschool+"&rowid="+row.rowid,"icon-edit");
+
     });
     // 绑定新建按钮事件
     $("#insert,#menu_insert").click(function () {
         parent.menuTabs.addTab("新增培养计划","{$ROOT}/major/index/majorlist","icon icon-add");
     });
-
     //取消更改
     $("#cancel,#menu_cancel").click(function () {
         var tt = $('#dg');
         tt.datagrid('rejectChanges');
         current_datagrid = null;
     });
-
-
     //绑定点击保存按钮事件
     $("#save,#menu_save").click(function () {
         var tt = $('#dg');
@@ -144,15 +140,12 @@ $(function () {
     });
     //右键菜单删除按钮
     $("#menu_delete,#delete").click(function () {
-        tt = $('#dg');
-        var row = tt.datagrid('getSelected');
-        if (row) {
+        var tt = $('#dg');
+        var row =  getSelectedRow();
+        if (row!=null) {
             tt.datagrid('endEditing');
             var rowIndex = tt.datagrid('getRowIndex', row);
             tt.datagrid('deleteRow', rowIndex);
-        }
-        else {
-            $.messager.alert('错误', '请先选中一条记录', 'error')
         }
     });
     //检索
@@ -164,12 +157,26 @@ $(function () {
             school: $('#school').combobox('getValue')
         });
     });
+    //编辑绑定的教学计划
     $("#program,#menu_program").click(function () {
-        parent.menuTabs.addTab("设置教学计划","{$ROOT}/major/index/majorplanprogram","icon icon-major");
+        var row =  getSelectedRow();
+        if (row!=null) {
+            parent.menuTabs.addTab("设置教学计划","{$ROOT}/major/index/majorplanprogram?majorplanid="+row.rowid,"icon icon-major");
+        }
     });
-    /**
-     * 导出
-     */
+    $("#class,#menu_class").click(function () {
+        var row =  getSelectedRow();
+        if (row!=null) {
+            parent.menuTabs.addTab("绑定班级","{$ROOT}/major/index/majorplanclass?majorplanid="+row.rowid,"icon icon-class");
+        }
+    });
+    $("#student,#menu_student").click(function () {
+        var row =  getSelectedRow();
+        if (row!=null) {
+            parent.menuTabs.addTab("绑定学生","{$ROOT}/major/index/majorplanstudent?majorplanid="+row.rowid,"icon icon-person");
+        }
+    });
+    //导出
     $('#export,#menu_export').click(function () {
         var year = encodeURI($('#year').val());
         var school = encodeURI($('#school').combobox('getValue'));
@@ -182,6 +189,16 @@ $(function () {
         });
     });
 });
+    function getSelectedRow(){
+        var row =  $('#dg').datagrid('getSelected');
+        if (row) {
+           return row;
+        }
+        else {
+            $.messager.alert('提示', '请先选中一条培养方案', 'info')
+            return null;
+        }
+    }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:100px;">

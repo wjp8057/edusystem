@@ -265,10 +265,22 @@ class MyAccess {
     public static function checkMajorSchool($majorschool=''){
         $condition=null;
         $condition['majorschool']=$majorschool;
-
         $data= Db::table('majors')->where($condition)->field('school')->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('majorschool:'.$majorschool, MyException::PARAM_NOT_CORRECT);
+        if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public static function checkMajorPlanSchool($majorplanid=''){
+        $condition=null;
+        $condition['majorplan.rowid']=$majorplanid;
+        $data= Db::table('majors')->join('majorplan','majorplan.majorschool=majors.majorschool')->where($condition)->field('school')->select();
+        if(!is_array($data)||count($data)!=1)
+            throw new Exception('majorplanid:'.$majorplanid, MyException::PARAM_NOT_CORRECT);
         if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
             return true;
         }

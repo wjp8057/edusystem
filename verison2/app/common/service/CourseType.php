@@ -21,7 +21,7 @@ use app\common\access\MyService;
 class CourseType extends MyService{
     //读取
     public function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('coursetypeoptions')->page($page,$rows)
             ->field('name,rtrim(value) value')->order('name')->select();

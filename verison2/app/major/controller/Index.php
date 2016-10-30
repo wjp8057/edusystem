@@ -44,16 +44,16 @@ class Index extends Template{
         return $this->fetch();
     }
 
-    public function majorplandetail($majorschool,$id=0){
+    public function majorplandetail($majorschool,$rowid=''){
         $operate="添加培养方案";
         $major=Item::getMajorItem($majorschool);
         $this->assign('major',$major);
         $majorplan=null;
-        if($id!=0)
+        if($rowid!='')
         {
             $operate="编辑详情";
             $obj=new Majorplan();
-            $majorplan=$obj->getList(1,1,'','',$id)["rows"];
+            $majorplan=$obj->getList(1,1,'','',$rowid)["rows"];
             $majorplan=$majorplan[0];
         }
         $this->assign('majorplan',$majorplan);

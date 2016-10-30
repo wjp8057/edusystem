@@ -14,11 +14,14 @@ namespace app\major\controller;
 use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\Classes;
+use app\common\service\Classplan;
 use app\common\service\Majorcode;
 use app\common\service\Majordirection;
 use app\common\service\Majorplan;
 use app\common\service\Program;
 use app\common\service\R12;
+use app\common\service\R30;
 use app\common\vendor\PHPExcel;
 
 class Plan extends MyController
@@ -167,8 +170,6 @@ class Plan extends MyController
         }
         return json($result);
     }
-
-
     //读取开设专业
     public function majorschool($page = 1, $rows = 20,$years='',$school='',$majorname='%')
     {
@@ -181,4 +182,80 @@ class Plan extends MyController
         }
         return json($result);
     }
+    //培养方案绑定的教学计划
+    public function majorplanprogram($page = 1, $rows = 20,$majorplanid)
+    {
+        $result = null;
+        try {
+            $obj=new R30();
+            $result = $obj->getList($page, $rows,$majorplanid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //绑定教学计划页面检索计划
+    public function programsearch($page = 1, $rows = 20,$programno='%',$progname='%',$school='')
+    {
+        $result = null;
+        try {
+            $program=new Program();
+            $result = $program->getList($page, $rows,$programno,$progname,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    //更新培养方案绑定的教学计划信息
+    public function  majorplanprogramupdate()
+    {
+        $result = null;
+        try {
+            $obj=new R30();
+            $result = $obj->update($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    //读取指定培养计划的绑定班级
+    public function majorplanclass($page = 1, $rows = 20,$majorplanid)
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->getList($page, $rows,$majorplanid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //更新绑定的班级培养计划
+    public function  majorplanclassupdate()
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->update($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    //绑定班级时检索班级
+    public function searchclass($page = 1, $rows = 20,$classno='%',$classname='%',$school='')
+    {
+        $result = null;
+        try {
+            $obj=new Classes();
+            $result = $obj->getList($page, $rows,$classno,$classname,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
 } 

@@ -24,7 +24,7 @@ class TeacherType extends MyService
      */
     function getList($page = 1, $rows = 20)
     {
-        $result = null;
+        $result=['total'=>0,'rows'=>[]];
         $condition = null;
         $data = $this->query->table('teachertype')->page($page, $rows)->field('name,rtrim(value) as value')->select();
         $count = $this->query->table('teachertype')->count();

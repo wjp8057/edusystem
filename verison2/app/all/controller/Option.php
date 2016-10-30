@@ -420,6 +420,16 @@ class Option {
         }
         return json($result);
     }
+    public function programform(){
+        $result=null;
+        try {
+            $result =Db::table('programform')->field('rtrim(name) as form,rtrim(value) as name')->order('form')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
     /**
      * 测试专用
      */

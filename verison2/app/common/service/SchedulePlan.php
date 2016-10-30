@@ -36,7 +36,7 @@ class SchedulePlan extends MyService {
      */
     public function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$classno='%',$school='',$extracondtion=[]){
         $condition=null;
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition['scheduleplan.year']=$year;
         $condition['scheduleplan.term']=$term;
         if($courseno!='%') $condition['scheduleplan.courseno+scheduleplan.[group]']=array('like',$courseno);

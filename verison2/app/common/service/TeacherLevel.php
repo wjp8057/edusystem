@@ -22,7 +22,7 @@ class TeacherLevel extends MyService {
      * @return array|null
      */
     function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('teacherlevel')->page($page,$rows)->field('level,rtrim(name) as name')->select();
         $count= $this->query->table('teacherlevel')->count();

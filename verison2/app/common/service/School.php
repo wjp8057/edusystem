@@ -25,7 +25,7 @@ class School extends MyService {
      * @return array|null
      */
     public function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('schools')->field('school,rtrim(name) name,active,manage')->order('school')->page($page,$rows)->where($condition)->select();
         $count=$this->query->table('schools')->where($condition)->count();

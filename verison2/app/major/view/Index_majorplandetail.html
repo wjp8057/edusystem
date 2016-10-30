@@ -41,9 +41,9 @@
                 data['credits']=credits.val();
                 data['mcredits']=mcredits.val();
                 data['rem']=rem.val();
-                if(getQueryString("id")!=null){
+                if(getQueryString("rowid")!=null){
                     updateRows.push(data);
-                    data['id']=getQueryString("id");
+                    data['rowid']=getQueryString("rowid");
                     effectRow["updated"]=$.toJSON(updateRows);
                 }
                 else

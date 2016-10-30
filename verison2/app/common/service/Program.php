@@ -30,7 +30,7 @@ class Program extends MyService{
      * @return array|null
      */
     public function  getList($page=1, $rows=20,$programno="%",$programname="%",$school=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($programno!='%') $condition['programs.programno']=array('like',$programno);
         if($programname!='%') $condition['programs.progname']=array('like',$programname);

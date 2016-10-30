@@ -125,7 +125,7 @@ class Classroom extends MyService {
      */
     function getList($page=1,$rows=20,$roomno='%',$name='%',$building='%',$area='',$equipment='',
                      $school='',$status='',$reserved='',$seatmin=0,$seatmax=1000,$testmin=0,$testmax=1000){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($roomno!='%') $condition['classrooms.roomno']=array('like',$roomno);
         if($name!='%') $condition['classrooms.jsn']=array('like',$name);

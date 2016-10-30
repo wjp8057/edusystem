@@ -11,37 +11,51 @@
 
 namespace app\common\service;
 
+
+use app\common\access\MyAccess;
 use app\common\access\MyService;
 
-/**角色
- * Class Role
+/**培养计划的教学计划绑定
+ * Class R30
  * @package app\common\service
  */
-class Role extends MyService{
-    /**获取角色列表
+class R30 extends MyService{
+
+    /**读取
      * @param int $page
      * @param int $rows
      * @return array|null
      */
-    public function getList($page=1,$rows=1000){
+    function getList($page=1,$rows=20,$majorplanid){
         $result=['total'=>0,'rows'=>[]];
-        $data=$this->query->table('roles')->field("role,rtrim(description) as name,'' as checked")->page($page,$rows)->select();
-        $count=$this->query->table('roles')->count();
-        if(is_array($data)&&count($data)>0){ //小于0的话就不返回内容，防止IE下无法解析rows为NULL时的错误。
+        $condition=null;
+        $condition['majorplan_rowid']=$majorplanid;
+        $data=$this->query->table('r30')
+            ->join('programs','programs.programno=r30.progno')
+            ->join('programform','programform.name=r30.form')
+            ->page($page,$rows)
+            ->field('progno programno,rtrim(programs.progname)progname,credits,mcredits,r30.form,rtrim(programform.value) formname')
+            ->where($condition)->order('programno')->select();
+        $count= $this->query->table('r30')->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
-        }
         return $result;
     }
 
-    /**更新角色信息
+    /**更新
      * @param $postData
      * @return array
      * @throws \Exception
      */
-    public function  update($postData){
+    function update($postData){
         $updateRow=0;
         $deleteRow=0;
         $insertRow=0;
+        $majorplanid=$postData["majorplanid"];
+        if(!MyAccess::checkMajorPlanSchool($majorplanid))
+        {
+            return array('info'=>'无法为其他学院的培养方案更新教学计划','status'=>0);
+        }
         //更新部分
         //开始事务
         $this->query->startTrans();
@@ -51,10 +65,12 @@ class Role extends MyService{
                 $listUpdated = json_decode($updated);
                 $data = null;
                 foreach ($listUpdated as $one) {
-                    $data=null;
-                    $data['role'] = $one->role;
-                    $data['description'] = $one->name;
-                    $row = $this->query->table('roles')->insert($data);
+                    $data['majorplan_rowid'] = $majorplanid;
+                    $data['progno'] = $one->programno;
+                    $data['form'] = $one->form;
+                    $data['credits'] = $one->credits;
+                    $data['mcredits'] = $one->mcredits;
+                    $row = $this->query->table('r30')->insert($data);
                     if ($row > 0)
                         $insertRow++;
                 }
@@ -64,10 +80,12 @@ class Role extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $data=null;
-                    $condition['role'] = $one->role;
-                    $data['description'] = $one->name;
-                    $updateRow += $this->query->table('roles')->where($condition)->update($data);
+                    $condition['majorplan_rowid'] = $majorplanid;
+                    $condition['progno'] = $one->programno;
+                    $data['form'] = $one->form;
+                    $data['credits'] = $one->credits;
+                    $data['mcredits'] = $one->mcredits;
+                    $updateRow += $this->query->table('r30')->where($condition)->update($data);
                 }
             }
             //删除部分
@@ -76,12 +94,13 @@ class Role extends MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['role'] = $one->role;
-                    $deleteRow += $this->query->table('roles')->where($condition)->delete();
+                    $condition['majorplan_rowid'] = $majorplanid;
+                    $condition['progno'] = $one->programno;
+                    $deleteRow += $this->query->table('r30')->where($condition)->delete();
                 }
             }
         }
-        catch(\PDOException $e){
+        catch(\Exception $e){
             $this->query->rollback();
             throw $e;
         }
@@ -98,4 +117,5 @@ class Role extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
+
 } 

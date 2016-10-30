@@ -22,7 +22,7 @@ class Position extends  MyService {
      * @return array|null
      */
     function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('positions')->join('teacherlevel ',' teacherlevel.level=positions.level')
             ->page($page,$rows)->field('positions.name,rtrim(positions.value) as value,positions.level,rtrim(teacherlevel.name) as levelname')->select();

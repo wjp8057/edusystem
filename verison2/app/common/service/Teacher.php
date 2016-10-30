@@ -28,7 +28,7 @@ class Teacher extends  MyService
      */
     function getList($page = 1, $rows = 20, $teacherno, $name, $school)
     {
-        $result = null;
+        $result=['total'=>0,'rows'=>[]];
         $condition = null;
         if ($teacherno != '%') $condition['teachers.teacherno'] = array('like', $teacherno);
         if ($name != '%') $condition['teachers.name'] = array('like', $name);

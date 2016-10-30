@@ -23,20 +23,6 @@ use think\Exception;
  * @package app\common\service
  */
 class Classes extends MyService{
-    /**获取班级的所在学院
-     * @param string $classno
-     * @return array
-     * @throws \think\Exception
-     */
-    public function getClassInfo($classno=''){
-        $condition=null;
-        $condition['classno']=$classno;
-        $data=$this->query->table('classes')->where($condition)->field('rtrim(classes.classname) classname,classes.school')->find();
-        if(!is_array($data))
-            throw new Exception('classno'.$classno, MyException::PARAM_NOT_CORRECT);
-        return $data;
-    }
-
     /**获取班级列表
      * @param int $page
      * @param int $rows
@@ -46,7 +32,7 @@ class Classes extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20,$classno='%',$classname='%',$school=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($classno!='%') $condition['classes.classno']=array('like',$classno);
         if($classname!='%') $condition['classes.classname']=array('like',$classname);

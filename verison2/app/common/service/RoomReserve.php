@@ -35,7 +35,7 @@ class RoomReserve extends MyService{
      * @return array|null
      */
     public function getList($page=1,$rows=20,$year,$term,$roomno='%',$school='',$approved=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['roomreserve.year']=$year;
         $condition['roomreserve.term']=$term;

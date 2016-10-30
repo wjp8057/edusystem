@@ -25,7 +25,7 @@ class CourseForm extends MyService{
      * @return array|null
      */
     public function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('courseform')->page($page,$rows)
             ->field('name,rtrim(value) value')->order('name')->select();

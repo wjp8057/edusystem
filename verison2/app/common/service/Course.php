@@ -28,7 +28,7 @@ class Course  extends  MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20,$courseno='%',$coursename='%',$school=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($courseno!='%') $condition['courses.courseno']=array('like',$courseno);
         if($coursename!='%') $condition['courses.coursename']=array('like',$coursename);

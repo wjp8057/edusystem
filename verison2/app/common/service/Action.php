@@ -63,7 +63,7 @@ class Action extends MyService{
      * @return array
      */
     private function searchAction($action='%',$description='%',$searchId=''){
-        $result=array();
+        $result=['total'=>0,'rows'=>[]];
         $nodeArray=null;
         $idArray=null;
         $condition=null;

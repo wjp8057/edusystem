@@ -1,0 +1,252 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function () {
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1')
+            school.combobox('select', '{$USERINFO.school}');
+        $('#dg').datagrid({
+            title: '绑定的教学计划',
+            idField: 'programno',
+            striped: 'true',
+            singleSelect: true,
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 50,
+            url: '{$ROOT}/major/plan/majorplanprogram',
+            queryParams: {majorplanid:getQueryString('majorplanid')},
+            toolbar: '#toolbar',
+            pageList: [50, 100, 200],
+            columns: [[
+                {field: 'programno', title: '计划号', width: 60, align: 'center'},
+                {field: 'progname', title: '计划名', width: 250, align: 'center'},
+                {field: 'credits', title: '总学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
+                {field: 'mcredits', title: '应获学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
+                {field: 'form', title: '审核类型*', width: 120, align: 'center',
+                    editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/programform', valueField: 'form', textField: 'name', panelHeight: 'auto', required: true,
+                    onSelect: function (rec) {
+                        var tt = $('#dg');
+                        tt.datagrid('getSelected').formname = rec.name;
+                    }}},
+                    formatter: function (val, rec) {
+                        return rec.formname;
+                    }}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell: function (index, field) {
+                var tt = $('#dg');
+                tt.datagrid('startEditing', {field: field, index: index});
+                current_datagrid = tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $('#dg2').datagrid({
+            title: '检索新教学计划',
+            idField: 'studentno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            url: '{$ROOT}/major/plan/programsearch',
+            queryParams: {school:school.combobox('getValue'),programno:''},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'checkbox', title: '选中', checkbox: true},
+                {field: 'programno', title: '计划号', width: 80, align: 'center'},
+                {field: 'progname', title: '计划名称', width: 240, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 150, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                programno: $('#programno').val(),
+                progname: $('#progname').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        function checkStudentSchool(rows) {
+            var count = rows.length;
+            for (var i = 0; i < count; i++) { //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+                if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
+                    $.messager.alert('错误', '你无法修改其他学院的学生信息（' + rows[i].name + '）！', 'error');
+                    $("#cancel").click();
+                    return false;
+                }
+            }
+            return true;
+        }
+        $("#add,#menu_add").click(function () {
+            var tt = $('#dg');
+            var tt2=$('#dg2');
+            var rows=tt2.datagrid('getSelections');
+            var length=rows.length;
+            for(var i=0;i<length;i++){
+                var dgRows=tt.datagrid('getRows');
+                var amount=dgRows.length;
+                for(var j=0;j<amount;j++){
+                    if(rows[i].programno==dgRows[j].programno){
+                        $.messager.alert('错误', rows[i].programno+rows[i].progname+'已在教学计划列表中！' , 'error');
+                        return;
+                    }
+                }
+                tt.datagrid('insertRow', {
+                    index: 0,
+                    row: {
+                        progname:rows[i].progname,
+                        programno:rows[i].programno,
+                        credits:0,
+                        mcredits:0,
+                        form:'1',
+                        formname:'全选全通过'
+                    }
+                });
+            }
+        });
+        $("#remove,#menu_remove").click(function () {
+            var tt = $('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else {
+                $.messager.alert('错误', '请先选中一条记录', 'error')
+            }
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('endEditing');
+            if (tt.datagrid('editIndex') != undefined) return;
+            //获取更改的数据行内容
+            var rows = tt.datagrid('getRows');
+            rows = tt.datagrid('getChanges', 'updated');
+            var count = 0;
+            var effectRow = {};
+            effectRow['majorplanid']=getQueryString('majorplanid');
+            if (rows.length > 0) {
+                count += rows.length;
+                effectRow["updated"] = $.toJSON(rows);
+            }
+            //获取删除的行
+            rows = tt.datagrid('getChanges', 'deleted');
+            if (rows.length > 0) {
+                count += rows.length;
+                effectRow["deleted"] = $.toJSON(rows);
+            }
+            //获取添加的行
+            rows = tt.datagrid('getChanges', 'inserted');
+            if (rows.length > 0) {
+                count += rows.length;
+                effectRow["inserted"] = $.toJSON(rows);
+            }
+            if (count <= 0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '没有数据需要保存！', 'info');
+                return;
+            }
+            $.post('{$ROOT}/major/plan/majorplanprogramupdate', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid = null;
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-remove'" id="menu_remove">删除教学计划</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-back'" id="menu_add">添加选中的教学计划</div>
+    </div>
+    <div id="left" style="width:620px;float:left">
+        <div id="toolbar">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">删除教学计划</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:630px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">添加选中的教学计划</a>
+            <label for="programno">教学计划号：</label><input id="programno" class="easyui-validatebox" size="4" value="%"/>
+            <label for="progname">教学计划名：</label><input id="progname" class="easyui-validatebox" size="10" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>因为每个学生都需一个班级，将选中学生移出列表无法删除本班学生。</li>
+        </ol>
+    </div>
+</div>

@@ -22,7 +22,7 @@ class ViewFinalScoreCourse extends MyService{
         if($year==''||$term=='')
             throw new Exception('year or term is empty', MyException::PARAM_NOT_CORRECT);
 
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['year']=$year;
         $condition['term']=$term;

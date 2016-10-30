@@ -27,7 +27,7 @@ class R12 extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20,$programno,$courseno='%',$coursename='%',$school=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['r12.programno']=$programno;
         if($courseno!='%') $condition['r12.courseno']=array('like',$courseno);

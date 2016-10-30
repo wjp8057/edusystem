@@ -25,7 +25,7 @@ class RoomOption extends MyService{
      * @return array|null
      */
     function getList($page=1,$rows=20){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $data=$this->query->table('roomoptions')->page($page,$rows)
             ->field('name,rtrim(value) value')->order('name')->select();
