@@ -66,3 +66,13 @@ scores where scores.studentno=graduate.studentno and scores.courseno=r12.coursen
 
 --公共选修课 08与007开头的课程，以及创新技能学分
 
+select * from graduate left join (
+select studentno,sum(credits) coursetotal from (
+select  distinct scores.studentno,courses.credits from scores  inner join courses on courses.courseno=scores.courseno
+where  (scores.courseno like '08%' or scores.courseno like '007%' )
+and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
+ )
+as t group by studentno) as p on p.studentno=graduate.studentno
+left join (select studentno,sum(credit) as  addtotal from addcredit group by studentno) as a on a.studentno=graduate.studentno
+where graduate.form=4
+and  exists(select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H'))
