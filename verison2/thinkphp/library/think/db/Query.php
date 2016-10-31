@@ -1755,6 +1755,7 @@ class Query
             return $this->connection->getRealSql($sql, $bind);
         } else {
             // 执行操作
+            Log::log($sql);
             return $this->execute($sql, $bind);
         }
     }
@@ -2144,6 +2145,7 @@ class Query
             Cache::rm($key);
         }
         // 执行操作
+        Log::log($sql);
         return $this->execute($sql, $bind);
     }
 

@@ -161,19 +161,19 @@ $(function () {
     $("#program,#menu_program").click(function () {
         var row =  getSelectedRow();
         if (row!=null) {
-            parent.menuTabs.addTab("设置教学计划","{$ROOT}/major/index/majorplanprogram?majorplanid="+row.rowid,"icon icon-major");
+            parent.menuTabs.addTab("设置"+row.directionname+"-"+row.module+"模块方向的教学计划","{$ROOT}/major/index/majorplanprogram?majorplanid="+row.rowid,"icon icon-major");
         }
     });
     $("#class,#menu_class").click(function () {
         var row =  getSelectedRow();
         if (row!=null) {
-            parent.menuTabs.addTab("绑定班级","{$ROOT}/major/index/majorplanclass?majorplanid="+row.rowid,"icon icon-class");
+            parent.menuTabs.addTab(row.directionname+"-"+row.module+"绑定班级","{$ROOT}/major/index/majorplanclass?majorplanid="+row.rowid,"icon icon-class");
         }
     });
     $("#student,#menu_student").click(function () {
         var row =  getSelectedRow();
         if (row!=null) {
-            parent.menuTabs.addTab("绑定学生","{$ROOT}/major/index/majorplanstudent?majorplanid="+row.rowid,"icon icon-person");
+            parent.menuTabs.addTab(row.directionname+"-"+row.module+"绑定学生","{$ROOT}/major/index/majorplanstudent?majorplanid="+row.rowid,"icon icon-person");
         }
     });
     //导出
@@ -207,8 +207,8 @@ $(function () {
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
         <div id='menu_program' data-options="iconCls:'icon icon-major'">设置教学计划</div>
-        <div id='menu_class' data-options="iconCls:'icon icon-class'">绑定班级列表</div>
-        <div id='menu_student' data-options="iconCls:'icon icon-person'">绑定学生列表</div>
+        <div id='menu_class' data-options="iconCls:'icon icon-class'">绑定班级</div>
+        <div id='menu_student' data-options="iconCls:'icon icon-person'">绑定学生</div>
         <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
@@ -226,8 +226,8 @@ $(function () {
             <input id="school">
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-major',plain:'true'" id="program">设置教学计划</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-class',plain:'true'" id="class">绑定班级列表</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-person',plain:'true'" id="student">绑定学生列表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-class',plain:'true'" id="class">绑定班级</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-person',plain:'true'" id="student">绑定学生</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
         </div>
     </div>

@@ -64,7 +64,10 @@
                 {field: 'checkbox', title: '选中', checkbox: true},
                 {field: 'classno', title: '班号', width: 70, align: 'center'},
                 {field: 'classname', title: '班名', width: 110, align: 'center'},
-                {field: 'schoolname', title: '学院', width: 100, align: 'center'}
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+                {field: 'year', title: '入校时间', width: 70, align: 'center'},
+                {field: 'students', title: '预计人数', width: 70, align: 'center'},
+                {field: 'amount', title: '实际人数', width: 70, align: 'center'}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function (e, field) {
@@ -95,7 +98,7 @@
             tt.datagrid('load', {
                 studentno: $('#studentno').val(),
                 classno: $('#classno').val(),
-                name: $('#name').val(),
+                classname: $('#classname').val(),
                 school:$('#school').combobox('getValue')
             });
         });
@@ -115,15 +118,20 @@
             var tt2=$('#dg2');
             var rows=tt2.datagrid('getSelections');
             var length=rows.length;
+
             for(var i=0;i<length;i++){
                 var classrows=tt.datagrid('getRows');
                 var amount=classrows.length;
+                var find=false;
                 for(var j=0;j<amount;j++){
                     if(rows[i].classno==classrows[j].classno){
                         $.messager.alert('错误', rows[i].classno+rows[i].classname+'已在班级列表中！' , 'error');
-                        return;
+                        find=true;
+                        break;
                     }
                 }
+                if(find)
+                    continue;
                 tt.datagrid('insertRow', {
                     index: 0,
                     row: {
@@ -144,6 +152,12 @@
                     tt.datagrid('deleteRow',index);
                 }
         });
+        $("#cancel,#menu_cancel").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid = null;
+        });
+
         //绑定点击保存按钮事件
         $("#save,#menu_save").click(function () {
             var tt = $('#dg');
@@ -182,47 +196,77 @@
                 $.messager.alert('提示', '没有数据需要保存！', 'info');
                 return;
             }
-            $.post('{$ROOT}/major/plan/majorplanclassupdate', effectRow, function (result) {
-                if (result.status == 1) {
-                    tt.datagrid('acceptChanges');
-                    tt.datagrid('reload');
-                    $.messager.show({	// show error message
-                        title: '成功',
-                        msg: result.info
-                    });
-                } else {
-                    $.messager.alert('错误', result.info, 'error');
-                }
-            }, 'json');
-        });
-        /**
-         * 导出学生名单
-         */
-        $('#menu_export,#export').click(function () {
-            var classno = '';
-            $.fileDownload("{$ROOT}/base/classes/export?classno=" + classno, {
-                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
-                dialogOptions: {modal: true, title: '提示'},
-                failCallback: function (html, url) {
-                    $.messager.alert('错误', html, 'error');
+            $.messager.confirm('确认','一个班级只能有一个培养方案，此操作将删除这些班级原有培养方案。确定保存么？',function(r) {
+                if (r) {
+                    $.post('{$ROOT}/major/plan/majorplanclassupdate', effectRow, function (result) {
+                        if (result.status == 1) {
+                            tt.datagrid('acceptChanges');
+                            tt.datagrid('reload');
+                            $.messager.show({	// show error message
+                                title: '成功',
+                                msg: result.info
+                            });
+                        } else {
+                            $.messager.alert('错误', result.info, 'error');
+                        }
+                    }, 'json');
                 }
             });
+        });
+        //绑定到班级学生
+        $("#bind,#menu_bind").click(function () {
+            var tt=$('#dg');
+            var rows=tt.datagrid('getSelections');
+            var length=rows.length;
+            var effectRow = {};
+            var updateRows=[];
+
+            if (length <= 0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '请选择至少一个班级！', 'info');
+                return;
+            }
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.classno = rows[i].classno;
+                updateRows.push(updateObj);
+            }
+            effectRow["updated"] = $.toJSON(updateRows);
+            $.messager.confirm('确认','本操作将删除班级所有学生原有主修培养方案，并绑定本方案，确定绑定么？',function(r) {
+                if (r) {
+                    $.post('{$ROOT}/major/plan/majorplanclassbind', effectRow, function (result) {
+                        if (result.status == 1) {
+                            tt.datagrid('acceptChanges');
+                            tt.datagrid('reload');
+                            $.messager.show({	// show error message
+                                title: '成功',
+                                msg: result.info
+                            });
+                        } else {
+                            $.messager.alert('错误', result.info, 'error');
+                        }
+                    }, 'json');
+                }
+            });
+
         });
     });
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出绑定班级</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div id='menu_remove' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div id='menu_bind' data-options="iconCls:'icon icon-person'">绑定到班级学生</div>
     </div>
     <div id="menu2" class="easyui-menu" style="width:150px;">
         <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中班级绑定计划</div>
     </div>
     <div id="left" style="width:570px;float:left">
         <div id="toolbar">
-
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存数据</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">将选中班级移出列表</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出绑定班级</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-person',plain:'true'" id="bind">将培养方案绑定到选中班级学生</a>
         </div>
         <table id="dg"></table>
     </div>

@@ -22,6 +22,8 @@ use app\common\service\Majorplan;
 use app\common\service\Program;
 use app\common\service\R12;
 use app\common\service\R30;
+use app\common\service\Student;
+use app\common\service\Studentplan;
 use app\common\vendor\PHPExcel;
 
 class Plan extends MyController
@@ -252,6 +254,54 @@ class Plan extends MyController
         try {
             $obj=new Classes();
             $result = $obj->getList($page, $rows,$classno,$classname,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //绑定培养计划到班级每个学生。
+    public function  majorplanclassbind()
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->bindStudent($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //读取培养计划绑定的学生列表
+    public function majorplanstudent($page = 1, $rows = 20,$majorplanid)
+    {
+        $result = null;
+        try {
+            $obj=new Studentplan();
+            $result = $obj->getList($page, $rows,$majorplanid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //读取培养计划绑定的学生列表
+    public function searchstudent($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$school='')
+    {
+        $result = null;
+        try {
+            $obj=new Student();
+            $result = $obj->getList($page, $rows,$studentno,$name,$classno,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //更新培养计划绑定的学生
+    public function  majorplanstudentupdate()
+    {
+        $result = null;
+        try {
+            $obj=new Studentplan();
+            $result = $obj->update($_POST);//无法用I('post.')获取二维数组
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

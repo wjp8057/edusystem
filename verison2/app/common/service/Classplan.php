@@ -48,7 +48,7 @@ class Classplan extends MyService{
         return $result;
     }
 
-    /**更新班级信息
+    /**更新
      * @param $postData
      * @return array
      * @throws \Exception
@@ -123,4 +123,45 @@ class Classplan extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
+
+    public function  bindStudent($postData){
+        $updateRow=0;
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
+        $obj=new Studentplan();
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            //删除部分
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    if(MyAccess::checkClassSchool($one->classno)) {
+                        $updateRow+=$obj->bindByClassNo($one->classno);
+                    }
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '位学生已绑定！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
+    }
+
+
 } 
