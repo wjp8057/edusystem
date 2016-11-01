@@ -15,6 +15,7 @@ namespace app\common\service;
 use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyService;
+use think\Db;
 
 /**教学计划
  * Class Program
@@ -34,13 +35,15 @@ class Program extends MyService{
         $condition=null;
         if($programno!='%') $condition['programs.programno']=array('like',$programno);
         if($programname!='%') $condition['programs.progname']=array('like',$programname);
+        $subsql = Db::table('r12')->join('courses','courses.courseno=r12.courseno')->group('programno')->field('programno,sum(credits) credits,count(*) amount')->buildSql();
         if($school!='') $condition['programs.school']=$school;
         $data= $this->query->table('programs')
             ->join('schools','schools.school=programs.school')
             ->join('zo','zo.name=programs.valid')
             ->join('programtype','programtype.name=programs.type')
-            ->field('rtrim(programno) programno,rtrim(progname) progname,date,valid,rtrim(zo.value) validname,schools.school,rtrim(schools.name) schoolname,type,rtrim(programtype.value) typename,
-            rtrim(url) url,rtrim(rem) rem')
+            ->join($subsql.' t ',' t.programno=programs.programno','LEFT')
+            ->field('rtrim(programs.programno) programno,rtrim(progname) progname,date,valid,rtrim(zo.value) validname,schools.school,rtrim(schools.name) schoolname,type,rtrim(programtype.value) typename,
+            rtrim(url) url,rtrim(rem) rem,isnull(t.credits,0) credits,isnull(t.amount,0) amount')
             ->where($condition)->page($page,$rows)->order('programno')->select();
         $count= $this->query->table('programs')->where($condition)->count();
         if(is_array($data)&&count($data)>0)

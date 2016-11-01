@@ -43,6 +43,37 @@ class Studentplan extends MyService{
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+    //获取毕业审核结果
+    function getGraduate($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$classname='%',$school='',$status='',$majorplanid=''){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($name!='%') $condition['students.name']=array('like',$name);
+        if($classno!='%') $condition['students.classno']=array('like',$classno);
+        if($classname!='%') $condition['students.classname']=array('like',$classname);
+        if($school!='') $condition['classes.school']= $school;
+        if($status!='') $condition['students.status']= $status;
+        if($majorplanid!='') $condition['studentplan.majorplanid']= $majorplanid;
+        $data=$this->query->table('studentplan')
+            ->join('students','students.studentno=studentplan.studentno')
+            ->join('majorplan','majorplan.rowid=studentplan.majorplanid')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools','schools.school=classes.school')
+            ->join('majors','majors.rowid=majorplan.map')
+            ->join('majordirection','majordirection.direction=majors.direction')
+            ->page($page,$rows)
+            ->field("students.studentno,rtrim(students.name) name,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,rtrim(majordirection.name) as directionname,
+            studentplan.majorplanid,majorplan.module,studentplan.credits,gcredits,addcredits,allplan,allpass,partplan,partpass,allpartplan,allpartpass,publicplan,publicpass,date")
+            ->order('studentno')
+            ->where($condition)->select();
+        $count= $this->query->table('studentplan')
+            ->join('students','students.studentno=studentplan.studentno')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools','schools.school=classes.school')->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
 
     /**更新
      * @param $postData

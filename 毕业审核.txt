@@ -1,26 +1,33 @@
---更新总学分
 update studentplan
 set credits=majorplan.credits
 from studentplan inner join majorplan on majorplan.rowid=studentplan.majorplanid
 inner join students on students.studentno=studentplan.studentno
-where students.status in ('A','C','H')
+where students.status in ('A','C','H','P','J')
 
 --已获得学分
 update studentplan
-set mcredits=p.total
+set gcredits=p.total
 from studentplan inner join (
 select studentno,sum(credits) as total from (
 select distinct students.studentno,courses.courseno,courses.credits
 from scores inner join courses on courses.courseno=scores.courseno
 inner join students on students.studentno=scores.studentno
-where students.status in ('A','C','H') and
+where students.status in ('A','C','H','P','J') and 
 (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
 ) as t group by studentno ) as p on p.studentno=studentplan.studentno
 
+update studentplan
+set addcredits=p.total
+from studentplan inner join (
+select studentno,sum(credit) total
+from addcredit
+group by studentno
+) as  p on p.studentno=studentplan.studentno
+
 
 --清理gradute表
-delete from graduate
-where exists (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H') )
+delete from graduate 
+where exists (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H','P','J') )
 
 --插入gradute表所有个人的教学计划
 insert into graduate(majorplanid,programno,form,studentno,credits,mcredits)
@@ -29,50 +36,129 @@ select majorplan.rowid,programs.programno,r30.form,studentplan.studentno,r30.cre
 from  majorplan inner join studentplan on studentplan.majorplanid=majorplan.rowid
 inner join r30 on r30.MAJORPLAN_ROWID=majorplan.rowid
 inner join PROGRAMS on PROGRAMS.PROGRAMNO=r30.PROGNO
-where exists   (select * from students where students.studentno=studentplan.studentno and students.status in ('A','C','H') )
+where exists   (select * from students where students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J') )
 
---更新 graduate获得学分列
+--更新 graduate中每个教学计划获得学分(除了公选课）
 update graduate
-
 set gcredits=p.total
-
 from graduate  inner join (
-select  rowid,sum(credits) total
-from (
-select distinct courses.courseno,courses.credits,graduate.rowid
+select sum(courses.credits) total,graduate.rowid
 from graduate inner join r12  on r12.programno=graduate.programno
 inner join courses on courses.courseno=r12.courseno
-where exists (select * from  scores
-where (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
-  and scores.studentno=graduate.studentno and  scores.courseno=r12.courseno)
-  ) as t
+where  --默认课号部分
+exists (select * from  scores 
+	where (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
+	and scores.studentno=graduate.studentno and  scores.courseno=r12.courseno
+	)   --等价课程部分
+or exists (select * from  scores  inner join r33 on scores.courseno=r33.EQNO 
+	where (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
+	and scores.studentno=graduate.studentno and  r33.courseno=r12.courseno and r12.programno=r33.programno
+	)
 group by rowid ) as p on p.rowid=graduate.rowid
-where  exists   (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H'))
+where  form!='4' and  exists   (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H','P','J'))
 
---全选全通过的，列出未通过课程。
+--更新公共选修课 08与007开头的课程，以及创新技能学分
+update graduate
+set gcredits=isnull(coursetotal,0)+isnull(addtotal,0)
+from graduate left join ( --课程同课号仅计算一次
+	select studentno,sum(credits) coursetotal from (
+	select  distinct scores.studentno,courses.credits,courses.courseno from scores  inner join courses on courses.courseno=scores.courseno
+	where  (scores.courseno like '08%' or scores.courseno like '007%' )
+	and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
+	 )as t group by studentno) as p on p.studentno=graduate.studentno
+	left join (select studentno,sum(credit) as  addtotal from addcredit group by studentno) as a on a.studentno=graduate.studentno
+where graduate.form='4' and  exists(select * from students where students.studentno=graduate.studentno  and students.status in ('A','C','H','P','J') )
+
+
+--全选全通过的/全选部分过/部分选部分过/ 列出选了但是未通过课程。
 INSERT INTO GRADUATE(MAJORPLANID,PROGRAMNO,STUDENTNO,COURSENO,FORM,MAP)
-select graduate.majorplanid,graduate.programno,graduate.studentno,r12.courseno,form,GRADUATE.ROWID
+select graduate.majorplanid,graduate.programno,graduate.studentno,r12.courseno,'A',GRADUATE.ROWID
 from graduate inner join r12 on r12.programno=graduate.programno
-where form=1  and not exists (select * from
-scores where scores.studentno=graduate.studentno and scores.courseno=r12.courseno
-and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 ))
-
---全选部分通过，列出未选课程。
+where form in ('1','2','3')  and  exists   (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H','P','J')) and
+not exists (select * from scores --一般课程中没有
+	where scores.studentno=graduate.studentno and scores.courseno=r12.courseno
+	and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 ))
+and not exists (select * from scores  inner join r33 on scores.courseno=r33.EQNO   --等价课程中也没有
+	where scores.studentno=graduate.studentno and r33.courseno=r12.courseno and r12.programno=r33.programno
+	and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 ))
+	--有成绩记录
+and (exists (select * from scores where scores.studentno=graduate.studentno and scores.courseno=r12.courseno ) 
+	or exists (select * from scores inner join r33 on r33.eqno=scores.courseno --或者等价课程有成绩记录
+		where scores.studentno=graduate.studentno and r33.courseno=r12.courseno and r33.programno=r12.programno)
+)
+--全选全通过的/全选部分过 列出没有选的课程。
 INSERT INTO GRADUATE(MAJORPLANID,PROGRAMNO,STUDENTNO,COURSENO,FORM,MAP)
-select graduate.majorplanid,graduate.programno,graduate.studentno,r12.courseno,form,GRADUATE.ROWID
+select graduate.majorplanid,graduate.programno,graduate.studentno,r12.courseno,'B',GRADUATE.ROWID
 from graduate inner join r12 on r12.programno=graduate.programno
-where form=2  and not exists (select * from
-scores where scores.studentno=graduate.studentno and scores.courseno=r12.courseno)
+where form in ('1','2')  and  exists   (select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H','P','J'))
+	--有成绩记录
+and not exists (select * from scores where scores.studentno=graduate.studentno and scores.courseno=r12.courseno ) 
+and not  exists (select * from scores inner join r33 on r33.eqno=scores.courseno -- 等价课程也没有成绩记录
+		where scores.studentno=graduate.studentno and r33.courseno=r12.courseno and r33.programno=r12.programno)
 
---公共选修课 08与007开头的课程，以及创新技能学分
 
-select * from graduate left join (
-select studentno,sum(credits) coursetotal from (
-select  distinct scores.studentno,courses.credits from scores  inner join courses on courses.courseno=scores.courseno
-where  (scores.courseno like '08%' or scores.courseno like '007%' )
-and (scores.testscore in ('及格','合格','中等','优秀','良好') or scores.examscore>=60 or scores.testscore2 in ('及格','合格','中等','优秀','良好') or scores.examscore2>=60 )
- )
-as t group by studentno) as p on p.studentno=graduate.studentno
-left join (select studentno,sum(credit) as  addtotal from addcredit group by studentno) as a on a.studentno=graduate.studentno
-where graduate.form=4
-and  exists(select * from students where students.studentno=graduate.studentno and students.status in ('A','C','H'))
+--更新全选全通过总数
+update studentplan
+set allplan=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='1'
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+--更新全选全通过完成数,学分达到，并且不存在未选的，或者选了缺未通过课程。
+update studentplan
+set allpass=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='1' and gcredits>=mcredits
+and not exists (select * from graduate as g where g.form in ('A','B' ) and graduate.rowid=g.map) 
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+
+--更新全选部分过总数
+update studentplan
+set allpartplan=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='2'
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+--更新全选部分过完成数  不存在未选的课程且满足学分要求。
+update studentplan
+set allpartpass=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='2' and gcredits>=mcredits
+and not exists (select * from graduate as g where g.form='B'  and graduate.rowid=g.map) 
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+
+--更新部分选部分过总数
+update studentplan
+set partplan=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='3'
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+--更新全选部分过完成数,满足学分要求即可
+update studentplan
+set partpass=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='3' and gcredits>=mcredits
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+
+--更新公共选修课总数
+update studentplan
+set publicplan=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='4'
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+--更新全选部分过完成数,满足学分要求即可
+update studentplan
+set publicpass=t.amount
+from studentplan  
+inner join (select majorplanid,studentno,count(*) amount from  graduate where form='4' and gcredits>=mcredits
+group by majorplanid,studentno)  as t on t.majorplanid=studentplan.majorplanid and t.studentno=studentplan.studentno
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')
+
+update studentplan
+set date=getdate()
+from studentplan
+inner join students on students.studentno=studentplan.studentno and students.status in ('A','C','H','P','J')

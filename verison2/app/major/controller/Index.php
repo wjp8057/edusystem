@@ -12,8 +12,10 @@ namespace app\major\controller;
 use app\common\access\Item;
 use app\common\access\Template;
 use app\common\service\Action;
+use app\common\service\Graduate;
 use app\common\service\Majorplan;
 use app\common\service\R12;
+use app\common\service\Studentplan;
 
 class Index extends Template{
     /**首页
@@ -43,7 +45,7 @@ class Index extends Template{
         $this->assign('operate',$operate);
         return $this->fetch();
     }
-
+    //培养方案详细页面
     public function majorplandetail($majorschool,$rowid=''){
         $operate="添加培养方案";
         $major=Item::getMajorItem($majorschool);
@@ -61,5 +63,44 @@ class Index extends Template{
         return $this->fetch();
     }
 
+    public function graduatedetail($studentno,$majorplanid){
+        $obj=new Studentplan();
+        $data=$obj->getGraduate(1,1,$studentno,'%','%','%','','',$majorplanid)["rows"];
+        $data=$data[0];
+        $ok="<span class='green'> 通过√</span>";
+        $fail="<span class='warn'> 未通过×</span>";
+        $totalresult=$ok;
+        if(((float)$data['credits'])>((float)$data['gcredits'])+((float)$data['addcredits'])||((float)$data['allplan'])>((float)$data['allpass'])||((float)$data['allpartplan'])>((float)$data['allpartpass'])
+        ||((float)$data['partplan'])>((float)$data['partpass'])||((float)$data['publicplan'])>((float)$data['publicpass']))
+            $totalresult=$fail;
+        $data['totalcredits']=$data['gcredits']+$data['addcredits'];
+        $data['totalresult']=$totalresult;
+        $this->assign('base',$data);
 
+        $detail='';
+        $graduate=new Graduate();
+        $program=$graduate->getProgram($majorplanid,$studentno)['rows'];
+        foreach ($program as  $oneprogram) {
+            $result=$ok;
+            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits']))
+                $result=$fail;
+            $detail.="<div class='program'>".$oneprogram['progname'].",".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
+            $course=$graduate->getCourse($oneprogram['rowid'])['rows'];
+            $nopass=''; //选了没有过的
+            $noselect=''; //没有选课的
+            foreach ($course as  $onecourse) {
+                $courseString="<div class='course'>".$fail.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                if($onecourse['form']='A')
+                        $nopass.=$courseString;
+                else
+                        $noselect.=$courseString;
+            }
+            $detail=$nopass==''?$detail:$detail.'<div  class="coursetitle">已选但未通过</div>'.$nopass;
+            $detail=$noselect==''?$detail:$detail.'<div class="coursetitle">未选修课程</div>'.$noselect;
+        }
+        $this->assign('detail',$detail);
+
+
+        return $this->fetch();
+    }
 }

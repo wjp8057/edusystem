@@ -60,7 +60,9 @@ $(function () {
                 }
             },
             {field: 'url', title: '网址*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}},
-            {field: 'rem', title: '备注*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}}
+            {field: 'rem', title: '备注*', width: 100, align: 'center', editor: {type: 'validatebox', options: {validType: 'maxLength[25]'}}},
+            {field: 'amount', title: '课程数', width: 50, align: 'center'},
+            {field: 'credits', title: '总学分', width: 50, align: 'center'}
         ]],
         //标题行右键菜单
         onHeaderContextMenu: function (e, field) {

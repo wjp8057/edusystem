@@ -157,7 +157,7 @@
             },'json');
         });
         $("#menu_delete,#delete").click(function(){
-            tt=$('#dg');
+            var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {
                 tt.datagrid('endEditing');
