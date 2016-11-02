@@ -307,5 +307,78 @@ class Plan extends MyController
         }
         return json($result);
     }
-
+    //在班级培养方案里面检索班级
+    public function  classplanlist($page=1,$rows=20,$classno='%',$classname='%',$school='')
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->getClassList($page,$rows,$classno,$classname,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //绑定培养计划到班级每个学生。(班级方案页面)
+    public function  classplanbindstudent()
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->bindStudent($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //班级方案中检索培养方案
+    public function classplansearch($page = 1, $rows = 20,$year='',$school='')
+    {
+        $result = null;
+        try {
+            $majorplan=new Majorplan();
+            $result = $majorplan->getList($page, $rows,$year,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //绑定到到班级|学生
+    public function classplanbind()
+    {
+        $result = null;
+        try {
+            $obj=new Classplan();
+            $result = $obj->bind($_POST);//无法用I('post.')获取二维数组
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //在学生方案里检索学生
+    public function studentplanlist($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$school='')
+    {
+        $result = null;
+        try {
+            $obj=new Studentplan();
+            $result = $obj->getStudentList($page,$rows,$studentno,$name,$classno,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //学生方案页面绑定学生培养方案
+    public function studentplanbind()
+    {
+        $result=array('info'=>'发生错误','status'=>0);
+        try {
+            $obj=new Studentplan();
+            $effectRow = $obj->bind($_POST['studentno'],$_POST['majorplanid']);
+            if($effectRow>0)
+                $result=array('info'=>'绑定成功','status'=>1);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 } 

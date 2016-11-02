@@ -1,0 +1,182 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function () {
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        var school2 = $('#school2');
+        school2.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1') {
+            school.combobox('select', '{$USERINFO.school}');
+            school2.combobox('select', '{$USERINFO.school}');
+        }
+        $('#dg').datagrid({
+            title: '检索学生',
+            idField: 'studentno',
+            striped: 'true',
+            pagination: 'true',
+            singleSelect:'true',
+            rownumbers: 'true',
+            pageSize:20,
+            url: '{$ROOT}/major/plan/studentplanlist',
+            queryParams: {studentno:''},
+            toolbar: '#toolbar',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'studentno', title: '学号', width: 60, align: 'center',rowspan:2},
+                {field: 'name', title: '姓名', width: 60, align: 'center',rowspan:2},
+                {field: 'classname', title: '班级', width: 80, align: 'center',rowspan:2},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center',rowspan:2},
+                {title: '培养方案',colspan:3}
+
+            ],[
+                {field: 'year', title: '年级', width: 40, align: 'center'},
+                {field: 'directionname', title: '专业方向', width: 95, align: 'center'},
+                {field: 'module', title: '模块方向', width: 95, align: 'center'}
+            ]
+            ],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        $('#dg2').datagrid({
+            title: '检索培养方案',
+            idField: 'classno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            singleSelect:'true',
+            url: '{$ROOT}/major/plan/classplansearch',
+            queryParams: {year: $('#year').val()},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'year', title: '年级', width: 60, align: 'center'},
+                {field: 'directionname', title: '专业方向', width: 120, align: 'center'},
+                {field: 'module', title: '模块方向', width: 110, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 120, align: 'center'},
+                {field: 'credits', title: '总学分', width: 100, align: 'center'},
+                {field: 'mcredits', title: '必修学分', width: 70, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                name: $('#name').val(),
+                classno: $('#classno').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        //绑定到班级学生
+        $("#bind,#menu_bind").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            var effectRow = {};
+            if (!row||!row2) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '请选择一个学生和培养方案！', 'info');
+                return;
+            }
+            if (row.school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
+                $.messager.alert('错误', '你无法为其他学院的学生修改培养方案（' + row.classname + '）！', 'error');
+                return false;
+            }
+            effectRow['studentno'] = row.studentno;
+            effectRow['majorplanid'] = row2.rowid;
+            $.post('{$ROOT}/major/plan/studentplanbind', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+
+        $("#search2").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                school:$('#school2').combobox('getValue')
+            });
+        });
+
+    });
+</script>
+<div class="container">
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div id='menu_bind' data-options="iconCls:'icon icon-person'">绑定到选中学生</div>
+    </div>
+    <div id="left" style="width:570px;float:left">
+        <div id="toolbar">
+            <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+            <label for="school">学院：</label>
+            <input id="school" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:680px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <label for="year">年级：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year-3}"/>
+            <label for="school2">学院：</label>
+            <input id="school2" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-class',plain:'true'" id="bind">绑定到选中学生</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>添加到列表后请保存数据</li>
+            <li class="warn">每个班级只能绑定一个培养方案，新绑定的培养方案会删除原有方案。</li>
+        </ol>
+    </div>
+</div>

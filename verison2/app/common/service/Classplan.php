@@ -27,10 +27,8 @@ class Classplan extends MyService{
     /**获取绑定了指定教学计划的班级
      * @param int $page
      * @param int $rows
-     * @param string $classno
-     * @param string $classname
-     * @param string $school
-     * @return array|null
+     * @param $majorplanid
+     * @return array
      */
     function getList($page=1,$rows=50,$majorplanid){
         $result=['total'=>0,'rows'=>[]];
@@ -48,6 +46,38 @@ class Classplan extends MyService{
         return $result;
     }
 
+    /**读取班级的培养方案信息
+     * @param int $page
+     * @param int $rows
+     * @param string $classno
+     * @param string $classname
+     * @param string $school
+     * @return array
+     */
+    function getClassList($page=1,$rows=20,$classno='%',$classname='%',$school=''){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        if($classno!='%') $condition['classes.classno']=array('like',$classno);
+        if($classname!='%') $condition['classes.classname']=array('like',$classname);
+        if($school!='') $condition['classes.school']= $school;
+
+        $subsql = Db::table('students')->group('classno')->field('classno,count(*) amount')->buildSql();
+
+        $data=$this->query->table('classes')->join('schools ',' schools.school=classes.school')
+            ->join($subsql.' t ',' t.classno=classes.classno','LEFT')
+            ->join('classplan','classplan.classno=classes.classno','LEFT')
+            ->join('majorplan','majorplan.rowid=classplan.majorplanid','LEFT')
+            ->join('majors','majors.rowid=majorplan.map','LEFT')
+            ->join('majordirection','majordirection.direction=majors.direction','LEFT')
+            ->page($page,$rows)
+            ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,classes.students,isnull(t.amount,0) amount,
+            rtrim(majordirection.name) directionname,rtrim(module) module,majorplan.year')
+            ->where($condition)->order('classno')->select();
+        $count= $this->query->table('classes')->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
     /**更新
      * @param $postData
      * @return array
@@ -123,7 +153,7 @@ class Classplan extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
+    //绑定班级培养方案到个人
     public function  bindStudent($postData){
         $updateRow=0;
         $deleteRow=0;
@@ -162,6 +192,41 @@ class Classplan extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
+    //绑定班级|学生
+    public function  bind($postData){
+        $updateRow=0;
+        $insertRow=0;
+        $info="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $majorplanid=$postData["majorplanid"];
+        $classno=$postData["classno"];
+        $tostudent=$postData["tostudent"];
+        $obj=new Studentplan();
+        if(MyAccess::checkClassSchool($classno)) {
+            $condition=null;
+            $condition['classno']=$classno;
+            $this->query->table('classplan')->where($condition)->delete();
+            $data=null;
+            $data['majorplanid']=$majorplanid;
+            $data['classno']=$classno;
+            $insertRow=$this->query->table('classplan')->insert($data);
+            if($insertRow>0) {
+                $info .= "班级培养方案更新成功！";
+                $status=1;
+            }
+            if($tostudent=="1") {
+                $updateRow = $obj->bindByClassNo($classno);
+                $info .= $updateRow."位学生绑定成功！";
+            }
+        }
+        if($insertRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
+    }
 
 } 

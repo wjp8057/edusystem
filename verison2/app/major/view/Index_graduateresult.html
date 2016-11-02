@@ -3,8 +3,8 @@
     $(function(){
         var status=$('#status');
         status.combobox({
-            url:'{$ROOT}/all/option/studentstatus?only=0',
-            valueField:'status',
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
             textField:'name',
             panelHeight:'auto'
         });
@@ -17,7 +17,8 @@
         //设置默认学院，非管理部门为本学院
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
-
+        var pass="<span class='green'  style='font-size:150%'>√</span>";
+        var fail="<span class='warn' style='font-size:150%'>×</span>";
         $('#dg').datagrid({
             title:'',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/major/graduate/query',
@@ -25,62 +26,53 @@
             singleSelect:true,
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
-                {field:'studentno',title:'学号',width:70,align:'center',rowspan:2},
-                {field:'name',title:'姓名',width:60,align:'center',rowspan:2},
+                {field:'studentno',title:'学号',width:65,align:'center',rowspan:2},
+                {field:'name',title:'姓名',width:50,align:'center',rowspan:2},
                 {field:'classname',title:'班级',width:100,align:'center',rowspan:2},
-                {title:'培养计划',colspan:6},
+                {title:'培养计划',colspan:7},
                 {title:'全选全通过',colspan:3},
                 {title:'全选部分过',colspan:3},
                 {title:'部分选部分过',colspan:3},
                 {title:'公选素质',colspan:3},
-                {field:'date',title:'审核时间',width:100,align:'center',rowspan:2}
+                {field:'date',title:'审核时间',width:115,align:'center',rowspan:2}
             ],
                 [
                     {field:'directionname',title:'专业方向',width:90,align:'center'},
                     {field:'module',title:'模块方向',width:80,align:'center'},
-                    {field:'credits',title:'需要学分',width:50,align:'center'},
-                    {field:'gcredits',title:'课程学分',width:60,align:'center'},
-                    {field:'addcredits',title:'创新技能',width:60,align:'center'},
-                    {field:'totalresult',title:'总结论',width:60,align:'center'
+                    {field:'credits',title:'需学分',width:50,align:'center'},
+                    {field:'gcredits',title:'课程',width:40,align:'center'},
+                    {field:'addcredits',title:'创新',width:40,align:'center'},
+                    {field:'totalcredits',title:'总计',width:40,align:'center'
                         ,formatter:function(val,rec){
-                            var result="<span class='green'>通过</span>";
-                        if(parseFloat(rec.credits)>parseFloat(rec.gcredits)+parseFloat(rec.addcredits)||parseFloat(rec.allplan)>parseFloat(rec.allpass)||parseFloat(rec.allpartplan)>parseFloat(rec.allpartpass)||parseFloat(rec.partplan)>parseFloat(rec.partpass))
-                            result="<span class='warn'>未通过</span>";
-                        return result;}
+                        return parseFloat(rec.gcredits)+parseFloat(rec.addcredits)}},
+                    {field:'totalresult',title:'总结论',width:50,align:'center'
+                        ,formatter:function(val,rec){
+                        return rec.totalresult=="0"?fail:pass;}
                     },
                     {field:'allplan',title:'计划数',width:0,align:'center'},
                     {field:'allpass',title:'通过数',width:50,align:'center'},
-                    {field:'allresult',title:'结论',width:50,align:'center',
-                        formatter:function(val,rec){
-                        var result="<span class='green'>通过</span>";
-                        if(parseFloat(rec.allplan)>parseFloat(rec.allpass))
-                            result="<span class='warn'>未通过</span>";
-                        return result;}
+                    {field:'allresult',title:'结论',width:35,align:'center'
+                         ,formatter:function(val,rec){
+                         return rec.allresult=="0"?fail:pass;}
                     },
                     {field:'allpartplan',title:'计划数',width:50,align:'center'},
                     {field:'allpartpass',title:'通过数',width:50,align:'center'},
-                    {field:'allpartresult',title:'结论',width:50,align:'center',
-                        formatter:function(val,rec){
-                            var result="<span class='green'>通过</span>";
-                            if(parseFloat(rec.allpartplan)>parseFloat(rec.allpartpass))
-                                result="<span class='warn'>未通过</span>";
-                            return result;}},
+                    {field:'allpartresult',title:'结论',width:35,align:'center'
+                            ,formatter:function(val,rec){
+                            return rec.allpartresult=="0"?fail:pass;}
+                    },
                     {field:'partplan',title:'计划数',width:50,align:'center'},
                     {field:'partpass',title:'通过数',width:50,align:'center'},
-                    {field:'partresult',title:'结论',width:50,align:'center',
+                    {field:'partresult',title:'结论',width:35,align:'center',
                         formatter:function(val,rec){
-                            var result="<span class='green'>通过</span>";
-                            if(parseFloat(rec.partplan)>parseFloat(rec.partpass))
-                                result="<span class='warn'>未通过</span>";
-                            return result;}},
+                        return rec.partresult=="0"?fail:pass;}
+                    },
                     {field:'publicplan',title:'计划数',width:50,align:'center'},
                     {field:'publicpass',title:'通过数',width:50,align:'center'},
-                    {field:'publicresult',title:'结论',width:50,align:'center',
+                    {field:'publicresult',title:'结论',width:35,align:'center',
                         formatter:function(val,rec){
-                            var result="<span class='green'>通过</span>";
-                            if(parseFloat(rec.publicplan)>parseFloat(rec.publicpass))
-                                result="<span class='warn'>未通过</span>";
-                            return result;}}
+                        return rec.publicresult=="0"?fail:pass;}
+                    }
                 ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -160,7 +152,7 @@
         <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
         <label for="school">学院：</label>
         <input id="school" size="15">
-        <label for="status">学籍状态：</label>
+        <label for="status">总结论是否通过：</label>
         <input id="status" size="8">
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="detail">查看审核报告</a>

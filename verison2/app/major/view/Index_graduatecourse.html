@@ -1,0 +1,115 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var form=$('#form');
+        form.combobox({
+            url:'{$ROOT}/all/option/graduateform?only=0',
+            valueField:'form',
+            textField:'name',
+            panelHeight:'auto'
+        });
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+
+        $('#dg').datagrid({
+            title:'',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/major/graduate/courselist',
+            queryParams: {studentno:''},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'studentno',title:'学号',width:65,align:'center'},
+                {field:'name',title:'姓名',width:50,align:'center'},
+                {field:'classname',title:'班级',width:120,align:'center'},
+                {field:'progname',title:'教学计划',width:180,align:'center'},
+                {field:'courseno',title:'课号',width:70,align:'center'},
+                {field:'coursename',title:'课名',width:190,align:'center'},
+                {field:'credits',title:'学分',width:40,align:'center'},
+                {field:'formname',title:'类型',width:80,align:'center'}
+
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                classno: $('#classno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue'),
+                form:$('#form').combobox('getValue')
+            });
+        });
+        /**
+         * 导出
+         */
+        $('#menu_export,#export').click(function(){
+            var   url="{$ROOT}/major/graduate/exportcourse";
+            var studentno=encodeURI($('#studentno').val());
+            var classno=encodeURI($('#classno').val());
+            var name=encodeURI($('#name').val());
+            var school=encodeURI($('#school').combobox('getValue'));
+            var form=encodeURI($('#form').combobox('getValue'));
+            $.fileDownload(url+"?studentno="+studentno+"&classno="+classno+"&name=" +name+
+            "&form="+form+'&school='+school, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export" >查看审核报告</div>
+    </div>
+    <div id="toolbar">
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school" size="15">
+        <label for="form">未通过原因：</label>
+        <input id="form" size="8">
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出数据（最多5000条）</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li></li>
+        </ol>
+    </div>
+</div>

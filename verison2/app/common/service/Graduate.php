@@ -39,16 +39,29 @@ class Graduate extends MyService{
         return $result;
     }
     //获取某一个教学计划的未通过课程列表
-    function getCourse($rowid){
+    function getCourse($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$school='',$form='',$rowid=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
-        $condition['map']=$rowid;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($name!='%') $condition['students.name']=array('like',$name);
+        if($classno!='%') $condition['students.classno']=array('like',$classno);
+        if($school!='') $condition['classes.school']= $school;
+        if($form!='') $condition['graduate.form']= $form;
+        if($rowid!='') $condition['map']=$rowid;
         $data=$this->query->table('graduate')
             ->join('courses','courses.courseno=graduate.courseno')
-            ->field('courses.courseno,rtrim(courses.coursename) coursename,courses.credits,graduate.form')
-            ->where($condition)
+            ->join('programs','programs.programno=graduate.programno')
+            ->join('graduateform','graduateform.name=graduate.form')
+            ->join('students','students.studentno=graduate.studentno')
+            ->join('classes','classes.classno=students.classno')
+            ->field('rtrim(students.name) name,students.studentno,rtrim(classes.classname) classname,courses.courseno,rtrim(courses.coursename) coursename,courses.credits,
+            rtrim(programs.progname) progname,graduate.form,rtrim(graduateform.value) formname')
+            ->where($condition)->page($page,$rows)
             ->order('courseno')->select();
-        $count= $this->query->table('graduate')->where($condition)->count();
+        $count= $this->query->table('graduate')
+            ->join('students','students.studentno=graduate.studentno')
+            ->join('classes','classes.classno=students.classno')
+            ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;

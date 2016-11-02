@@ -65,7 +65,7 @@ class Index extends Template{
 
     public function graduatedetail($studentno,$majorplanid){
         $obj=new Studentplan();
-        $data=$obj->getGraduate(1,1,$studentno,'%','%','%','','',$majorplanid)["rows"];
+        $data=$obj->getGraduate(1,1,$studentno,'%','%','','',$majorplanid)["rows"];
         $data=$data[0];
         $ok="<span class='green'> 通过√</span>";
         $fail="<span class='warn'> 未通过×</span>";
@@ -85,7 +85,7 @@ class Index extends Template{
             if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits']))
                 $result=$fail;
             $detail.="<div class='program'>".$oneprogram['progname'].",".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
-            $course=$graduate->getCourse($oneprogram['rowid'])['rows'];
+            $course=$graduate->getCourse(1,1000,'%','%','%','','',$oneprogram['rowid'])['rows'];
             $nopass=''; //选了没有过的
             $noselect=''; //没有选课的
             foreach ($course as  $onecourse) {

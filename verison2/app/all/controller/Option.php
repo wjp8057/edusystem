@@ -420,6 +420,7 @@ class Option {
         }
         return json($result);
     }
+    //教学计划类型 全选全通过，部分选部分通过，全选部分通过，公共选修课
     public function programform(){
         $result=null;
         try {
@@ -429,7 +430,21 @@ class Option {
         }
         return json($result);
     }
+    //毕业审核详细表中的课程未通过原因，为选修，
+    public function graduateform($only=1){
+        $result=null;
+        try {
+            $result =Db::table('graduateform')->field('rtrim(name) as form,rtrim(value) as name')->order('form')->select();
+            if($only==0) {
+                $all[] = array('form' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     /**
      * 测试专用
      */

@@ -182,7 +182,7 @@
 
             }
             else{
-                $.messager.alert('错误','请先选中一条记录','error')
+                $.messager.alert('提示','请先选中一条记录','info')
             }
         });
         //编辑
@@ -232,6 +232,10 @@
                         $.messager.alert('错误',html,'error');
                     }
                 });
+            }
+            else
+            {
+                $.messager.alert('提示','请先选中一条记录','info');
             }
         });
         $("#student,#menu_student").click(function(){

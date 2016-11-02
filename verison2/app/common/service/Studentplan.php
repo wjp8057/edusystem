@@ -22,7 +22,7 @@ use app\common\access\MyService;
 class Studentplan extends MyService{
 
 
-    /**读取
+    /**读取制定majorplanid的学生信息
      * @param int $page
      * @param int $rows
      * @return array|null
@@ -43,16 +43,43 @@ class Studentplan extends MyService{
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+    //读取学生培养方案信息
+    function getStudentList($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$school=''){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($name!='%') $condition['students.name']=array('like',$name);
+        if($classno!='%') $condition['classes.classno']=array('like',$classno);
+        if($school!='') $condition['classes.school']= $school;
+        $data=$this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools ',' schools.school=classes.school')
+            ->join('studentplan','studentplan.studentno=students.studentno','LEFT')
+            ->join('majorplan','majorplan.rowid=studentplan.majorplanid','LEFT')
+            ->join('majors','majors.rowid=majorplan.map','LEFT')
+            ->join('majordirection','majordirection.direction=majors.direction','LEFT')
+            ->page($page,$rows)
+            ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,
+            rtrim(majordirection.name) directionname,rtrim(module) module,majorplan.year,students.studentno,rtrim(students.name) name')
+            ->where($condition)->order('classno')->select();
+        $count= $this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools ',' schools.school=classes.school')
+            ->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
     //获取毕业审核结果
-    function getGraduate($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$classname='%',$school='',$status='',$majorplanid=''){
+    function getGraduate($page=1,$rows=20,$studentno='%',$name='%',$classno='%',$school='',$status='',$majorplanid=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
         if($name!='%') $condition['students.name']=array('like',$name);
         if($classno!='%') $condition['students.classno']=array('like',$classno);
-        if($classname!='%') $condition['students.classname']=array('like',$classname);
         if($school!='') $condition['classes.school']= $school;
-        if($status!='') $condition['students.status']= $status;
+        if($status!='') $condition['studentplan.totalresult']= $status;
         if($majorplanid!='') $condition['studentplan.majorplanid']= $majorplanid;
         $data=$this->query->table('studentplan')
             ->join('students','students.studentno=studentplan.studentno')
@@ -63,7 +90,8 @@ class Studentplan extends MyService{
             ->join('majordirection','majordirection.direction=majors.direction')
             ->page($page,$rows)
             ->field("students.studentno,rtrim(students.name) name,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,rtrim(majordirection.name) as directionname,
-            studentplan.majorplanid,majorplan.module,studentplan.credits,gcredits,addcredits,allplan,allpass,partplan,partpass,allpartplan,allpartpass,publicplan,publicpass,date")
+            studentplan.majorplanid,majorplan.module,studentplan.credits,gcredits,addcredits,allplan,allpass,partplan,partpass,allpartplan,allpartpass,publicplan,publicpass,convert(varchar,date, 120) date,
+            totalresult,allresult,partresult,allpartresult,publicresult")
             ->order('studentno')
             ->where($condition)->select();
         $count= $this->query->table('studentplan')
@@ -132,9 +160,12 @@ class Studentplan extends MyService{
         return $result;
     }
 
-
+    /**根据班号绑定所有的班级学生培养方案
+     * @param $classno
+     * @return int
+     * @throws \Exception
+     */
     function bindByClassNo($classno){
-        $effectRow=0;
         $this->query->startTrans();
         try {
             $condition=null;
@@ -153,4 +184,29 @@ class Studentplan extends MyService{
 
         return $effectRow;
     }
+    //绑定学生教学计划
+    function bind($studentno,$majorplanid){
+        $result=false;
+        $this->query->startTrans();
+        try {
+            $condition=null;
+            $condition['studentno']=$studentno;
+            $this->query->table('studentplan')->where($condition)->delete();
+            $data=null;
+            $data['studentno']=$studentno;
+            $data['majorplanid']=$majorplanid;
+            $data['type']='M';
+            $effectRow=$this->query->table('studentplan')->insert($data);
+            if($effectRow>0)
+                $result=true;
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+
+        return $result;
+    }
+
 } 

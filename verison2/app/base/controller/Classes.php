@@ -133,7 +133,7 @@ class Classes extends MyController {
                 if($one['amount']>0) { //仅导出有学生的班级
                     $amount++;
                     $result = $student->getList(1, 10000, '%', '%', $one['classno'], '', '','');
-                    $class = Item::getClassItem($classno,true);
+                    $class = Item::getClassItem($one['classno'],true);
                     $classname = $class['classname'];
                     $data = $result['rows'];
                     $sheet = str_replace("*", "", $classname);
