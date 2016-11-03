@@ -84,10 +84,10 @@ class Index extends Template{
         $program=$graduate->getProgram($majorplanid,$studentno)['rows'];
         foreach ($program as  $oneprogram) {
             $result=$ok;
-            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits']))
+            $course=$graduate->getCourse(1,1000,'%','%','%','','',$oneprogram['rowid'])['rows'];
+            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||count($course)>0)
                 $result=$fail;
             $detail.="<div class='program'>".$oneprogram['progname'].",".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
-            $course=$graduate->getCourse(1,1000,'%','%','%','','',$oneprogram['rowid'])['rows'];
             $nopass=''; //选了没有过的
             $noselect=''; //没有选课的
             $noend='';//未结束的

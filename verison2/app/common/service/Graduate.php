@@ -56,7 +56,7 @@ class Graduate extends MyService{
             ->join('classes','classes.classno=students.classno')
             ->join('statusoptions','statusoptions.name=students.status')
             ->field('rtrim(students.name) name,students.studentno,rtrim(classes.classname) classname,courses.courseno,rtrim(courses.coursename) coursename,courses.credits,
-            rtrim(programs.progname) progname,graduate.form,rtrim(graduateform.value) formname,rtrim(statusoptions.value) statusname')
+            rtrim(programs.progname) progname,programs.programno,graduate.form,rtrim(graduateform.value) formname,rtrim(statusoptions.value) statusname')
             ->where($condition)->page($page,$rows)
             ->order('studentno,courseno')->select();
         $count= $this->query->table('graduate')

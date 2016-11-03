@@ -23,7 +23,9 @@
             toolbar: '#toolbar',
             pageList: [50, 100, 200],
             columns: [[
-                {field: 'programno', title: '计划号', width: 60, align: 'center'},
+                {field: 'programno', title: '计划号', width: 60, align: 'center',
+                    formatter:function(val,rec){
+                        return "<a class='blue_link'href='javascript:program(\""+rec.programno+"\",\""+rec.progname+"\")' >"+rec.programno+"</a>" ;}},
                 {field: 'progname', title: '计划名', width: 250, align: 'center'},
                 {field: 'credits', title: '总学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
                 {field: 'mcredits', title: '应获学分*', width: 60, align: 'center',editor:{type:'numberbox',options:{precision:2,required:true}}},
@@ -67,7 +69,7 @@
 
         $('#dg2').datagrid({
             title: '检索新教学计划',
-            idField: 'studentno',
+            idField: 'programno',
             striped: 'true',
             pagination: 'true',
             rownumbers: true,
@@ -78,7 +80,9 @@
             pageList: [20,50, 100, 200],
             columns: [[
                 {field: 'checkbox', title: '选中', checkbox: true},
-                {field: 'programno', title: '计划号', width: 60, align: 'center'},
+                {field: 'programno', title: '计划号', width: 60, align: 'center',
+                    formatter:function(val,rec){
+                        return "<a class='blue_link'href='javascript:program(\""+rec.programno+"\",\""+rec.progname+"\")' >"+rec.programno+"</a>" ;}},
                 {field: 'progname', title: '计划名称', width: 220, align: 'center'},
                 {field: 'schoolname', title: '学院', width: 120, align: 'center'},
                 {field: 'amount', title: '课程数', width: 50, align: 'center'},
@@ -217,6 +221,9 @@
             current_datagrid = null;
         });
     });
+    function program (programno,progname){
+        parent.menuTabs.addTab(progname+"的课程列表","{$ROOT}/major/index/programcourse?programno="+programno,"icon icon-schedule");
+    }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">

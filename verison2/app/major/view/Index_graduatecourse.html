@@ -29,7 +29,9 @@
                 {field:'name',title:'姓名',width:50,align:'center'},
                 {field:'classname',title:'班级',width:120,align:'center'},
                 {field:'statusname',title:'学籍状态',width:60,align:'center'},
-                {field:'progname',title:'教学计划',width:180,align:'center'},
+                {field:'progname',title:'教学计划',width:200,align:'center',
+                    formatter:function(val,rec){
+                        return "<a class='blue_link'href='javascript:program(\""+rec.programno+"\",\""+rec.progname+"\")' >"+rec.progname+"</a>" ;}},
                 {field:'courseno',title:'课号',width:70,align:'center'},
                 {field:'coursename',title:'课名',width:190,align:'center'},
                 {field:'credits',title:'学分',width:40,align:'center'},
@@ -90,6 +92,9 @@
             });
         });
     });
+    function program (programno,progname){
+        parent.menuTabs.addTab(progname+"的课程列表","{$ROOT}/major/index/programcourse?programno="+programno,"icon icon-schedule");
+    }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
