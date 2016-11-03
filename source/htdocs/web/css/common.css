@@ -112,6 +112,7 @@ a:hover{ color:Red; text-decoration:none;}
 .space{margin:5px;}
 .warn{color:red;font-weight: bold;font-size:100%}
 .green{color:green;font-weight: bold;font-size:100%}
+.orange{color:orange;font-weight: bold;font-size:100%}
 .welcome{text-align:center;font-size: 30pt;padding: 300px 0;font-family: "Microsoft YaHei", sans-serif;color: #0000ff}
 .pagetitle{text-align: center;font-size: 14px;font-weight: bold;color:blue;height:40px;line-height: 40px}
 /*自定义表格样式*/

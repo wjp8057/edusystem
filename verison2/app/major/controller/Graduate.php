@@ -55,7 +55,7 @@ class Graduate extends MyController
             $data = $result['rows'];
             $sheet = '全部';
             $title = '';
-            $template = array("studentno" => "学号", "name" => "姓名", "classname" => "班级", "progname" => "教学计划","courseno"=>"课号",
+            $template = array("studentno" => "学号", "name" => "姓名", "classname" => "班级","statusname"=>'学籍状态', "progname" => "教学计划","courseno"=>"课号",
                 "coursename"=>"课名","credits"=>"学分","formname"=>"类型");
             $string = array("studentno");
             $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);

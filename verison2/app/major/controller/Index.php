@@ -69,6 +69,8 @@ class Index extends Template{
         $data=$data[0];
         $ok="<span class='green'> 通过√</span>";
         $fail="<span class='warn'> 未通过×</span>";
+        $unselect="<span class='warn'> 未选修×</span>";
+        $process="<span class='orange'>未结束○</span>";
         $totalresult=$ok;
         if(((float)$data['credits'])>((float)$data['gcredits'])+((float)$data['addcredits'])||((float)$data['allplan'])>((float)$data['allpass'])||((float)$data['allpartplan'])>((float)$data['allpartpass'])
         ||((float)$data['partplan'])>((float)$data['partpass'])||((float)$data['publicplan'])>((float)$data['publicpass']))
@@ -88,13 +90,22 @@ class Index extends Template{
             $course=$graduate->getCourse(1,1000,'%','%','%','','',$oneprogram['rowid'])['rows'];
             $nopass=''; //选了没有过的
             $noselect=''; //没有选课的
+            $noend='';//未结束的
             foreach ($course as  $onecourse) {
-                $courseString="<div class='course'>".$fail.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
-                if($onecourse['form']='A')
-                        $nopass.=$courseString;
-                else
-                        $noselect.=$courseString;
+                switch($onecourse['form']){
+                    case 'A':
+                        $nopass.="<div class='course'>".$fail.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    case 'B':
+                        $noselect.="<div class='course'>".$unselect.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    case 'C':
+                        $noend.="<div class='course'>".$process.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    default:break;
+                }
             }
+            $detail=$noend==''?$detail:$detail.'<div class="coursetitle">课程未结束</div>'.$noend;
             $detail=$nopass==''?$detail:$detail.'<div  class="coursetitle">已选但未通过</div>'.$nopass;
             $detail=$noselect==''?$detail:$detail.'<div class="coursetitle">未选修课程</div>'.$noselect;
         }

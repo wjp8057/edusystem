@@ -54,10 +54,11 @@ class Graduate extends MyService{
             ->join('graduateform','graduateform.name=graduate.form')
             ->join('students','students.studentno=graduate.studentno')
             ->join('classes','classes.classno=students.classno')
+            ->join('statusoptions','statusoptions.name=students.status')
             ->field('rtrim(students.name) name,students.studentno,rtrim(classes.classname) classname,courses.courseno,rtrim(courses.coursename) coursename,courses.credits,
-            rtrim(programs.progname) progname,graduate.form,rtrim(graduateform.value) formname')
+            rtrim(programs.progname) progname,graduate.form,rtrim(graduateform.value) formname,rtrim(statusoptions.value) statusname')
             ->where($condition)->page($page,$rows)
-            ->order('courseno')->select();
+            ->order('studentno,courseno')->select();
         $count= $this->query->table('graduate')
             ->join('students','students.studentno=graduate.studentno')
             ->join('classes','classes.classno=students.classno')
