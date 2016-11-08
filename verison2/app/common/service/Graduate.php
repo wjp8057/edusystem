@@ -39,12 +39,13 @@ class Graduate extends MyService{
         return $result;
     }
     //获取某一个教学计划的未通过课程列表
-    function getCourse($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$school='',$form='',$rowid=''){
+    function getCourse($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$courseno='%',$school='',$form='',$rowid=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
         if($name!='%') $condition['students.name']=array('like',$name);
         if($classno!='%') $condition['students.classno']=array('like',$classno);
+        if($courseno!='%') $condition['courses.courseno']=array('like',$courseno);
         if($school!='') $condition['classes.school']= $school;
         if($form!='') $condition['graduate.form']= $form;
         if($rowid!='') $condition['map']=$rowid;
@@ -62,6 +63,7 @@ class Graduate extends MyService{
         $count= $this->query->table('graduate')
             ->join('students','students.studentno=graduate.studentno')
             ->join('classes','classes.classno=students.classno')
+            ->join('courses','courses.courseno=graduate.courseno')
             ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);

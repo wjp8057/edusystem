@@ -34,23 +34,23 @@ class Graduate extends MyController
     }
 
     //查看课程
-    public function courselist($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$school='',$form='')
+    public function courselist($page = 1, $rows = 20,$studentno='%',$name='%',$classno='%',$courseno='%',$school='',$form='')
     {
         $result = null;
         try {
             $obj=new \app\common\service\Graduate();
-            $result = $obj->getCourse($page,$rows,$studentno,$name,$classno,$school,$form);
+            $result = $obj->getCourse($page,$rows,$studentno,$name,$classno,$courseno,$school,$form);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return json($result);
     }
-    public function exportcourse($studentno='%',$name='%',$classno='%',$school='',$form='')
+    public function exportcourse($studentno='%',$name='%',$classno='%',$courseno='%',$school='',$form='')
     {
         $result = null;
         try {
             $major=new \app\common\service\Graduate();
-            $result = $major->getCourse(1,5000,$studentno,$name,$classno,$school,$form);
+            $result = $major->getCourse(1,5000,$studentno,$name,$classno,$courseno,$school,$form);
             $file="未通过课程列表";
             $data = $result['rows'];
             $sheet = '全部';

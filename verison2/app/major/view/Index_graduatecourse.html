@@ -68,6 +68,7 @@
                 studentno: $('#studentno').val(),
                 classno: $('#classno').val(),
                 name: $('#name').val(),
+                courseno:$('#courseno').val(),
                 school:$('#school').combobox('getValue'),
                 form:$('#form').combobox('getValue')
             });
@@ -80,10 +81,11 @@
             var studentno=encodeURI($('#studentno').val());
             var classno=encodeURI($('#classno').val());
             var name=encodeURI($('#name').val());
+            var courseno=encodeURI($('#courseno').val());
             var school=encodeURI($('#school').combobox('getValue'));
             var form=encodeURI($('#form').combobox('getValue'));
             $.fileDownload(url+"?studentno="+studentno+"&classno="+classno+"&name=" +name+
-            "&form="+form+'&school='+school, {
+            "&form="+form+'&school='+school+'&courseno='+courseno, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -104,6 +106,7 @@
         <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
         <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
         <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
         <label for="school">学院：</label>
         <input id="school" size="15">
         <label for="form">未通过原因：</label>
