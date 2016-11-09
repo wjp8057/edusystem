@@ -35,10 +35,11 @@
             if(weeks!="") {
                 $("input[id^='week']").each(function () {
                     var thisweek = weeks % 2;
-                    alert(thisweek);
                     weeks = Math.floor(weeks / 2);
                     if (thisweek == 1)
-                        $(this).prop('checked', 'true');
+                        $(this).prop('checked', true);
+                    else
+                        $(this).prop('checked', false);
                 });
             }
             $("#myForm").form('validate');
@@ -154,24 +155,24 @@
         <tr>
             <th>周次</th>
             <td colspan="3">
-                <label for="week1">1</label> <input type="checkbox" id="week1">
-                <label for="week2">2</label> <input type="checkbox" id="week2">
-                <label for="week3">3</label> <input type="checkbox" id="week3">
-                <label for="week4">4</label> <input type="checkbox" id="week4">
-                <label for="week5">5</label> <input type="checkbox" id="week5">
-                <label for="week6">6</label> <input type="checkbox" id="week6">
-                <label for="week7">7</label> <input type="checkbox" id="week7">
-                <label for="week8">8</label> <input type="checkbox" id="week8">
-                <label for="week9">9</label> <input type="checkbox" id="week9">
-                <label for="week10">10</label> <input type="checkbox" id="week10"> <br />
-                <label for="week11">11</label> <input type="checkbox" id="week11">
-                <label for="week12">12</label> <input type="checkbox" id="week12">
-                <label for="week13">13</label> <input type="checkbox" id="week13">
-                <label for="week14">14</label> <input type="checkbox" id="week14">
-                <label for="week15">15</label> <input type="checkbox" id="week15">
-                <label for="week16">16</label> <input type="checkbox" id="week16">
-                <label for="week17">17</label> <input type="checkbox" id="week17">
-                <label for="week18">18</label> <input type="checkbox" id="week18">
+                <label for="week1">1</label> <input type="checkbox" id="week1" checked="checked">
+                <label for="week2">2</label> <input type="checkbox" id="week2"  checked="checked">
+                <label for="week3">3</label> <input type="checkbox" id="week3"  checked="checked">
+                <label for="week4">4</label> <input type="checkbox" id="week4"  checked="checked">
+                <label for="week5">5</label> <input type="checkbox" id="week5"  checked="checked">
+                <label for="week6">6</label> <input type="checkbox" id="week6"  checked="checked">
+                <label for="week7">7</label> <input type="checkbox" id="week7"  checked="checked">
+                <label for="week8">8</label> <input type="checkbox" id="week8"  checked="checked">
+                <label for="week9">9</label> <input type="checkbox" id="week9"  checked="checked">
+                <label for="week10">10</label> <input type="checkbox" id="week10"  checked="checked"> <br />
+                <label for="week11">11</label> <input type="checkbox" id="week11"  checked="checked">
+                <label for="week12">12</label> <input type="checkbox" id="week12"  checked="checked">
+                <label for="week13">13</label> <input type="checkbox" id="week13"  checked="checked">
+                <label for="week14">14</label> <input type="checkbox" id="week14"  checked="checked">
+                <label for="week15">15</label> <input type="checkbox" id="week15"  checked="checked">
+                <label for="week16">16</label> <input type="checkbox" id="week16"  checked="checked">
+                <label for="week17">17</label> <input type="checkbox" id="week17"  checked="checked">
+                <label for="week18">18</label> <input type="checkbox" id="week18"  checked="checked">
             </td>
         </tr>
     </table>

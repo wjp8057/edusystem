@@ -54,11 +54,6 @@
             return false; //this is critical to stop the click event which will trigger a normal file download!
         });
         $('#menu_timetable,#timetable').click(function(){
-      /*      var obj=$('#timetable');
-            var icon=obj.linkbutton('options')['iconCls'];
-            var title=obj.text();
-
-           // addTab('/teacher/index/timetable?',title,icon);*/
             var year=$('#year').val();
             var term=$('#term').val();
             var url='/teacher/index/timetable?';
