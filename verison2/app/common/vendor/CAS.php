@@ -19,8 +19,7 @@ class CAS {
      * @param string $ticket
      * @return int
      */
-    static public function signinNormal($ticket=""){
-        $service= 'http://'.$_SERVER["SERVER_NAME"]."/web/home/login/caslogin";
+    static public function signinNormal($ticket="",$service){
         $ssoURL="http://ids.nbcc.cn/sso/";
         if($ticket==""){
             header('Location:'.$ssoURL."login?service=".$service);
