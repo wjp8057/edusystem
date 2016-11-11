@@ -3,17 +3,22 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>浏览器版本过低</title>
-    <script language="JavaScript" type="text/javascript">
-        if (navigator.userAgent.indexOf('MSIE') < 0) {
+    <script type="text/javascript" src="{$ROOT}/js/browsercheck.js"></script>
+    <script type="text/javascript">
+        var browser=browsercheck();
+        if(browser.browser!="IE"||(browser.browser=="IE"&&parseInt(browser.version)>=8))
             location.href="/";
-        }
     </script>
 </head>
 <body>
-您的浏览器是IE，且版本过低（IE9以下），请使用更高的版本。<br/>
+您的浏览器是<span id="browser"></span>，版本过低（IE8以下），请使用更高的版本。<br/>
 Windows XP 最高支持IE8，用户可以选择:<br/>
 <b>Chrome谷歌浏览器</b><a href="http://rj.baidu.com/soft/detail/14744.html">http://rj.baidu.com/soft/detail/14744.html</a> <br/>
 <b>Firefox火狐浏览器</b><a href="http://rj.baidu.com/soft/detail/11843.html">http://rj.baidu.com/soft/detail/11843.html</a> <br/>
-如果您确定您使用的是IE9以上版本浏览器，还是看到本界面，请确认使用非兼容模式访问本站。遨游浏览器应使用快速模式。
+<div style="color:red;font-size:16pt">如果您确定您使用的是IE9以上版本浏览器，还是看到本界面，请确认使用非兼容模式访问本站，如果您在使用遨游、360、QQ等国产浏览器，请切换到快速（极速）模式。</div>
+<script type="text/javascript">
+    document.getElementById("browser").innerHTML=browser.browser+browser.version;
+</script>
+
 </body>
 </html>
