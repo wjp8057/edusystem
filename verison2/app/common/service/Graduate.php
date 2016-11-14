@@ -69,4 +69,72 @@ class Graduate extends MyService{
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+
+    public function printByClassNo($classno="000000"){
+        $resultString='';
+        $obj=new Studentplan();
+        $data=$obj->getGraduate(1,200,'%','%',$classno,'','','')["rows"];
+        $amount=count($data);
+        foreach($data as $one){
+            $resultString.=$this->printByStudentNo($one['majorplanid'],$one['studentno'])['data'];
+        }
+        return array("amount"=>$amount,"data"=>$resultString);
+    }
+
+    /**按学号审核
+     * @param $majorplanid
+     * @param $studentno
+     * @return string
+     */
+    public function printByStudentNo($majorplanid,$studentno){
+        $resultString='';
+        $obj=new Studentplan();
+        $data=$obj->getGraduate(1,1,$studentno,'%','%','','',$majorplanid)["rows"];
+        $data=$data[0];
+        $ok="<span class='green'> 通过√</span>";
+        $fail="<span class='warn'> 未通过×</span>";
+        $unselect="<span class='warn'> 未选修×</span>";
+        $process="<span class='orange'>未结束○</span>";
+        $totalresult=$ok;
+        if(((float)$data['credits'])>((float)$data['gcredits'])+((float)$data['addcredits'])||((float)$data['allplan'])>((float)$data['allpass'])||((float)$data['allpartplan'])>((float)$data['allpartpass'])
+            ||((float)$data['partplan'])>((float)$data['partpass'])||((float)$data['publicplan'])>((float)$data['publicpass']))
+            $totalresult=$fail;
+        $data['totalcredits']=$data['gcredits']+$data['addcredits'];
+        $data['totalresult']=$totalresult;
+        $resultString.='<div class="student">学号：'.$data['studentno'].' 姓名：'.$data['name'].' 学院：'.$data['schoolname'].' 班级：'.$data['classname'].'专业方向：'.$data['directionname'].' 模块方向：'.$data['module'].'审核时间：'.$data['date'].'</div>';
+        $resultString.='<div class="subtitle">培养方案应获得学分：'.$data['credits'].' ,已获得课程学分：'.$data['gcredits'].' ,
+                创新技能素质学分（已包含在公共选修课学分中）：'.$data['addcredits'].',获得总学分：'.$data['totalcredits'].',总体结论：'.$data['totalresult'].'</div>';
+        $detail='';
+        $graduate=new Graduate();
+        $program=$graduate->getProgram($majorplanid,$studentno)['rows'];
+        foreach ($program as  $oneprogram) {
+            $result=$ok;
+            $course=$graduate->getCourse(1,1000,'%','%','%','%','','',$oneprogram['rowid'])['rows'];
+            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||count($course)>0)
+                $result=$fail;
+            $detail.="<div class='program'>".$oneprogram['progname'].",".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
+            $nopass=''; //选了没有过的
+            $noselect=''; //没有选课的
+            $noend='';//未结束的
+            foreach ($course as  $onecourse) {
+                switch($onecourse['form']){
+                    case 'A':
+                        $nopass.="<div class='course'>".$fail.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    case 'B':
+                        $noselect.="<div class='course'>".$unselect.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    case 'C':
+                        $noend.="<div class='course'>".$process.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
+                        break;
+                    default:break;
+                }
+            }
+            $detail=$noend==''?$detail:$detail.'<div class="coursetitle">课程未结束</div>'.$noend;
+            $detail=$nopass==''?$detail:$detail.'<div  class="coursetitle">已选但未通过</div>'.$nopass;
+            $detail=$noselect==''?$detail:$detail.'<div class="coursetitle">未选修课程</div>'.$noselect;
+        }
+        $resultString.='<div class="detail">'.$detail.'</div>';
+        return array("amount"=>1,"data"=>$resultString);
+    }
 } 

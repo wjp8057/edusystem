@@ -89,7 +89,7 @@ class Studentplan extends MyService{
             ->join('majors','majors.rowid=majorplan.map')
             ->join('majordirection','majordirection.direction=majors.direction')
             ->page($page,$rows)
-            ->field("students.studentno,rtrim(students.name) name,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,rtrim(majordirection.name) as directionname,
+            ->field("students.studentno,students.classno,rtrim(students.name) name,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,rtrim(majordirection.name) as directionname,
             studentplan.majorplanid,majorplan.module,studentplan.credits,gcredits,addcredits,allplan,allpass,partplan,partpass,allpartplan,allpartpass,publicplan,publicpass,convert(varchar,date, 120) date,
             totalresult,allresult,partresult,allpartresult,publicresult")
             ->order('studentno')

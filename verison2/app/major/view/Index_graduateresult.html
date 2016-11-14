@@ -121,6 +121,18 @@
                 $.messager.alert('提示','请先选中一条记录','info')
             }
         });
+        $("#menu_classdetail,#classdetail").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            var classno=encodeURI(row.classno);
+            if (row) {
+                var url='/major/index/graduateclassdetail?classno='+classno;
+                window.open('{$ROOT}'+url);
+            }
+            else{
+                $.messager.alert('提示','请先选中一条记录','info')
+            }
+        });
         /**
          * 导出
          */
@@ -145,6 +157,7 @@
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div data-options="iconCls:'icon icon-excel'" id="menu_detail" >查看审核报告</div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_classdetail" >查看整班审核报告</div>
     </div>
     <div id="toolbar">
         <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
@@ -156,6 +169,7 @@
         <input id="status" size="8">
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="detail">查看审核报告</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="classdetail">查看整班审核报告</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>
