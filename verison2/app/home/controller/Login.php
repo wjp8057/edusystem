@@ -38,10 +38,13 @@ class Login
     /**
      *统一登录
      */
-    public function caslogin($ticket="",$forward="login"){
+    public function caslogin($ticket="",$forward=""){
         $service= 'http://'.$_SERVER["SERVER_NAME"]."/web/home/login/caslogin?forward=".$forward;
         $status=CAS::signinNormal($ticket,$service);
-        if($forward=="login") {
+        if($forward=="score"){
+            header('Location:' . Request::instance()->root() . '/teacher/?233');
+        }
+        else if($forward=="login") {
             switch ($status) {
                 case 1:
                     header('Location:' . Request::instance()->root() . '/home/index/index');
@@ -56,9 +59,6 @@ class Login
                     echo "登录失败";
                     break;
             }
-        }
-        else if($forward=="score"){
-            header('Location:' . Request::instance()->root() . '/teacher/?233');
         }
         else if ($forward=="room"){
             header('Location:' . Request::instance()->root() . '/teacher/?1478');

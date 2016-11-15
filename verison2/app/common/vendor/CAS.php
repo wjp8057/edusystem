@@ -13,6 +13,7 @@
 
 namespace app\common\vendor;
 use app\common\service\User;
+use think\Log;
 
 class CAS {
     /**统一身份登录。
@@ -21,17 +22,18 @@ class CAS {
      */
     static public function signinNormal($ticket="",$service){
         $ssoURL="http://ids.nbcc.cn/sso/";
+
         if($ticket==""){
             header('Location:'.$ssoURL."login?service=".$service);
         }
         $validateURL=$ssoURL."serviceValidate?ticket=".$ticket."&service=".$service;
         $string= file_get_contents($validateURL);
-     //   print_r($string);
         $p = xml_parser_create();
         xml_parse_into_struct($p, $string, $vals, $index);
         xml_parser_free($p);
-     //   echo "\nVals array\n";
+
         $userid=($vals[2]["value"]);
+        Log::log($string);
         $user=new User();
 
         $result=$user->signInAsTeacherNo($userid);
