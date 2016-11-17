@@ -6,12 +6,10 @@
  * Time: 10:41
  */
 namespace app\teacher\controller;
-use app\common\access\Item;
 use app\common\access\MyController;
 use app\common\access\MyAccess;
-use app\common\vendor\PHPExcel;
+use app\common\service\ViewSchedule;
 use app\common\service\R32;
-use app\common\service\ViewScheduleTable;
 
 /**课程
  * Class Course
@@ -28,7 +26,7 @@ class Course extends MyController{
     public function query($page=1,$rows=20,$year,$term){
         $result=null;
         try{
-            $schedule=new ViewScheduleTable();
+            $schedule=new ViewSchedule();
             $teacherno= session('S_TEACHERNO');
             $result=$schedule->getTeacherCourseList($page,$rows,$year,$term,$teacherno);
 

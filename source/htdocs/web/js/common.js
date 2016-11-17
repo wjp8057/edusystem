@@ -469,6 +469,13 @@ function bindMessageErrorEven(errorMsg, callbacks, messageType){
         var r = window.location.search.substr(1).match(reg);
         if (r!=null) return (r[2]); return null;
     }
+    //获取url问号前面的地址 http://host.com/name?a=1返回http://host.com/name
+    function getURLString(){
+        var url=window.location.href;
+        var index=url.indexOf('?');
+        url=index==-1?url:url.substring(0,index);
+        return url;
+    }
     //检查是否为数字
     function IsNum(s)
     {

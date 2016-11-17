@@ -6,7 +6,9 @@
             var page=getQueryString('page');
             if(page==null)
                 page=2;
-            location.href=("{$ROOT}/score/index/printfinalview?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
+            else
+                page=parseInt(page)+1;
+            location.href=(getURLString()+"?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
         });
         $("#print").click(function(){
             window.print();

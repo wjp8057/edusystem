@@ -16,9 +16,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\Classroom;
 use app\common\service\ViewSchedule;
-use app\common\service\ViewScheduleTable;
 use app\common\service\R32;
-use app\common\access\Item;
 
 class Process extends MyController
 {
@@ -91,6 +89,19 @@ class Process extends MyController
         }
         return json($result);
     }
+    //读取教师列表
+    public function teacherlist($page = 1, $rows = 20, $teacherno = '%', $name = '%', $school = '')
+    {
+        $result = null;
+        try {
+            $teacher = new \app\common\service\Teacher();
+            $result = $teacher->getList($page, $rows, $teacherno, $name, $school);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 
     /**教师课程列表
      * @param int $page
@@ -103,7 +114,7 @@ class Process extends MyController
     public function tablecourse($page=1,$rows=20,$year,$term,$teacherno){
         $result=null;
         try{
-            $schedule=new ViewScheduleTable();
+            $schedule=new ViewSchedule();
             $result=$schedule->getTeacherCourseList($page,$rows,$year,$term,$teacherno);
         }
         catch (\Exception $e) {
