@@ -106,7 +106,7 @@ class Student extends MyService {
         return $result;
     }
 
-    /**修改学生密码
+    /**修改学生密码(管理员更改）
      * @param string $studentno 学号
      * @param string $password 新密码
      * @return array
@@ -131,6 +131,26 @@ class Student extends MyService {
         return $result;
     }
 
+    public function changeSelfPassword($oldPassword,$newPassword){
+        $condition['studentno']= session('S_USER_NAME');
+        $condition['password']= $oldPassword;
+        $result= $this->query->table('students')->where($condition)->select();
+
+        if(is_array($result)&&count($result)==1)
+        {
+            $data['password']=$newPassword;
+            $data['enterdate']=date("Y-m-d H:i:s");
+            $this->query->table('students')->where($condition)->setField($data);
+            $status = 1;
+            $info = "密码修改成功";
+        }
+        else{
+            $status = "错误";
+            $info = "旧密码错误！";
+        }
+        $result = array('info' => $info, 'status' => $status);
+        return $result;
+    }
     /**获取单个学生详细信息
      * @param $studentno
      * @throws \think\Exception

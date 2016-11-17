@@ -1,0 +1,236 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var classcheck=true;
+    $(function(){
+        //数据预处理
+        {
+            var studentno = $('#studentno');
+            studentno.validatebox({required: true, validType: 'minmaxLength[8,9]'});
+            studentno.val('{$student.studentno}');
+            var queryString=getQueryString('studentno');
+            var updateString="?op=add";
+            if(queryString!=null){
+                studentno.attr("readonly",true);
+                updateString="";
+            } //没有学号参数的话为添加模式
+            var name = $('#name');
+            name.validatebox({required: true, validType: 'minmaxLength[2,15]'});
+            name.val('{$student.name}');
+            var sex = $('#sex');
+            sex.combobox({required: true, editable:false,url: '{$ROOT}/all/option/sex', valueField: 'sex',textField: 'name',panelHeight: 'auto'
+            });
+            sex.combobox('setValue', '{$student.sex}');
+            var birthday = $('#birthday');
+            birthday.datebox({required: true, editable:false});
+            birthday.datebox('setValue', '{$student.birthday}');
+
+            $('#photo').prop("src","{$ROOT}{$student.photo}");
+            var nationality = $('#nationality');
+            nationality.combobox({
+                required: true, editable:false,
+                url: '{$ROOT}/all/option/nationality',
+                valueField: 'nationality',
+                textField: 'name',
+                panelHeight: '200'
+            });
+            nationality.combobox('setValue', '{$student.nationality}');
+            var party = $('#party');
+            party.combobox({required: true, editable:false, url: '{$ROOT}/all/option/party', valueField: 'party', textField: 'name'});
+            party.combobox('setValue', '{$student.party}');
+            var years = $('#years');
+            years.numberbox({min: 2, max: 5, precision: 0, required: true});
+            years.numberbox('setValue', '{$student.years}');
+            var enterdate = $('#enterdate');
+            enterdate.datebox({required: true, editable:false});
+            enterdate.datebox('setValue', '{$student.enterdate}');
+            var classno = $('#classno');
+            classno.validatebox({required: true, validType: 'minmaxLength[6,7]'});
+            classno.val('{$student.classno}');
+            $('#classname').text('{$student.classname}');
+            $('#schoolname').text('{$student.schoolname}');
+            var major = $('#major');
+            major.combobox({required: true, editable:false, url: '{$ROOT}/all/option/major', valueField: 'major', textField: 'name'});
+            major.combobox('setValue', '{$student.major}');
+            var classcode = $('#classcode');
+            classcode.combobox({
+                required: true, editable:false,
+                url: '{$ROOT}/all/option/classcode',
+                valueField: 'class',
+                textField: 'name',
+                panelHeight: 'auto'
+            });
+            classcode.combobox('setValue', '{$student.classcode}');
+            var midschool = $('#midschool');
+            midschool.validatebox({validType: 'maxLength[20]'});
+            midschool.val('{$student.midschool}');
+            var postcode = $('#postcode');
+            postcode.validatebox({validType: 'equalLength[6]'});
+            postcode.val('{$student.postcode}');
+            var address = $('#address');
+            address.validatebox({validType: 'maxLength[50]'});
+            address.val('{$student.address}');
+            var examno = $('#examno');
+            examno.validatebox({validType: 'maxLength[20]'});
+            examno.val('{$student.examno}');
+            var id = $('#id');
+            id.validatebox({validType: 'minmaxLength[15,18]'});
+            id.val('{$student.id}');
+            var origin = $('#origin');
+            origin.validatebox({validType: 'maxLength[30]'});
+            origin.val('{$student.origin}');
+            var province = $('#province');
+            province.combobox({
+                required: true, editable:false,
+                url: '{$ROOT}/all/option/province',
+                valueField: 'province',
+                textField: 'name'
+            });
+            province.combobox('setValue', '{$student.province}');
+            var tel = $('#tel');
+            tel.validatebox({validType: 'maxLength[40]'});
+            tel.val('{$student.tel}');
+            var status = $('#status');
+            status.combobox({
+                required: true, editable:false,
+                url: '{$ROOT}/all/option/studentstatus',
+                valueField: 'status',
+                textField: 'name'
+            });
+            status.combobox('setValue', '{$student.status}');
+            $("#myForm").form('validate');
+        }
+        classno.blur(function(){
+            $('#classname').text('');
+            $('#schoolname').text('');
+            $.post('{$ROOT}/all/info/getclassinfo',{classno:classno.val()},function(result){
+                if (result.status==1){
+                    $('#classname').text(result.classname);
+                    $('#schoolname').text(result.schoolname);
+                    classcheck=true;
+                }
+                else{
+                    $('#classname').html("<div class='warn'>"+result.classname+"</div>");
+                    classcheck=false;
+                }
+            },'json');
+        });
+        $("#update").click(function() {
+            if(classcheck&&$("#myForm").form('validate')){
+                var data={};
+                data["studentno"]=studentno.val();
+                data["name"]=name.val();
+                data["sex"]=sex.combobox('getValue');
+                data["birthday"]=birthday.datebox('getValue');
+                data["nationality"]=nationality.combobox('getValue');
+                data["party"]=party.combobox('getValue');
+                data["years"]=years.val();
+                data["enterdate"]=enterdate.datebox('getValue');
+                data["classno"]=classno.val();
+                data["major"]=major.combobox('getValue');
+                data["classcode"]=classcode.combobox('getValue');
+                data["midschool"]=midschool.val();
+                data["postcode"]=postcode.val();
+                data["address"]=address.val();
+                data["examno"]=examno.val();
+                data["id"]=id.val();
+                data["origin"]=origin.val();
+                data["province"]=province.combobox('getValue');
+                data["tel"]=tel.val();
+                data["status"]=status.combobox('getValue');
+                $.post('{$ROOT}/base/student/updatedetail'+updateString,data,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','数据输入不完整！请检查红色框提示内容！','error');
+            }
+
+        });
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">学生详细信息</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>学号</th>
+            <td><input id="studentno"/></td>
+            <th>姓名</th>
+            <td><input id="name"/></td>
+            <td rowspan="5" align="center" valign="middle"><img id="photo" src="#" height="150px"/></td>
+        </tr>
+        <tr>
+            <th>性别</th>
+            <td><input id="sex"/></td>
+            <th>出生日期</th>
+            <td><input id="birthday"/></td>
+        </tr>
+        <tr>
+            <th>民族</th>
+            <td><input id="nationality"/></td>
+            <th>政治面貌</th>
+            <td><input id="party"/></td>
+        </tr>
+        <tr>
+            <th>学制</th>
+            <td><input id="years"/></td>
+            <th>入校时间</th>
+            <td><input id="enterdate"/></td>
+        </tr>
+        <tr>
+            <th>班号</th>
+            <td><input id="classno"/></td>
+            <th>班级名称</th>
+            <td><lable id="classname"></lable></td>
+        </tr>
+        <tr>
+            <th>学院</th>
+            <td><lable id="schoolname"></lable></td>
+            <th>专业</th>
+            <td colspan="2"><input id="major"/></td>
+        </tr>
+        <tr>
+            <th>生源类型</th>
+            <td><input id="classcode"/></td>
+            <th>中学</th>
+            <td colspan="2"><input id="midschool" size="40"/></td>
+        </tr>
+        <tr>
+            <th>邮编</th>
+            <td><input id="postcode"/></td>
+            <th>联系地址</th>
+            <td colspan="2"><input id="address" size="40"/></td>
+        </tr>
+        <tr>
+            <th>准考证号</th>
+            <td><input id="examno"/></td>
+            <th>身份证号</th>
+            <td colspan="2"><input id="id"/></td>
+        </tr>
+        <tr>
+            <th>籍贯</th>
+            <td><input id="origin"/></td>
+            <th>联系电话</th>
+            <td colspan="2"><input id="tel"/></td>
+        </tr>
+        <tr>
+            <th>省份</th>
+            <td><input id="province"/></td>
+            <th>学籍状态</th>
+            <td colspan="2"><input id="status"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" style="visibility:hidden" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="update">保存数据</a>
+    </div>
+</div>

@@ -60,7 +60,7 @@ class Studentplan extends MyService{
             ->join('majordirection','majordirection.direction=majors.direction','LEFT')
             ->page($page,$rows)
             ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,
-            rtrim(majordirection.name) directionname,rtrim(module) module,majorplan.year,students.studentno,rtrim(students.name) name')
+            rtrim(majordirection.name) directionname,rtrim(module) module,majorplan.year,students.studentno,rtrim(students.name) name,majorplan.rowid majorplanid')
             ->where($condition)->order('classno')->select();
         $count= $this->query->table('students')
             ->join('classes','classes.classno=students.classno')

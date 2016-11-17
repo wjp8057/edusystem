@@ -22,10 +22,11 @@ class Template extends \think\Controller
             MyAccess::getAccess();
             $userinfo=null;
             $userinfo['username']=session('S_USER_NAME');//用户名登录名
-            $userinfo['realname']=session('S_TEACHER_NAME');//真实姓名
+            $userinfo['realname']=session('S_REAL_NAME');//真实姓名
             $userinfo['teacherno']=session('S_TEACHERNO');//真实姓名
             $userinfo['school']=session('S_USER_SCHOOL'); //所在学院代码
             $userinfo['schoolname']=session('S_USER_SCHOOL_NAME');//学院名称
+            $userinfo['depart']=session('S_DEPART_NAME');//真实姓名
             $userinfo['manage']=session('S_MANAGE');//是否主管部门1是/0否
             $this->assign('USERINFO',$userinfo);
 

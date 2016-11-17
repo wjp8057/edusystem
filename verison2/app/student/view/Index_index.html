@@ -25,7 +25,11 @@
                 menuTabs.menuObj.accordion('select', $(this).parents('.panel').children().first().text());
             });
         }
+        $("#password").click(function () {
+            menuTabs.addTab("修改密码","{$ROOT}/student/index/changepassword","icon icon-shield");
+        });
     });
+
 </script>
 <noscript>
     抱歉，请开启脚本支持！
@@ -39,19 +43,19 @@
 <!-- 头部 -->
 <div id="top" region="north" split="false" border="false" >
     <span style="float:right; padding-right:30px;">
-        <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-role'">{$USERINFO.username}/{$USERINFO.realname}({$USERINFO.schoolname})</a> |
-        <a href="{$ROOT}/home/index/index"  class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-home'">返回首页</a>
+        <a href="#" class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-role'">{$USERINFO.username}/{$USERINFO.realname}({$USERINFO.schoolname} {$USERINFO.depart})</a> |
+         <a href="#"  class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-shield'" id="password">修改密码</a>
         <a href="#"  class="easyui-linkbutton" data-options="plain:true,iconCls:'icon icon-exit'" id="loginOut">退出</a>
     </span>
     <span style="padding-left:10px; font-size: 16px; "><img src="{$ROOT}/img/logo_min.jpg" /></span>
 </div>
 <!-- 左侧菜单 -->
-<div region="west" split="true"  title="个人信息" style="width:130px;" id="west"></div>
+<div region="west" split="true"  title="功能导航" style="width:130px;" id="west"></div>
 <!-- 初始内容页 -->
 <div data-options="region:'center',border:'false'" style="overflow: hidden" scroll="no">
     <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" style="overflow: hidden" scroll="no" >
         <div class="welcome">
-             欢迎使用个人信息
+             欢迎使用教务管理系统
         </div>
     </div>
 </div>

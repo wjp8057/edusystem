@@ -43,17 +43,20 @@ class MyAccess {
         $usertype=session("S_LOGIN_TYPE");
         session('S_ACCESS', 0);
         if($usertype) {
+            $condition=null;
+            $condition["action.action"] = $action;
+            $actionInfo=Db::table('action')->where($condition)->find();
+            if(!is_array($actionInfo))
+                throw new Exception($action . ' is not found!', MyException::WITH_OUT_PERMISSION);
+            //写入session
+            session('S_ACTIONID', $actionInfo['id']);
+            session('S_ACTION', $action);
             //首先检查用户权限表
             if ($usertype == 1) {
                 $condition=null;
                 $condition['username']=session('S_USER_NAME');;
                 $role =Db::table('users')->where($condition)->field('rtrim(roles) roles')->find();
-                $condition=null;
-                $condition["action.action"] = $action;
-                $actionInfo=Db::table('action')->where($condition)->find();
-                if(is_array($role)&&is_array($actionInfo)) {
-                    session('S_ACTIONID', $actionInfo['id']);
-                    session('S_ACTION', $action);
+                if(is_array($role)) {
                     $roles = str_split($role['roles']);
                     $condition = null;
                     $condition["action.action"] = $action;
@@ -67,14 +70,21 @@ class MyAccess {
                         }
                     }
                     session('S_ACCESS', $result);
-                }
-                else{
-                    throw new Exception($action . ' is not found!', MyException::WITH_OUT_PERMISSION);
+                    return ;
                 }
             }
+            //学生直接检查权限表
+            else if($usertype==2){
+                $condition = null;
+                $condition["actionid"] =  $actionInfo['id'];
+                $condition['role'] = 'S';
+                $data = Db::table('actionrole')->where($condition)->field('access')->find();
+                $result=is_array($data)?$data['access']:0;
+                session('S_ACCESS', $result);
+                return;
+            }
         }
-        else
-            throw new Exception('',MyException::NOT_LOGIN);
+        throw new Exception('',MyException::NOT_LOGIN);
     }
     /**检查是否有读取权限
      * @param string $operate 操作类型：R读取、M修改、D删除、A增加、E执行，默认为读取
@@ -119,7 +129,7 @@ class MyAccess {
         $condition=null;
         $condition['username']=session('S_USER_NAME');
         $result=Db::table('sessions')->where($condition)->find();
-        if($result!=null) {
+        if(is_array($result)) {
             $remoteip=trim($result['remoteip']);
             if ($remoteip!= get_client_ip()) {
                 session(null);

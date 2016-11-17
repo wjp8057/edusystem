@@ -146,6 +146,29 @@ class Action extends MyService{
         return $menu;
     }
 
+    public function getStudentAccessMenu($username='',$parentId=1){
+        if($username=='')
+            throw new Exception('username'.$username, MyException::PARAM_NOT_CORRECT);
+        $menu=array();
+        $condition=null;
+        $condition['actionrole.role']='S';
+        $condition['action.ismenu']=1;
+        $condition['action.parentid']=$parentId;
+        $condition['action.id']=array('NEQ',1);
+        $data=$this->query->table('action')->join('actionrole','actionrole.actionid=action.id')
+            ->field('distinct action.image as icon,action.description as menuname,action.id menuid,action.action url,action.rank')
+            ->order('rank')->where($condition)->select();
+        if(is_array($data)&&count($data)>0){
+            foreach ($data as $one) {
+                $array=null;
+                $menudata=$this->getStudentAccessMenu($username,$one['menuid']);
+                $array[]=array('menuid' => $one['menuid'], 'menuname' => $one['menuname'], 'icon' => $one['icon'],'url'=>Request::instance()->root().$one['url'],'menus'=>$menudata);
+                $menu=array_merge($menu,$array);
+            }
+        }
+        return $menu;
+    }
+
     /**获取Action列表
      * @param string $action
      * @param string $description

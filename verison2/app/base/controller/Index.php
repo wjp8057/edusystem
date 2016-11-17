@@ -40,8 +40,6 @@ class Index extends Template
         }
         $this->assign('student', $student);
         return $this->fetch();
-
-
     }
 
     function roomtimetable($year = '', $term = '', $roomno = '')

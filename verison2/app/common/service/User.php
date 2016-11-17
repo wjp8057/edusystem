@@ -50,10 +50,12 @@ class User extends MyService{
         session(null);
         session('S_USER_SCHOOL', $data['school']);
         session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
+        session("S_DEPART_NAME", $data['schoolname']); //分部门
         session("S_LOGIN_TYPE", 1); //注册用户为教师
         session("S_USER_NAME", $username); //注册用户
         session("S_TEACHERNO", $data['teacherno']); //注册用户
         session("S_TEACHER_NAME", $data['teachername']); //注册用户
+        session("S_REAL_NAME", $data['teachername']); //注册用户
         session("S_GUID", $guid); //注册GUID
         session("S_ROLES", $roles); //注册角色信息
         session("S_LOGIN_COUNT", 0);
@@ -137,7 +139,8 @@ class User extends MyService{
             $condition = null;
             $condition['studentno'] = $studentno;
             $data = Db::table('students')->join('classes', 'students.classno=classes.classno')
-                ->field('classes.school,students.studentno')
+                ->join('schools','schools.school=classes.school')
+                ->field('classes.school,students.studentno,rtrim(schools.name) schoolname,rtrim(students.name) studentname,rtrim(classes.classname) classname')
                 ->where($condition)->find();
             if (is_array($data) && count($data) > 0) {
                 $guid = getGUID(session_id()); //获得GUID
@@ -145,8 +148,11 @@ class User extends MyService{
 
                 session(null);
                 session('S_USER_SCHOOL', $data['school']);
+                session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
+                session("S_DEPART_NAME", $data['classname']); //分部门
                 session("S_LOGIN_TYPE", 2); //注册用户为学生
                 session("S_USER_NAME", $data['studentno']); //注册用户
+                session("S_REAL_NAME", $data['studentname']); //注册用户
                 session("S_GUID", $guid); //注册GUID
                 session("S_ROLES", "S"); //注册角色信息
                 session("S_LOGIN_COUNT", 0);
@@ -161,7 +167,7 @@ class User extends MyService{
      * @param $password
      * @return int
      */
-    public   function loginAsStudent($studentno,$password){
+    public  function loginAsStudent($studentno,$password){
         $condition = null;
         $condition['studentno'] = $studentno;
         $data = Db::table('students')
