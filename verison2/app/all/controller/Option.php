@@ -449,8 +449,6 @@ class Option {
      * 测试专用
      */
     public function test(){
-        $condition['courseno']='080A01A';
-        $result =Db::table('courses')->field('convert(varchar(10),khours) lhours')->where($condition)->select();
-        dump($result);
+        MyAccess::checkLoginIP();
     }
 }

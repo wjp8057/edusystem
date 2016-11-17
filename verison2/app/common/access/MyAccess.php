@@ -16,6 +16,7 @@ use think\Request;
 
 class MyAccess {
 
+
     /**
      * @param $id
      * @param $action
@@ -39,11 +40,11 @@ class MyAccess {
     public static function  getAccess(){
         $request = Request::instance();
         $action= strtolower('/'.$request->module().'/'.$request->controller().'/'.$request->action());
-        $session=session("S_LOGIN_TYPE");
+        $usertype=session("S_LOGIN_TYPE");
         session('S_ACCESS', 0);
-        if($session) {
+        if($usertype) {
             //首先检查用户权限表
-            if ($session == 1) {
+            if ($usertype == 1) {
                 $condition=null;
                 $condition['username']=session('S_USER_NAME');;
                 $role =Db::table('users')->where($condition)->field('rtrim(roles) roles')->find();
@@ -113,7 +114,24 @@ class MyAccess {
          }
         throw new Exception(MyAccess::buildMessage(session("S_ACTIONID"),session("S_ACTION"),$operate), MyException::WITH_OUT_PERMISSION);
     }
-
+    //检测登录IP地址是否与session表相同
+    public static  function checkLoginIP(){
+        $condition=null;
+        $condition['username']=session('S_USER_NAME');
+        $result=Db::table('sessions')->where($condition)->find();
+        if($result!=null) {
+            $remoteip=trim($result['remoteip']);
+            if ($remoteip!= get_client_ip()) {
+                session(null);
+                throw new Exception('login by '.$remoteip.'!!', MyException::LOGIN_BY_OHTER);
+            }
+        }
+        else {
+            session(null);
+            throw new Exception('', MyException::NOT_LOGIN);
+        }
+        return true;
+    }
     /**抛出错误信息
      * @param $errorCode
      * @param $errorMessage
@@ -139,7 +157,7 @@ class MyAccess {
         $error=array(
             '200'=>'ok',
             '701'=>'you have not login system!',
-            '702'=>'your account has been used on another computer!',
+            '702'=>'your account has been used on other computer!',
             '703'=>'without permission!',
             '704'=>'user is not exist!',
             '705'=>'parameter is not correct!',

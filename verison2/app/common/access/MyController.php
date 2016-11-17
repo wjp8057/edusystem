@@ -22,6 +22,7 @@ class MyController {
             MyAccess::getAccess();
             $log=new MyLog();
             config('log2db')&&$log->write('R');
+            config('single')&&MyAccess::checkLoginIP();
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
