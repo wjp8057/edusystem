@@ -59,4 +59,17 @@ class Course extends MyController{
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
     }
+
+    public function stop($year,$term,$courseno){
+        $result=null;
+        try{
+            $obj=new R32();
+            $result=$obj->stopNetWork($year,$term,$courseno);
+
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
 }

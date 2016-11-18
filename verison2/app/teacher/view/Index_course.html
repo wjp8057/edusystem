@@ -75,6 +75,30 @@
             }
             return false; //this is critical to stop the click event which will trigger a normal file download!
         });
+        $('#stop').click(function(){
+            var year=$('#year').val();
+            var term=$('#term').val();
+            if(year!='{$YEARTERM.year}'||term!='{$YEARTERM.term}')
+                $.messager.alert('错误','任课教师只能对本学期的课程学生操作！','error');
+            var courseno=getCourseNo();
+            if(!courseno)
+                return;
+            $.messager.confirm('确认','你确定停用么？\n学生可退出统一门户后重新登录接入网络！',function(r){
+                if (r){
+                    $.post('{$ROOT}/teacher/course/stop',{year:year,term:term,courseno:courseno},function(result){
+                        if (result.status==1){
+                            $.messager.show({
+                                title: '成功',
+                                msg: result.info
+                            });
+                        }
+                        else {
+                            $.messager.alert('错误',result.info,'error');
+                        }
+                    },'json');
+                }
+            });
+        });
     });
     function addTab(url,title,icon,check){
         var year=$('#year').val();
@@ -104,6 +128,7 @@
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出课堂考勤表</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="exportAll">导出全部课堂考勤表</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">打印学期课表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-no',plain:'true'" id="stop">断开学生网络</a>
     </div>
     <table id="dg"></table>
 </div>

@@ -9,8 +9,10 @@
 namespace app\common\service;
 
 
+use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
+use app\common\vendor\DrCom;
 use think\Exception;
 use app\common\vendor\PHPExcel;
 
@@ -107,4 +109,41 @@ class R32 extends  MyService {
         }
         PHPExcel::printCourseCheckIn($file,$array);
     }
+
+    public function stopNetWork($year,$term,$courseno){
+        set_time_limit(300);
+        $result=null;
+        $success=0;
+        $fail=0;
+        $order=0;
+        $condition=null;
+        $condition['courseno']=substr($courseno,0,7);
+        $condition['group']=substr($courseno,7,2);
+        $condition['r32.year']=$year;
+        $condition['r32.term']=$term;
+        if(!MyAccess::checkCourseTeacher($year,$term,$courseno))
+            return array('info' =>'您无法停用其他教师的课程学生网络', 'status' =>0);
+        $data=$this->query->table('r32')
+            ->field('studentno')->where($condition)->select();
+        if(is_array($data)&&count($data)>0) {
+            foreach($data as $one){
+                if(DrCom::stop($one['studentno'],$order)) {
+                    $success++;
+                }
+                else
+                    $fail++;
+                $order++;
+            }
+        }
+        if($fail>0){
+            $status=0;
+            $info=$success."个踢网成功，".$fail."个失败";
+        }
+        else {
+            $status=1;
+            $info=$success."个踢网成功!";
+        }
+        return array('info' => $info, 'status' => $status);
+    }
+
 }

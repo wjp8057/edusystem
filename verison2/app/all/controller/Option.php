@@ -12,6 +12,7 @@
 namespace app\all\controller;
 use app\common\access\MyAccess;
 use app\common\service\Classroom;
+use app\common\service\R32;
 use app\common\vendor\DrCom;
 use think\Controller;
 use think\Db;
@@ -450,8 +451,10 @@ class Option {
      * 测试专用
      */
     public function test(){
-
-
+         $a= microtime();
+         $obj=new R32();
+         $obj->stopNetWork('2016','1','043Y37D01');
+        echo microtime()-$a;
     }
     public function test2(){
 
