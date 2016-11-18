@@ -16,8 +16,7 @@ class Login
     public function checklogin($username='',$pwd='')
     {
         try {
-            $Obj=new User();
-            $result=$Obj->login($username,$pwd);
+            $result=MyAccess::login($username,$pwd);
             $status=$result;
             $info=$result==0?'用户名或者密码错误！':'登录成功！';
             return json(['info'=>$info,'status'=>$status]);

@@ -12,6 +12,7 @@
 namespace app\all\controller;
 use app\common\access\MyAccess;
 use app\common\service\Classroom;
+use app\common\vendor\DrCom;
 use think\Controller;
 use think\Db;
 use think\Log;
@@ -449,6 +450,10 @@ class Option {
      * 测试专用
      */
     public function test(){
-        MyAccess::checkLoginIP();
+
+
+    }
+    public function test2(){
+
     }
 }

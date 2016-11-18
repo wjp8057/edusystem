@@ -16,7 +16,180 @@ use think\Request;
 
 class MyAccess {
 
+    /**设置用户的session 信息
+     * @param $data
+     * @param $username
+     * @param $guid
+     * @return int
+     */
+    private static function  setSession($data,$username,$guid){
+        $roles = trim($data['roles']);
+        session(null);
+        session('S_USER_SCHOOL', $data['school']);
+        session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
+        session("S_DEPART_NAME", $data['schoolname']); //分部门
+        session("S_LOGIN_TYPE", 1); //注册用户为教师
+        session("S_USER_NAME", $username); //注册用户
+        session("S_TEACHERNO", $data['teacherno']); //注册用户
+        session("S_TEACHER_NAME", $data['teachername']); //注册用户
+        session("S_REAL_NAME", $data['teachername']); //注册用户
+        session("S_GUID", $guid); //注册GUID
+        session("S_ROLES", $roles); //注册角色信息
+        session("S_LOGIN_COUNT", 0);
+        session("S_MANAGE", $data['manage']);
+        $user['TEACHERNO'] = $data['teacherno'];
+        session("S_USER_INFO", $user);
+        if ($roles == "B*" || $roles == "*B")
+            return 2; //如果纯粹教师，返回状态2
+        return 1; //管理员教师返回状态1
+    }
+    /**更新数据库session表
+     * @param $username
+     * @param $guid
+     * @throws Exception
+     */
+    private static function updateSession($username,$guid){
+        //记录当次ip 时间，以便下次登陆用
+        $data = null;
+        $condition = null;
+        $condition['username'] = $username;
+        $data['username'] = $username;
+        $data['sessionid'] = $guid;
+        $data['remoteip'] = get_client_ip();
+        $data['logintime'] = date('Y-m-d H:i:s');
+        $result = Db::table('sessions')->where($condition)->find();
+        if (is_array($result)) {
+            Db::table('sessions')->where($condition)->update($data);
+        } else
+            Db::table('sessions')->insert($data);
+    }
+    /**根据用户名写入登录信息
+     * @param $username
+     * @return int  0为找不到，1为管理员，2为普通教师
+     */
+    public static function signInAsUserName($username){
+        $condition = null;
+        $condition['username'] = $username;
 
+        $data = Db::table('users')->join('teachers', 'teachers.teacherno=users.teacherno')
+            ->join('schools', 'schools.school=teachers.school')
+            ->field('schools.manage,teachers.teacherno,rtrim(teachers.name) as teachername,
+            teachers.school,rtrim(schools.name) as schoolname,rtrim(users.roles) as roles')
+            ->where($condition)->find();
+        if (is_array($data) && count($data) > 0) {
+            $guid = getGUID(session_id()); //获得GUID
+            self::updateSession($username, $guid);
+            return self::setSession($data,$username,$guid);
+        }
+        return 0;
+    }
+    /**根据教师号写入登录信息
+     * @param $teacherno
+     * @return int  0为找不到，1为管理员，2为普通教师
+     */
+    public static function signInAsTeacherNo($teacherno){
+        $condition = null;
+        $condition['teachers.teacherno'] = $teacherno;
+
+        $data = Db::table('users')->join('teachers', 'teachers.teacherno=users.teacherno')
+            ->join('schools', 'schools.school=teachers.school')
+            ->field('users.username,schools.manage,teachers.teacherno,rtrim(teachers.name) as teachername,
+            teachers.school,rtrim(schools.name) as schoolname,rtrim(users.roles) as roles')
+            ->where($condition)->find();
+        if (is_array($data) && count($data) > 0) {
+            $guid = getGUID(session_id()); //获得GUID
+            $username=trim($data['username']);
+            self::updateSession($username, $guid);
+            return self::setSession($data,$username,$guid);
+        }
+        return 0;
+
+    }
+    /**在用户表中检索信息
+     * @param $username
+     * @param $password
+     * @return int 0为找不到，1为管理员，2为普通教师
+     * @throws Exception
+     */
+    public static function loginAsUser($username,$password){
+        $condition = null;
+        $condition['username'] = $username;
+        $data = Db::table('users')
+            ->field('rtrim(users.password) as password')
+            ->where($condition)->find();
+        if (is_array($data) && count($data) > 0) {
+            if (md5(md5($data['password']) . session('S_GUID')) == $password) {
+                return self::signInAsUserName($username);
+            }
+        }
+        return 0;
+    }
+    /**以学生身份登录信息
+     * @param $studentno
+     * @return int 3为学生成功，0为失败
+     */
+    public static function  signInAsStudent($studentno){
+        $condition = null;
+        $condition['studentno'] = $studentno;
+        $data = Db::table('students')->join('classes', 'students.classno=classes.classno')
+            ->join('schools','schools.school=classes.school')
+            ->field('classes.school,students.studentno,rtrim(schools.name) schoolname,rtrim(students.name) studentname,rtrim(classes.classname) classname,students.classno')
+            ->where($condition)->find();
+        if (is_array($data) && count($data) > 0) {
+            $guid = getGUID(session_id()); //获得GUID
+            self::updateSession($studentno, $guid);
+
+            session(null);
+            session('S_USER_SCHOOL', $data['school']);
+            session('S_USER_SCHOOL_NAME', $data['schoolname']); //所在学院
+            session("S_DEPART_NAME", $data['classname']); //分部门
+            session("S_DEPART_NO", $data['classno']); //分部门
+            session("S_LOGIN_TYPE", 2); //注册用户为学生
+            session("S_USER_NAME", $data['studentno']); //注册用户
+            session("S_REAL_NAME", $data['studentname']); //注册用户
+            session("S_GUID", $guid); //注册GUID
+            session("S_ROLES", "S"); //注册角色信息
+            session("S_LOGIN_COUNT", 0);
+            session("S_USER_INFO", $data);
+            return 3;
+        }
+        return 0;
+    }
+    /**以学生身份登录
+     * @param $studentno
+     * @param $password
+     * @return int
+     */
+    public static  function loginAsStudent($studentno,$password){
+        $condition = null;
+        $condition['studentno'] = $studentno;
+        $data = Db::table('students')
+            ->field('rtrim(password) as password')
+            ->where($condition)->find();
+        if (is_array($data) && count($data) > 0) {
+            if (md5(md5($data['password']) . session('S_GUID')) == $password) {
+                return self::signInAsStudent($studentno);
+            }
+        }
+        return 0;
+    }
+    /**验证用户的密码
+     * @param $username string 用户名
+     * @param $password string 密码
+     * @return bool
+     * @throws \think\Exception
+     * @throws \think\exception\DbException
+     */
+    public static function login($username,$password){
+        $log=new MyLog();
+        session("S_USER_NAME",$username);
+        $log->write('R');
+        $result=self::loginAsUser($username,$password);
+        if($result==0){
+            $result=self::loginAsStudent($username,$password);
+        }
+        return $result;
+    }
     /**
      * @param $id
      * @param $action

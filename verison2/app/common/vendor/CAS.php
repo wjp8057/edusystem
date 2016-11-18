@@ -12,6 +12,7 @@
 // +----------------------------------------------------------------------
 
 namespace app\common\vendor;
+use app\common\access\MyAccess;
 use app\common\service\User;
 use think\Log;
 
@@ -20,7 +21,7 @@ class CAS {
      * @param string $ticket
      * @return int
      */
-    static public function signinNormal($ticket="",$service){
+    public  static  function signinNormal($ticket="",$service){
         $ssoURL="http://ids.nbcc.cn/sso/";
 
         if($ticket==""){
@@ -34,11 +35,9 @@ class CAS {
 
         $userid=($vals[2]["value"]);
         Log::log($string);
-        $user=new User();
-
-        $result=$user->signInAsTeacherNo($userid);
+        $result=MyAccess::signInAsTeacherNo($userid);
         if($result==0)
-            $result=$user->signInAsStudent($userid);
+            $result=MyAccess::signInAsStudent($userid);
         return $result;
     }
 }

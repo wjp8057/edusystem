@@ -50,5 +50,24 @@ class Index extends Template
         $this->assign('result',$result);
         return $this->fetch();
     }
+    //班级课表
+    function classtable($year, $term)
+    {
+        try {
+            $title['year'] = $year;
+            $title['term'] = $term;
+            $title['time'] = date("Y-m-d H:i:s");
+            $title['classname'] = session('S_DEPART_NAME');
+            $this->assign('title', $title);
+            $classno = session('S_DEPART_NO');
+            $schedule = new Schedule();
+            $time = $schedule->getTeacherTimeTable($year, $term, $classno);
+            $this->assign('time', $time);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 
 }

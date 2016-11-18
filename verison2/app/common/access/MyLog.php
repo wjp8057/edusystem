@@ -35,7 +35,7 @@ class MyLog {
         $request = Request::instance();
         $data['host']=$request->domain();
         $data['username']=session("S_USER_NAME");
-        $data['name']=session("S_TEACHER_NAME");
+        $data['name']=session("S_REAL_NAME");
         $data['role']=session("S_ROLES");
 
         $data['url']=$request->url();

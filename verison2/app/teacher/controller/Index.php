@@ -113,7 +113,7 @@ class Index extends Template
     /*
      * 教师课表页面
      */
-    function timetable($year = '', $term = '')
+    function timetable($year, $term)
     {
         try {
             $title['year'] = $year;
