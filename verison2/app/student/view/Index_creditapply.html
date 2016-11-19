@@ -1,0 +1,178 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/student/vacation/creditlist',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val()
+            },
+            columns:[[
+                {field:'year',title:'学年',width:50,align:'center'},
+                {field:'term',title:'学期',width:50,align:'center'},
+                {field:'reason',title:'理由*',width:250,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]',required:true}}},
+                {field:'credit',title:'学分*',width:50,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision:1}}},
+                {field:'type',title:'类型*',width:100,align:'center',editor:{type:'combobox', options:{editable:false,required:true,panelHeight:'auto',
+                    url:'{$ROOT}/all/option/credittype',
+                    valueField:'type',textField:'name',
+                    onSelect:function(rec){
+                        tt=$('#dg').datagrid('getSelected');
+                        tt.typename=rec.name;
+                    }}},
+                    formatter:function(val,rec){
+                        return rec.typename;
+                    }},
+                {field:'cerdate',title:'证书时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
+                {field:'applydate',title:'申请时间',width:120,align:'center'},
+                {field:'audit',title:'审核',width:50,align:'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }},
+                {field:'verify',title:'认定',width:50,align:'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }}
+            ]],
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val()
+            });
+        });
+        $("#insert,#menu_insert").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            tt.datagrid('insertRow',{
+                index: 0,
+                row: {
+                    year:'{$YEARTERM.year}',
+                    term:'{$YEARTERM.term}'
+                }
+            });
+            tt.datagrid('startEditing',{field:'reason',index:0});
+            current_datagrid=tt;
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkAudit(rows))
+                    return;
+                effectRow["updated"]=$.toJSON(rows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkAudit(rows))
+                    return;
+                effectRow["deleted"]=$.toJSON(rows);
+            }
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkAudit(rows))
+                    return;
+                effectRow["inserted"]=$.toJSON(rows);
+            }
+            if(count<=0) //如果没有任何更新，就退出
+                return;
+
+            $.post('{$ROOT}/student/vacation/creditupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+    });
+    function checkAudit(rows){
+        var amount=rows.length;
+        for(var i=0;i<amount;i++){
+            if(rows[i]['audit']=='1') {
+                $.messager.alert('错误', rows[i]['reason']+'已经通过审核，无法修改', 'error');
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="insert">新增</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+
+    </div>
+    <table id="dg"></table>
+</div>

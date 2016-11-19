@@ -402,7 +402,7 @@ class Option {
         }
         return json($result);
     }
-    //考核方式 考试、考查、考核
+    //课程类别
     public function coursecat(){
         $result=null;
         try {
@@ -442,6 +442,20 @@ class Option {
                 $result = array_merge($all, $result);
             }
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function credittype($only=1){
+        $result=null;
+        try {
+            $result =Db::table('credittype')->field('rtrim(type) as type,rtrim(name) as name')->order('type')->select();
+            if($only==0) {
+                $all[] = array('type' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }

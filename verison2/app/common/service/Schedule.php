@@ -21,8 +21,8 @@ class Schedule extends MyService {
 
     /**将单条课程信息放入课表数组
      * @param $result
-     * @param $one
-     * @param $string
+     * @param $one string 数据集
+     * @param $string string 特殊字符串
      * @return mixed
      */
     private function  _buildSingle($result,$one,$string){
@@ -129,7 +129,7 @@ class Schedule extends MyService {
         $condition['scheduleplan.term']=$term;
         $result=$this->query->table('teacherplan')->join('scheduleplan ',' scheduleplan.recno=teacherplan.map')
             ->join('courseplan ',' courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group] and courseplan.year=scheduleplan.year
-            and courseplan.term=courseplan.term')
+            and scheduleplan.term=courseplan.term')
             ->join('classes ',' classes.classno=courseplan.classno')
             ->join('courses ',' courses.courseno=courseplan.courseno')
             ->join('schedule ',' schedule.map=teacherplan.recno','LEFT')
@@ -139,8 +139,6 @@ dbo.GROUP_CONCAT(distinct rtrim(classes.classname),',') classname")
             ->where($condition)->where('(schedule.day is null or day =0)')->select();
         return $result;
     }
-
-
     /**获取某个教师指定学年学期的课表，二维数组，第一维为星期第二维为节次
      * @param string $year
      * @param string $term
@@ -190,7 +188,14 @@ classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.c
         return $result;
     }
 
-
+    /**获取教室指定学年学期的课表
+     * @param string $year
+     * @param string $term
+     * @param string $roomno 教室号
+     * @param bool $all 是否显示借用部分
+     * @return mixed|null
+     * @throws Exception
+     */
     public function getRoomTimeTable($year='',$term='',$roomno='',$all=false){
         if($year==''||$term==''||$roomno=='')
             throw new Exception('year term roomno is empty ',MyException::PARAM_NOT_CORRECT);
@@ -239,6 +244,148 @@ classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.c
             foreach ($data as $one) {
                 $string = $one['schoolname'] . '借用<br/>周次:' . implode(' ', str_split(week_dec2bin_reserve($one['week'], 20), 4)) . '<br/>';
                 $result = $this->_buildSingle($result, $one, $string);
+            }
+        }
+        return $result;
+    }
+
+    /**获取班级的未排课课程
+     * @param $year
+     * @param $term
+     * @param $classno
+     * @return false|\PDOStatement|string|\think\Collection
+     */
+    private function _getClassCourseUnschedule($year,$term,$classno){
+        $condition=null;
+        $condition['courseplan.classno']=$classno;
+        $condition['courseplan.year']=$year;
+        $condition['courseplan.term']=$term;
+        $result=$this->query->table('courseplan')
+            ->join('scheduleplan ',' courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group] and courseplan.year=scheduleplan.year
+            and scheduleplan.term=courseplan.term')
+            ->join('courses ',' courses.courseno=courseplan.courseno')
+            ->join('teacherplan','teacherplan.map=scheduleplan.recno','LEFT')
+            ->join('schedule ',' schedule.map=teacherplan.recno','LEFT')
+            ->field("rtrim(courses.coursename) coursename,scheduleplan.courseno+scheduleplan.[group] courseno")
+            ->group("courses.coursename,scheduleplan.courseno+scheduleplan.[group]")
+            ->where($condition)->where('(schedule.day is null or day =0)')->select();
+        return $result;
+    }
+    /**获取班级课表信息
+     * @param string $year
+     * @param string $term
+     * @param string $classno
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getClassTimeTable($year='',$term='',$classno=''){
+        if($year==''||$term==''||$classno=='')
+            throw new Exception('year term classno is empty ',MyException::PARAM_NOT_CORRECT);
+
+        $condition=null;
+        $result=null;
+        for($i=0;$i<10;$i++){
+            for($j=0;$j<10;$j++)
+                $result[$i][$j]='';
+        }
+        $condition['courseplan.classno']=$classno;
+        $condition['courseplan.year']=$year;
+        $condition['courseplan.term']=$term;
+        //读取教师的排课记录。
+        $data=$this->query->table('courseplan')
+            ->join('scheduleplan','scheduleplan.courseno=courseplan.courseno and scheduleplan.[group]= courseplan.[group]
+            and scheduleplan.year=courseplan.year and scheduleplan.term=courseplan.term')
+            ->join('teacherplan ','teacherplan.map=scheduleplan.recno')
+            ->join('schedule ',' schedule.map=teacherplan.recno')
+            ->join('teachers ',' teachers.teacherno=teacherplan.teacherno')
+            ->join('oewoptions ',' oewoptions.code=schedule.oew')
+            ->join('classrooms ',' classrooms.roomno=schedule.roomno')
+            ->join('courses ',' courses.courseno=schedule.courseno')
+            ->join('taskoptions ',' taskoptions.code=teacherplan.task')
+            ->join('timesections ',' timesections.name=schedule.time')
+            ->field("dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,dbo.GROUP_CONCAT(rtrim(teachers.name),',') teachername,classrooms.jsn roomname,
+            schedule.courseno+schedule.[group] as courseno,courses.coursename,schedule.day,schedule.time,taskoptions.name taskname,timesections.value as timename")
+            ->group('classrooms.jsn ,schedule.courseno+schedule.[group],courses.coursename,schedule.day,schedule.time,taskoptions.name,timesections.value')
+            ->where($condition)->select();
+        foreach($data as $one){
+            $string=$one['courseno'].':'.$one['coursename'].'('.$one['roomname'].')<br/>'.$one['teachername'].' '.$one['taskname'];
+            $common_week=isset($this->oew[$one['week']]);
+            $string=$common_week?$this->oew[$one['week']].$string.'<br/>':$string.'<br/>周次:'.implode(' ',str_split(week_dec2bin_reserve($one['week'],20), 4)).'<br/>';
+            $result=$this->_buildSingle($result,$one,$string);
+        }
+        //读取教师未排时间地点的课程
+        $unschedule=$this->_getClassCourseUnschedule($year,$term,$classno);
+        if(count($unschedule)>0){
+            foreach($unschedule as $one){
+                $result[0][0].=$one['courseno'].':'.$one['coursename'].',';
+            }
+        }
+        return $result;
+    }
+
+    private function _getStudentCourseUnschedule($year,$term,$studentno){
+        $condition=null;
+        $condition['r32.studentno']=$studentno;
+        $condition['r32.year']=$year;
+        $condition['r32.term']=$term;
+        $result=$this->query->table('r32')
+            ->join('scheduleplan ',' r32.courseno+r32.[group]=scheduleplan.courseno+scheduleplan.[group] and r32.year=scheduleplan.year
+            and scheduleplan.term=r32.term')
+            ->join('courses ',' courses.courseno=r32.courseno')
+            ->join('teacherplan','teacherplan.map=scheduleplan.recno','LEFT')
+            ->join('schedule ',' schedule.map=teacherplan.recno','LEFT')
+            ->field("rtrim(courses.coursename) coursename,scheduleplan.courseno+scheduleplan.[group] courseno")
+            ->group("courses.coursename,scheduleplan.courseno+scheduleplan.[group]")
+            ->where($condition)->where('(schedule.day is null or day =0)')->select();
+        return $result;
+    }
+    /**获取班级课表信息
+     * @param string $year
+     * @param string $term
+     * @param string $studentno
+     * @return mixed|null
+     * @throws Exception
+     */
+    public function getStudentTimeTable($year='',$term='',$studentno=''){
+        if($year==''||$term==''||$studentno=='')
+            throw new Exception('year term studentno is empty ',MyException::PARAM_NOT_CORRECT);
+
+        $condition=null;
+        $result=null;
+        for($i=0;$i<10;$i++){
+            for($j=0;$j<10;$j++)
+                $result[$i][$j]='';
+        }
+        $condition['r32.studentno']=$studentno;
+        $condition['r32.year']=$year;
+        $condition['r32.term']=$term;
+        //读取教师的排课记录。
+        $data=$this->query->table('r32')
+            ->join('scheduleplan','scheduleplan.courseno=r32.courseno and scheduleplan.[group]= r32.[group]
+            and scheduleplan.year=r32.year and scheduleplan.term=r32.term')
+            ->join('teacherplan ','teacherplan.map=scheduleplan.recno')
+            ->join('schedule ',' schedule.map=teacherplan.recno')
+            ->join('teachers ',' teachers.teacherno=teacherplan.teacherno')
+            ->join('oewoptions ',' oewoptions.code=schedule.oew')
+            ->join('classrooms ',' classrooms.roomno=schedule.roomno')
+            ->join('courses ',' courses.courseno=schedule.courseno')
+            ->join('taskoptions ',' taskoptions.code=teacherplan.task')
+            ->join('timesections ',' timesections.name=schedule.time')
+            ->field("dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,dbo.GROUP_CONCAT(rtrim(teachers.name),',') teachername,classrooms.jsn roomname,
+            schedule.courseno+schedule.[group] as courseno,courses.coursename,schedule.day,schedule.time,taskoptions.name taskname,timesections.value as timename")
+            ->group('classrooms.jsn ,schedule.courseno+schedule.[group],courses.coursename,schedule.day,schedule.time,taskoptions.name,timesections.value')
+            ->where($condition)->select();
+        foreach($data as $one){
+            $string=$one['courseno'].':'.$one['coursename'].'('.$one['roomname'].')<br/>'.$one['teachername'].' '.$one['taskname'];
+            $common_week=isset($this->oew[$one['week']]);
+            $string=$common_week?$this->oew[$one['week']].$string.'<br/>':$string.'<br/>周次:'.implode(' ',str_split(week_dec2bin_reserve($one['week'],20), 4)).'<br/>';
+            $result=$this->_buildSingle($result,$one,$string);
+        }
+        //读取教师未排时间地点的课程
+        $unschedule=$this->_getStudentCourseUnschedule($year,$term,$studentno);
+        if(count($unschedule)>0){
+            foreach($unschedule as $one){
+                $result[0][0].=$one['courseno'].':'.$one['coursename'].',';
             }
         }
         return $result;

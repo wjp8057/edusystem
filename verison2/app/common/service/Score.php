@@ -33,7 +33,7 @@ class Score extends  MyService {
         if($year==''||$term==''||$courseno=='')
             throw new Exception('year term courseno is empty', MyException::PARAM_NOT_CORRECT);
 
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['courseno']=substr($courseno,0,7);
         $condition['group']=substr($courseno,7,2);
@@ -50,7 +50,6 @@ class Score extends  MyService {
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-
     /**更新期末考试成绩
      * @param $postData
      * 数据格式范例
@@ -214,5 +213,38 @@ class Score extends  MyService {
         }
         return $result;
     }
-    
+
+    /**获取层级列表
+     * @param int $page
+     * @param int $rows
+     * @param string $year
+     * @param string $term
+     * @param string $studentno
+     * @return array
+     */
+    public function getScoreList($page=1,$rows=20,$year='',$term='',$studentno){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        if($studentno!='%') $condition['scores.studentno']=array('like',$studentno);
+        if($year!='') $condition['scores.year']=$year;
+        if($term!='') $condition['scores.term']=$term;
+        $count= $this->query->table('scores')->where($condition)->count();// 查询满足要求的总记录数
+        $data=$this->query->table('scores')
+            ->join('students ',' students.studentno=scores.studentno')
+            ->join('approachcode ',' approachcode.code=scores.approach')
+            ->join('courses',' courses.courseno=scores.courseno')
+            ->join('examremoptions','examremoptions.code=scores.examrem')
+            ->join('examoptions','examoptions.name=scores.testtype')
+            ->join('courseapproaches','courseapproaches.name=scores.plantype')
+            ->where($condition)->page($page,$rows)
+            ->field("scores.year,scores.term,students.studentno,students.name studentname,scores.courseno+scores.[group] courseno,
+                courses.credits,rtrim(courses.coursename) coursename,isnull(case when testscore = '' then cast(examscore as char) else rtrim(testscore) end,'') as score,
+                isnull(case when testscore2 = '' then cast(examscore2 as char) else rtrim(testscore2) end,'') as makup,
+                rtrim(examremoptions.name) examremname,rtrim(approachcode.name) as approachname,point,rtrim(examoptions.value) as examtypename,
+                rtrim(courseapproaches.value) courseapproachname")
+            ->order('year,term,courseno')->select();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
 }

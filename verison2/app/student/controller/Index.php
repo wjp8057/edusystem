@@ -13,6 +13,7 @@ use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
 use app\common\service\Graduate;
+use app\common\service\Schedule;
 use app\common\service\Student;
 use app\common\service\Studentplan;
 
@@ -51,17 +52,19 @@ class Index extends Template
         return $this->fetch();
     }
     //班级课表
-    function classtable($year, $term)
+    function classtable($year='', $term='')
     {
         try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
+            $classno = session('S_DEPART_NO');
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
             $title['classname'] = session('S_DEPART_NAME');
             $this->assign('title', $title);
-            $classno = session('S_DEPART_NO');
             $schedule = new Schedule();
-            $time = $schedule->getTeacherTimeTable($year, $term, $classno);
+            $time = $schedule->getClassTimeTable($year, $term, $classno);
             $this->assign('time', $time);
 
         } catch (\Exception $e) {
@@ -69,5 +72,25 @@ class Index extends Template
         }
         return $this->fetch();
     }
+    //个人课表
+    function mytable($year='', $term='')
+    {
+        try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
+            $studentno = session('S_USER_NAME');
+            $title['year'] = $year;
+            $title['term'] = $term;
+            $title['time'] = date("Y-m-d H:i:s");
+            $title['studentname'] = session('S_REAL_NAME');
+            $this->assign('title', $title);
+            $schedule = new Schedule();
+            $time = $schedule->getStudentTimeTable($year, $term, $studentno);
+            $this->assign('time', $time);
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

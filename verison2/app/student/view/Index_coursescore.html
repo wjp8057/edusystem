@@ -3,18 +3,22 @@
     $(function(){
         $('#dg').datagrid({
             title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/student/vacation/testplan',toolbar:'#toolbar',
+            url:'{$ROOT}/student/score/course',toolbar:'#toolbar',
             queryParams: {
-                year: $('#year').val(),
-                term: $('#term').val()
+
             },
             columns:[[
+                {field:'year',title:'学年',width:50,align:'center'},
+                {field:'term',title:'学期',width:50,align:'center'},
                 {field:'courseno',title:'课号',width:80,align:'center'},
-                {field:'coursename',title:'课名',width:200,align:'center'},
-                {field:'testtime',title:'考试时间',width:200,align:'center'},
-                {field:'roomno1',title:'考场1',width:100,align:'center'},
-                {field:'roomno2',title:'考场2',width:100,align:'center'},
-                {field:'roomno3',title:'考场3',width:100,align:'center'}
+                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'credits',title:'学分',width:50,align:'center'},
+                {field:'score',title:'总评',width:60,align:'center'},
+                {field:'makeup',title:'补考',width:60,align:'center'},
+                {field:'point',title:'积点分',width:60,align:'center'},
+                {field:'examremname',title:'考核备注',width:60,align:'center'},
+                {field:'approachname',title:'修课方式',width:60,align:'center'},
+                {field:'courseapproachname',title:'考核方式',width:60,align:'center'},
             ]]
         });
         $("#search").click(function() {
@@ -31,7 +35,7 @@
     <div id="toolbar">
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a>
     </div>
     <table id="dg"></table>
 </div>

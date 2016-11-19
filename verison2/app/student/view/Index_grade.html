@@ -1,0 +1,33 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/student/score/grade',toolbar:'#toolbar',
+            queryParams: {
+
+            },
+            columns:[[
+                {field:'year',title:'年度',width:50,align:'center'},
+                {field:'month',title:'月份',width:50,align:'center'},
+                {field:'typename',title:'考试类型',width:200,align:'center'},
+                {field:'gradename',title:'考试级别',width:200,align:'center'},
+                {field:'score',title:'成绩',width:60,align:'center'}
+            ]]
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val()
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a>
+    </div>
+    <table id="dg"></table>
+</div>
