@@ -33,7 +33,7 @@ class CreditApply extends MyService {
             ->join('credittype','credittype.type=creditapply.type')
             ->where($condition)
             ->field('creditapply.id,creditapply.year,creditapply.term,students.studentno,rtrim(reason) reason,credit,cerdate,applydate,rtrim(schools.name) schoolname,
-            rtrim(classes.classname) classname,rtrim(students.name) studentname,audit,verify,rtrim(credittype.name) typename,creditapply.type')
+            rtrim(classes.classname) classname,rtrim(students.name) studentname,audit,verify,rtrim(credittype.name) typename,creditapply.type,filedate')
             ->order('year,term,studentno')->select();
         $count= $this->query->table('creditapply')
             ->join('students','students.studentno=creditapply.studentno')

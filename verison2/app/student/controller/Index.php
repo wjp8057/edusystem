@@ -9,6 +9,7 @@
 namespace app\student\controller;
 
 
+use app\common\access\Item;
 use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
@@ -88,6 +89,17 @@ class Index extends Template
             $time = $schedule->getStudentTimeTable($year, $term, $studentno);
             $this->assign('time', $time);
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+    function creditapply()
+    {
+        try {
+            $valid=Item::getValidItem('A');
+            $valid['now']=date("m/d/Y H:m:s");
+            $this->assign('valid', $valid);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

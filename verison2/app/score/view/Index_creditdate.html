@@ -1,0 +1,55 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var start=$('#start');
+        var stop=$('#stop');
+        start.datetimebox({
+            value: '{$valid.start}',
+            required: true,
+            showSeconds: false
+        });
+        stop.datetimebox({
+            value: '{$valid.stop}',
+            required: true,
+            showSeconds: false
+        });
+        $("#save").click(function() {
+            if($("#myForm").form('validate')){
+                $.post('{$ROOT}/score/credit/updatedate',{start:start.datetimebox("getValue"),stop:stop.datetimebox("getValue")},function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
+
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">设置学分起止时间</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="start">开始时间</label></th>
+            <td><input id="start" /></td>
+        </tr>
+        <tr>
+            <th><label for="stop">结束时间</label></th>
+            <td><input id="stop" /></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存设置</a>
+    </div>
+</div>

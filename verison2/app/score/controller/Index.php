@@ -54,7 +54,6 @@ class Index extends  Template {
         }
 
     }
-
     /**学期初补考成绩输入界面
      * @param string $year
      * @param string $term
@@ -93,8 +92,6 @@ class Index extends  Template {
         }
         return $this->fetch();
     }
-
-
     /**
      * 成绩输入-打印成绩单
      * @param string $year
@@ -135,5 +132,26 @@ class Index extends  Template {
         }
         return $this->fetch();
 
+    }
+
+    function creditdate(){
+        try {
+            $valid=Item::getValidItem('A');
+            $valid['now']=date("m/d/Y H:m:s");
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+
+    function creativestudent($id){
+        try {
+            $project=Item::getProjectItem($id);
+            $this->assign('project', $project);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
     }
 }

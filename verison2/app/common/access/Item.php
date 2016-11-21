@@ -157,11 +157,13 @@ class Item {
      * @return mixed
      * @throws Exception
      */
-    public static  function getOEWItem($oew){
+    public static  function getOEWItem($oew,$alert=true){
         $condition['code']=$oew;
         $result=Db::table('oewoptions')->field('rtrim(name) name,timebit,timebit2')->where($condition)->select();
-        if(!is_array($result)||count($result)!=1)
-            throw new Exception('oew'.$oew, MyException::ITEM_NOT_EXISTS);
+        if(!is_array($result)||count($result)!=1) {
+            if($alert)
+            throw new Exception('oew' . $oew, MyException::ITEM_NOT_EXISTS);
+        }
         return $result[0];
     }
 
@@ -170,16 +172,18 @@ class Item {
      * @return mixed
      * @throws Exception
      */
-    public static function getTimeSectionItem($time)
+    public static function getTimeSectionItem($time,$alert=true)
     {
         $condition['name']=$time;
         $result=Db::table('timesections')->field('rtrim(value) value,timebits,timebits2')->where($condition)->select();
-        if(!is_array($result)||count($result)!=1)
-            throw new Exception('time'.$time,  MyException::ITEM_NOT_EXISTS);
+        if(!is_array($result)||count($result)!=1) {
+            if($alert)
+            throw new Exception('time' . $time, MyException::ITEM_NOT_EXISTS);
+        }
         return $result[0];
     }
     //获取某个开设专业
-    public static function getMajorItem($majorschool)
+    public static function getMajorItem($majorschool,$alert=true)
     {
         $condition['majorschool']=$majorschool;
         $result=Db::table('majors')->join('schools','schools.school=majors.school')
@@ -187,8 +191,32 @@ class Item {
             ->join('majordirection','majordirection.direction=majors.direction')
             ->field('majors.majorschool,rtrim(schools.name) schoolname,majors.direction,rtrim(majordirection.name) directionname,
             majors.majorno,rtrim(majorcode.name) majorname,majors.rowid')->where($condition)->select();
-        if(!is_array($result)||count($result)!=1)
-            throw new Exception('majorschool'.$majorschool,  MyException::ITEM_NOT_EXISTS);
+        if(!is_array($result)||count($result)!=1) {
+            if($alert)
+            throw new Exception('majorschool' . $majorschool, MyException::ITEM_NOT_EXISTS);
+        }
         return $result[0];
+    }
+    //获取有效时间段
+    public static function getValidItem($type,$alert=true){
+        $condition=null;
+        $condition['type']=$type;
+        $data=Db::table('valid')->where($condition)->field('start,stop')->find();
+        if(!is_array($data)) {
+            if($alert)
+            throw new Exception('type' . $type, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
+    //获取创新技能学分项目
+    public static function getProjectItem($id,$alert=true){
+        $condition=null;
+        $condition['id']=$id;
+        $data=Db::table('project')->where($condition)->field('id,name,credit,date')->find();
+        if(!is_array($data)) {
+            if($alert)
+                throw new Exception('id' . $id, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
     }
 }

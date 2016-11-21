@@ -2,49 +2,31 @@
 <script type="text/javascript">
 
     $(function(){
-        var stopTime=new Date('{$valid.stop}');
-        var startTime=new Date('{$valid.start}');
-        var nowTime=new Date('{$valid.now}');
-        if(nowTime.getTime()>stopTime.getTime()||nowTime.getTime()<startTime.getTime()){
-            $('#insert').linkbutton('disable');
-        }
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0',
+            valueField:'school',
+            textField:'name'
+        });
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
         $('#dg').datagrid({
-            title:'现行{$YEARTERM.year}学年{$YEARTERM.term}第学期认定，申报时间：{$valid.start} 至 {$valid.stop}',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/student/vacation/creditlist',toolbar:'#toolbar',
+            title:'统一申报项目列表',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/score/credit/creativelist',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
-                term: $('#term').val()
+                term: $('#term').val(),
+                school:school.combobox('getValue')
             },
             columns:[[
                 {field:'year',title:'学年',width:50,align:'center'},
                 {field:'term',title:'学期',width:50,align:'center'},
-                {field:'reason',title:'理由*',width:250,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]',required:true}}},
+                {field:'name',title:'名称*',width:250,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]',required:true}}},
                 {field:'credit',title:'学分*',width:50,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision:1}}},
-                {field:'type',title:'类型*',width:100,align:'center',editor:{type:'combobox', options:{editable:false,required:true,panelHeight:'auto',
-                    url:'{$ROOT}/all/option/credittype',
-                    valueField:'type',textField:'name',
-                    onSelect:function(rec){
-                        tt=$('#dg').datagrid('getSelected');
-                        tt.typename=rec.name;
-                    }}},
-                    formatter:function(val,rec){
-                        return rec.typename;
-                    }},
-                {field:'cerdate',title:'证书时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
-                {field:'applydate',title:'申请时间',width:120,align:'center'},
-                {field:'audit',title:'审核',width:50,align:'center',formatter:function(val,rec){
-                    if(val==1)
-                        return '√';
-                    else
-                        return '';
-                }},
-                {field:'verify',title:'认定',width:50,align:'center',formatter:function(val,rec){
-                    if(val==1)
-                        return '√';
-                    else
-                        return '';
-                }},
-                {field:'filedate',title:'归档时间',width:120,align:'center'},
+                {field:'typename',title:'类型',width:100,align:'center'},
+                {field:'schoolname',title:'学院',width:100,align:'center'},
+                {field:'date',title:'时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
+                {field:'amount',title:'人数',width:50,align:'center'}
             ]],
             //点击单元格时候的事件
             onClickCell:function(index, field){
@@ -72,10 +54,6 @@
             });
         });
         $("#menu_insert,#insert").click(function(){
-            if($("#insert").linkbutton('options').disabled) {
-                $.messager.alert('错误','现在不能新报认定项目，可以修改或删除未审核条目。申报时间：{$valid.start}至{$valid.stop}','error');
-                return;
-            } //如果禁用了，就直接退出。
             var tt=$('#dg');
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
             if(tt.datagrid('editIndex')!=undefined) return;
@@ -83,10 +61,14 @@
                 index: 0,
                 row: {
                     year:'{$YEARTERM.year}',
-                    term:'{$YEARTERM.term}'
+                    term:'{$YEARTERM.term}',
+                    type:'A',
+                    typename:'创新技能',
+                    school:'{$USERINFO.school}',
+                    schoolname:'{$USERINFO.schoolname}'
                 }
             });
-            tt.datagrid('startEditing',{field:'reason',index:0});
+            tt.datagrid('startEditing',{field:'name',index:0});
             current_datagrid=tt;
         });
         //取消更改
@@ -107,7 +89,7 @@
             var effectRow = {};
             if(rows.length>0){
                 count+=rows.length;
-                if(!checkAudit(rows))
+                if(!checkSchool(rows))
                     return;
                 effectRow["updated"]=$.toJSON(rows);
             }
@@ -115,7 +97,7 @@
             rows=tt.datagrid('getChanges','deleted');
             if(rows.length>0){
                 count+=rows.length;
-                if(!checkAudit(rows))
+                if(!checkAmount(rows)||!checkSchool(rows))
                     return;
                 effectRow["deleted"]=$.toJSON(rows);
             }
@@ -123,14 +105,14 @@
             rows=tt.datagrid('getChanges','inserted');
             if(rows.length>0){
                 count+=rows.length;
-                if(!checkAudit(rows))
+                if(!checkSchool(rows))
                     return;
                 effectRow["inserted"]=$.toJSON(rows);
             }
             if(count<=0) //如果没有任何更新，就退出
                 return;
 
-            $.post('{$ROOT}/student/vacation/creditupdate',effectRow,function(result){
+            $.post('{$ROOT}/score/credit/creativeprojectupdate',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -145,7 +127,7 @@
         });
         //右键菜单删除按钮
         $("#menu_delete,#delete").click(function(){
-            tt=$('#dg');
+            var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {
                 tt.datagrid('endEditing');
@@ -156,12 +138,35 @@
                 $.messager.alert('错误','请先选中一条记录','error')
             }
         });
+        $("#menu_detail,#detail").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                parent.menuTabs.addTab(row.name+"-参加人员名单","{$ROOT}/score/index/creativestudent?id="+row.id,"icon icon-people");
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
     });
-    function checkAudit(rows){
+    //检查项目中人数是否为0，不为零的不能删除,
+    function checkAmount(rows){
         var amount=rows.length;
         for(var i=0;i<amount;i++){
-            if(rows[i]['audit']=='1') {
-                $.messager.alert('错误', rows[i]['reason']+'已经通过审核，无法修改', 'error');
+            if(parseInt(rows[i]['amount'])>0) {
+                $.messager.alert('错误', rows[i]['name']+'参加人数不为零，无法删除', 'error');
+                return false;
+            }
+        }
+        return true;
+    }
+    //检测是否本学院的。
+    function checkSchool(rows){
+        var count=rows.length;
+        for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+            if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                $.messager.alert('错误','你无法修改其他学院的项目信息（'+rows[i].name+'）！','error');
+                $("#cancel").click();
                 return false;
             }
         }
@@ -172,6 +177,7 @@
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div id='menu_detail' data-options="iconCls:'icon icon-people'">参加人员名单</div>
         <div class="menu-sep"></div>
         <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
@@ -183,7 +189,9 @@
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        <label for="school">学院：</label><input id="school"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-people',plain:'true'" id="detail">参加人员名单</a>
 
     </div>
     <table id="dg"></table>
@@ -191,8 +199,6 @@
     <div class="information">
         <ol>说明：
             <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
-            <li>学分认定只能在申报时间内新增，其他时间可以修改未经审核的条目，一旦经过审核就无法更改。</li>
-            <li>显示归档时间的表示文件以完成认定并归档，计入创新技能学分总数。</li>
         </ol>
     </div>
 </div>
