@@ -24,8 +24,8 @@
             pageList: [50, 100, 200],
             columns: [[
                 {field: 'studentno', title: '学号', width: 70, align: 'center'},
-                {field: 'name', title: '姓名', width: 70, align: 'center'},
-                {field:'reason',title:'理由*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]',required:true}}},
+                {field: 'studentname', title: '姓名', width: 70, align: 'center'},
+                {field:'reason',title:'理由*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[25]'}}},
                 {field:'credit',title:'学分*',width:50,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision:1}}},
                 {field:'cerdate',title:'证书时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
                 {field:'verify',title:'认定',width:50,align:'center',formatter:function(val,rec){
@@ -44,6 +44,12 @@
                     left: e.pageX,
                     top: e.pageY
                 });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
             },
             //数据行上右键菜单
             onRowContextMenu: function (e, rowindex, row) {
@@ -112,17 +118,6 @@
                 school:$('#school').combobox('getValue')
             });
         });
-        function checkStudentSchool(rows) {
-            var count = rows.length;
-            for (var i = 0; i < count; i++) { //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
-                if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
-                    $.messager.alert('错误', '你无法修改其他学院的学生信息（' + rows[i].name + '）！', 'error');
-                    $("#cancel").click();
-                    return false;
-                }
-            }
-            return true;
-        }
         $("#add,#menu_add").click(function () {
             var tt = $('#dg');
             var tt2=$('#dg2');
@@ -140,55 +135,76 @@
                 tt.datagrid('insertRow', {
                     index: 0,
                     row: {
-                        studentno:rows[i].studentno,name:rows[i].name,
+                        studentno:rows[i].studentno,
+                        studentname:rows[i].name,
                         credit:'{$project.credit}',
-                        cerdate:'{$project.date}'
+                        cerdate:'{$project.date}',
+                        reason:'',
+                        id:0
                     }
                 });
             }
         });
         $("#remove,#menu_remove").click(function () {
-            var tt = $('#dg');
-            var rows=tt.datagrid('getSelections');
-            var length=rows.length;
-            var message="";
-            for(var i=length-1;i>=0;i--){
-                if(rows[i].verify==1){
-                    message+= rows[i].studentno+rows[i].name+',';
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                if(row['verify']=="1") {
+                    $.messager.alert('错误', '该记录已通过认定，无法删除！', 'error');
+                    return;
                 }
-                else{
-                    var index=tt.datagrid('getRowIndex',rows[i].studentno);
-                    tt.datagrid('deleteRow',index);
-                }
-
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
             }
-            if(message!="")
-                $.messager.alert('提示',message+'的学分已认定，无法移除！', 'info');
+            else{
+                $.messager.alert('错误','请先选中一条记录','error');
+            }
         });
         //绑定点击保存按钮事件
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id=rows[i].id;
+                updateObj.studentno = rows[i].studentno;
+                updateObj.credit = rows[i].credit;
+                updateObj.cerdate= rows[i].cerdate;
+                updateObj.reason = rows[i].reason;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
         $("#save,#menu_save").click(function () {
             var tt = $('#dg');
             tt.datagrid('endEditing');
             if (tt.datagrid('editIndex') != undefined) return;
             //获取更改的数据行内容
+            var count=0;
+            var effectRow = {};
+
             var rows = tt.datagrid('getChanges', 'inserted');
-            if (!checkStudentSchool(rows)) return;
-            var length=rows.length;
-            if (length<= 0) { //如果没有任何更新，就退出
+            if(rows.length>0) {
+                effectRow["inserted"] = $.toJSON(buildDataArray(rows));
+                count+=rows.length;
+            }
+            rows = tt.datagrid('getChanges', 'deleted');
+            if(rows.length>0) {
+                effectRow["deleted"] = $.toJSON(buildDataArray(rows));
+                count+=rows.length;
+            }
+            rows = tt.datagrid('getChanges', 'updated');
+            if(rows.length>0) {
+                effectRow["updated"] = $.toJSON(buildDataArray(rows));
+                count+=rows.length;
+            }
+            effectRow["map"] = '{$project.id}';
+            if (count<= 0) { //如果没有任何更新，就退出
                 $.messager.alert('提示', '没有数据需要保存！', 'info');
                 return;
             }
-            var effectRow = {};
-            var updateRows=[];
-            for (var i = 0; i < length; i++) {
-                var updateObj = {}; //插入的单元格
-                updateObj.studentno = rows[i].studentno;
-                updateRows.push(updateObj);
-            }
-
-            effectRow["inserted"] = $.toJSON(updateRows);
-            effectRow["classno"] = '}';
-            $.post('{$ROOT}/base/classes/studentadd', effectRow, function (result) {
+            $.post('{$ROOT}/score/credit/creativeupdate', effectRow, function (result) {
                 if (result.status == 1) {
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -215,23 +231,25 @@
             });
         });
     });
-    function detail(studentno){
-        var url='/base/index/studentdetail?';
-        parent.menuTabs.addTab("学生详情",'{$ROOT}'+url+'studentno='+studentno,"icon icon-student");
-    }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出班级学生名单</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出学生名单</div>
+        <div class="menu-sep"></div>
+        <div data-options="iconCls:'icon icon-remove'" id="menu_remove">删除</div>
+        <div data-options="iconCls:'icon icon-cancel'" id="menu_cancel">取消</div>
     </div>
     <div id="menu2" class="easyui-menu" style="width:150px;">
-        <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中加入该班</div>
+        <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中加入名单</div>
     </div>
     <div id="left" style="width:680px;float:left">
         <div id="toolbar">
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出学生名单</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存名单</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">删除</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存名单</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出学生名单</a>
+
         </div>
         <table id="dg"></table>
     </div>
@@ -250,7 +268,9 @@
     <div class="space"></div>
     <div class="information" style="clear:both">
         <ol>说明：
-            <li>因为每个学生都需一个班级，将选中学生移出列表无法删除本班学生。</li>
+            <li>证书类每个学生内容相同的，理由部分可以不写。</li>
+            <li>比赛不同名次的，请再理由中标注。</li>
+            <li>认定人员看到的学生的认定理由将会是“项目名称”+“理由”相叠加。</li>
         </ol>
     </div>
 </div>

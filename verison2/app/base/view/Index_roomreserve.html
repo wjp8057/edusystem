@@ -169,6 +169,26 @@
                 $.messager.alert('错误','请先选中一条记录','error')
             }
         });
+        $("#menu_tableprint,#tableprint").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                print(row.roomno,true);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#menu_noteprint,#noteprint").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                print(row.recno,false);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
         //取消更改
         $("#cancel").click(function(){
             var tt= $('#dg');
@@ -203,6 +223,8 @@
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div data-options="iconCls:'icon icon-add'" id="menu_insert" >借用教室申请</div>
+        <div data-options="iconCls:'icon icon-print'" id="menu_tableprint" >打印教室课表</div>
+        <div data-options="iconCls:'icon icon-print'" id="menu_noteprint" >打印借用单</div>
         <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出借用信息</div>
         <div data-options="iconCls:'icon icon-save'" id="menu_save" >保存数据</div>
         <div data-options="iconCls:'icon icon-remove'" id="menu_delete" >删除条目</div>
@@ -215,11 +237,13 @@
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
             <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
-            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="9" value="%"/>
-            <label for="school">借用学院：</label><input id="school" size="20">
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="6" value="%"/>
+            <label for="school">借用学院：</label><input id="school" size="18">
             <label for="approved">批准状态：</label><input id="approved" size="10">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出借用信息</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="tableprint">打印课表</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="noteprint">打印借用单</a>
         </div>
     </div>
     <table id="dg"></table>

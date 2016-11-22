@@ -8,40 +8,45 @@
 // +----------------------------------------------------------------------
 // | Author: fangrenfu <fangrenfu@126.com> 
 // +----------------------------------------------------------------------
-// | Created:2016/11/21 15:10
+// | Created:2016/11/22 8:24
 // +----------------------------------------------------------------------
 
 namespace app\common\service;
 
 
 use app\common\access\MyService;
-use think\Db;
-
-//创新技能学分项目
-class Project extends  MyService{
-    //读取项目信息
-    public function  getList($page=1, $rows=20,$year,$term,$type='',$school=''){
+//学分认定详细名单
+class ProjectDetail extends MyService {
+    //读取
+    public function  getList($page=1, $rows=20,$type='',$map='',$year='',$term='',$projectname='%',$studentno='%',$school='',$verify=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
-        $condition['year']=$year;
-        $condition['term']=$term;
-        if($type!='')   $condition['project.type']=$type;
-        if($school!='') $condition['project.school']=$school;
-
-        $data= $this->query->table('project')
+        if($year!='')  $condition['project.year']=$year;
+        if($term!='')  $condition['project.term']=$term;
+        if($type!='')  $condition['project.type']=$type;
+        if($map!='')   $condition['projectdetail.map']=$map;
+        if($projectname!='%')   $condition['project.name']=$projectname;
+        if($studentno!='%')   $condition['projectdetail.studentno']=$studentno;
+        if($school!='')   $condition['project.school']=$school;
+        if($verify!='')   $condition['projectdetail.verify']=$verify;
+        $data= $this->query->table('projectdetail')
+            ->join('project','project.id=projectdetail.map')
             ->join('schools','schools.school=project.school')
             ->join('credittype','credittype.type=project.type')
-            ->field('project.id,rtrim(project.name) name,year,term,credit,project.type,(credittype.name) typename,project.date,project.amount,
-            schools.school,rtrim(schools.name) schoolname')
+            ->join('students','students.studentno=projectdetail.studentno')
+            ->field('projectdetail.id,rtrim(project.name) projectname,year,term,projectdetail.credit,project.type,(credittype.name) typename,projectdetail.cerdate,
+            schools.school,rtrim(schools.name) schoolname,projectdetail.studentno,projectdetail.date,rtrim(students.name) studentname,projectdetail.verify,
+            rtrim(projectdetail.reason) reason')
             ->where($condition)->page($page,$rows)->order('id')->select();
-        $count= $this->query->table('project')->where($condition)->count();
+        $count= $this->query->table('projectdetail')
+            ->join('project','project.id=projectdetail.map')
+            ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-
-    //更新项目信息
-    public function update($postData){
+    //更新
+    function update($postData){
         $updateRow=0;
         $deleteRow=0;
         $insertRow=0;
@@ -49,19 +54,18 @@ class Project extends  MyService{
         //开始事务
         $this->query->startTrans();
         try {
+            $map=$postData["map"];
             if (isset($postData["inserted"])) {
                 $updated = $postData["inserted"];
                 $listUpdated = json_decode($updated);
-                $data = null;
                 foreach ($listUpdated as $one) {
-                    $data['year'] = $one->year;
-                    $data['term'] = $one->term;
-                    $data['name'] = $one->name;
+                    $data = null;
+                    $data['map'] = $map;
+                    $data['studentno'] = $one->studentno;
+                    $data['reason'] = $one->reason;
                     $data['credit'] = $one->credit;
-                    $data['type'] = $one->type;
-                    $data['date'] = $one->date;
-                    $data['school'] = $one->school;
-                    $row = $this->query->table('project')->insert($data);
+                    $data['cerdate'] = $one->cerdate;
+                    $row = $this->query->table('projectdetail')->insert($data);
                     if ($row > 0)
                         $insertRow++;
                 }
@@ -71,12 +75,13 @@ class Project extends  MyService{
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
+                    $data = null;
                     $condition['id'] = $one->id;
-                    $data['name'] = $one->name;
+                    $condition['verify'] = 0;
+                    $data['reason'] = $one->reason;
                     $data['credit'] = $one->credit;
-                    $data['type'] = $one->type;
-                    $data['date'] = $one->date;
-                    $updateRow += $this->query->table('project')->where($condition)->update($data);
+                    $data['cerdate'] = $one->cerdate;
+                    $updateRow += $this->query->table('projectdetail')->where($condition)->update($data);
                 }
             }
             //删除部分
@@ -86,16 +91,19 @@ class Project extends  MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['id'] = $one->id;
-                    $condition['amount']=$one->amount;
-                    $deleteRow += $this->query->table('project')->where($condition)->delete();
+                    $condition['map'] = $map;
+                    $condition['verify'] = 0;
+                    $deleteRow += $this->query->table('projectdetail')->where($condition)->delete();
                 }
             }
+            //更新人数
         }
         catch(\Exception $e){
             $this->query->rollback();
             throw $e;
         }
         $this->query->commit();
+        Project::updateAmount($map);
         $info='';
         if($updateRow>0) $info.=$updateRow.'条更新！</br>';
         if($deleteRow>0) $info.=$deleteRow.'条删除！</br>';
@@ -107,17 +115,5 @@ class Project extends  MyService{
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;
-    }
-    //更新人数
-    public static function updateAmount($id){
-        $condition=null;
-        $data=null;
-        $condition['projectdetail.map']=$id;
-        $result=Db::table('projectdetail')->where($condition)->field('count(*) amount')->find();
-        $condition=null;
-        $condition['project.id']=$id;
-        $data['amount']=$result['amount'];
-        Db::table('project')->where($condition)->setField($data);
-        return true;
     }
 }
