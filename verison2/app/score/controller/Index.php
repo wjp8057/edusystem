@@ -144,8 +144,18 @@ class Index extends  Template {
         }
         return $this->fetch();
     }
-
+    //创新技能项目学生名单
     function creativestudent($id){
+        try {
+            $project=Item::getProjectItem($id);
+            $this->assign('project', $project);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+    //素质学分项目学生名单
+    function qualitystudent($id){
         try {
             $project=Item::getProjectItem($id);
             $this->assign('project', $project);

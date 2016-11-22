@@ -188,21 +188,78 @@ class CreditApply extends MyService {
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
+    //转换类型
     function parseType($id,$type){
         $condition=null;
 
         $result="成功";
         $status=1;
         $condition['id']=$id;
+        $condition['verify']=0;
+        $condition['audit']=0;
         if(!MyAccess::checkCreditApplySchool($id)){
             $result="无法转换其他学院的条目";
             $status=0;
         }
         else{
             $data['type']=$type;
+
             $this->query->table('creditapply')->where($condition)->setField($data);
         }
         return array("info"=>$result,"status"=>$status);
+    }
+
+    function verify($postData){
+        $updateRow=0;
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info='';
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['id'] = $one->id;
+                    $data['verify']=$one->verify;
+                    $data['audit']=$one->audit;
+                    $data['credit']=$one->credit;
+                    $data['reason']=$one->reason;
+                    $data['cerdate']=$one->cerdate;
+                    $updateRow += $this->query->table('creditapply')->where($condition)->update($data);
+                }
+            }
+            //删除部分
+            if (isset($postData["deleted"])) {
+                $updated = $postData["deleted"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['id'] = $one->id;
+                    $deleteRow += $this->query->table('creditapply')->where($condition)->delete();
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow>0) $info.=$updateRow.'条更新！</br>';
+        if($deleteRow>0) $info.=$deleteRow.'条删除！</br>';
+        if($insertRow>0) $info.=$insertRow.'条添加！</br>';
+        $status=1;
+        if($info=='') {
+            $info="没有数据被更新";
+            $status=0;
+        }
+        if($errorRow>0)
+            $status=0;
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
     }
 }

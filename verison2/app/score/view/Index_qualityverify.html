@@ -18,18 +18,34 @@
             textField:'name',
             panelHeight:'auto'
         });
-
-        audit.combobox('select','0');
+        audit.combobox('select','1');
+        var verify=$('#verify');
+        verify.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
+        verify.combobox('select','0');
+        var batch=0; //是否批量申请
         $('#dg').datagrid({
             title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/score/credit/creativeapply',toolbar:'#toolbar',
+            url:'{$ROOT}/score/credit/qualityquery',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val(),
                 school:school.combobox('getValue'),
-                audit:audit.combobox('getValue')
+                audit:audit.combobox('getValue'),
+                verify:verify.combobox('getValue'),
+                batch:0
             },
             columns:[[
+                {field:'verify',title:'认定*',width:40,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }},
                 {field:'audit',title:'审核*',width:40,editor:{type:'checkbox',options:{on:1,off:0}},align:'center',formatter:function(val,rec){
                     if(val==1)
                         return '√';
@@ -46,13 +62,8 @@
                 {field:'credit',title:'学分*',width:50,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision:1}}},
                /* {field:'typename',title:'类型',width:100,align:'center'},*/
                 {field:'cerdate',title:'证书时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
-                {field:'applydate',title:'申报时间',width:120,align:'center'},
-                {field:'verify',title:'认定',width:40,align:'center',formatter:function(val,rec){
-                    if(val==1)
-                        return '√';
-                    else
-                        return '';
-                }}
+                {field:'applydate',title:'申报时间',width:120,align:'center'}
+
             ]],
             //点击单元格时候的事件
             onClickCell:function(index, field){
@@ -71,7 +82,7 @@
                 });
             }
         });
-        $("#search").click(function() {
+        function search(){
             var tt=$('#dg');
             tt.datagrid('loadData',{total:0,rows:[]});
             tt.datagrid('load', {
@@ -79,9 +90,18 @@
                 term: $('#term').val(),
                 reason:$('#reason').val(),
                 school:school.combobox('getValue'),
-                audit:audit.combobox('getValue')
-
+                audit:audit.combobox('getValue'),
+                verify:verify.combobox('getValue'),
+                batch:batch
             });
+        }
+        $("#searchsingle").click(function() {
+            batch=0;
+            search();
+        });
+        $("#searchbatch").click(function() {
+            batch=1;
+            search();
         });
         //取消更改
         $("#cancel,#menu_cancel").click(function(){
@@ -110,11 +130,11 @@
             for (var i = 0; i < length; i++) {
                 var updateObj = {}; //插入的单元格
                 updateObj.id=rows[i].id;
+                updateObj.verify = rows[i].verify;
                 updateObj.audit = rows[i].audit;
                 updateObj.credit = rows[i].credit;
                 updateObj.cerdate= rows[i].cerdate;
                 updateObj.reason = rows[i].reason;
-                updateObj.school=rows[i].school;
                 updateRow.push(updateObj);
             }
             return updateRow;
@@ -130,22 +150,18 @@
             var effectRow = {};
             if(rows.length>0){
                 count+=rows.length;
-                if(!checkSchoolAndVerify(rows))
-                    return;
                 effectRow["updated"]=$.toJSON(buildDataArray(rows));
             }
             //获取删除的行
             rows=tt.datagrid('getChanges','deleted');
             if(rows.length>0){
                 count+=rows.length;
-                if(!checkSchoolAndVerify(rows))
-                    return;
                 effectRow["deleted"]=$.toJSON(buildDataArray(rows));
             }
             if(count<=0) //如果没有任何更新，就退出
                 return;
-
-            $.post('{$ROOT}/score/credit/creativeaudit',effectRow,function(result){
+            effectRow["batch"]=batch;
+            $.post('{$ROOT}/score/credit/qualityverify',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -171,31 +187,6 @@
                 $.messager.alert('错误','请先选中一条记录','error')
             }
         });
-        $("#menu_parse,#parse").click(function(){
-            var tt=$('#dg');
-            var row = tt.datagrid('getSelected');
-            if (row) {
-                if(row.audit=='1'||row.verify=='1') {
-                    $.messager.alert('错误', "已经通过审核或认定，无法改变类型", 'error');
-                    return;
-                }
-                $.post('{$ROOT}/score/credit/parsequality',{id:row.id},function(result){
-                    if (result.status==1){
-                        tt.datagrid('acceptChanges');
-                        tt.datagrid('reload');
-                        $.messager.show({	// show error message
-                            title: '成功',
-                            msg: result.info
-                        });
-                    } else {
-                        $.messager.alert('错误',result.info,'error');
-                    }
-                },'json');
-            }
-            else{
-                $.messager.alert('错误','请先选中一条记录','error')
-            }
-        });
         $('#export,#menu_export').click(function(){
             var year=encodeURI($('#year').val());
             var term=encodeURI($('#term').val());
@@ -203,7 +194,9 @@
             var reason=encodeURI($('#reason').val());
             var studentno=encodeURI($('#studentno').val());
             var audit=encodeURI($('#audit').combobox('getValue'));
-            $.fileDownload("{$ROOT}/score/credit/auditexportcreative?year=" +year+"&term="+term+'&school='+school+'&reason='+reason+'&studentno='+studentno+'&audit='+audit, {
+            var verify=encodeURI($('#verify').combobox('getValue'));
+            $.fileDownload("{$ROOT}/score/credit/verifyexportquality?year=" +year+"&term="+term+'&school='+school
+                +'&reason='+reason+'&studentno='+studentno+'&audit='+audit+'&verify='+verify+'&batch='+batch, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -216,7 +209,6 @@
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
-        <div id='menu_parse' data-options="iconCls:'icon icon-reload'">转为素质学分</div>
         <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
         <div class="menu-sep"></div>
         <div id='menu_remove' data-options="iconCls:'icon icon-remove'">删除</div>
@@ -232,16 +224,17 @@
         <label for="reason">理由：</label><input id="reason" class="easyui-validatebox" size="6" value="%"/>
         <label for="school">学院：</label><input id="school" size="15"/>
         <label for="audit">已审核：</label><input id="audit" size="7"/>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="parse">转为素质学分</a>
+        <label for="verify">已认定：</label><input id="verify" size="7"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="searchsingle">检索单个</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="searchbatch">检索统报</a>|
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
-
     </div>
     <table id="dg"></table>
     <div class="space"></div>
     <div class="information">
         <ol>说明：
             <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li class="warn">统一申报的学院无需审核，认定理由不允许修改。</li>
         </ol>
     </div>
 </div>

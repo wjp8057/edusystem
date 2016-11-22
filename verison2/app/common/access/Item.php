@@ -212,7 +212,7 @@ class Item {
     public static function getProjectItem($id,$alert=true){
         $condition=null;
         $condition['id']=$id;
-        $data=Db::table('project')->where($condition)->field('id,name,credit,date')->find();
+        $data=Db::table('project')->where($condition)->field('id,rtrim(name) name,credit,date')->find();
         if(!is_array($data)) {
             if($alert)
                 throw new Exception('id' . $id, MyException::ITEM_NOT_EXISTS);

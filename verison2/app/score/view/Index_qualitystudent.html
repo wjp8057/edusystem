@@ -18,7 +18,7 @@
             pagination: 'true',
             rownumbers: true,
             pageSize: 50,
-            url: '{$ROOT}/score/credit/creativestudent',
+            url: '{$ROOT}/score/credit/qualitystudent',
             queryParams: {map:'{$project.id}'},
             toolbar: '#toolbar',
             pageList: [50, 100, 200],
@@ -70,7 +70,7 @@
             pagination: 'true',
             rownumbers: true,
             pageSize: 20,
-            url: '{$ROOT}/score/credit/creativesearch',
+            url: '{$ROOT}/score/credit/qualitysearch',
             queryParams: {studentno: ''},
             toolbar: '#toolbar2',
             pageList: [20,50, 100, 200],
@@ -209,7 +209,7 @@
                 $.messager.alert('提示', '没有数据需要保存！', 'info');
                 return;
             }
-            $.post('{$ROOT}/score/credit/creativeupdate', effectRow, function (result) {
+            $.post('{$ROOT}/score/credit/qualityupdate', effectRow, function (result) {
                 if (result.status == 1) {
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -226,7 +226,7 @@
          * 导出学生名单
          */
         $('#menu_export,#export').click(function () {
-            $.fileDownload("{$ROOT}/score/credit/exportbatchcreative?id={$project.id}", {
+            $.fileDownload("{$ROOT}/score/credit/exportbatchquality?id={$project.id}", {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
