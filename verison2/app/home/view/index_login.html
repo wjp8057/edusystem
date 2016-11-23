@@ -38,107 +38,91 @@
             a.focus();
         }
     </script>
-    <style type="text/css">
-        body
-        {
-            margin: 0;
-            padding: 0;
-            background: url('{$ROOT}/img/logback.png') repeat;
-        }
-        #head
-        {
-            margin: 0 auto;
-            width: 705px;
-            height: 90px;
-            margin-top: 20px;
-        }
-        #content
-        {
-            position: relative;
-            margin: 30px auto;
-            width: 760px;
-            min-height: 360px;
-            height: auto;
-            background: url({$ROOT}/img/dl.png) no-repeat;
-            background-size: cover;
-        }
-        #cn_bg
-        {
-            overflow: hidden;
-            display: inline-block;
-            margin-top: 100px;
-            margin-left: 10px;
-        }
-        #password
-        {
-            margin-top: 25px;
-        }
-        #user_name{
-            margin-top: 40px;
-            position: relative;
-        }
-        #password, #user_name
-        {
-            margin-left: 534px;
-        }
-        #login
-        {
-            display: block;
-            background: url({$ROOT}/img/loginbtn_bg.gif);
-            line-height: 42px;
-            width: 112px;
-            height: 42px;
-            color: #FFF;
-            font-family: "微软雅黑";
-            text-decoration: none;
-            position:absolute;
-            right:54px;
-            top: 260px;
-            text-indent: 25px;
-        }
-        input
-        {
-            height: 25px;
-            width: 130px;
-            line-height: 25px;
-            padding:0 5px;;
-            border: 1px solid #999;
-        }
-        input:focus
-        {
-            border: 1px solid #294C8E;
-        }
-        #footer
-        {
-            width: 810px;
-            margin: 0 auto;
-            padding-top: 0px;
-        }
-        .label
-        {
-            width: 100px;
-        }
-    </style>
+<style type="text/css">
+    *{
+        margin:0;
+        padding:0;
+        list-style: none;
+    }
+    body{
+        background:url("{$ROOT}/img/bg.png") repeat;
+    }
+    #all{
+        width:1000px;
+        margin:0 auto;
+    }
+    #head{
+        width:100%;
+        height:150px;
+        background: url("{$ROOT}/img/logo.png") no-repeat;
+    }
+    #content{
+        position: relative;
+        height:500px;
+        width: 100%;
+        background:url("{$ROOT}/img/school{$order}.jpg") no-repeat ;
+    }
+    #loginForm{
+        position: absolute;
+        top:160px;
+        left:660px;
+        border:1px silver solid;
+        width:250px;
+        height:250px;
+        background-color: #E0ECFF;
+    }
+    #loginForm input,#loginbt{
+        display: block;
+        height:40px;
+        border:1px silver solid;
+        margin:15px auto;
+        padding-left:35px;
+        width:150px;
+    }
+    #tip{
+        border-bottom: 1px silver solid;
+        display: block;
+        line-height: 40px;
+        height: 40px;
+        padding-left: 40px;
+        background-color: #CCCCCC;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
+    #username{
+        background:url("{$ROOT}/img/user.png") no-repeat left seashell;
+    }
+    #pwd{
+        background:url("{$ROOT}/img/lock.png") no-repeat left seashell;
+    }
+    #loginbt{
+        padding-left: 0;
+        line-height: 40px;
+        text-align: center;
+        background-color: #8d8d8d;
+        width:185px;
+    }
+    #loginbt:hover{
+        background-color: #0052A3;
+        color:#000;
+    }
+    #footer{
+        height:50px;
+        line-height:50px;
+    }
+</style>
 <body>
-<form action="" method="post" name="loginForm" id="loginForm">
+<div id="all">
     <div id="head"> </div>
     <div id="content">
-        <div id="cn_bg">
-            <div id="user_name">
-                <label for="username" class="label">
-                    账号：</label>
-                <input type="text" name="username" id="username" class="easyui-validatebox" data-options="iconCls:'icon icon-shield',validType:'minmaxLength[2,20]'" placeholder="教师号或者学号"/>
-            </div>
-            <div id="password">
-                <label for="pwd" class="label">
-                    密码：</label>
-                <input type="password" name="pwd" id="pwd" class="easyui-validatebox" data-options="validType:'minLength[3]'" placeholder="输入密码" />
-            </div>
-            <a id="login" href="javascript:login_click()">登 录</a>
-        </div>
+        <form action="" method="post" name="loginForm" id="loginForm">
+            <span id="tip">账户登录</span>
+            <input type="text" name="username" id="username"  placeholder="教师号或者学号"/>
+            <input type="password" name="pwd" id="pwd"   placeholder="输入密码" />
+            <a onclick="login_click()" id="loginbt" href="#">用户登录</a>
+        </form>
     </div>
-    <div id="footer">
-        <img src="{$ROOT}/img/footer_bg.png" width="809" height="73" alt="" /></div>
-</form>
+    <div id="footer"> {$COPYRIGHT}</div>
+</div>
 </body>
 </html>
