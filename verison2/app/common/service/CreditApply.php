@@ -16,6 +16,7 @@ namespace app\common\service;
 
 use app\common\access\MyAccess;
 use app\common\access\MyService;
+use app\common\vendor\PHPWord;
 
 class CreditApply extends MyService {
     //读取学分认定信息
@@ -261,5 +262,28 @@ class CreditApply extends MyService {
             $status=0;
         $result=array('info'=>$info,'status'=>$status);
         return $result;
+    }
+
+    function exportWord($id){
+        $condition=null;
+        $condition['id']=$id;
+        $data=$this->query->table('creditapply')
+            ->join('students','students.studentno=creditapply.studentno')
+            ->join('classes','students.classno=classes.classno')
+            ->join('schools','schools.school=classes.school')
+            ->join('credittype','credittype.type=creditapply.type')
+            ->where($condition)
+            ->field('creditapply.id,creditapply.year,creditapply.term,students.studentno,rtrim(reason) reason,credit,cerdate,applydate,schools.school,rtrim(schools.name) schoolname,
+            rtrim(classes.classname) classname,rtrim(students.name) studentname,audit,verify,rtrim(credittype.name) typename,creditapply.type,filedate')
+            ->find();
+        $data['Value1']=$data['studentno'];
+        $data['Value2']=$data['studentname'];
+        $data['Value3']=$data['classname'];
+        $data['Value4']=$data['schoolname'];
+        $data['Value5']=$data['typename'];
+        $data['Value6']=$data['credit'];
+        $data['Value7']=$data['reason'];
+        $data['time']=$data['id'];
+        PHPWord::save2Template($data,'creditapply','创新技能素质认定申请表');
     }
 }

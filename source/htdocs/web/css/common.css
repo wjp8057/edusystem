@@ -1,4 +1,4 @@
-*{font-size:12px; font-family:"宋体";margin:0;padding:0}
+﻿*{font-size:12px; font-family:"宋体";margin:0;padding:0}
 a{ color:Black; text-decoration:none;}
 a:hover{ color:Red; text-decoration:none;}
 
@@ -105,7 +105,7 @@ a:hover{ color:Red; text-decoration:none;}
 .icon-five{background-position:0 -1248px;}
 
 
-.container{padding: 5px;min-width: 1260px;}
+.container{padding: 5px;}
 
 .information ol li,.information ol{line-height: 20px;font-size:10pt;margin-left: 15px;}
 

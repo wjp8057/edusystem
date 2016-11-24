@@ -14,6 +14,8 @@ use app\common\access\MyAccess;
 use app\common\service\Classroom;
 use app\common\service\R32;
 use app\common\vendor\DrCom;
+use app\common\vendor\PHPExcel;
+use app\common\vendor\PHPWord;
 use think\Controller;
 use think\Db;
 use think\Log;
@@ -465,12 +467,7 @@ class Option {
      * 测试专用
      */
     public function test(){
-         $a= microtime();
-         $obj=new R32();
-         $obj->stopNetWork('2016','1','043Y37D01');
-        echo microtime()-$a;
-    }
-    public function test2(){
-
+        $data=array("Value1"=>"fang");
+         PHPWord::save2Template($data,'Template','cheshi');
     }
 }

@@ -56,4 +56,13 @@ class Vacation extends MyController {
         return json($result);
     }
 
+    public function creditexport($id){
+        try{
+            $obj = new CreditApply();
+            $obj->exportWord($id);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+    }
 }

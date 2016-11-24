@@ -12,8 +12,6 @@
 
 namespace app\common\vendor;
 
-use think\Log;
-
 require ROOT_PATH . '/vendor/PHPExcel/PHPExcel.php';
 
 class PHPExcel
