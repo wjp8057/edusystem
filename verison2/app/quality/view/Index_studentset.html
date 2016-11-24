@@ -1,0 +1,67 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $("#syncourse").click(function() {
+            $.post('{$ROOT}/quality/student/syncourse',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val()},function(result){
+                if (result.status==1){
+                    $.messager.alert("成功",result.info,"info");
+                }
+                else {
+                    $.messager.alert("错误",result.info,"error");
+                }
+            },'json');
+        });
+        $("#lock").click(function() {
+           setStatus(1);
+        });
+        $("#free").click(function() {
+            setStatus(0);
+        });
+        function setStatus(lock){
+            $.post('{$ROOT}/quality/student/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),lock:lock},function(result){
+                if (result.status==1){
+                    $.messager.alert("成功",result.info,"info");
+                }
+                else {
+                    $.messager.alert("错误",result.info,"error");
+                }
+            },'json');
+        }
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">学评教设置</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="year">学年</label></th>
+            <td><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/></td>
+        </tr>
+        <tr>
+            <th><label for="term">学期</label></th>
+            <td><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/></td>
+        </tr>
+        <tr>
+            <th><label for="courseno">课号</label></th>
+            <td><input id="courseno" class="easyui-validatebox" size="9" value="%"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="syncourse">同步课程</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="synstudent">同步学生名单</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-lock'" id="lock">锁定课程</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-free'" id="free">解锁课程</a>
+    </div>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>同步课程：生成指定学年、学期、课号的课程信息。</li>
+            <li>同步学生：生成指定学年、学期、课号的课程参加学生信息。</li>
+            <li>锁定/解锁课程：将设定学年学期课号的课程锁定，禁止修改课程类型以及学生名单信息。</li>
+        </ol>
+    </div>
+</div>

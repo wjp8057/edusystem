@@ -18,7 +18,7 @@ $(function(){
     body{font-size:10pt}
     .title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}
     .course{text-align: center;line-height:20px;height: 20px;}
-    #score,#summary{width:100%;margin: 0 auto}
+    #score,#summary{width:100%;margin: 0 auto 5px;}
     td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
     table{border-collapse: collapse;border: none;}
     #summary td{width:14%}
@@ -27,7 +27,7 @@ $(function(){
     .sign{text-align: right;line-height: 40px;margin-right:20px;}
     .sign div{width:33%;float: left;text-align: center}
 </style>
-<div class="container">
+<div class="container2">
     <div class="title">{$year}学年第{$term}学期期末成绩登记表</div>
     <div class="course">课号：{$course.courseno} 课名：{$course.coursename} 开课学院：{$course.schoolname} 人数：{$course.attendents} <a id="nextpage" href="#">下一页>></a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>

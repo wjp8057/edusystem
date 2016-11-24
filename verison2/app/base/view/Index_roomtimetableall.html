@@ -10,13 +10,13 @@ $(function(){
 <style type="text/css">
     .course{text-align: center;font-size: 11pt;line-height:20px;height: 20px;}
     #timetable{width:100%;margin: 0 auto}
-    th,td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;width:13%}
+    th,td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
     table{border-collapse: collapse;border: none;}
     th{height:50px;background-color:#CCE6FF;font-weight:100}
-    th.lesson{width:8%;height:auto}
+    th.lesson{min-width:60px;;height:auto}
     .tip ol li,.information ol{line-height: 30px;font-size:10pt;margin-left: 30px;}
 </style>
-<div class="container">
+<div class="container2">
     <div class="print_title">{$title.roomname}的{$title.year}学年第{$title.term}学期课程表(含教室借用)</div>
     <div class="course">打印时间：{$title.time}<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>
     <table id="timetable">

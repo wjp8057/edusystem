@@ -1,0 +1,245 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+        var enabled=$('#enabled');
+        enabled.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
+        var lock=$('#lock');
+        lock.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
+        //显示更多项目
+        $("#more").click(function() {
+            var toolbar=$("#toolbar_hide");
+            if(toolbar.is(":hidden")){
+                toolbar.show();
+            }else{
+                toolbar.hide();     //如果元素为显现,则将其隐藏
+            }
+        });
+        $("#toolbar_hide").hide();
+        $('#dg').datagrid({
+            title:'统一申报项目列表',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/quality/student/courselist',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                school:school.combobox('getValue')
+            },
+            columns:[[
+                {field:'year',title:'学年',width:50,align:'center'},
+                {field:'term',title:'学期',width:50,align:'center'},
+                {field:'courseno',title:'课号',width:90,align:'center'},
+                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'teachername',title:'教师',width:70,align:'center'},
+                {field:'typename',title:'类型',width:100,align:'center'},
+                {field:'schoolname',title:'学院',width:100,align:'center'},
+                {field:'date',title:'时间*',width:120,align:'center',editor:{type:'datebox',options:{required:true}}},
+                {field:'amount',title:'人数',width:50,align:'center'}
+            ]],
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                courseno: $('#courseno').val(),
+                teachername: $('#teachername').val(),
+                coursename: $('#coursename').val(),
+                school:school.combobox('getValue'),
+                enabled:enabled.combobox('getValue'),
+                lock:lock.combobox('getValue')
+            });
+        });
+        $("#menu_insert,#insert").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            tt.datagrid('insertRow',{
+                index: 0,
+                row: {
+                    year:'{$YEARTERM.year}',
+                    term:'{$YEARTERM.term}',
+                    type:'B',
+                    typename:'素质学分',
+                    school:'{$USERINFO.school}',
+                    schoolname:'{$USERINFO.schoolname}'
+                }
+            });
+            tt.datagrid('startEditing',{field:'name',index:0});
+            current_datagrid=tt;
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkSchool(rows))
+                    return;
+                effectRow["updated"]=$.toJSON(rows);
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkAmount(rows)||!checkSchool(rows))
+                    return;
+                effectRow["deleted"]=$.toJSON(rows);
+            }
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                if(!checkSchool(rows))
+                    return;
+                effectRow["inserted"]=$.toJSON(rows);
+            }
+            if(count<=0) //如果没有任何更新，就退出
+                return;
+
+            $.post('{$ROOT}/score/credit/qualityprojectupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#menu_detail,#detail").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                parent.menuTabs.addTab(row.name+"-参加人员名单","{$ROOT}/score/index/qualitystudent?id="+row.id,"icon icon-people");
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+    });
+    //检查项目中人数是否为0，不为零的不能删除,
+    function checkAmount(rows){
+        var amount=rows.length;
+        for(var i=0;i<amount;i++){
+            if(parseInt(rows[i]['amount'])>0) {
+                $.messager.alert('错误', rows[i]['name']+'参加人数不为零，无法删除', 'error');
+                return false;
+            }
+        }
+        return true;
+    }
+    //检测是否本学院的。
+    function checkSchool(rows){
+        var count=rows.length;
+        for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+            if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                $.messager.alert('错误','你无法修改其他学院的项目信息（'+rows[i].name+'）！','error');
+                $("#cancel").click();
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div id='menu_detail' data-options="iconCls:'icon icon-people'">参加人员名单</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="toolbar">
+        <div>
+
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-system',plain:'true'" id="more">更多</a>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+            <label for="teachername">姓名：</label><input id="teachername" class="easyui-validatebox" size="5" value="%"/>
+            <label for="school">学院：</label><input id="school" size="15"/>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="insert">新增</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-people',plain:'true'" id="detail">人员名单</a>
+        </div>
+        <span id="toolbar_hide">
+             <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="12" value="%"/>
+            <label for="enabled">是否有效：</label><input id="enabled" size="8"/>
+            <label for="lock">是否锁定：</label><input id="lock" size="8"/>
+        </span>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+        </ol>
+    </div>
+</div>
