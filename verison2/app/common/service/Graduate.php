@@ -112,7 +112,7 @@ class Graduate extends MyService{
             $course=$graduate->getCourse(1,1000,'%','%','%','%','','',$oneprogram['rowid'])['rows'];
             if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||count($course)>0)
                 $result=$fail;
-            $detail.="<div class='program'>".$oneprogram['progname'].",".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
+            $detail.="<div class='program'>".$oneprogram['progname']."(".$oneprogram['programno']."),".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
             $nopass=''; //选了没有过的
             $noselect=''; //没有选课的
             $noend='';//未结束的

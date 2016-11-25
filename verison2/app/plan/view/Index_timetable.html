@@ -1,0 +1,63 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+$(function(){
+    var year=getQueryString('year');
+    var term=getQueryString('term');
+    var type=getQueryString('type');
+    var who=getQueryString('who');
+    year=year==null?'{$YEARTERM.year}':year;
+    term=term==null?'{$YEARTERM.term}':term;
+    $("#print").click(function(){
+        window.print();
+    });
+    $("#last").click(function(){
+        if(term=='1'){
+            year=parseInt(year)-1;
+            term=2;
+        }
+        else
+        {
+            term=parseInt(term)-1;
+        }
+        location=getURLString()+"?year="+year+"&term="+term+"&who="+who+"&type="+type;
+    });
+    $("#next").click(function(){
+        if(term=='2'){
+            year=parseInt(year)+1;
+            term=1;
+        }
+        else
+        {
+            term=parseInt(term)+1;
+        }
+        location=getURLString()+"?year="+year+"&term="+term+"&who="+who+"&type="+type;
+    });
+});
+
+</script>
+<style type="text/css">
+    .course{text-align: center;font-size: 11pt;line-height:20px;height: 20px;}
+    #timetable{width:100%;margin: 0 auto}
+    th,td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
+    table{border-collapse: collapse;border: none;}
+    th{height:50px;background-color:#CCE6FF;font-weight:100}
+    th.lesson{min-width:60px;;height:auto}
+    .tip ol li,.information ol{line-height: 30px;font-size:10pt;margin-left: 30px;}
+    .container2{padding:0 5px;}
+    #last,#next{padding: 0 5px}
+</style>
+<div class="container2">
+    <div class="print_title">{$title.name}的{$title.year}学年第{$title.term}学期课程表</div>
+    <div class="course">打印时间：{$title.time}<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a>
+        <a id="last" href="#">上学期</a><a id="next" href="#">下学期</a>
+    </div>
+    <table id="timetable">
+        <tr><th>节次/星期</th><th>周一</th><th>周二</th><th>周三</th><th>周四</th><th>周五</th><th>周六</th><th>周日</th></tr>
+        <tr><th class="lesson">第1-2节</th><td>{$time[1][1]}</td><td>{$time[2][1]}</td><td>{$time[3][1]}</td><td>{$time[4][1]}</td><td>{$time[5][1]}</td><td>{$time[6][1]}</td><td>{$time[7][1]}</td></tr>
+        <tr><th class="lesson">第3-4节</th><td>{$time[1][2]}</td><td>{$time[2][2]}</td><td>{$time[3][2]}</td><td>{$time[4][2]}</td><td>{$time[5][2]}</td><td>{$time[6][2]}</td><td>{$time[7][2]}</td></tr>
+        <tr><th class="lesson">第5-6节</th><td>{$time[1][3]}</td><td>{$time[2][3]}</td><td>{$time[3][3]}</td><td>{$time[4][3]}</td><td>{$time[5][3]}</td><td>{$time[6][3]}</td><td>{$time[7][3]}</td></tr>
+        <tr><th class="lesson">第7-8节</th><td>{$time[1][4]}</td><td>{$time[2][4]}</td><td>{$time[3][4]}</td><td>{$time[4][4]}</td><td>{$time[5][4]}</td><td>{$time[6][4]}</td><td>{$time[7][4]}</td></tr>
+        <tr><th class="lesson">第9-10节</th><td>{$time[1][5]}</td><td>{$time[2][5]}</td><td>{$time[3][5]}</td><td>{$time[4][5]}</td><td>{$time[5][5]}</td><td>{$time[6][5]}</td><td>{$time[7][5]}</td></tr>
+        <tr><th class="lesson">第11-12节</th><td>{$time[1][6]}</td><td>{$time[2][6]}</td><td>{$time[3][6]}</td><td>{$time[4][6]}</td><td>{$time[5][6]}</td><td>{$time[6][6]}</td><td>{$time[7][6]}</td></tr>
+    </table>
+</div>

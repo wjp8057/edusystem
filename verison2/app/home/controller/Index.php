@@ -22,6 +22,11 @@ class Index extends Controller
     public function index()
     {
         try {
+            $request = Request::instance();
+            if(session('S_LOGIN_TYPE')==2) {
+                header('Location:' . $request->root().'/student/');
+                exit();
+            }
             MyAccess::getAccess();
             config('auth')&& MyAccess::checkAccess('R');
         } catch (\Exception $e) {
