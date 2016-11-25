@@ -449,7 +449,21 @@ class Option {
         }
         return json($result);
     }
+    //学评教课程类型
+    public function qualitytype($only=1){
+        $result=null;
+        try {
+            $result =Db::table('qualitystudenttype')->field('rtrim(type) as type,rtrim(name) as name')->order('type')->select();
+            if($only==0) {
+                $all[] = array('type' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     public function credittype($only=1){
         $result=null;
         try {

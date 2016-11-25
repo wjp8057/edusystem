@@ -504,11 +504,25 @@ class MyAccess {
             return false;
         }
     }
-
+    //检查创新技能认定申请的学院
     public static function checkCreditApplySchool($id=0){
         $condition=null;
         $condition['id']=$id;
         $data= Db::table('creditapply')->where($condition)->field('school')->select();
+        if(!is_array($data)||count($data)!=1)
+            throw new Exception('creditapply:'.$id, MyException::PARAM_NOT_CORRECT);
+        if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public static function checkQualityStudentSchool($id=0){
+        $condition=null;
+        $condition['id']=$id;
+        $data= Db::table('qualitystudent')->where($condition)->field('school')->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('creditapply:'.$id, MyException::PARAM_NOT_CORRECT);
         if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){

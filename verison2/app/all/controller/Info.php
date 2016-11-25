@@ -78,7 +78,7 @@ class Info
         }
         return json(["status" => $status, 'progname' => $result]);
     }
-
+    //获取班级信息
     public function  getclassinfo($classno)
     {
         $result = null;
@@ -100,4 +100,28 @@ class Info
         }
         return json(["status" => $status, 'classname' => $classname,'schoolname'=>$schoolname]);
     }
+    //获取教师信息
+    public function  getteacherinfo($teacherno)
+    {
+        $result = null;
+        $status = 1;
+        $teachername=null;
+        $schoolname=null;
+        try {
+            $result =Item::getTeacherItem($teacherno,false);
+            if ($result != null) {
+                $teachername = $result['teachername'];
+                $schoolname= $result['schoolname'];
+                $status = 1;
+            } else {
+                $teachername= '该教师不存在!';
+                $status = 0;
+            }
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json(["status" => $status, 'teachername' => $teachername,'schoolname'=>$schoolname]);
+    }
+
+
 }

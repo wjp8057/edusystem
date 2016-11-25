@@ -1,0 +1,128 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var teachercheck=true;
+    var coursecheck=true;
+    $(function(){
+        //数据预处理
+        {
+            var year= $('#year');
+            year.validatebox({required: true, validType: 'equalLength[4]'});
+            var term= $('#term');
+            term.validatebox({required: true, validType: 'equalLength[1]'});
+            var teacherno = $('#teacherno');
+            teacherno.validatebox({required: true, validType: 'equalLength[6]'});
+            var courseno = $('#courseno');
+            courseno.validatebox({required: true, validType: 'equalLength[9]'});
+            var type=$('#type');
+            type.combobox({
+                url:'{$ROOT}/all/option/qualitytype',
+                valueField:'type',
+                textField:'name',
+                panelHeight:'auto',
+                required:true
+            });
+
+        }
+        $("#save").click(function() {
+            if($("#myForm").form('validate')&&teachercheck&&coursecheck){
+                var data={};
+                var rows=[];
+                var effectRow ={};
+                data['year']=year.val();
+                data['term']=term.val();
+                data['type']=type.combobox('getValue');
+                data['teacherno']=teacherno.val();
+                data['courseno']=courseno.val();
+                rows.push(data);
+                effectRow["inserted"]=$.toJSON(rows);
+                $.post('{$ROOT}/quality/student/courseupdate',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
+        //当教学计划号填写完成后。
+        teacherno.blur(function(){
+            $('#teachername').text('');
+            $('#teacherschoolname').text('');
+            if(teacherno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getteacherinfo',{teacherno:teacherno.val()},function(result){
+                if (result.status==1){
+                    $('#teachername').text(result.teachername);
+                    $('#teacherschoolname').text(result.schoolname);
+                    teachercheck=true;
+                }
+                else {
+                    $('#roomname').html("<div class='warn'>" + result.progname + "</div>");
+                    teachercheck = false;
+                }
+            },'json');
+        });
+
+        courseno.blur(function(){
+            $('#coursename').text('');
+            if(courseno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:courseno.val().substring(0,7)},function(result){
+                if (result.status==1){
+                    $('#coursename').text(result.coursename);
+                    coursecheck=true;
+                }
+                else {
+                    $('#coursename').html("<div class='warn'>" + result.coursename + "</div>");
+                    coursecheck = false;
+                }
+            },'json');
+        });
+
+        $("#myForm").form('validate');
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">新增考评条目</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="year">学年</label></th>
+            <td><input id="year"  size="4" value="{$YEARTERM.year}"/></td>
+            <th><label for="term">学期</label></th>
+            <td><input id="term" size="1" value="{$YEARTERM.term}"/></td>
+        </tr>
+        <tr>
+            <th><label for="teacherno">教师号</label></th>
+            <td><input id="teacherno" size="6"/></td>
+            <th>姓名</th>
+            <td><label id="teachername"></label></td>
+        </tr>
+        <tr>
+            <th colspan="1">所在学院</th>
+            <td colspan="3"><label id="teacherschoolname"></label></td>
+        </tr>
+        <tr>
+            <th><label for="courseno">课号</label></th>
+            <td><input id="courseno" size="9"/></td>
+            <th>课名</th>
+            <td><label id="coursename"></label></td>
+        </tr>
+        <tr>
+            <th colspan="1"><label for="type">类型</label></th>
+            <td colspan="3"><input id="type" size="9"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存考评条目信息</a>
+    </div>
+</div>

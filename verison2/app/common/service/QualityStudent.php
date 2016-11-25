@@ -14,6 +14,7 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyService;
 use think\Db;
@@ -91,6 +92,96 @@ class QualityStudent extends MyService {
             ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
+    public function  update($postData){
+        $updateRow=0;
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            if (isset($postData["inserted"])) {
+                $updated = $postData["inserted"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $data = null;
+                    $data['courseno'] = $one->courseno;
+                    $data['year'] = $one->year;
+                    $data['term'] = $one->term;
+                    $data['type'] = $one->type;
+                    $data['teacherno'] = $one->teacherno;
+                    $school=Item::getCourseItem( $one->courseno)['school'];
+                    $data['school'] = $school;
+                    if ($school!= session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
+                        $info .= '无法为其它学院添加课程条目'.$one->courseno .'</br>';
+                        $status=0;
+                        $errorRow++;
+                    }
+                    else {
+                        $row = $this->query->table('qualitystudent')->insert($data);
+                        if ($row > 0)
+                            $insertRow++;
+                    }
+                }
+            }
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $data = null;
+                    $condition['id'] = $one->id;
+                    $data['enabled'] = $one->enabled;
+                    $data['type'] = $one->type;
+
+                    if(MyAccess::checkQualityStudentSchool($one->id))
+                        $updateRow += $this->query->table('qualitystudent')->where($condition)->update($data);
+                    else{
+                        $info.=$one->courseno.'不是本学院班级，无法更改信息</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
+
+                }
+            }
+            //删除部分
+            if (isset($postData["deleted"])) {
+                $updated = $postData["deleted"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['id'] = $one->id;
+                    if(MyAccess::checkQualityStudentSchool($one->id))
+                        $deleteRow += $this->query->table('qualitystudent')->where($condition)->delete();
+                    else{
+                        $info.=$one->courseno.'不是本学院课程条目，无法删除</br>';
+                        $errorRow++;
+                        $status=0;
+                    }
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
 }

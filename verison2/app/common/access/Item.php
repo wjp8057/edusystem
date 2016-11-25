@@ -50,11 +50,12 @@ class Item {
     public static function getCourseItem($courseno,$alert=true){
         $result=null;
         $condition=null;
-        $condition['courseno']=$courseno;
-        $data=Db::table('courses')->where($condition)->field('rtrim(coursename) as coursename,courseno,credits,hours')->select();
+        $condition['courseno']=substr($courseno,0,7);
+        $data=Db::table('courses')
+            ->where($condition)->field('rtrim(coursename) as coursename,courseno,credits,hours,school')->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)
-                throw new Exception('courseno:' . $courseno, MyException::ITEM_NOT_EXISTS);
+                throw new Exception('courseno:'.$courseno, MyException::ITEM_NOT_EXISTS);
         }
         else
             $result=$data[0];
@@ -119,7 +120,8 @@ class Item {
         $result=null;
         $condition=null;
         $condition['teacherno']=$teacherno;
-        $data=Db::table('teachers')->where($condition)->field('rtrim(name) as teachername,teacherno')->select();
+        $data=Db::table('teachers')
+            ->join('schools','schools.school=teachers.school')->where($condition)->field('rtrim(teachers.name) as teachername,teacherno,rtrim(schools.name) schoolname')->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)
                 throw new Exception('teacherno:' . $teacherno, MyException::ITEM_NOT_EXISTS);
