@@ -1,0 +1,271 @@
+<layout name="all@index/layout" />
+<style type="text/css">
+    #statusbar{
+        line-height: 35px;
+        height: 35px;
+    }
+</style>
+<script type="text/javascript">
+    var courseInfo=null; //需要排考的课程信息
+    var courseIndex=0; //课程序号
+    var courseCount=0;//课程总数
+    var year;
+    var term;
+    $(function(){
+        $('#process').progressbar({
+            value: 0,
+            width:800
+        });
+        $('#dg').datagrid({
+            title:'',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:10,
+            url:'{$ROOT}/exam/end/autoquery',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                classno: $('#classno').val(),
+                courseno:$('#courseno').val()
+            },
+            columns:[[
+                {field:'lock',title:'锁定*',width:60,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                    formatter:function(val,rec){if(val==1)return '√';}},
+                {field:'flag',title:'场次',width:50,align:'center'},
+                {field:'courseno',title:'课号',width:80,align:'center'},
+                {field:'courseno2',title:'等价课号*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'equalLength[9]',required:true}}},
+                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'schoolname',title:'开课学院',width:100,align:'center'},
+                {field:'classname',title:'主修班级',width:250,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt= $('#dg');
+                tt.datagrid('startEditing',{index:index,field:field});
+                current_datagrid=tt;
+            }
+        });
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        $("#menu_delete,#delete").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                var rows=[];
+                rows.push(row);
+                if(!checkCourseSchool(rows))
+                    return;
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('提示','请先选中一条记录','info')
+            }
+        });
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id=rows[i].id;
+                updateObj.lock = rows[i].lock;
+                updateObj.courseno2= rows[i].courseno2;
+                updateObj.courseno = rows[i].courseno;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            if(!checkCourseSchool(rows)) return;
+            var count=0;
+            var effectRow ={};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(buildDataArray(rows));
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(!checkCourseSchool(rows)) return;
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(buildDataArray(rows));
+            }
+            if(count<=0){ //如果没有任何更新，就退出
+                $.messager.alert('提示','没有数据需要保存！','info');
+                return;
+            }
+            $.post('{$ROOT}/exam/end/autoupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                classno: $('#classno').val(),
+                courseno:$('#courseno').val()
+            });
+        });
+        $("#lock").click(function() {
+            setStatus(1);
+        });
+        $("#free").click(function() {
+            setStatus(0);
+        });
+        $("#load").click(function(){
+            $.post('{$ROOT}/exam/end/loadcourse',{ year: $('#year').val(),term: $('#term').val()},function(result){
+                if (result.status==1){
+                    var tt=$('#dg');
+                    tt.datagrid('reload');
+                    $('#message').text(result.info);
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        $("#init").click(function(){
+            $.post('{$ROOT}/exam/end/autoinit',{ year: $('#year').val(),term: $('#term').val()},function(result){
+                if (result.status==1){
+                    $('#message').text(result.info);
+                    $('#start').val(parseInt(result.flag)+1);
+                    $('#end').val(parseInt(result.times)+parseInt(result.flag));
+                    courseInfo=result.data;
+                    courseCount=courseInfo.length;
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        $("#schedule").click(function(){
+            year=$('#year').val();
+            term= $('#term').val();
+            toSchedule(1);
+        });
+        //init 是否初始化
+        function toSchedule(init){
+            if(init==1)
+                courseIndex=0;
+            var courseno=courseInfo[courseIndex].courseno;
+            var amount=courseInfo[courseIndex].amount;
+            $.post('{$ROOT}/exam/end/schedule',{ year:year,term:term,init:init,courseno:courseno,amount:amount,start:$('#start').val(),end:$('#end').val()},function(result){
+                if (result.status==1){
+                    var value = Math.floor((parseInt(courseIndex)+1)*100/courseCount);
+                    $('#process').progressbar('setValue', value);
+                    $('#message').text(courseInfo[courseIndex].coursename+result.info+','+(parseInt(courseIndex)+1)+'/'+courseCount);
+                    if(courseIndex<courseCount-1){
+                        courseIndex++;
+                        toSchedule(0);
+                    }
+                    else
+                        $('#message').text('全部排考完成！');
+
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        }
+        function checkCourseSchool(rows){
+            var count=rows.length;
+            for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+                if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                    $.messager.alert('错误','你无法修改其他学院的课程信息（'+rows[i].coursename+'）！','error');
+                    $("#cancel").click();
+                    return false;
+                }
+            }
+            return true;
+        }
+        function setStatus(lock){
+            $.post('{$ROOT}/exam/end/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:encodeURI($('#courseno').val()),
+                classno:encodeURI($('#classno').val()),lock:lock},function(result){
+                if (result.status==1){
+                    $('#dg').datagrid('reload');
+                    $.messager.alert("成功",result.info,"info");
+                }
+                else {
+                    $.messager.alert("错误",result.info,"error");
+                }
+            },'json');
+        }
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div class="menu-sep"></div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
+            <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="load">1、载入课程</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="lock">全锁定</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-free',plain:'true'" id="free">全解锁</a>
+        </div>
+        <div>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="init">2、初始化</a>
+            <label for="courseno">场次从：</label><input id="start" class="easyui-validatebox" size="2" value="0"/>
+            <label for="classno">到：</label><input id="end" class="easyui-validatebox" size="2" value="0"/>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-caluate',plain:'true'" id="schedule">3、开始排考</a>
+        </div>
+        <div id="process"></div>
+        <div id="statusbar">
+           <lable>状态：</lable><label id="message" class="warn"></label>
+        </div>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>修改后请将数据保存</li>
+        </ol>
+    </div>
+</div>

@@ -13,6 +13,8 @@ namespace app\all\controller;
 use app\common\access\MyAccess;
 use app\common\service\Classroom;
 use app\common\service\R32;
+use app\common\service\TestCourse;
+use app\common\service\TestStudent;
 use app\common\vendor\DrCom;
 use app\common\vendor\PHPExcel;
 use app\common\vendor\PHPWord;
@@ -481,7 +483,8 @@ class Option {
      * 测试专用
      */
     public function test(){
-        $data=array("Value1"=>"fang");
-         PHPWord::save2Template($data,'Template','cheshi');
+        $sql='select flag from flagtemp where flag=100';
+        $data=Db::query($sql);
+        dump(count($data));
     }
 }

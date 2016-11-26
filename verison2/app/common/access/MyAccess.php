@@ -451,7 +451,6 @@ class MyAccess {
     public static function checkCourseSchool($courseno=''){
         $condition=null;
         $condition['courseno']=$courseno;
-
         $data= Db::table('courses')->where($condition)->field('school')->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('courseno:'.$courseno, MyException::PARAM_NOT_CORRECT);

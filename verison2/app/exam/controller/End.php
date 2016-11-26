@@ -17,6 +17,7 @@ namespace app\exam\controller;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\SchedulePlan;
+use app\common\service\TestCourse;
 use app\common\vendor\PHPExcel;
 
 class End extends MyController{
@@ -37,7 +38,7 @@ class End extends MyController{
         }
         return json($result);
     }
-
+    //更新课程信息
     public function  courseupdate()
     {
         $result = null;
@@ -49,6 +50,7 @@ class End extends MyController{
         }
         return json($result);
     }
+    //导出数据
     public function  export ($year, $term,$courseno='%',$coursename='%',$classno='%',$school='',$exam=''){
         try{
             $student=new SchedulePlan();
@@ -73,4 +75,77 @@ class End extends MyController{
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
     }
+    //检索排考的课程
+    public function autoquery($page = 1, $rows = 20, $year, $term,$classno='%',$courseno='%')
+    {
+        $result = null;
+        try {
+            $obj = new TestCourse();
+            $result = $obj->getFinalList($page, $rows, $year, $term,$courseno,$classno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //载入课程
+    public function loadcourse($year, $term)
+    {
+        $result = null;
+        try {
+            $obj = new TestCourse();
+            $result = $obj->loadFinalCourse($year,$term);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //批量开放与锁定课程
+    public function lockfree($year,$term,$courseno='%',$classno='%',$lock=1){
+        $result = null;
+        try {
+            $obj = new TestCourse();
+            $result = $obj->setFinalCourseStatus($year,$term,$courseno,$classno,$lock);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //更新课程信息
+    public function  autoupdate()
+    {
+        $result = null;
+        try {
+            $obj=new TestCourse();
+            $result = $obj->update($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //初始化排考
+    public function  autoinit($year,$term)
+    {
+        $result = null;
+        try {
+            $obj=new TestCourse();
+            $result = $obj->init($year,$term,'A');
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+     //排考
+    public function schedule($year,$term,$courseno,$amount,$init=0,$start=0,$end=0)
+    {
+        $result = null;
+        try {
+            $obj=new TestCourse();
+            $result = $obj->schedule($year,$term,'A',$courseno,$amount,$init,$start,$end);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
 }
