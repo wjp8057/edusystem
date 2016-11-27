@@ -1,0 +1,10 @@
+ID	ACTION	DESCRIPTION	IMAGE	PARENTID	ISMENU	RANK	SHORTNAME
+insert into action(ACTION,DESCRIPTION,IMAGE,PARENTID,ISMENU,RANK)
+('/exam/index/finalauto',,自动排考','icon-caluate',1480,1,2),
+('/exam/end/autoquery','检索课程','icon-blank',1564,0,0),
+('/exam/end/lockfree','锁定解锁课程','icon-blank',1564,0,1),
+('/exam/end/autoinit','初始化数据','icon-blank',1564,0,2),
+('/exam/end/schedule','开始排考','icon-blank',1564,0,3),
+('/exam/end/loadcourse','载入课程','icon-blank',1564,0,0),
+('/exam/end/autoupdate','更新课程信息','icon-blank',1564,0,0),
+('/exam/end/exportexcel','导出到excel','icon-blank',1564,0,6)

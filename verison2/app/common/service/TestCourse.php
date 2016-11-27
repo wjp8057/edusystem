@@ -18,7 +18,7 @@ use think\Db;
 
 class TestCourse extends MyService {
     //读取期末考试课程列表
-    function getFinalList($page = 1, $rows = 20,$year,$term,$courseno='%',$classno='%')
+    function getFinalList($page = 1, $rows = 20,$year,$term,$courseno='%',$classno='%',$lock='')
     {
         $result=['total'=>0,'rows'=>[]];
         $condition = null;
@@ -27,14 +27,16 @@ class TestCourse extends MyService {
         $condition['testcourse.type']='A';
         if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
         if($classno!='%') $condition['courseplan.classno']=array('like',$classno);
+        if($lock!='') $condition['testcourse.lock']=array('like',$lock);
         $data = $this->query->table('testcourse')->page($page, $rows)
             ->join('courses','courses.courseno=substring(testcourse.courseno,1,7)')
             ->join('courseplan','courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
             ->join('classes','classes.classno=courseplan.classno')
             ->join('schools','schools.school=courses.school')
-            ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
+            ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
             courses.school,rtrim(schools.name) schoolname,dbo.GROUP_CONCAT(rtrim(classes.classname),',') classname")
-            ->group('testcourse.id,courses.school,testcourse.lock,testcourse.flag,testcourse.courseno,courses.coursename,schools.name,testcourse.courseno2')
+            ->group('testcourse.id,courses.school,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,courses.coursename,schools.name,
+            testcourse.courseno2')
             ->order('courseno')
             ->where($condition)->select();
         $count = $this->query->table('testcourse')
@@ -60,13 +62,20 @@ class TestCourse extends MyService {
         return array('info'=>$rows.'门课程成功载入！','status'=>'1');
     }
     //锁定，解锁
-    public function setFinalCourseStatus($year,$term,$courseno='%',$classno='%',$lock=1){
+    public function setFinalCourseStatus($year,$term,$courseno='%',$classno='%',$lock=0){
         $row=0;
-        $info=$lock==1?'锁定':'解锁';
         try {
+            if($lock==0){
+                $data['lock']=array('exp','lock^1');
+                $info='反向锁定';
+            }
+            else{
+                $data['lock']=1;
+                $info='锁定';
+            }
             $condition['courseplan.year']=$year;
             $condition['courseplan.term']=$term;
-            $data['lock']=$lock;
+            $condition['testcourse.type']='A';
             if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
             $condition['courseplan.classno']=array('like',$classno);
             $row=$this->query->table('testcourse')
@@ -76,7 +85,7 @@ class TestCourse extends MyService {
         catch(\Exception $e){
             throw $e;
         }
-        return ["info"=>"锁定成功！".$row."条记录".$info,"status"=>"1"];
+        return ["info"=>$info."成功！共".$row."条记录。","status"=>"1"];
     }
     //更新信息
     public function  update($postData){
@@ -145,6 +154,26 @@ class TestCourse extends MyService {
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
+    //清空flag
+    private static function  resetFlag($year,$term,$type){
+        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
+        $sql="update testcourse set flag=0
+            where testcourse.year=:year and testcourse.term=:term and testcourse.type=:type and lock=0";
+        Db::execute($sql,$bind);
+        $sql="update teststudent set flag=0 ";
+        Db::execute($sql);
+
+    }
+    //计算人数
+    private static function  setAmount($year,$term,$type){
+        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
+        $sql="update testcourse
+            set amount=t.amount from testcourse inner join
+            (select map,count(*) amount from teststudent
+            group by map) as t on t.map=testcourse.id
+            where testcourse.year=:year and testcourse.term=:term and testcourse.type=:type";
+        Db::execute($sql,$bind);
+    }
     //读取已排的最大场场次数
     private static function getMinFlag($year,$term,$type){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
@@ -167,7 +196,7 @@ class TestCourse extends MyService {
     private static function getCourseInfo($year,$term,$type){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
         $sql="select courses.courseno,rtrim(courses.coursename) coursename,count(*) amount
-            from testcourse inner join courses on courses.courseno=substring(testcourse.courseno,1,7)
+            from testcourse inner join courses on courses.courseno=substring(testcourse.courseno2,1,7)
             inner join teststudent on teststudent.map=testcourse.id
             where testcourse.year=:year and testcourse.term=:term and testcourse.type=:type and testcourse.lock=0
             group by courses.courseno,courses.coursename
@@ -193,6 +222,8 @@ class TestCourse extends MyService {
                 return  array('info'=>'排考类型参数错误！','status'=>'0');
                 break;
         }
+        self::resetFlag($year,$term,$type);
+        self::setAmount($year,$term,$type);
         $flag=self::getMinFlag($year,$term,$type);
         $times=self::getMinTimes($year,$term,$type);
         $data=self::getCourseInfo($year,$term,$type);
@@ -219,23 +250,13 @@ class TestCourse extends MyService {
             $dataset[]=array('flag'=>$i,'total'=>0);
         Db::table('flagtemp')->insertAll($dataset);
     }
-    //清空flag
-    private static function  resetFlag($year,$term,$type){
-        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
-        $sql="update testcourse set flag=0
-            where testcourse.year=:year and testcourse.term=:term and testcourse.type=:type and lock=0";
-        Db::execute($sql,$bind);
-        $sql="update teststudent set flag=0 ";
-        Db::execute($sql);
-
-    }
     //检索flag
     private static function findFlag($year,$term,$type,$courseno){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type,'courseno'=>$courseno);
         $sql="select top 1 flag from flagtemp
             where not exists (select * from teststudent
             where teststudent.flag=flagtemp.flag and exists(select * from testcourse inner join teststudent as t on t.map=testcourse.id
-            where testcourse.year=:year and testcourse.term=:term and substring(testcourse.courseno,1,7)=:courseno and type=:type
+            where testcourse.year=:year and testcourse.term=:term and substring(testcourse.courseno2,1,7)=:courseno and type=:type
              and t.studentno=teststudent.studentno
             ))
             order by total,flag";
@@ -250,11 +271,11 @@ class TestCourse extends MyService {
     //设置两个表的flag
     private static function setFlag($year,$term,$type,$courseno,$flag){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type,'courseno'=>$courseno,'flag'=>$flag);
-        $sql='update testcourse set flag=:flag where year=:year and term=:term and type=:type and substring(courseno,1,7)=:courseno';
+        $sql='update testcourse set flag=:flag where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno';
         Db::execute($sql,$bind);
 
         $sql='update teststudent set flag=:flag from testcourse inner join teststudent on testcourse.id=teststudent.map
-        where year=:year and term=:term and type=:type and substring(courseno,1,7)=:courseno';
+        where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno';
         Db::execute($sql,$bind);
     }
     //排考

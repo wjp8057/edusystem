@@ -11,13 +11,22 @@
     var courseCount=0;//课程总数
     var year;
     var term;
+    var startTime;
+    var endTime;
     $(function(){
         $('#process').progressbar({
             value: 0,
             width:800
         });
+        var status=$('#status');
+        status.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
         $('#dg').datagrid({
-            title:'',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:10,
+            title:'',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:15,pageList:[15,30,45],
             url:'{$ROOT}/exam/end/autoquery',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
@@ -26,12 +35,13 @@
                 courseno:$('#courseno').val()
             },
             columns:[[
-                {field:'lock',title:'锁定*',width:60,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                {field:'lock',title:'锁定*',width:50,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
                     formatter:function(val,rec){if(val==1)return '√';}},
                 {field:'flag',title:'场次',width:50,align:'center'},
                 {field:'courseno',title:'课号',width:80,align:'center'},
                 {field:'courseno2',title:'等价课号*',width:80,align:'center',editor:{type:'validatebox',options:{validType:'equalLength[9]',required:true}}},
                 {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'amount',title:'人数',width:50,align:'center'},
                 {field:'schoolname',title:'开课学院',width:100,align:'center'},
                 {field:'classname',title:'主修班级',width:250,align:'center'}
             ]],
@@ -142,25 +152,30 @@
                 year: $('#year').val(),
                 term: $('#term').val(),
                 classno: $('#classno').val(),
-                courseno:$('#courseno').val()
+                courseno:$('#courseno').val(),
+                status:status.combobox('getValue')
             });
         });
         $("#lock").click(function() {
             setStatus(1);
         });
-        $("#free").click(function() {
+        $("#neglock").click(function() {
             setStatus(0);
         });
         $("#load").click(function(){
-            $.post('{$ROOT}/exam/end/loadcourse',{ year: $('#year').val(),term: $('#term').val()},function(result){
-                if (result.status==1){
-                    var tt=$('#dg');
-                    tt.datagrid('reload');
-                    $('#message').text(result.info);
-                } else {
-                    $.messager.alert('错误',result.info,'error');
+            $.messager.confirm('确认','载入操作会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期的排考结果，你确定要重新载入课程么？',function(r){
+                if (r){
+                    $.post('{$ROOT}/exam/end/loadcourse',{ year: $('#year').val(),term: $('#term').val()},function(result){
+                        if (result.status==1){
+                            var tt=$('#dg');
+                            tt.datagrid('reload');
+                            $('#message').text(result.info);
+                        } else {
+                            $.messager.alert('错误',result.info,'error');
+                        }
+                    },'json');
                 }
-            },'json');
+            });
         });
         $("#init").click(function(){
             $.post('{$ROOT}/exam/end/autoinit',{ year: $('#year').val(),term: $('#term').val()},function(result){
@@ -170,6 +185,7 @@
                     $('#end').val(parseInt(result.times)+parseInt(result.flag));
                     courseInfo=result.data;
                     courseCount=courseInfo.length;
+                    $('#dg').datagrid('reload');
                 } else {
                     $.messager.alert('错误',result.info,'error');
                 }
@@ -180,10 +196,23 @@
             term= $('#term').val();
             toSchedule(1);
         });
+        $('#exportexcel').click(function(){
+            var year= encodeURI($('#year').val());
+            var term= encodeURI($('#term').val());
+            $.fileDownload("{$ROOT}/exam/end/exportexcel?year="+year+"&term="+term, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
         //init 是否初始化
         function toSchedule(init){
-            if(init==1)
-                courseIndex=0;
+            if(init==1) {
+                courseIndex = 0;
+                startTime=new Date();
+            }
             var courseno=courseInfo[courseIndex].courseno;
             var amount=courseInfo[courseIndex].amount;
             $.post('{$ROOT}/exam/end/schedule',{ year:year,term:term,init:init,courseno:courseno,amount:amount,start:$('#start').val(),end:$('#end').val()},function(result){
@@ -195,8 +224,11 @@
                         courseIndex++;
                         toSchedule(0);
                     }
-                    else
-                        $('#message').text('全部排考完成！');
+                    else {
+                        endTime=new Date();
+                        $('#message').text(courseCount+'门课全部排考完成！用时：'+(endTime.getTime()-startTime.getTime())/1000+'秒！');
+                        $('#dg').datagrid('reload');
+                    }
 
                 } else {
                     $.messager.alert('错误',result.info,'error');
@@ -215,8 +247,8 @@
             return true;
         }
         function setStatus(lock){
-            $.post('{$ROOT}/exam/end/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:encodeURI($('#courseno').val()),
-                classno:encodeURI($('#classno').val()),lock:lock},function(result){
+            $.post('{$ROOT}/exam/end/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),
+                classno:$('#classno').val(),lock:lock},function(result){
                 if (result.status==1){
                     $('#dg').datagrid('reload');
                     $.messager.alert("成功",result.info,"info");
@@ -241,23 +273,27 @@
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
             <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
             <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="load">1、载入课程</a>
+            <label for="status">是否锁定：</label><input id="status" size="7"/>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="lock">全锁定</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-free',plain:'true'" id="free">全解锁</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="lock">按班号锁定</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="neglock">锁定反向</a>
         </div>
         <div>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="init">2、初始化</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="load">1、载入课程</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-clear',plain:'true'" id="init">2、初始化</a>
             <label for="courseno">场次从：</label><input id="start" class="easyui-validatebox" size="2" value="0"/>
             <label for="classno">到：</label><input id="end" class="easyui-validatebox" size="2" value="0"/>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-caluate',plain:'true'" id="schedule">3、开始排考</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-clock',plain:'true'" id="schedule">3、开始排考</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-note',plain:'true'" id="exportplan">4、导出到考试安排表</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-plan',plain:'true'" id="flag">5、设定时间表</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="exportexcel">导出全部</a>
         </div>
         <div id="process"></div>
         <div id="statusbar">
-           <lable>状态：</lable><label id="message" class="warn"></label>
+           <lable>提示：</lable><label id="message" class="warn"></label>
         </div>
     </div>
     <table id="dg"></table>

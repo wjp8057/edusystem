@@ -76,12 +76,12 @@ class End extends MyController{
         }
     }
     //检索排考的课程
-    public function autoquery($page = 1, $rows = 20, $year, $term,$classno='%',$courseno='%')
+    public function autoquery($page = 1, $rows = 20, $year, $term,$classno='%',$courseno='%',$status='')
     {
         $result = null;
         try {
             $obj = new TestCourse();
-            $result = $obj->getFinalList($page, $rows, $year, $term,$courseno,$classno);
+            $result = $obj->getFinalList($page, $rows, $year, $term,$courseno,$classno,$status);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
@@ -100,7 +100,7 @@ class End extends MyController{
         return json($result);
     }
     //批量开放与锁定课程
-    public function lockfree($year,$term,$courseno='%',$classno='%',$lock=1){
+    public function lockfree($year,$term,$courseno='%',$classno='%',$lock=0){
         $result = null;
         try {
             $obj = new TestCourse();
@@ -147,5 +147,24 @@ class End extends MyController{
         }
         return json($result);
     }
+    //导出到excel表
+    public function exportexcel($year,$term)
+    {
+        try{
+            $obj = new TestCourse();
+            $result = $obj->getFinalList(1,10000,$year,$term,'%','%','');
+            $data = $result['rows'];
+            $file = $year."学年第".$term."学期期末考试时间安排表";
+            $sheet = '全部';
+            $title = $file;
+            $template = array('courseno'=>'课号','coursename'=>'课名','schoolname'=>'学院','classname'=>'班级','amount'=>'人数','flag'=>'时间',);
+            $string = array("courseno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file, $array);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
 
+    }
 }

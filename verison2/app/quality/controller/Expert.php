@@ -197,7 +197,7 @@ class Expert extends MyController
         }
         return json($result);
     }
-
+    //导出教师平均得分
     public function exportteacherscore($year,$teacherno='%',$name='%',$school='')
     {
         try{
@@ -217,7 +217,7 @@ class Expert extends MyController
         }
 
     }
-
+    //导出详细打分记录
     public function exportscore($year,$term,$expert='%',$name='%',$school='')
     {
         try{
