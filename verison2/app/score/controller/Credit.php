@@ -471,7 +471,7 @@ class Credit extends MyController {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
     }
-
+    //检索信息
     public function query($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch='0',$type='')
     {
         $result = null;
@@ -489,7 +489,7 @@ class Credit extends MyController {
         }
         return json($result);
     }
-
+    //导出到ecel
     public function export($year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch,$type=''){
         $result=null;
         $file='';
@@ -519,6 +519,16 @@ class Credit extends MyController {
             PHPExcel::export2Excel($file,$array);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+    }
+    //导出单个认定到word
+    public function exportword($id){
+        try{
+            $obj = new CreditApply();
+            $obj->exportWord($id);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
         }
     }
 

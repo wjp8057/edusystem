@@ -466,12 +466,32 @@ class Option {
         }
         return json($result);
     }
+//   认定学分类型
     public function credittype($only=1){
         $result=null;
         try {
             $result =Db::table('credittype')->field('rtrim(type) as type,rtrim(name) as name')->order('type')->select();
             if($only==0) {
                 $all[] = array('type' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //场次
+    public function testbatch($year,$term,$type,$only=1){
+        $result=null;
+        try {
+            $condition=null;
+            $condition['year']=$year;
+            $condition['term']=$term;
+            $condition['type']=$type;
+            $result =Db::table('testbatch')->field('rtrim(testtime) as name,flag')
+                ->where($condition)->order('name')->select();
+            if($only==0) {
+                $all[] = array('flag' => '', 'name' => '全部');
                 $result = array_merge($all, $result);
             }
         } catch (\Exception $e) {

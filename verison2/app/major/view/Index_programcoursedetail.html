@@ -14,7 +14,7 @@
             $('#hours').text('{$course.hours}');
 
             var year = $('#year');
-            year.validatebox({required: true, validType: 'equalLength[1]'});
+            year.validatebox({required: true, validType: 'equalLength[4]'});
             year.val("{$course.year}");
             var term = $('#term');
             term.validatebox({required: true, validType: 'equalLength[1]'});
@@ -136,7 +136,7 @@
         </tr>
         <tr>
             <th>学年</th>
-            <td><input id="year" size="1"/></td>
+            <td><input id="year" size="4"/></td>
             <th>学期</th>
             <td><input id="term" size="1"/></td>
         </tr>

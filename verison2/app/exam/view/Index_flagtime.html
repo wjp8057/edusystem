@@ -1,0 +1,124 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var year=$('#year');
+        year.val('{$year}');
+        var term=$('#term');
+        term.val('{$term}');
+        $('#dg').datagrid({
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            queryParams: {
+                year: year.val(),
+                term: term.val(),
+                type:'{$type}'
+            }, url:'{$ROOT}/exam/auto/flagquery',toolbar:'#toolbar',
+            columns:[[
+                {field:'year',title:'学年',width:60,align:'center'},
+                {field:'term',title:'学期',width:60,align:'center'},
+                {field:'flag',title:'场次',width:60,align:'center'},
+                {field:'amount',title:'人数',width:60,align:'center'},
+                {field:'testtime',title:'考试时间*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[50]',required:true}}}
+            ]],
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno=rows[i].recno;
+                updateObj.testtime = rows[i].testtime;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(buildDataArray(rows));
+            }
+            if(count<=0) //如果没有任何更新，就退出
+                return;
+
+            $.post('{$ROOT}/exam/auto/flagupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value=""/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value=""/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+            <li>代码添加后无法更改。</li>
+        </ol>
+    </div>
+</div>

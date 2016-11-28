@@ -17,8 +17,22 @@ use app\common\access\MyService;
 use think\Db;
 
 class TestCourse extends MyService {
+    public static function getTypeName($type='A')
+    {
+        switch($type){
+            case 'A':
+                return '期末考试';
+            case 'B':
+                return '学期初补考';
+                break;
+            case 'C':
+                return '毕业免听考';
+            default:
+               return '期末考试';
+        }
+    }
     //读取期末考试课程列表
-    function getFinalList($page = 1, $rows = 20,$year,$term,$courseno='%',$classno='%',$lock='')
+    function getList($page = 1, $rows = 20,$year,$term,$courseno='%',$classno='%',$lock='',$type='A')
     {
         $result=['total'=>0,'rows'=>[]];
         $condition = null;
@@ -26,33 +40,42 @@ class TestCourse extends MyService {
         $condition['courseplan.term']=$term;
         $condition['testcourse.type']='A';
         if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
-        if($classno!='%') $condition['courseplan.classno']=array('like',$classno);
         if($lock!='') $condition['testcourse.lock']=array('like',$lock);
-        $data = $this->query->table('testcourse')->page($page, $rows)
-            ->join('courses','courses.courseno=substring(testcourse.courseno,1,7)')
-            ->join('courseplan','courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
-            ->join('classes','classes.classno=courseplan.classno')
-            ->join('schools','schools.school=courses.school')
-            ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
+        if($type=='A') {
+            if($classno!='%') $condition['courseplan.classno']=array('like',$classno);
+            $data = $this->query->table('testcourse')->page($page, $rows)
+                ->join('courses', 'courses.courseno=substring(testcourse.courseno,1,7)')
+                ->join('courseplan', 'courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
+                ->join('classes', 'classes.classno=courseplan.classno')
+                ->join('schools', 'schools.school=courses.school')
+                ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
             courses.school,rtrim(schools.name) schoolname,dbo.GROUP_CONCAT(rtrim(classes.classname),',') classname")
-            ->group('testcourse.id,courses.school,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,courses.coursename,schools.name,
+                ->group('testcourse.id,courses.school,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,courses.coursename,schools.name,
             testcourse.courseno2')
-            ->order('courseno')
-            ->where($condition)->select();
-        $count = $this->query->table('testcourse')
-            ->join('courseplan','courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
-            ->where($condition)->count('distinct testcourse.courseno');
+                ->order('courseno')
+                ->where($condition)->select();
+            $count = $this->query->table('testcourse')
+                ->join('courseplan', 'courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
+                ->where($condition)->count('distinct testcourse.courseno');
+        }
+        else{
+            $data = $this->query->table('testcourse')->page($page, $rows)
+                ->join('courses', 'courses.courseno=substring(testcourse.courseno,1,7)')
+                ->join('schools', 'schools.school=courses.school')
+                ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
+            courses.school,'' classname")
+                ->order('courseno')
+                ->where($condition)->select();
+            $count = $this->query->table('testcourse')
+                ->where($condition)->count();
+        }
         if (is_array($data) && count($data) > 0)
             $result = array('total' => $count, 'rows' => $data);
         return $result;
     }
     //载入期末考试课程
-    function  loadFinalCourse($year,$term){
+    private static function loadFinalCourse($year,$term){
         $bind=array('year'=>$year,'term'=>$term);
-        MyAccess::checkAccess('E');
-        $sql="delete from testcourse where year=:year and term=:term and type='A'";
-        Db::execute($sql,$bind);
-
         $sql="insert into testcourse(year,term,type,courseno,courseno2,coursename)
             select scheduleplan.year,scheduleplan.term,'A',scheduleplan.courseno+scheduleplan.[group],scheduleplan.courseno+scheduleplan.[group],courses.coursename
             from scheduleplan
@@ -61,9 +84,21 @@ class TestCourse extends MyService {
         $rows=Db::execute($sql,$bind);
         return array('info'=>$rows.'门课程成功载入！','status'=>'1');
     }
+    function  loadCourse($year,$term,$type='A'){
+        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
+        MyAccess::checkAccess('E');
+        $sql="delete from testcourse where year=:year and term=:term and type=:type";
+        Db::execute($sql,$bind);
+        switch($type){
+            case 'A':
+                return self::loadFinalCourse($year,$term);
+
+            default:
+                return self::loadFinalCourse($year,$term);
+        }
+    }
     //锁定，解锁
-    public function setFinalCourseStatus($year,$term,$courseno='%',$classno='%',$lock=0){
-        $row=0;
+    public function setCourseStatus($year,$term,$courseno='%',$classno='%',$lock=0){
         try {
             if($lock==0){
                 $data['lock']=array('exp','lock^1');
@@ -73,14 +108,20 @@ class TestCourse extends MyService {
                 $data['lock']=1;
                 $info='锁定';
             }
-            $condition['courseplan.year']=$year;
-            $condition['courseplan.term']=$term;
+            $condition['testcourse.year']=$year;
+            $condition['testcourse.term']=$term;
             $condition['testcourse.type']='A';
             if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
-            $condition['courseplan.classno']=array('like',$classno);
-            $row=$this->query->table('testcourse')
-                ->join('courseplan','testcourse.courseno=courseplan.courseno+courseplan.[group]')
-                ->where($condition)->update($data);
+            if($classno!='%') {
+                $condition['courseplan.classno'] = array('like', $classno);
+                $row = $this->query->table('testcourse')
+                    ->join('courseplan', 'testcourse.courseno=courseplan.courseno+courseplan.[group] and testcourse.year=courseplan.year and testcourse.term=courseplan.term')
+                    ->where($condition)->update($data);
+            }
+            else {
+                $row = $this->query->table('testcourse')
+                    ->where($condition)->update($data);
+            }
         }
         catch(\Exception $e){
             throw $e;
@@ -210,8 +251,8 @@ class TestCourse extends MyService {
         TestStudent::clear();
         switch($type){
             case 'A': //期末考试
-            $total=TestStudent::loadFinal($year,$term);
-            break;
+                $total=TestStudent::loadFinal($year,$term);
+                break;
             case 'B': //期初补考
                 $total=TestStudent::loadFinal($year,$term);
                 break;
@@ -294,5 +335,39 @@ class TestCourse extends MyService {
             return array('info'=>'排考完成，场次为'.$flag,'status'=>'1');
         }
         return array('info'=>'排考失败，建议增加场次数','status'=>'0');
+    }
+    //导出Flag到Testbatch
+    private static function exportFlag($year,$term,$type){
+        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
+        //清除原有记录
+        $sql="delete from testbatch
+             where year=:year and term=:term and type=:type";
+        Db::execute($sql,$bind);
+        //加入新纪录
+        $sql=" insert into testbatch(year,term,type,flag,amount)
+              select year,term,type,flag,sum(amount) amount  from testcourse
+              where year=:year and term=:term and type=:type
+              group by flag,year,term,type";
+        Db::execute($sql,$bind);
+    }
+    //导出课程到testplan
+    private static function exportCourse($year,$term,$type){
+        $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
+        //清除原有记录
+        $sql="delete from testplan
+             where year=:year and term=:term and type=:type";
+        Db::execute($sql,$bind);
+        //加入新纪录
+        $sql=" insert into testplan(year,term,type,flag,attendents,courseno)
+              select year,term,type,flag,amount,courseno  from testcourse
+              where year=:year and term=:term and type=:type";
+        Db::execute($sql,$bind);
+    }
+    //导出到排考计划表testplan
+    public function exportPlan($year,$term,$type){
+        MyAccess::checkAccess('E');
+        self::exportFlag($year,$term,$type);
+        self::exportCourse($year,$term,$type);
+        return array('info'=>'导出完成！','status'=>'1');
     }
 }

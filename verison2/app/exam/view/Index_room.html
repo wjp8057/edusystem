@@ -1,0 +1,199 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var type='{$type.type}';
+    var typename='{$type.typename}';
+    $(function () {
+        var flag = $('#flag');
+        flag.combobox({
+            url: '{$ROOT}/all/option/testbatch?only=0&year={$YEARTERM.year}&term={$YEARTERM.term}&type='+type,
+            valueField: 'flag',
+            textField: 'name'
+        });
+        var equipment = $('#equipment');
+        equipment.combobox({
+            url: '{$ROOT}/all/option/equipment?only=0',
+            valueField: 'equipment',
+            textField: 'name'
+        });
+        var area = $('#area');
+        area.combobox({
+            url: '{$ROOT}/all/option/area?only=0',
+            valueField: 'area',
+            textField: 'name',
+            panelHeight:'auto'
+        });
+        area.combobox('setValue','4');
+        if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
+            area.combobox('setValue','3');
+        $('#dg').datagrid({
+            title: '考试列表',
+            idField: 'studentno',
+            striped: 'true',
+            pagination: 'true',
+            singleSelect:'true',
+            rownumbers: 'true',
+            pageSize:20,
+            url: '{$ROOT}/major/plan/studentplanlist',
+            queryParams: {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type
+            },
+            toolbar: '#toolbar',
+            pageList: [20,40,60,100],
+            columns: [[
+                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2},
+                {field: 'coursename', title: '课名', width: 60, align: 'center',rowspan:2},
+                {field: 'attendents', title: '人数', width: 80, align: 'center',rowspan:2},
+                {field: 'schoolname', title: '学院', width: 100, align: 'center',rowspan:2},
+                {title: '考场1',colspan:2},
+                {title: '考场2',colspan:2}
+
+            ],[
+                {field: 'roomno1', title: '房间', width: 40, align: 'center'},
+                {field: 'seats1', title: '考位', width: 95, align: 'center'},
+                {field: 'roomno2', title: '房间', width: 40, align: 'center'},
+                {field: 'seats2', title: '考位', width: 95, align: 'center'}
+            ]
+            ],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type,
+                flag:flag.combobox('getValue')
+            });
+        });
+        $('#dg2').datagrid({
+            title: '检索教室',
+            idField: 'roomno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            singleSelect:'true',
+            url: '{$ROOT}/exam/room/query',
+            queryParams: { area:area.combobox('getValue')},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'roomno', title: '教室号', width: 80, align: 'center',formatter:function(val,rec){
+                    return "<a class='blue_link'href='javascript:print(\""+rec.roomno+"\")' >"+rec.roomno+"</a>" ;
+                }},
+                {field: 'roomname', title: '名称', width: 100, align: 'center'},
+                {field: 'testers', title: '考位数', width: 50, align: 'center'},
+                {field: 'equipmentname', title: '类型', width: 110, align: 'center'},
+                {field: 'areaname', title: '校区', width: 110, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+
+        //绑定到班级学生
+        $("#bind,#menu_bind").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            var effectRow = {};
+            if (!row||!row2) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '请同时选择一个课程和教室！', 'info');
+                return;
+            }
+            if (row.school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
+                $.messager.alert('错误', '你无法为其他学院的课程修改考场（' + row.roomno1 + '）！', 'error');
+                return false;
+            }
+            effectRow['studentno'] = row.studentno;
+            effectRow['majorplanid'] = row2.rowid;
+            $.post('{$ROOT}/major/plan/studentplanbind', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+
+        $("#search2").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                roomno:$('#roomno').val(),
+                equipment:$('#equipment').combobox('getValue'),
+                area:$('#area').combobox('getValue')
+            });
+        });
+    });
+    function print(item){
+        var url='/exam/index/roomtimetable?roomno='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
+        window.open('{$ROOT}'+url);
+    }
+</script>
+<div class="container">
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div id='menu_bind' data-options="iconCls:'icon icon-person'">绑定到选中学生</div>
+    </div>
+    <div id="left" style="width:680px;float:left">
+        <div id="toolbar">
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
+            <label for="flag">场次：</label><input id="flag" size="4">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:570px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="7" value="%"/>
+            <label for="equipment">类型：</label><input id="equipment" size="14" />
+            <label for="area">校区：</label><input id="area" size="16" />
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-house',plain:'true'" id="setroom1">设置为考场1</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-factory',plain:'true'" id="setroom2">设置为考场2</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+            <li>添加到列表后请保存数据</li>
+            <li class="warn">每个班级只能绑定一个培养方案，新绑定的培养方案会删除原有方案。</li>
+        </ol>
+    </div>
+</div>

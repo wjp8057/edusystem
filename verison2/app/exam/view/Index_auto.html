@@ -13,6 +13,8 @@
     var term;
     var startTime;
     var endTime;
+    var type='{$type.type}';
+    var typename='{$type.typename}';
     $(function(){
         $('#process').progressbar({
             value: 0,
@@ -27,12 +29,13 @@
         });
         $('#dg').datagrid({
             title:'',idField:'courseno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:15,pageList:[15,30,45],
-            url:'{$ROOT}/exam/end/autoquery',toolbar:'#toolbar',
+            url:'{$ROOT}/exam/auto/query',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val(),
                 classno: $('#classno').val(),
-                courseno:$('#courseno').val()
+                courseno:$('#courseno').val(),
+                type:type
             },
             columns:[[
                 {field:'lock',title:'锁定*',width:50,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
@@ -131,7 +134,7 @@
                 $.messager.alert('提示','没有数据需要保存！','info');
                 return;
             }
-            $.post('{$ROOT}/exam/end/autoupdate',effectRow,function(result){
+            $.post('{$ROOT}/exam/auto/update',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -153,7 +156,8 @@
                 term: $('#term').val(),
                 classno: $('#classno').val(),
                 courseno:$('#courseno').val(),
-                status:status.combobox('getValue')
+                status:status.combobox('getValue'),
+                type:type
             });
         });
         $("#lock").click(function() {
@@ -163,9 +167,9 @@
             setStatus(0);
         });
         $("#load").click(function(){
-            $.messager.confirm('确认','载入操作会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期的排考结果，你确定要重新载入课程么？',function(r){
+            $.messager.confirm('确认','载入操作会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期的'+typename+'排考结果，你确定要重新载入课程么？',function(r){
                 if (r){
-                    $.post('{$ROOT}/exam/end/loadcourse',{ year: $('#year').val(),term: $('#term').val()},function(result){
+                    $.post('{$ROOT}/exam/auto/load',{ year: $('#year').val(),term: $('#term').val(),type:type},function(result){
                         if (result.status==1){
                             var tt=$('#dg');
                             tt.datagrid('reload');
@@ -178,7 +182,7 @@
             });
         });
         $("#init").click(function(){
-            $.post('{$ROOT}/exam/end/autoinit',{ year: $('#year').val(),term: $('#term').val()},function(result){
+            $.post('{$ROOT}/exam/auto/init',{ year: $('#year').val(),term: $('#term').val(),type:type},function(result){
                 if (result.status==1){
                     $('#message').text(result.info);
                     $('#start').val(parseInt(result.flag)+1);
@@ -199,13 +203,30 @@
         $('#exportexcel').click(function(){
             var year= encodeURI($('#year').val());
             var term= encodeURI($('#term').val());
-            $.fileDownload("{$ROOT}/exam/end/exportexcel?year="+year+"&term="+term, {
+            $.fileDownload("{$ROOT}/exam/auto/exportexcel?year="+year+"&term="+term+'&type='+type, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
                     $.messager.alert('错误',html,'error');
                 }
             });
+        });
+        $("#exportplan").click(function(){
+            $.messager.confirm('确认','导出到排考表会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期'+typename+'教师和教师安排，你确定要导出么？',function(r){
+                if (r){
+                    $.post('{$ROOT}/exam/auto/exportplan',{ year: $('#year').val(),term: $('#term').val(),type:type},function(result){
+                        if (result.status==1){
+                            $.messager.alert('成功',result.info,'info');
+                        } else {
+                            $.messager.alert('错误',result.info,'error');
+                        }
+                    },'json');
+                }
+            });
+        });
+        $("#flagset").click(function(){
+            parent.menuTabs.addTab(typename+"时间设置","{$ROOT}/exam/index/flagtime?year="+$('#year').val()+"&term="+$('#term').val()+"&type="+type,"icon icon-system");
+
         });
         //init 是否初始化
         function toSchedule(init){
@@ -215,7 +236,7 @@
             }
             var courseno=courseInfo[courseIndex].courseno;
             var amount=courseInfo[courseIndex].amount;
-            $.post('{$ROOT}/exam/end/schedule',{ year:year,term:term,init:init,courseno:courseno,amount:amount,start:$('#start').val(),end:$('#end').val()},function(result){
+            $.post('{$ROOT}/exam/auto/schedule',{ year:year,term:term,type:type,init:init,courseno:courseno,amount:amount,start:$('#start').val(),end:$('#end').val()},function(result){
                 if (result.status==1){
                     var value = Math.floor((parseInt(courseIndex)+1)*100/courseCount);
                     $('#process').progressbar('setValue', value);
@@ -247,7 +268,7 @@
             return true;
         }
         function setStatus(lock){
-            $.post('{$ROOT}/exam/end/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),
+            $.post('{$ROOT}/exam/auto/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),
                 classno:$('#classno').val(),lock:lock},function(result){
                 if (result.status==1){
                     $('#dg').datagrid('reload');
@@ -288,7 +309,7 @@
             <label for="classno">到：</label><input id="end" class="easyui-validatebox" size="2" value="0"/>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-clock',plain:'true'" id="schedule">3、开始排考</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-note',plain:'true'" id="exportplan">4、导出到考试安排表</a>
-            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-plan',plain:'true'" id="flag">5、设定时间表</a>
+            <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-plan',plain:'true'" id="flagset">5、设定时间表</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="exportexcel">导出全部</a>
         </div>
         <div id="process"></div>
