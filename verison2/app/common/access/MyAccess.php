@@ -450,7 +450,7 @@ class MyAccess {
     //检查课程所在学院是否有权限
     public static function checkCourseSchool($courseno=''){
         $condition=null;
-        $condition['courseno']=$courseno;
+        $condition['courseno']=substr($courseno,0,7);
         $data= Db::table('courses')->where($condition)->field('school')->select();
         if(!is_array($data)||count($data)!=1)
             throw new Exception('courseno:'.$courseno, MyException::PARAM_NOT_CORRECT);

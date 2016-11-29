@@ -26,14 +26,14 @@
         if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
             area.combobox('setValue','3');
         $('#dg').datagrid({
-            title: '考试列表',
-            idField: 'studentno',
+            title: '考试课程列表',
+            idField: 'id',
             striped: 'true',
             pagination: 'true',
             singleSelect:'true',
             rownumbers: 'true',
             pageSize:20,
-            url: '{$ROOT}/major/plan/studentplanlist',
+            url: '{$ROOT}/exam/room/courselist',
             queryParams: {
                 year:$("#year").val(),
                 term:$('#term').val(),
@@ -42,18 +42,26 @@
             toolbar: '#toolbar',
             pageList: [20,40,60,100],
             columns: [[
-                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2},
-                {field: 'coursename', title: '课名', width: 60, align: 'center',rowspan:2},
-                {field: 'attendents', title: '人数', width: 80, align: 'center',rowspan:2},
+                {field: 'courseno', title: '课号', width: 70, align: 'center',rowspan:2},
+                {field: 'coursename', title: '课名', width: 170, align: 'center',rowspan:2},
+                {field: 'attendents', title: '人数', width: 40, align: 'center',rowspan:2},
+                {field: 'seatsall', title: '总考位', width: 50, align: 'center',rowspan:2,
+                    formatter:function(val,rec){
+                        var seatall=parseInt(rec.seats1)+parseInt(rec.seats2)+parseInt(rec.seats3);
+                        if(seatall<parseInt(rec.attendents))
+                            return "<label class='warn'>"+seatall+"</a>" ;
+                        else
+                            return seatall ;
+                }},
                 {field: 'schoolname', title: '学院', width: 100, align: 'center',rowspan:2},
                 {title: '考场1',colspan:2},
                 {title: '考场2',colspan:2}
 
             ],[
-                {field: 'roomno1', title: '房间', width: 40, align: 'center'},
-                {field: 'seats1', title: '考位', width: 95, align: 'center'},
-                {field: 'roomno2', title: '房间', width: 40, align: 'center'},
-                {field: 'seats2', title: '考位', width: 95, align: 'center'}
+                {field: 'roomno1', title: '名称', width: 100, align: 'center'},
+                {field: 'seats1', title: '考位', width: 40, align: 'center'},
+                {field: 'roomno2', title: '名称', width: 100, align: 'center'},
+                {field: 'seats2', title: '考位', width: 40, align: 'center'}
             ]
             ],
             //标题行右键菜单
@@ -94,7 +102,7 @@
                     return "<a class='blue_link'href='javascript:print(\""+rec.roomno+"\")' >"+rec.roomno+"</a>" ;
                 }},
                 {field: 'roomname', title: '名称', width: 100, align: 'center'},
-                {field: 'testers', title: '考位数', width: 50, align: 'center'},
+                {field: 'testers', title: '考位', width: 50, align: 'center'},
                 {field: 'equipmentname', title: '类型', width: 110, align: 'center'},
                 {field: 'areaname', title: '校区', width: 110, align: 'center'}
             ]],
@@ -119,37 +127,123 @@
                 });
             }
         });
-
-        //绑定到班级学生
-        $("#bind,#menu_bind").click(function () {
-            var tt=$('#dg');
-            var row=tt.datagrid('getSelected');
-            var row2=$('#dg2').datagrid('getSelected');
-            var effectRow = {};
+        function selectCheck(row,row2){
             if (!row||!row2) { //如果没有任何更新，就退出
                 $.messager.alert('提示', '请同时选择一个课程和教室！', 'info');
-                return;
+                return false;
             }
             if (row.school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
                 $.messager.alert('错误', '你无法为其他学院的课程修改考场（' + row.roomno1 + '）！', 'error');
                 return false;
             }
-            effectRow['studentno'] = row.studentno;
-            effectRow['majorplanid'] = row2.rowid;
-            $.post('{$ROOT}/major/plan/studentplanbind', effectRow, function (result) {
+            return true;
+        }
+        function setRoom(tt,row,force){
+            var effectRow = {};
+            var updateRow=[];
+            var updateObj = {}; //插入的单元格
+            updateObj.id=row.id;
+            updateObj.courseno=row.courseno;
+            updateObj.room1=row.room1;
+            updateObj.roomno1=row.roomno1;
+            updateObj.seats1=row.seats1;
+            updateObj.room2=row.room2;
+            updateObj.roomno2=row.roomno2;
+            updateObj.seats2=row.seats2;
+            updateObj.room3=row.room3;
+            updateObj.roomno3=row.roomno3;
+            updateObj.seats3=row.seats3;
+            updateRow.push(updateObj);
+            effectRow["updated"]=$.toJSON(updateRow);
+            effectRow["force"]=force;
+            $.post('{$ROOT}/exam/room/courseupdate', effectRow, function (result) {
                 if (result.status == 1) {
-                    tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
                     $.messager.show({	// show error message
                         title: '成功',
                         msg: result.info
                     });
                 } else {
-                    $.messager.alert('错误', result.info, 'error');
+                    if(result.used!='') {
+                        $.messager.confirm('确认', result.used+'强制设置为考场么？', function (r) {
+                            if (r) {
+                                setRoom(tt,row,1);
+                            }
+                        });
+                    }
+                    else{
+                        $.messager.alert('错误', result.info, 'error');
+                    }
                 }
             }, 'json');
+        }
+        //绑定到班级学生
+        $("#setroom1,#menu_setroom1").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            roomno=row.roomno1;
+            row.room1=row2.roomno;
+            row.roomno1=row2.roomname;
+            row.seats1=row2.testers;
+            if(roomno!=null) {
+                $.messager.confirm('确认', '考场2已经设定了教室，确定要使用新教室么？', function (r) {
+                    if (r) {
+                        setRoom(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setRoom(tt,row,0);
         });
-
+        $("#setroom2,#menu_setroom2").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            roomno=row.roomno2;
+            row.room2=row2.roomno;
+            row.roomno2=row2.roomname;
+            row.seats2=row2.testers;
+            if(roomno!=null) {
+                $.messager.confirm('确认', '考场2已经设定了教室，确定要使用新教室么？', function (r) {
+                    if (r) {
+                        setRoom(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setRoom(tt,row,0);
+        });
+        $("#setroom3,#menu_setroom3").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2,0))
+                return;
+            roomno=row.roomno3;
+            row.room3=row2.roomno;
+            row.roomno3=row2.roomname;
+            row.seats3=row2.testers;
+            if(roomno!=null) {
+                $.messager.confirm('确认', '考场2已经设定了教室，确定要使用新教室么？', function (r) {
+                    if (r) {
+                        setRoom(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setRoom(tt,row);
+        });
         $("#search2").click(function () {
             var tt = $('#dg2');
             tt.datagrid('loadData', {total: 0, rows: []});
@@ -167,25 +261,31 @@
 </script>
 <div class="container">
     <div id="menu2" class="easyui-menu" style="width:150px;">
-        <div id='menu_bind' data-options="iconCls:'icon icon-person'">绑定到选中学生</div>
+        <div id='menu_setroom1' data-options="iconCls:'icon icon-house'">设置为考场1</div>
+        <div id='menu_setroom2' data-options="iconCls:'icon icon-factory'">设置为考场2</div>
     </div>
-    <div id="left" style="width:680px;float:left">
+    <div id="left" style="width:750px;float:left">
         <div id="toolbar">
             <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
-            <label for="flag">场次：</label><input id="flag" size="4">
+            <label for="flag">场次：</label><input id="flag" size="24">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
         </div>
         <table id="dg"></table>
     </div>
-    <div id="right" style="width:570px;float:left;padding-left:5px;">
+    <div id="right" style="width:500px;float:left;padding-left:5px;">
         <div id="toolbar2">
-            <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="7" value="%"/>
-            <label for="equipment">类型：</label><input id="equipment" size="14" />
-            <label for="area">校区：</label><input id="area" size="16" />
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-house',plain:'true'" id="setroom1">设置为考场1</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-factory',plain:'true'" id="setroom2">设置为考场2</a>
+            <div>
+                <label for="roomno">教室号：</label><input id="roomno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="equipment">类型：</label><input id="equipment" size="14" />
+                <label for="area">校区：</label><input id="area" size="16" />
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
+            </div>
+            <div>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-house',plain:'true'" id="setroom1">设置为考场1</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-factory',plain:'true'" id="setroom2">设置为考场2</a>
+                <a href="#" style="visibility:hidden" class="easyui-linkbutton"  data-options="iconCls:'icon icon-build',plain:'true'" id="setroom3">设置为考场3</a>
+            </div>
         </div>
         <table id="dg2"></table>
     </div>

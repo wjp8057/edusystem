@@ -18,7 +18,7 @@ use app\common\access\MyService;
  * Class Schedulechange
  * @package app\common\service
  */
-class Schedulechange extends MyService{
+class ScheduleChange extends MyService{
     /**调停课统计
      * @param int $page
      * @param int $rows

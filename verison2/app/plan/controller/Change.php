@@ -9,7 +9,7 @@ namespace app\plan\controller;
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
-use app\common\service\Schedulechange;
+use app\common\service\ScheduleChange;
 
 class Change extends MyController
 {
@@ -18,7 +18,7 @@ class Change extends MyController
     {
         $result = null;
         try {
-            $summary = new Schedulechange();
+            $summary = new ScheduleChange();
             $result = $summary->getSummary($page, $rows, $year, $term, $status);
 
         } catch (\Exception $e) {

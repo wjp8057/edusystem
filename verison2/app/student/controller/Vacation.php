@@ -17,13 +17,13 @@ namespace app\student\controller;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\CreditApply;
-use app\common\service\Testplan;
+use app\common\service\TestPlan;
 
 class Vacation extends MyController {
     //读取考试安排
     public function testplan($page=1,$rows=20,$year,$term){
         try {
-            $obj=new Testplan();
+            $obj=new TestPlan();
             $studentno=session('S_USER_NAME');
             return $obj->studentCourseList($page,$rows,$year,$term,$studentno);
 

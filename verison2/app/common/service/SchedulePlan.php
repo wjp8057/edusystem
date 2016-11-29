@@ -58,7 +58,7 @@ class SchedulePlan extends MyService {
             ->join('courseplan ','courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term and courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group]')
             ->join('schools ',' schools.school=courses.school')
             ->join('classes ',' classes.classno=courseplan.classno')
-            ->where($condition)->where($extracondtion)->count();
+            ->where($condition)->where($extracondtion)->count('distinct scheduleplan.courseno+scheduleplan.[group]');
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
