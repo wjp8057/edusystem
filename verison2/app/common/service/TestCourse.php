@@ -362,6 +362,16 @@ class TestCourse extends MyService {
               select year,term,type,flag,amount,courseno  from testcourse
               where year=:year and term=:term and type=:type";
         Db::execute($sql,$bind);
+        //如果是期末考试，更新学生学院
+        if($type='A'){
+            $sql=" update testplan
+             set studentschool=classes.school
+             from testplan
+             inner join courseplan on courseplan.courseno+courseplan.[group]=testplan.courseno and courseplan.year=testplan.year and courseplan.term=testplan.term
+             inner join classes on classes.classno=courseplan.classno
+            where testplan.year=:year and testplan.term=:term and testplan.type=:type";
+            Db::execute($sql,$bind);
+        }
     }
     //导出到排考计划表testplan
     public function exportPlan($year,$term,$type){

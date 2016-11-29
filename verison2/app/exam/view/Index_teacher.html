@@ -1,0 +1,378 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var type='{$type.type}';
+    var typename='{$type.typename}';
+    $(function () {
+        var flag = $('#flag');
+        flag.combobox({
+            url: '{$ROOT}/all/option/testbatch?only=0&year={$YEARTERM.year}&term={$YEARTERM.term}&type='+type,
+            valueField: 'flag',
+            textField: 'name'
+        });
+
+        var teacherschool = $('#teacherschool');
+        teacherschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1')
+            teacherschool.combobox('select', '{$USERINFO.school}');
+        var courseschool = $('#courseschool');
+        courseschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0',
+            valueField: 'school',
+            textField: 'name'
+        });
+        var studentschool = $('#studentschool');
+        studentschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0',
+            valueField: 'school',
+            textField: 'name'
+        });
+        $('#dg').datagrid({
+            title: '考试课程列表',
+            idField: 'id',
+            striped: 'true',
+            pagination: 'true',
+            singleSelect:'true',
+            rownumbers: 'true',
+            pageSize:20,
+            url: '{$ROOT}/exam/teacher/courselist',
+            queryParams: {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type
+            },
+            toolbar: '#toolbar',
+            pageList: [20,40,60,100],
+            columns: [[
+                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2},
+                {field: 'coursename', title: '课名', width: 120, align: 'center',rowspan:2},
+                {field: 'attendents', title: '人数', width: 35, align: 'center',rowspan:2},
+                {field: 'schoolname', title: '开课学院', width: 80, align: 'center',rowspan:2},
+                {field: 'studentschoolname', title: '学生学院', width: 85, align: 'center',rowspan:2},
+                {title: '考场1',colspan:4},
+                {title: '考场2',colspan:4}
+
+            ],[
+                {field: 'roomno1', title: '房间', width: 70, align: 'center'},
+                {field: 'teachername1', title: '监考1', width: 45, align: 'center'},
+                {field: 'teachername2', title: '监考2', width: 45, align: 'center'},
+                {field: 'teachername3', title: '监考3', width: 45, align: 'center'},
+                {field: 'roomno2', title: '房间', width: 70, align: 'center'},
+                {field: 'teachername4', title: '监考1', width: 45, align: 'center'},
+                {field: 'teachername5', title: '监考2', width: 45, align: 'center'},
+                {field: 'teachername6', title: '监考3', width: 45, align: 'center'}
+            ]
+            ],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type,
+                flag:flag.combobox('getValue'),
+                school:courseschool.combobox('getValue'),
+                studentschool:studentschool.combobox('getValue')
+            });
+        });
+        $('#dg2').datagrid({
+            title: '检索教师',
+            idField: 'teacherno',
+            striped: 'true',
+            pagination: 'true',
+            rownumbers: true,
+            pageSize: 20,
+            singleSelect:'true',
+            url: '{$ROOT}/exam/teacher/query',
+            queryParams: { school:teacherschool.combobox('getValue')},
+            toolbar: '#toolbar2',
+            pageList: [20,50, 100, 200],
+            columns: [[
+                {field: 'teacherno', title: '教师号', width: 80, align: 'center'},
+                {field: 'name', title: '姓名', width: 80, align: 'center'},
+                {field: 'sexname', title: '性别', width: 50, align: 'center'},
+                {field: 'schoolname', title: '学院', width: 120, align: 'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu: function (e, rowindex, row) {
+                e.preventDefault();
+                var tt = $('#dg2');
+                tt.datagrid('selectRow', rowindex);
+                $('#menu2').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        function selectCheck(row,row2){
+            if (!row||!row2) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '请同时选择一个课程和教室！', 'info');
+                return false;
+            }
+            if (row.studentschool!='{$USERINFO.school}'&&row.school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
+                $.messager.alert('错误', '不是开课学院和学生所在学院无法设置监考！（' + row.coursename + '）！', 'error');
+                return false;
+            }
+            return true;
+        }
+        function setTeacher(tt,row,force){
+            var effectRow = {};
+            var updateRow=[];
+            var updateObj = {}; //插入的单元格
+            updateObj.id=row.id;
+            updateObj.courseno=row.courseno;
+            updateObj.teacherno1=row.teacherno1;
+            updateObj.teachername1=row.teachername1;
+            updateObj.teacherno2=row.teacherno2;
+            updateObj.teachername2=row.teachername2;
+            updateObj.teacherno3=row.teacherno3;
+            updateObj.teachername3=row.teachername3;
+            updateObj.teacherno4=row.teacherno4;
+            updateObj.teachername4=row.teachername4;
+            updateObj.teacherno5=row.teacherno5;
+            updateObj.teachername5=row.teachername5;
+            updateObj.teacherno6=row.teacherno6;
+            updateObj.teachername6=row.teachername6;
+            updateObj.teacherno7=row.teacherno7;
+            updateObj.teachername7=row.teachername7;
+            updateObj.teacherno8=row.teacherno8;
+            updateObj.teachername8=row.teachername8;
+            updateObj.teacherno9=row.teacherno9;
+            updateObj.teachername9=row.teachername9;
+            updateRow.push(updateObj);
+            effectRow["updated"]=$.toJSON(updateRow);
+            effectRow["force"]=force;
+            $.post('{$ROOT}/exam/teacher/courseupdate', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    if(result.used!='') {
+                        $.messager.confirm('确认', result.used+'强制设置为监考教师么？', function (r) {
+                            if (r) {
+                                setTeacher(tt,row,1);
+                            }
+                        });
+                    }
+                    else{
+                        $.messager.alert('错误', result.info, 'error');
+                    }
+                }
+            }, 'json');
+        }
+
+        $("#setteacher1,#menu_setteacher1").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno1;
+            row.teacherno1=row2.teacherno;
+            row.teachername1=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场1监考1已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#setteacher2,#menu_setteacher2").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno2;
+            row.teacherno2=row2.teacherno;
+            row.teachername2=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场1监考2已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#setteacher3,#menu_setteacher3").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno3;
+            row.teacherno3=row2.teacherno;
+            row.teachername3=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场1监考3已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#setteacher4,#menu_setteacher4").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno4;
+            row.teacherno4=row2.teacherno;
+            row.teachername4=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场2监考1已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#setteacher5,#menu_setteacher5").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno5;
+            row.teacherno5=row2.teacherno;
+            row.teachername5=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场2监考2已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#setteacher6,#menu_setteacher6").click(function () {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var row2=$('#dg2').datagrid('getSelected');
+            if(!selectCheck(row,row2))
+                return;
+            var teacherno=row.teacherno6;
+            row.teacherno6=row2.teacherno;
+            row.teachername6=row2.name;
+            if(teacherno!=null) {
+                $.messager.confirm('确认', '考场2监考3已经设定了教师，确定要使用新教师么？', function (r) {
+                    if (r) {
+                        setTeacher(tt,row,0);
+                    }
+                    else
+                        tt.datagrid('rejectChanges');
+                });
+            }
+            else
+                setTeacher(tt,row,0);
+        });
+        $("#search2").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                teacherno:$('#teacherno').val(),
+                teachername:$('#teachername').val(),
+                school:$('#teacherschool').combobox('getValue')
+            });
+        });
+    });
+    function print(item){
+        var url='/exam/index/roomtimetable?roomno='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
+        window.open('{$ROOT}'+url);
+    }
+</script>
+<div class="container">
+    <div id="menu2" class="easyui-menu" style="width:150px;">
+        <div id='menu_setteacher1' data-options="iconCls:'icon icon-change'">设置为考场1监考1</div>
+        <div id='menu_setteacher2' data-options="iconCls:'icon icon-audit'">设置为考场1监考2</div>
+        <div id='menu_setteacher3' data-options="iconCls:'icon icon-degree'">设置为考场1监考3</div>
+        <div id='menu_setteacher4' data-options="iconCls:'icon icon-person'">设置为考场2监考1</div>
+        <div id='menu_setteacher5' data-options="iconCls:'icon icon-student'">设置为考场2监考2</div>
+        <div id='menu_setteacher6' data-options="iconCls:'icon icon-people'">设置为考场2监考3</div>
+    </div>
+    <div id="left" style="width:830px;float:left">
+        <div id="toolbar">
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
+            <label for="courseschool">开课学院：</label><input id="courseschool" size="18" />
+            <label for="studentschool">学生学院：</label><input id="studentschool" size="18" />
+            <label for="flag">场次：</label><input id="flag" size="24">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:420px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <div>
+                <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size="6" value="%"/>
+                <label for="teachername">姓名：</label><input id="teachername" class="easyui-validatebox" size="5" value="%"/>
+                <label for="teacherschool">学院：</label><input id="teacherschool" size="20" />
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
+            </div>
+            <div>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-change',plain:'true'" id="setteacher1">设置为考场1监考1</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-audit',plain:'true'" id="setteacher2">设置为考场1监考2</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-degree',plain:'true'" id="setteacher3">设置为考场1监考3</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-person',plain:'true'" id="setteacher4">设置为考场2监考1</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-student',plain:'true'" id="setteacher5">设置为考场2监考2</a>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-people',plain:'true'" id="setteacher6">设置为考场2监考3</a>
+            </div>
+        </div>
+        <table id="dg2"></table>
+    </div>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+
+        </ol>
+    </div>
+</div>

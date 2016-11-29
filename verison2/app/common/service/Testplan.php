@@ -48,7 +48,7 @@ class TestPlan extends MyService {
         return $result;
     }
 
-    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='')
+    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='')
     {
         $result = ['total' => 0, 'rows' => []];
         $condition = null;
@@ -57,13 +57,18 @@ class TestPlan extends MyService {
         $condition['testplan.type'] = $type;
         if($flag!='') $condition['testplan.flag'] = $flag;
         if($school!='') $condition['courses.school'] = $school;
+        if($studentschool!='') $condition['testplan.studentschool'] = $studentschool;
         $data = $this->query->table('testplan')
             ->join('testbatch', 'testbatch.flag=testplan.flag and testbatch.year=testplan.year and testplan.term=testbatch.term and testbatch.type=testplan.type')
             ->join('courses', 'courses.courseno=substring(testplan.courseno,1,7)')
             ->join('schools','schools.school=courses.school')
+            ->join('schools s','s.school=testplan.studentschool')
             ->field('id,testplan.year,testplan.term,testplan.courseno,rtrim(courses.coursename) coursename,testbatch.testtime,
-            rtrim(roomno1) roomno1,rtrim(roomno2) roomno2,rtrim(roomno3) roomno3,
-            room1,room2,room3,seats1,seats2,seats3,attendents,schools.school,rtrim(schools.name) schoolname')
+            rtrim(roomno1) roomno1,rtrim(roomno2) roomno2,rtrim(roomno3) roomno3,room1,room2,room3,
+            seats1,seats2,seats3,attendents,schools.school,rtrim(schools.name) schoolname,studentschool,rtrim(s.name) studentschoolname,
+            rtrim(teachername1) teachername1, rtrim(teachername2) teachername2, rtrim(teachername3) teachername3, rtrim(teachername4) teachername4, rtrim(teachername5) teachername5,
+             rtrim(teachername6) teachername6, rtrim(teachername7) teachername7, rtrim(teachername8) teachername8, rtrim(teachername9) teachername9,
+             teacherno1,teacherno2,teacherno3,teacherno4,teacherno5,teacherno6,teacherno7,teacherno8,teacherno9')
             ->order('courseno')->page($page, $rows)->where($condition)->select();
         $count = $this->query->table('testplan')
             ->join('courses', 'courses.courseno=substring(testplan.courseno,1,7)')
@@ -86,6 +91,7 @@ class TestPlan extends MyService {
         else
             return false;
     }
+    //设置考场
     public function  updateRoom($postData){
         $updateRow=0;
         $deleteRow=0;
@@ -122,6 +128,98 @@ class TestPlan extends MyService {
                         $used.=$one->roomno2.'教室已有安排！';
                     if($force!=1&&!self::checkRoomUsed($one->id,$one->room3))
                         $used.=$one->roomno3.'教室已有安排！';
+
+                    if(MyAccess::checkCourseSchool($one->courseno)&&$used=='')
+                        $updateRow += $this->query->table('testplan')->where($condition)->update($data);
+                    else{
+                        $info.=$one->courseno.'不是本学院课程，无法更改信息'.$used;
+                        $errorRow++;
+                        $status=0;
+                    }
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow+$deleteRow+$insertRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status,'used'=>$used);
+        return $result;
+    }
+    //检查同时段教师是否已经有监考
+    private  static function checkTeacherUsed($id,$teacherno)
+    {
+        $bind=['id'=>$id,'teacherno1'=>$teacherno,'teacherno2'=>$teacherno,'teacherno3'=>$teacherno,'teacherno4'=>$teacherno,'teacherno5'=>$teacherno,'teacherno6'=>$teacherno];
+        $sql='select t1.id from testplan as t1
+                where (teacherno1=:teacherno1 or teacherno2=:teacherno2 or teacherno3=:teacherno3 or teacherno4=:teacherno4 or teacherno5=:teacherno5 or teacherno6=:teacherno6)
+                 and  exists (select * from testplan as t2
+                where t2.id=:id and  t1.year=t2.year and t1.term=t2.term and t1.flag=t2.flag and t1.type=t2.type)';
+        $result=Db::query($sql,$bind);
+        if(count($result)==0)
+            return true;
+        else
+            return false;
+    }
+    //设置监考教师
+    public function  updateTeacher($postData){
+        $updateRow=0;
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $used="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            $force=isset($postData["force"])?$postData["force"]:0;
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $data = null;
+                    $condition['id'] = $one->id;
+                    $condition['courseno'] = $one->courseno;
+                    $data['teacherno1']=$one->teacherno1;
+                    $data['teachername1']=$one->teachername1;
+                    $data['teacherno2']=$one->teacherno2;
+                    $data['teachername2']=$one->teachername2;
+                    $data['teacherno3']=$one->teacherno3;
+                    $data['teachername3']=$one->teachername3;
+                    $data['teacherno4']=$one->teacherno4;
+                    $data['teachername4']=$one->teachername4;
+                    $data['teacherno5']=$one->teacherno5;
+                    $data['teachername5']=$one->teachername5;
+                    $data['teacherno6']=$one->teacherno6;
+                    $data['teachername6']=$one->teachername6;
+                    $data['teacherno7']=$one->teacherno7;
+                    $data['teachername7']=$one->teachername7;
+                    $data['teacherno8']=$one->teacherno8;
+                    $data['teachername8']=$one->teachername8;
+                    $data['teacherno9']=$one->teacherno9;
+                    $data['teachername9']=$one->teachername9;
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno1))
+                        $used.=$one->teachername1.'教师已有监考！';
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno2))
+                        $used.=$one->teachername2.'教师已有监考！';
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno3))
+                        $used.=$one->teachername3.'教师已有监考！';
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno4))
+                        $used.=$one->teachername4.'教师已有监考！';
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno5))
+                        $used.=$one->teachername5.'教师已有监考！';
+                    if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno6))
+                        $used.=$one->teachername6.'教师已有监考！';
 
                     if(MyAccess::checkCourseSchool($one->courseno)&&$used=='')
                         $updateRow += $this->query->table('testplan')->where($condition)->update($data);
