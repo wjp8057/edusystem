@@ -11,6 +11,16 @@
                 }
             },'json');
         });
+        $("#synstudent").click(function() {
+            $.post('{$ROOT}/quality/student/synstudent',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val()},function(result){
+                if (result.status==1){
+                    $.messager.alert("成功",result.info,"info");
+                }
+                else {
+                    $.messager.alert("错误",result.info,"error");
+                }
+            },'json');
+        });
         $("#lock").click(function() {
            setStatus(1);
         });

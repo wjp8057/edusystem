@@ -19,18 +19,19 @@ use app\common\access\MyService;
 use think\Db;
 
 class QualityStudentDetail extends MyService{
+    //同步学生名单
     public function synStudent($year,$term,$courseno='%'){
         $row=0;
         try {
             MyAccess::checkAccess('E');
             $bind=["year"=>$year,"term"=>$term,"courseno"=>$courseno];
             //同步课程信息
-            $sql="insert into qualitystudentdetail(map,studentno)
-                select qualitystudent.id,r32.studentno
+            $sql="insert into qualitystudentdetail(year,term,map,studentno)
+                select r32.year,r32.term,qualitystudent.id,r32.studentno
                 from qualitystudent inner join r32 on r32.year=qualitystudent.year
                 and r32.term=qualitystudent.term and r32.courseno+r32.[group]=qualitystudent.courseno
-                where qualitystudent.year=2016 and qualitystudent.term=1 and not exists (select
-                * from qualitystudentdetail as d where d.map=qualitystudent.id and d.studentno=r32.studentno)";
+                where qualitystudent.year=:year and qualitystudent.term=:term and qualitystudent.courseno like :courseno
+                and not exists (select * from qualitystudentdetail as d where d.map=qualitystudent.id and d.studentno=r32.studentno)";
             $row=Db::execute($sql,$bind);
         }
         catch(\Exception $e){
@@ -38,6 +39,7 @@ class QualityStudentDetail extends MyService{
         }
         return ["info"=>"同步学生成功！".$row."条记录添加","status"=>"1"];
     }
+    //获取学生信息
     function getList($page=1,$rows=20,$map){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
@@ -55,6 +57,62 @@ class QualityStudentDetail extends MyService{
             ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+    //更新学生名单
+    public function  update($postData){
+        $deleteRow=0;
+        $insertRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            $map=$postData["map"];
+            if(MyAccess::checkQualityStudentSchool($map)) {
+                if (isset($postData["inserted"])) {
+                    $updated = $postData["inserted"];
+                    $listUpdated = json_decode($updated);
+                    foreach ($listUpdated as $one) {
+                        $data = null;
+                        $data['map'] = $map;
+                        $data['studentno'] = $one->studentno;
+                        $insertRow += $this->query->table('qualitystudentdetail')->insert($data);
+                    }
+                }
+                //删除部分
+                if (isset($postData["deleted"])) {
+                    $updated = $postData["deleted"];
+                    $listUpdated = json_decode($updated);
+                    foreach ($listUpdated as $one) {
+                        $condition = null;
+                        $condition['id'] = $one->id;
+                        $deleteRow += $this->query->table('qualitystudentdetail')->where($condition)->delete();
+                    }
+                }
+            }
+            else
+            {
+                $info= '您修改其他学院考评课程的学生！';
+                $status=0;
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($deleteRow+$insertRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
 }

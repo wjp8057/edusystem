@@ -32,6 +32,19 @@ class Student extends MyController {
         }
         return json($result);
     }
+    //同步学生
+    public function synstudent($year,$term,$courseno='%'){
+        $result = null;
+        try {
+            $obj = new QualityStudentDetail();
+            $result = $obj->synStudent($year,$term,$courseno);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
     //锁定/开锁
     public function lockfree($year,$term,$courseno='%',$lock=1){
         $result = null;
@@ -92,4 +105,16 @@ class Student extends MyController {
         }
         return json($result);
     }
+
+    public function studentupdate(){
+        $result=null;
+        try {
+            $obj=new  QualityStudentDetail();
+            $result =  $obj->update($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
 }

@@ -124,7 +124,7 @@
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
             if(tt.datagrid('editIndex')!=undefined) return;
             //获取更改的数据行内容
-            var rows=tt.datagrid('getRows');
+            var rows;
             rows=tt.datagrid('getChanges','updated');
             var count=0;
             var effectRow = {};

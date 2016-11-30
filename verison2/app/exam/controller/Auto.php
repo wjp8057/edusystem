@@ -47,11 +47,11 @@ class Auto extends  MyController {
         return json($result);
     }
     //批量开放与锁定课程
-    public function lockfree($year,$term,$courseno='%',$classno='%',$lock=0){
+    public function lockfree($year,$term,$type,$courseno='%',$classno='%',$lock=0){
         $result = null;
         try {
             $obj = new TestCourse();
-            $result = $obj->setCourseStatus($year,$term,$courseno,$classno,$lock);
+            $result = $obj->setCourseStatus($year,$term,$type,$courseno,$classno,$lock);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

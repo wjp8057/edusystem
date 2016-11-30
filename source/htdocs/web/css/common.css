@@ -120,6 +120,11 @@ a:hover{ color:Red; text-decoration:none;}
 .mytable td,.mytable th{border:1px solid #CDC9C9;height:35px;line-height:35px;width:180px;}
 .mytable th{text-align:right;font-weight:normal;padding-right:10px;background-color:#E3E3E3}
 .mytable td{padding-left:10px;}
+/**/
+.content{margin-bottom: 10px;}
+.content p{text-indent: 2em;line-height: 25px;font-size: 11pt;}
+p.first{text-indent: 0;}
+p.remark{text-align: right;padding-right: 50px;}
 
 .blue_link {text-decoration:underline; color: blue;  }
 .print_title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}

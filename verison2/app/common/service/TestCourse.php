@@ -98,7 +98,7 @@ class TestCourse extends MyService {
         }
     }
     //锁定，解锁
-    public function setCourseStatus($year,$term,$courseno='%',$classno='%',$lock=0){
+    public function setCourseStatus($year,$term,$type,$courseno='%',$classno='%',$lock=0){
         try {
             if($lock==0){
                 $data['lock']=array('exp','lock^1');
@@ -110,7 +110,7 @@ class TestCourse extends MyService {
             }
             $condition['testcourse.year']=$year;
             $condition['testcourse.term']=$term;
-            $condition['testcourse.type']='A';
+            $condition['testcourse.type']=$type;
             if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
             if($classno!='%') {
                 $condition['courseplan.classno'] = array('like', $classno);
@@ -312,11 +312,11 @@ class TestCourse extends MyService {
     //设置两个表的flag
     private static function setFlag($year,$term,$type,$courseno,$flag){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type,'courseno'=>$courseno,'flag'=>$flag);
-        $sql='update testcourse set flag=:flag where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno';
+        $sql='update testcourse set flag=:flag where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno and lock=0';
         Db::execute($sql,$bind);
 
         $sql='update teststudent set flag=:flag from testcourse inner join teststudent on testcourse.id=teststudent.map
-        where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno';
+        where year=:year and term=:term and type=:type and substring(courseno2,1,7)=:courseno and lock=0';
         Db::execute($sql,$bind);
     }
     //排考

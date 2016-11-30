@@ -212,7 +212,7 @@
             });
         });
         $("#exportplan").click(function(){
-            $.messager.confirm('确认','导出到排考表会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期'+typename+'教师和教师安排，你确定要导出么？',function(r){
+            $.messager.confirm('确认','导出到排考表会清除'+$('#year').val()+'学年第'+$('#term').val()+'学期'+typename+'教室和教师安排，你确定要导出么？',function(r){
                 if (r){
                     $.post('{$ROOT}/exam/auto/exportplan',{ year: $('#year').val(),term: $('#term').val(),type:type},function(result){
                         if (result.status==1){
@@ -269,7 +269,7 @@
         }
         function setStatus(lock){
             $.post('{$ROOT}/exam/auto/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),
-                classno:$('#classno').val(),lock:lock},function(result){
+                classno:$('#classno').val(),lock:lock,type:type},function(result){
                 if (result.status==1){
                     $('#dg').datagrid('reload');
                     $.messager.alert("成功",result.info,"info");

@@ -34,7 +34,7 @@ class QualityStudent extends MyService {
                 inner join courses on courses.courseno=scheduleplan.courseno
                 where scheduleplan.year=:year and scheduleplan.term=:term and teacherplan.teacherno!='000000' and scheduleplan.courseno+scheduleplan.[group] like :courseno and
                 not exists (select * from qualitystudent
-                where qualitystudent.year=scheduleplan.year and qualitystudent.term=scheduleplan.term and qualitystudent.courseno=scheduleplan.courseno+scheduleplan.[group] and qualitystudent.type=courses.form)";
+                where qualitystudent.year=scheduleplan.year and qualitystudent.term=scheduleplan.term and qualitystudent.courseno=scheduleplan.courseno+scheduleplan.[group] and teacherplan.teacherno=qualitystudent.teacherno)";
             $row=Db::execute($sql,$bind);
             //设定毕业实践环节课程
             $sql="update qualitystudent

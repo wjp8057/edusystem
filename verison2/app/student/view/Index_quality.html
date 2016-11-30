@@ -1,0 +1,57 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/student/quality/query',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val()
+            },
+            columns:[[
+                {field:'courseno',title:'课号',width:80,align:'center'},
+                {field:'coursename',title:'课名',width:200,align:'center'},
+                {field:'testtime',title:'考试时间',width:200,align:'center'},
+                {field:'roomno1',title:'考场1',width:100,align:'center'},
+                {field:'roomno2',title:'考场2',width:100,align:'center'},
+                {field:'roomno3',title:'考场3',width:100,align:'center'}
+            ]]
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val()
+            });
+        });
+    });
+</script>
+<style type="text/css">
+    .container2{padding: 30px;}
+</style>
+<div class="container2">
+    <div class="pagetitle">学生网上评教</div>
+    <div class="content">
+        <p class="first">亲爱的同学们：</p>
+        <p>为了更好地征集大家对我校教学工作的意见，提高我校的教学质量，学校每学期利用校园网开展网上评教工作。请同学们就教师的教学工作发表自己的看法，并对每位
+            任课教师根据相关的评价指标进行客观公正的评定。每个同学的意见在经过汇总后，将为学校教学工作的决策提供有力的支持。</p>
+        <p>教学质量是关系每一位师生的大事，教学评价的目的就是能够有效地掌握教学情况，适时地发现问题并改进工作。学生参与评教是学生在教学中主体地位的体现，是教师
+            教学效果评价的重要依据，是激励教师提高教学水平的重要手段。所有同学都有权利和义务对自己的老师进行评价。网上评教的目的在于从同学中收集有关教学情况的
+            第一手资料，请每位同学务必认真对待，客观评价。</p>
+        <p>在以往开展的学评教工作中，同学们表现出了极大的热情，评价的结果也越来越得到教师的认可。教师非常看重学生对自己的看法，他们可以从中找出自己在教学中存
+            在的问题，发现学生潜在的需求。学生评教已经成为师生互动的一个重要环节。</p>
+        <p>学生对教师的评价结果在学期结束后将分别反馈给每位教师，也将通过简报的形式反馈给广大同学。</p>
+        <p><span class="warn">网上评教采取无记名方式，评价的结果只有学校教学管理人员能够阅读。</span>请进入学生网上评教页面，用你的责任心和使命感，提交你对教师教学工作的看法。让我们
+            行动起来，为提高教学质量做出应有的贡献。</p>
+        <p>我们相信，在全校师生的共同努力下，我校整体的教学质量和水平将得到更进一步的提高，受益的是我们广大的教师和学生。谢谢你的合作!</p>
+        <p class="remark">教务处</p>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-work',plain:'true'" id="start">开始给老师评分</a>
+    </div>
+    <table id="dg"></table>
+</div>

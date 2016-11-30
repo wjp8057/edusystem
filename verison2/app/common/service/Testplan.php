@@ -84,7 +84,7 @@ class TestPlan extends MyService {
         $bind=['id'=>$id,'roomno1'=>$roomno,'roomno2'=>$roomno,'roomno3'=>$roomno];
         $sql='select t1.id from testplan as t1
                 where (room1=:roomno1 or room2=:roomno2 or room3=:roomno3) and  exists (select * from testplan as t2
-                where t2.id=:id and  t1.year=t2.year and t1.term=t2.term and t1.flag=t2.flag and t1.type=t2.type)';
+                where t2.id=:id and t1.id!=t2.id and  t1.year=t2.year and t1.term=t2.term and t1.flag=t2.flag and t1.type=t2.type)';
         $result=Db::query($sql,$bind);
         if(count($result)==0)
             return true;
@@ -161,7 +161,7 @@ class TestPlan extends MyService {
         $sql='select t1.id from testplan as t1
                 where (teacherno1=:teacherno1 or teacherno2=:teacherno2 or teacherno3=:teacherno3 or teacherno4=:teacherno4 or teacherno5=:teacherno5 or teacherno6=:teacherno6)
                  and  exists (select * from testplan as t2
-                where t2.id=:id and  t1.year=t2.year and t1.term=t2.term and t1.flag=t2.flag and t1.type=t2.type)';
+                where t2.id=:id  and t2.id!=t1.id and  t1.year=t2.year and t1.term=t2.term and t1.flag=t2.flag and t1.type=t2.type)';
         $result=Db::query($sql,$bind);
         if(count($result)==0)
             return true;
