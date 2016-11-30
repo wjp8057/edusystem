@@ -10,13 +10,17 @@ namespace app\student\controller;
 
 
 use app\common\access\Item;
+use app\common\access\MyException;
 use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
 use app\common\service\Graduate;
+use app\common\service\QualityStudentDetail;
 use app\common\service\Schedule;
 use app\common\service\Student;
 use app\common\service\Studentplan;
+use think\Exception;
+use think\Request;
 
 class Index extends Template
 {
@@ -94,6 +98,7 @@ class Index extends Template
         }
         return $this->fetch();
     }
+    //学分认定申请
     function creditapply()
     {
         try {
@@ -104,5 +109,48 @@ class Index extends Template
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return $this->fetch();
+    }
+    //
+    function qualitycourse($year='',$term='',$id=0)
+    {
+        try {
+            $studentno=session('S_USER_NAME');
+            $yearterm=get_year_term();
+            if($year=='') $year=$yearterm['year'];
+            if($term=='') $term=$yearterm['term'];
+            if($id==0)
+                $id=QualityStudentDetail::getNextID($year,$term,$id,$studentno);
+            //如果没有考评条目了，转回首页
+            if($id==0) {
+                $request =Request::instance();
+                header('Location:' . $request->root().'/student/index/quality');
+                exit();
+            }
+            $obj=new QualityStudentDetail();
+            $result=$obj->getList(1,1,$year,$term,$studentno,$id);
+            $result=$result['rows'][0];
+            $result['nextid']=QualityStudentDetail::getNextID($year,$term,$id,$studentno);
+            $this->assign('course', $result);
+            $template='';
+            switch($result['type']){
+                case 'A':
+                    $template='qualitycoursea';
+                    break;
+                case 'B':
+                    $template='qualitycourseb';
+                    break;
+                case 'C':
+                    $template='qualitycoursec';
+                    break;
+                case 'D':
+                    $template='qualitycoursed';
+                    break;
+                default:
+                    throw new Exception('type'.$result['type'], MyException::PARAM_NOT_CORRECT);
+            }
+            return $this->fetch($template);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
     }
 }

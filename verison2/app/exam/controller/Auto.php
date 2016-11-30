@@ -102,7 +102,7 @@ class Auto extends  MyController {
             $obj = new TestCourse();
             $result = $obj->getList(1,10000,$year,$term,'%','%','',$type);
             $data = $result['rows'];
-            $file = $year."学年第".$term."学期'.$typename.'时间安排表";
+            $file = $year."学年第".$term."学期".$typename."时间安排表";
             $sheet = '全部';
             $title = $file;
             $template = array('courseno'=>'课号','coursename'=>'课名','schoolname'=>'学院','classname'=>'班级','amount'=>'人数','flag'=>'时间',);

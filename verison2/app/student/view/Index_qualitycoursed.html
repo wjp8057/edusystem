@@ -1,0 +1,167 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var id='{$course.id}';
+
+    $(function(){
+        var one = $('#one');
+        one.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:20
+        });
+        one.numberbox('setValue','{$course.one}');
+        var two = $('#two');
+        two.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:30
+        });
+        two.numberbox('setValue','{$course.two}');
+        var three = $('#three');
+        three.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:30
+        });
+        three.numberbox('setValue','{$course.three}');
+        var four = $('#four');
+        four.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:20
+        });
+        four.numberbox('setValue','{$course.four}');
+        $('#total').text('{$course.total}');
+        $("#save").click(function() {
+            if( $("#myForm").form('validate')) {
+                var one=$('#one').numberbox('getValue');
+                var two=$('#two').numberbox('getValue');
+                var three=$('#three').numberbox('getValue');
+                var four=$('#four').numberbox('getValue');
+                var total=parseInt(one)+parseInt(two)+parseInt(three)+parseInt(four);
+                $('#total').text(total);
+                $.messager.confirm('确认','您确定给本课程打分'+total+'么？',function(r){
+                    if (r){
+                        $.post('{$ROOT}/student/quality/update', {id: id, one:one,two:two,three:three,four:four}, function (result) {
+                            if (result.status == 1) {
+                                location=getURLString()+"?id={$course.nextid}";
+                            }
+                            else {
+                                $.messager.alert("错误", result.info, "error");
+                            }
+                        }, 'json');
+                    }
+                });
+
+
+            }
+            else
+                $.messager.alert("错误", '数据不完整，请检查！', "error");
+        });
+        $("#myForm").form('validate');
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+   .mytable{width:90% }
+   .mytable td,.mytable th{text-align: center;padding: 0}
+    td.left{text-align: left;width:51%;padding-left:10px}
+</style>
+<div class="container">
+    <div class="pagetitle">
+        <div>宁波城市职业技术学院学生评教评估表（毕业综合实践）</div>
+        <div>课号：{$course.courseno} ，课名：{$course.coursename} ，任课教师：{$course.teachername}</div>
+    </div>
+
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th rowspan="2">一级指标</th>
+            <th colspan="2">二级指标</th>
+            <th colspan="5">评价等级</th>
+        </tr>
+        <tr>
+            <th >序号</th>
+            <th>观察点</th>
+            <th >A</th>
+            <th >B</th>
+            <th >C</th>
+            <th >D</th>
+            <th >得分</th>
+        </tr>
+        <tr>
+            <td>教学态度<br/>（20分）</td>
+            <td>1</td>
+            <td class="left">
+                <p> 1.给同学耐心讲解顶岗实习、毕业综合实践、毕业设计等相关要求、注意事项等；</p>
+                <p> 2.到实地看望同学或经常通过电话等通讯手段联系、关心同学。</p>
+                <p> 3.经常关心同学就业进展情况。</p>
+            </td>
+            <td>20</td>
+            <td>16</td>
+            <td>12</td>
+            <td>8</td>
+            <td><input id="one" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学内容<br/>（30分）</td>
+            <td>2</td>
+            <td class="left">
+                <p> 1.指导解决顶岗实习过程中各种问题，指导评阅实习周记、实习报告等；</p>
+                <p> 2.编写并下达毕业设计或毕业论文任务书，认真指导、审定学生开题报告和工作计划；</p>
+                <p> 3.认真指导和评阅学生毕业设计（论文）等工作。</p>
+            </td>
+            <td>30</td>
+            <td>24</td>
+            <td>18</td>
+            <td>12</td>
+            <td><input id="two" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学方法<br/>（30分）</td>
+            <td>3</td>
+            <td class="left">
+                <p> 1.顶岗实习、毕业综合实践、毕业设计各环节要求讲解清楚，安全教育明确细致。</p>
+                <p> 2.实地指导与通讯指导相结合，经常与同学保持联系。</p>
+                <p> 3.顶岗实习动态信息管理平台中信息回复处理及时、有效。</p>
+            </td>
+            <td>30</td>
+            <td>24</td>
+            <td>18</td>
+            <td>12</td>
+            <td><input id="three" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学效果<br/>（20分）</td>
+            <td>4</td>
+            <td class="left">
+                <p>1.顶岗实习收获大，顺利完成实习周记、实习报告，能胜任岗位工作。</p>
+                <p> 2.毕业设计（论文）顺利完成，并使自己能力得到显著提高。</p>
+            </td>
+            <td>20</td>
+            <td>16</td>
+            <td>12</td>
+            <td>8</td>
+            <td><input id="four" size="6"/></td>
+        </tr>
+        <tr>
+            <td colspan="3">总分</td>
+            <td colspan="5"><span id="total"></span></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存并进入下一门课</a>
+    </div>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li class="warn">无法给两个教师打相同的分数！</li>
+            <li>可以点TAB键切换到下一行。</li>
+        </ol>
+    </div>
+</div>

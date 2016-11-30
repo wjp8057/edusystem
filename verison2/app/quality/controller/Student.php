@@ -44,19 +44,6 @@ class Student extends MyController {
         }
         return json($result);
     }
-
-    //锁定/开锁
-    public function lockfree($year,$term,$courseno='%',$lock=1){
-        $result = null;
-        try {
-            $obj = new QualityStudent();
-            $result = $obj->setCourseStatus($year,$term,$courseno,$lock);
-
-        } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
-        return json($result);
-    }
     //获取课程列表
     public function courselist($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$teachername='%',$school='',$type='',$enabled='',$lock='')
     {
@@ -98,7 +85,7 @@ class Student extends MyController {
         $result=null;
         try {
             $obj=new QualityStudentDetail();
-            $result =  $obj->getList($page,$rows,$id);
+            $result =  $obj->getStudentList($page,$rows,$id);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());

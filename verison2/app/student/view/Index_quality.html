@@ -2,20 +2,31 @@
 <script type="text/javascript">
     $(function(){
         $('#dg').datagrid({
-            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            title:'本学期任课教师列表',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
             url:'{$ROOT}/student/quality/query',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val()
             },
             columns:[[
+                {field:'done',title:'完成',width:80,align:'center',
+                    formatter:function(val,rec){if(val==1)return '√';}},
                 {field:'courseno',title:'课号',width:80,align:'center'},
-                {field:'coursename',title:'课名',width:200,align:'center'},
-                {field:'testtime',title:'考试时间',width:200,align:'center'},
-                {field:'roomno1',title:'考场1',width:100,align:'center'},
-                {field:'roomno2',title:'考场2',width:100,align:'center'},
-                {field:'roomno3',title:'考场3',width:100,align:'center'}
-            ]]
+                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'typename',title:'类型',width:100,align:'center'},
+                {field:'teachername',title:'任课教师',width:150,align:'center'},
+                {field:'total',title:'总分',width:100,align:'center'}
+            ]],
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
         });
         $("#search").click(function() {
             var tt=$('#dg');
@@ -25,10 +36,19 @@
                 term: $('#term').val()
             });
         });
+        $("#menu_start,#start").click(function() {
+            var tt=$('#dg');
+            var row=tt.datagrid('getSelected');
+            var url='';
+            if(row)
+                url='?id='+row.id;
+            parent.menuTabs.addTab("评价教师","{$ROOT}/student/index/qualitycourse"+url,"icon icon-note");
+        });
     });
 </script>
 <style type="text/css">
     .container2{padding: 30px;}
+    .center{margin:0 auto;width:800px;}
 </style>
 <div class="container2">
     <div class="pagetitle">学生网上评教</div>
@@ -47,11 +67,17 @@
         <p>我们相信，在全校师生的共同努力下，我校整体的教学质量和水平将得到更进一步的提高，受益的是我们广大的教师和学生。谢谢你的合作!</p>
         <p class="remark">教务处</p>
     </div>
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_start' data-options="iconCls:'icon icon-work'">给这位老师打分</div>
+    </div>
     <div id="toolbar">
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索&刷新得分</a> |
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-work',plain:'true'" id="start">开始给老师评分</a>
     </div>
-    <table id="dg"></table>
+    <div class="center">
+        <table id="dg"></table>
+    </div>
+
 </div>

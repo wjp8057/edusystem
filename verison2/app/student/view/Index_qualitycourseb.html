@@ -1,0 +1,164 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var id='{$course.id}';
+    $(function(){
+        var one = $('#one');
+        one.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:20
+        });
+        one.numberbox('setValue','{$course.one}');
+        var two = $('#two');
+        two.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:30
+        });
+        two.numberbox('setValue','{$course.two}');
+        var three = $('#three');
+        three.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:30
+        });
+        three.numberbox('setValue','{$course.three}');
+        var four = $('#four');
+        four.numberbox({
+            required:true,
+            precision:0,
+            min:0,
+            max:20
+        });
+        four.numberbox('setValue','{$course.four}');
+        $('#total').text('{$course.total}');
+        $("#save").click(function() {
+            if( $("#myForm").form('validate')) {
+                var one=$('#one').numberbox('getValue');
+                var two=$('#two').numberbox('getValue');
+                var three=$('#three').numberbox('getValue');
+                var four=$('#four').numberbox('getValue');
+                var total=parseInt(one)+parseInt(two)+parseInt(three)+parseInt(four);
+                $('#total').text(total);
+                $.messager.confirm('确认','您确定给本课程打分'+total+'么？',function(r){
+                    if (r){
+                        $.post('{$ROOT}/student/quality/update', {id: id, one:one,two:two,three:three,four:four}, function (result) {
+                            if (result.status == 1) {
+                                location=getURLString()+"?id={$course.nextid}";
+                            }
+                            else {
+                                $.messager.alert("错误", result.info, "error");
+                            }
+                        }, 'json');
+                    }
+                });
+
+
+            }
+            else
+                $.messager.alert("错误", '数据不完整，请检查！', "error");
+        });
+        $("#myForm").form('validate');
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+   .mytable{width:90% }
+   .mytable td,.mytable th{text-align: center;padding: 0}
+    td.left{text-align: left;width:51%;padding-left:10px}
+</style>
+<div class="container">
+    <div class="pagetitle">
+        <div>宁波城市职业技术学院学生评教评估表（理实一体课）</div>
+        <div>课号：{$course.courseno} ，课名：{$course.coursename} ，任课教师：{$course.teachername}</div>
+    </div>
+
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th rowspan="2">一级指标</th>
+            <th colspan="2">二级指标</th>
+            <th colspan="5">评价等级</th>
+        </tr>
+        <tr>
+            <th >序号</th>
+            <th>观察点</th>
+            <th >A</th>
+            <th >B</th>
+            <th >C</th>
+            <th >D</th>
+            <th >得分</th>
+        </tr>
+        <tr>
+            <td>教学态度<br/>（20分）</td>
+            <td>1</td>
+            <td class="left">
+                <p> 1.利用多种方式与我们沟通，课前准备充分，课后关心学习。</p>
+                <p>2.科学合理布置作业，批改认真，反馈及时。</p>
+                <p> 3.教师严于律己，严格管理课堂，课堂秩序良好，要求学生保持实践场所整洁</p>
+            </td>
+            <td>20</td>
+            <td>16</td>
+            <td>12</td>
+            <td>8</td>
+            <td><input id="one" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学内容<br/>（30分）</td>
+            <td>2</td>
+            <td class="left">
+                <p>1.课程的教学目标清楚，教学内容充实，实训部分目标明确。</p>
+                <p>2.讲解重点突出，难点分解易懂，理论讲解与实际训练的内容联系紧密，有机融合。</p>
+            </td>
+            <td>30</td>
+            <td>24</td>
+            <td>18</td>
+            <td>12</td>
+            <td><input id="two" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学方法<br/>（30分）</td>
+            <td>3</td>
+            <td class="left">
+                <p> 1.精讲多练，训练部分的要领讲解简明扼要。</p>
+                <p> 2.善于启发引导，教学方式灵活，现场指导及时恰当。</p>
+                <p>3.网络信息丰富，多媒体课件图文并茂，实训指导示范规范。</p>
+            </td>
+            <td>30</td>
+            <td>24</td>
+            <td>18</td>
+            <td>12</td>
+            <td><input id="three" size="6"/></td>
+        </tr>
+        <tr>
+            <td>教学效果<br/>（20分）</td>
+            <td>4</td>
+            <td class="left">
+                <p>本课程激发了我的学习兴趣，老师上课有吸引力，学后有收获，喜欢听他（她）的课。</p>
+            </td>
+            <td>20</td>
+            <td>16</td>
+            <td>12</td>
+            <td>8</td>
+            <td><input id="four" size="6"/></td>
+        </tr>
+        <tr>
+            <td colspan="3">总分</td>
+            <td colspan="5"><span id="total"></span></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存并进入下一门课</a>
+    </div>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li class="warn">无法给两个教师打相同的分数！</li>
+            <li>可以点TAB键切换到下一行。</li>
+        </ol>
+    </div>
+</div>

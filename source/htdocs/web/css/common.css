@@ -114,7 +114,7 @@ a:hover{ color:Red; text-decoration:none;}
 .green{color:green;font-weight: bold;font-size:100%}
 .orange{color:orange;font-weight: bold;font-size:100%}
 .welcome{text-align:center;font-size: 30pt;padding: 300px 0;font-family: "Microsoft YaHei", sans-serif;color: #0000ff}
-.pagetitle{text-align: center;font-size: 14px;font-weight: bold;color:blue;height:40px;line-height: 40px}
+.pagetitle{text-align: center;font-size: 14px;font-weight: bold;color:blue;line-height: 40px}
 /*自定义表格样式*/
 .mytable{border:1px  solid #CDC9C9;font:"宋体" 11pt #000;width:900px;margin:0 auto;}
 .mytable td,.mytable th{border:1px solid #CDC9C9;height:35px;line-height:35px;width:180px;}

@@ -36,15 +36,15 @@ class Room extends MyController {
         return json($result);
     }
     //考试课程列表
-    public function  courselist($page=1,$rows=20,$year,$term,$type,$flag='',$school='')
+    public function  courselist($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='')
     {
         $result=null;
         try {
             $obj = new TestPlan();
-            $result = $obj->getList($page,$rows,$year,$term,$type,$flag,$school);
+            $result = $obj->getList($page,$rows,$year,$term,$type,$flag,$school,$studentschool);
 
         } catch (\Exception $e) {
-           MyAccess::throwException($e->getCode(), $e->getMessage());
+            MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return json($result);
     }

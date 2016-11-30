@@ -26,8 +26,8 @@ class QualityStudentDetail extends MyService{
             MyAccess::checkAccess('E');
             $bind=["year"=>$year,"term"=>$term,"courseno"=>$courseno];
             //同步课程信息
-            $sql="insert into qualitystudentdetail(year,term,map,studentno)
-                select r32.year,r32.term,qualitystudent.id,r32.studentno
+            $sql="insert into qualitystudentdetail(year,term,map,studentno,enabled)
+                select r32.year,r32.term,qualitystudent.id,r32.studentno,enabled
                 from qualitystudent inner join r32 on r32.year=qualitystudent.year
                 and r32.term=qualitystudent.term and r32.courseno+r32.[group]=qualitystudent.courseno
                 where qualitystudent.year=:year and qualitystudent.term=:term and qualitystudent.courseno like :courseno
@@ -40,7 +40,7 @@ class QualityStudentDetail extends MyService{
         return ["info"=>"同步学生成功！".$row."条记录添加","status"=>"1"];
     }
     //获取学生信息
-    function getList($page=1,$rows=20,$map){
+    function getStudentList($page=1,$rows=20,$map){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['map']=$map;
@@ -58,6 +58,42 @@ class QualityStudentDetail extends MyService{
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
+    }
+    //根据学生获取考评条目
+    public function getList($page=1,$rows=20,$year,$term,$studentno,$id=0){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['studentno']=$studentno;
+        $condition['qualitystudentdetail.year']=$year;
+        $condition['qualitystudentdetail.term']=$term;
+        $condition['qualitystudentdetail.enabled']=1;
+        if($id!=0)
+            $condition['qualitystudentdetail.id']=$id;
+        $data=$this->query->table('qualitystudentdetail')->page($page,$rows)
+            ->join('qualitystudent','qualitystudentdetail.map=qualitystudent.id')
+            ->join('courses','courses.courseno=substring(qualitystudent.courseno,1,7)')
+            ->join('teachers','teachers.teacherno=qualitystudent.teacherno')
+            ->join('qualitystudenttype','qualitystudenttype.type=qualitystudent.type')
+            ->where($condition)
+            ->field('qualitystudentdetail.id,qualitystudent.courseno,rtrim(coursename) coursename,one,two,three,four,qualitystudentdetail.total,
+            done,rtrim(teachers.name) teachername,rtrim(qualitystudenttype.name) typename,qualitystudent.type')
+            ->order('courseno')->select();
+        $count= $this->query->table('qualitystudentdetail')
+            ->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+    //获取任意一个id
+    public static function getNextID($year,$term,$id,$studentno){
+        $bind=['year'=>$year,'term'=>$term,'id'=>$id,'studentno'=>$studentno];
+        $sql="select top 1 id from qualitystudentdetail as q1
+            where q1.year=:year and q1.term=:term and enabled=1 and studentno=:studentno and id!=:id and done=0";
+        $result=Db::query($sql,$bind);
+        if(count($result)!=0)
+            return $result[0]['id'];
+        else
+            return 0;
     }
     //更新学生名单
     public function  update($postData){
@@ -114,5 +150,39 @@ class QualityStudentDetail extends MyService{
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;
+    }
+    private  static function checkSameScore($id,$studentno,$total)
+    {
+        $bind=['id'=>$id,'studentno'=>$studentno,'total'=>$total];
+        $sql='select id from qualitystudentdetail as q1 where studentno=:studentno and total=:total and  exists(
+              select * from qualitystudentdetail as q2 where q1.studentno=q2.studentno and q2.id=:id and q1.id!=q2.id and q1.year=q2.year and q1.term=q2.term
+            )';
+        $result=Db::query($sql,$bind);
+        if(count($result)==0)
+            return true;
+        else return false;
+    }
+    public function updateScore($postData){
+        $condition=null;
+        $studentno=session('S_USER_NAME');
+        $id=$postData['id'];;
+        $condition['studentno']=$studentno;
+        $condition['id']=$id;
+        $data['one']=$postData['one'];
+        $data['two']=$postData['two'];
+        $data['three']=$postData['three'];
+        $data['four']=$postData['four'];
+        $total=(int)$data['one']+(int)$data['two']+(int)$data['three']+(int)$data['four'];
+        $data['total']=$total;
+        $data['done']=1;
+        if(self::checkSameScore($id,$studentno,$total)) {
+            $this->query->table('qualitystudentdetail')->where($condition)->update($data);
+            return array('info'=>'保存成功','status'=>'1');
+        }
+        else
+        {
+            return array('info'=>'您已经给其他教师打过'.$total.'分！<br />请做适当调整！','status'=>'0');
+        }
+
     }
 }

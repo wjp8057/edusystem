@@ -25,6 +25,18 @@
         area.combobox('setValue','4');
         if('{$USERINFO.school}'=='18') //如果是环境学院的老师，默认为溪口校区
             area.combobox('setValue','3');
+        var courseschool = $('#courseschool');
+        courseschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        var studentschool = $('#studentschool');
+        studentschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
         $('#dg').datagrid({
             title: '考试课程列表',
             idField: 'id',
@@ -53,7 +65,7 @@
                         else
                             return seatall ;
                 }},
-                {field: 'schoolname', title: '学院', width: 100, align: 'center',rowspan:2},
+                {field: 'studentschoolname', title: '学生学院', width: 100, align: 'center',rowspan:2},
                 {title: '考场1',colspan:2},
                 {title: '考场2',colspan:2}
 
@@ -82,7 +94,9 @@
                 year:$("#year").val(),
                 term:$('#term').val(),
                 type:type,
-                flag:flag.combobox('getValue')
+                flag:flag.combobox('getValue'),
+                school:courseschool.combobox('getValue'),
+                studentschool:studentschool.combobox('getValue')
             });
         });
         $('#dg2').datagrid({
@@ -268,7 +282,9 @@
         <div id="toolbar">
             <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
-            <label for="flag">场次：</label><input id="flag" size="24">
+            <label for="courseschool">开课学院：</label><input id="courseschool" size="16" />
+            <label for="studentschool">学生学院：</label><input id="studentschool" size="16" />
+            <label for="flag">场次：</label><input id="flag" size="20">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
         </div>
         <table id="dg"></table>

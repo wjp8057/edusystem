@@ -48,22 +48,6 @@ class QualityStudent extends MyService {
         }
         return ["info"=>"同步课程成功！".$row."条记录添加","status"=>"1"];
     }
-    //设定锁定状态
-    public function setCourseStatus($year,$term,$courseno='%',$lock=1){
-        $row=0;
-        $info=$lock==1?'锁定':'解锁';
-        try {
-            $data['lock']=$lock;
-            $condition['year']=$year;
-            $condition['term']=$term;
-            $condition['courseno']=array('like',$courseno);
-            $row=$this->query->table('qualitystudent')->where($condition)->update($data);
-        }
-        catch(\Exception $e){
-            throw $e;
-        }
-        return ["info"=>"锁定成功！".$row."条记录".$info,"status"=>"1"];
-    }
 
     function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$teachername='%',$school='',$type='',$enabled='',$lock=''){
         $result=['total'=>0,'rows'=>[]];
@@ -140,8 +124,14 @@ class QualityStudent extends MyService {
                     $data['enabled'] = $one->enabled;
                     $data['type'] = $one->type;
 
-                    if(MyAccess::checkQualityStudentSchool($one->id))
+                    if(MyAccess::checkQualityStudentSchool($one->id)) {
                         $updateRow += $this->query->table('qualitystudent')->where($condition)->update($data);
+                        $condition = null;
+                        $data = null;
+                        $data['enabled'] = $one->enabled;
+                        $condition['map'] = $one->id;
+                        $this->query->table('qualitystudentdetail')->where($condition)->update($data);
+                    }
                     else{
                         $info.=$one->courseno.'不是本学院班级，无法更改信息</br>';
                         $errorRow++;
@@ -157,8 +147,13 @@ class QualityStudent extends MyService {
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['id'] = $one->id;
-                    if(MyAccess::checkQualityStudentSchool($one->id))
+                    if(MyAccess::checkQualityStudentSchool($one->id)) {
                         $deleteRow += $this->query->table('qualitystudent')->where($condition)->delete();
+                        $condition = null;
+                        $data = null;
+                        $condition['map'] = $one->id;
+                        $this->query->table('qualitystudentdetail')->where($condition)->delete();
+                    }
                     else{
                         $info.=$one->courseno.'不是本学院课程条目，无法删除</br>';
                         $errorRow++;
