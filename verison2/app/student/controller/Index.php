@@ -66,7 +66,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['classname'] = session('S_DEPART_NAME');
+            $title['name'] = session('S_DEPART_NAME');
             $this->assign('title', $title);
             $schedule = new Schedule();
             $time = $schedule->getClassTimeTable($year, $term, $classno);
@@ -75,7 +75,7 @@ class Index extends Template
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetable');
     }
     //个人课表
     function mytable($year='', $term='')
@@ -87,7 +87,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['studentname'] = session('S_REAL_NAME');
+            $title['name'] = session('S_REAL_NAME');
             $this->assign('title', $title);
             $schedule = new Schedule();
             $time = $schedule->getStudentTimeTable($year, $term, $studentno);
@@ -96,7 +96,7 @@ class Index extends Template
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetable');
     }
     //学分认定申请
     function creditapply()
@@ -110,7 +110,20 @@ class Index extends Template
         }
         return $this->fetch();
     }
-    //
+    //学评教首页
+    function quality()
+    {
+        try {
+            $valid=Item::getValidItem('C');
+            $valid['now']=date("m/d/Y H:m:s");
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+    //学评教汇总表
+    //学评教打分表
     function qualitycourse($year='',$term='',$id=0)
     {
         try {

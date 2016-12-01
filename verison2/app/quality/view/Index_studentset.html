@@ -1,6 +1,18 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
+        var start=$('#start');
+        var stop=$('#stop');
+        start.datetimebox({
+            value: '{$valid.start}',
+            required: true,
+            showSeconds: false
+        });
+        stop.datetimebox({
+            value: '{$valid.stop}',
+            required: true,
+            showSeconds: false
+        });
         $("#syncourse").click(function() {
             $.post('{$ROOT}/quality/student/syncourse',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val()},function(result){
                 if (result.status==1){
@@ -21,6 +33,25 @@
                 }
             },'json');
         });
+        $("#save").click(function() {
+            if($("#myForm").form('validate')){
+                if(start.datetimebox("getValue")>=stop.datetimebox("getValue")){
+                    $.messager.alert("错误",'开始时间不能比结束时间晚！',"error");
+                    return;
+                }
+                $.post('{$ROOT}/quality/student/updatedate',{start:start.datetimebox("getValue"),stop:stop.datetimebox("getValue")},function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
     });
 </script>
 <style type="text/css">
@@ -33,20 +64,27 @@
         <tr>
             <th><label for="year">学年</label></th>
             <td><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/></td>
-        </tr>
-        <tr>
             <th><label for="term">学期</label></th>
             <td><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/></td>
         </tr>
         <tr>
+            <th><label for="start">开始</label></th>
+            <td><input id="start" /></td>
+            <th><label for="stop">结束</label></th>
+            <td><input id="stop" /></td>
+        </tr>
+        <tr>
             <th><label for="courseno">课号</label></th>
             <td><input id="courseno" class="easyui-validatebox" size="9" value="%"/></td>
+            <td></td>
+            <td></td>
         </tr>
     </table>
     </form>
     <div id="toolbar">
         <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="syncourse">同步课程</a>
         <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="synstudent">同步学生名单</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存学评教起止时间</a>
     </div>
     <div class="space"></div>
     <div class="information">

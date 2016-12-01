@@ -38,25 +38,25 @@ class Index extends Template
     /** 打印教师课表
      * @param $year
      * @param $term
-     * @param $teacherno
+     * @param $who
      * @return mixed
      */
-    function processtable($year, $term,$teacherno)
+    function processtable($year, $term,$who)
     {
         try {
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['teachername'] = Item::getTeacherItem($teacherno)['teachername'];
+            $title['name'] = Item::getTeacherItem($who)['teachername'];
             $this->assign('title', $title);
             $schedule = new Schedule();
-            $time = $schedule->getTeacherTimeTable($year, $term, $teacherno);
+            $time = $schedule->getTeacherTimeTable($year, $term, $who);
             $this->assign('time', $time);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetable');
     }
 
     /**教室课程列表

@@ -18,8 +18,22 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\QualityStudent;
 use app\common\service\QualityStudentDetail;
+use app\common\service\Valid;
 
 class Student extends MyController {
+    //设置学评教开放时间
+    public function updatedate($start,$stop)
+    {
+        $result = null;
+        try {
+            $obj = new Valid();
+            $result = $obj->update($start,$stop,'C');
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
     //同步课程
     public function syncourse($year,$term,$courseno='%'){
         $result = null;

@@ -215,7 +215,7 @@
     function print(item,istimelist){
         var url='/base/index/roomreservenote?recno='+item;
         if(istimelist)
-            url='/base/index/roomtimetableall?roomno='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
+            url='/base/index/roomtimetableall?who='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
         window.open('{$ROOT}'+url);
     }
 

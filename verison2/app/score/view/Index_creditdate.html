@@ -15,6 +15,10 @@
         });
         $("#save").click(function() {
             if($("#myForm").form('validate')){
+                if(start.datetimebox("getValue")>=stop.datetimebox("getValue")){
+                    $.messager.alert("错误",'开始时间不能比结束时间晚！',"error");
+                    return;
+                }
                 $.post('{$ROOT}/score/credit/updatedate',{start:start.datetimebox("getValue"),stop:stop.datetimebox("getValue")},function(result){
                     if (result.status==1){
                         $.messager.alert("成功",result.info,"info");

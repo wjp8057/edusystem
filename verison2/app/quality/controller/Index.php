@@ -42,4 +42,13 @@ class Index extends Template
         }
         return $this->fetch();
     }
+    function studentset(){
+        try {
+            $valid=Item::getValidItem('C');
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

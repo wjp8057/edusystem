@@ -119,7 +119,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['teachername'] = session('S_TEACHER_NAME');
+            $title['name'] = session('S_TEACHER_NAME');
             $this->assign('title', $title);
             $teacherno = session("S_TEACHERNO");
             $schedule = new Schedule();
@@ -129,6 +129,6 @@ class Index extends Template
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetable');
     }
 }

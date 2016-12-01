@@ -42,40 +42,43 @@ class Index extends Template
         return $this->fetch();
     }
 
-    function roomtimetable($year = '', $term = '', $roomno = '')
+    function roomtimetable($year = '', $term = '', $who)
     {
         try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['roomname']=Item::getRoomItem($roomno)['name'];
+            $title['name'] = Item::getRoomItem($who)['name'];
             $this->assign('title', $title);
             $schedule = new Schedule();
-            $time = $schedule->getRoomTimeTable($year, $term, $roomno);
+            $time = $schedule->getRoomTimeTable($year, $term, $who);
             $this->assign('time', $time);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
-
+        return $this->fetch('all@index/timetable');
     }
 
-    function roomtimetableall($year = '', $term = '', $roomno = '')
+    function roomtimetableall($year = '', $term = '', $who)
     {
         try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['roomname']=Item::getRoomItem($roomno)['name'];
+            $title['name'] = Item::getRoomItem($who)['name'];
             $this->assign('title', $title);
             $schedule = new Schedule();
-            $time = $schedule->getRoomTimeTable($year, $term, $roomno, true);
+            $time = $schedule->getRoomTimeTable($year, $term, $who, true);
             $this->assign('time', $time);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetableall');
     }
 
     function roomreservenote($recno)

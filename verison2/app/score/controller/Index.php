@@ -137,7 +137,6 @@ class Index extends  Template {
     function creditdate(){
         try {
             $valid=Item::getValidItem('A');
-            $valid['now']=date("m/d/Y H:m:s");
             $this->assign('valid', $valid);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
