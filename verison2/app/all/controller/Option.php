@@ -12,6 +12,7 @@
 namespace app\all\controller;
 use app\common\access\MyAccess;
 use app\common\service\Classroom;
+use app\common\service\QualityStudentDetail;
 use app\common\service\R32;
 use app\common\service\TestCourse;
 use app\common\service\TestStudent;
@@ -503,8 +504,7 @@ class Option {
      * 测试专用
      */
     public function test(){
-        $sql='select flag from flagtemp where flag=100';
-        $data=Db::query($sql);
-        dump(count($data));
+       dump(QualityStudentDetail::isAllDone('1','1','1'));
+
     }
 }

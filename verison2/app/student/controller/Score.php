@@ -53,4 +53,15 @@ class Score extends MyController{
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
     }
+//    学期积点分
+    public function point($page=1,$rows=20){
+      //  try {
+            $obj=new \app\common\service\Score();
+            $studentno=session('S_USER_NAME');
+            return $obj->getPointList($page,$rows,$studentno);
+      //  } catch (\Exception $e) {
+      //      MyAccess::throwException($e->getCode(), $e->getMessage());
+     //   }
+    }
+
 }

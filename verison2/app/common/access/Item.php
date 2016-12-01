@@ -99,7 +99,7 @@ class Item {
         $data=Db::table('scheduleplan')
             ->join('courses','courses.courseno=scheduleplan.courseno')->where($condition)
             ->field('rtrim(coursename) as coursename,scheduleplan.courseno+scheduleplan.[group] courseno,
-            scheduleplan.estimate,scheduleplan.attendents,scheduleplan.year,scheduleplan.term')
+            scheduleplan.estimate,scheduleplan.attendents,scheduleplan.year,scheduleplan.term,halflock,lock')
             ->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)

@@ -103,7 +103,7 @@ class Index extends Template
     {
         try {
             $valid=Item::getValidItem('A');
-            $valid['now']=date("m/d/Y H:m:s");
+            $valid['now']=date("Y-m-d H:m:s");
             $this->assign('valid', $valid);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -115,7 +115,7 @@ class Index extends Template
     {
         try {
             $valid=Item::getValidItem('C');
-            $valid['now']=date("m/d/Y H:m:s");
+            $valid['now']=date("Y-m-d H:m:s");
             $this->assign('valid', $valid);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -127,6 +127,13 @@ class Index extends Template
     function qualitycourse($year='',$term='',$id=0)
     {
         try {
+            $valid=Item::getValidItem('C');
+            $valid['now']=date("Y-m-d H:m:s");
+            if(strtotime($valid['now'])>strtotime($valid['stop'])||strtotime($valid['now'])<strtotime($valid['start']))
+            {
+                echo '现在是'.$valid['now'].'不在学评教时间内:'.$valid['start'].'-'.$valid['stop'];
+                die();
+            }
             $studentno=session('S_USER_NAME');
             $yearterm=get_year_term();
             if($year=='') $year=$yearterm['year'];

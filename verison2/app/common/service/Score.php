@@ -214,7 +214,7 @@ class Score extends  MyService {
         return $result;
     }
 
-    /**获取层级列表
+    /**获取成绩列表
      * @param int $page
      * @param int $rows
      * @param string $year
@@ -243,6 +243,22 @@ class Score extends  MyService {
                 rtrim(examremoptions.name) examremname,rtrim(approachcode.name) as approachname,point,rtrim(examoptions.value) as examtypename,
                 rtrim(courseapproaches.value) courseapproachname")
             ->order('year,term,courseno')->select();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
+    //获取学期积点分列表
+    public function getPointList($page=1,$rows=20,$studentno){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['studentno']=$studentno;
+        $data=$this->query->table('scores')->page($page,$rows)
+            ->where($condition)
+            ->field('year,term,studentno,sum(point) point')
+            ->group('year,term,studentno')
+            ->order('year,term,studentno')->select();
+        $count= $this->query->table('scores')->where($condition)->count('distinct studentno');
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;

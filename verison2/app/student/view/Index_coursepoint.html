@@ -1,0 +1,20 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'role', striped:'true',rownumbers:true,singleSelect:true,
+            url:'{$ROOT}/student/score/point',toolbar:'#toolbar',
+            queryParams: {
+
+            },
+            columns:[[
+                {field:'year',title:'学年',width:50,align:'center'},
+                {field:'term',title:'学期',width:50,align:'center'},
+                {field:'point',title:'总积点分',width:60,align:'center'}
+            ]]
+        });
+    });
+</script>
+<div class="container">
+    <table id="dg"></table>
+</div>

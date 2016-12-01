@@ -151,6 +151,7 @@ class QualityStudentDetail extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
+    //检查是否有相同的给分
     private  static function checkSameScore($id,$studentno,$total)
     {
         $bind=['id'=>$id,'studentno'=>$studentno,'total'=>$total];
@@ -162,6 +163,7 @@ class QualityStudentDetail extends MyService{
             return true;
         else return false;
     }
+    //更新成绩
     public function updateScore($postData){
         $condition=null;
         $studentno=session('S_USER_NAME');
@@ -184,5 +186,19 @@ class QualityStudentDetail extends MyService{
             return array('info'=>'您已经给其他教师打过'.$total.'分！<br />请做适当调整！','status'=>'0');
         }
 
+    }
+    //是否已经全部完成
+    public static  function isAllDone($year,$term,$studentno){
+        $condition=null;
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $condition['enabled']=1;
+        $condition['studentno']=$studentno;
+        $condition['done']=0;
+        $data=Db::table('qualitystudentdetail')->where($condition)->find();
+        if(is_array($data))
+            return false;
+        else
+            return true;
     }
 }
