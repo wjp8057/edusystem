@@ -55,7 +55,7 @@ class Student extends MyService {
             ->field("students.studentno,rtrim(students.name) name,students.sex,rtrim(sexcode.name) sexname,
             students.classno,rtrim(classes.classname) as classname,classes.school,rtrim(schools.name) schoolname,
             personal.party,rtrim(partycode.name) partyname,personal.nationality,rtrim(nationalitycode.name) nationalityname,
-            personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free")
+            personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free,score")
             ->where($condition)->order('studentno')->select();
         $count= $this->query->table('students')->join('classes  ',' classes.classno=students.classno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)

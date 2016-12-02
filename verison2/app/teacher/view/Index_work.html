@@ -10,13 +10,25 @@
                 {field:'courseno',title:'课号',width:100,align:'center'},
                 {field:'coursename',title:'课名',width:200,align:'center'},
                 {field:'work',title:'工作量',width:60,align:'center'},
-                {field:'attendent',title:'人数',width:60,align:'center'},
+                {field:'attendent',title:'学生数',width:60,align:'center'},
                 {field:'classname',title:'班级',width:160,align:'center'}
             ]]
+        });
+        $('#export').click(function(){
+            $.fileDownload("{$ROOT}/teacher/work/export", {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
         });
     });
 </script>
 <div class="container">
+    <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出本人工作量</a>
+    </div>
     <table id="dg"></table>
     <div class="space"></div>
     <div class="information">

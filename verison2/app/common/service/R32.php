@@ -245,7 +245,6 @@ class R32 extends  MyService {
         }
         return false;
     }
-
     //学生自主选课
     public function updateByStudent($postData){
         $info='';
@@ -330,12 +329,35 @@ class R32 extends  MyService {
                 $condition['courseno'] = substr($courseno, 0, 7);
                 $condition['[group]'] = substr($courseno, 7, 2);
                 $this->query->table('r32')->where($condition)->delete();
-                $info.=$courseno.'删除成功！</br>';
+                $info.=$courseno.'退课成功！</br>';
                 //更新课程人数
                 self::updateAttendent($year, $term, $courseno);
             }
         }
         return ['info'=>$info,'status'=>$status];
+    }
+    //检索学生的选课
+    public function getSelectedCourse($page=1,$rows=20,$year,$term,$studentno){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['r32.year']=$year;
+        $condition['r32.term']=$term;
+        $condition['r32.studentno']=$studentno;
+        $data=$this->query->table('r32')
+            ->join('viewscheduletable vt','r32.courseno+r32.[group]=vt.coursenogroup and vt.year=r32.year and vt.term=r32.term')
+            ->join('plantypecode','plantypecode.code=r32.coursetype')
+            ->join('examoptions','examoptions.name=r32.examtype')
+            ->where($condition)->page($page,$rows)
+            ->field("coursenogroup,vt.year,vt.term,credits,examoptions.value  examtype,plantypecode.name coursetype,weekhours,rem,
+            dbo.GROUP_CONCAT(distinct rtrim(classname),',') classname,dbo.GROUP_CONCAT(distinct rtrim(teachername),',') teachername,
+            dbo.GROUP_CONCAT(distinct dayntime,',') dayntime,schoolname,coursename")
+            ->group('coursenogroup,vt.year,vt.term,credits,schoolname,rem,weekhours,schoolname,coursename,examoptions.value,plantypecode.name')
+            ->order('coursenogroup')
+            ->select();
+        $count= $this->query->table('r32')->where($condition)->count();// 查询满足要求的总记录数
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
     }
 
 }

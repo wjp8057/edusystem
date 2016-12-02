@@ -26,8 +26,11 @@ class WorkFile extends  MyService {
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['teacherno']=$teacherno;
+        $data=$this->query->table('workfile')
+            ->where($condition)->page($page,$rows)
+            ->field('year,term,courseno,rtrim(coursename) coursename,work,attendent,rtrim(classname) classname')
+            ->order('year desc,term desc,courseno')->select();
         $count= $this->query->table('workfile')->where($condition)->count();// 查询满足要求的总记录数
-        $data=$this->query->table('workfile')->where($condition)->page($page,$rows)->order('year desc,term desc')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;

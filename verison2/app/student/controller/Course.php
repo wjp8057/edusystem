@@ -32,12 +32,23 @@ class Course extends MyController {
     public function update()
     {
         $result = null;
-      //  try {
+        try {
             $obj = new R32();
             $result = $obj->updateByStudent($_POST);
-       /* } catch (\Exception $e) {
+        } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
-        }*/
+        }
         return json($result);
+    }
+
+    public function selected($page=1,$rows=20,$year,$term){
+        try {
+            $studentno=session('S_USER_NAME');
+            $obj=new R32();
+            return $obj->getSelectedCourse($page,$rows,$year,$term,$studentno);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
     }
 }

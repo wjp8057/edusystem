@@ -63,10 +63,13 @@
         background:url("{$ROOT}/img/school{$order}.jpg") no-repeat ;
     }
     #loginForm{
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius:5px;
         position: absolute;
         top:160px;
         left:660px;
-        border:1px silver solid;
+        border:1px #cc9933 solid;
         width:250px;
         height:250px;
         background-color: #E0ECFF;
@@ -80,14 +83,16 @@
         width:150px;
     }
     #tip{
-        border-bottom: 1px silver solid;
         display: block;
         line-height: 40px;
         height: 40px;
         padding-left: 40px;
-        background-color: #CCCCCC;
+        background-color:#CC9933;
         font-weight: bold;
         margin-bottom: 30px;
+        background-image: url("{$ROOT}/img/user_tip.png");
+        background-repeat: no-repeat;
+        background-position: 5px center ;
     }
     #username{
         background:url("{$ROOT}/img/user.png") no-repeat left seashell;
@@ -99,12 +104,13 @@
         padding-left: 0;
         line-height: 40px;
         text-align: center;
-        background-color: #8d8d8d;
+        background-color:#FFCC00;
         width:185px;
+        color:#000;
     }
     #loginbt:hover{
-        background-color: #0052A3;
-        color:#000;
+        background-color: #FF9933;
+        color:#FFF;
     }
     #footer{
         height:50px;

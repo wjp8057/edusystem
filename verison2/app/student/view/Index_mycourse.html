@@ -22,7 +22,7 @@
         });
         $('#dg').datagrid({
             title:'',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/student/course/query',toolbar:'#toolbar',
+            url:'{$ROOT}/student/course/selected',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val(),
@@ -34,8 +34,12 @@
                 {field:'coursename',title:'课名',width:170,align:'center'},
                 {field:'credits',title:'学分',width:30,align:'center'},
                 {field:'weekhours',title:'周学时',width:40,align:'center'},
-                {field:'estimate',title:'限选',width:40,align:'center'},
-                {field:'attendents',title:'已选',width:40,align:'center'}
+                {field:'repeat',title:'重修',width:40,align:'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '是';
+                    else
+                        return '否';
+                }}
 
             ]],
             columns:[[
@@ -65,14 +69,7 @@
             tt.datagrid('clearChecked');
             tt.datagrid('load', {
                 year: $('#year').val(),
-                term: $('#term').val(),
-                courseno:$('#courseno').val(),
-                coursename:$('#coursename').val(),
-                teachername:$('#teachername').val(),
-                classno:$('#classno').val(),
-                school:school.combobox('getValue'),
-                weekday:weekday.combobox('getValue'),
-                time:time.combobox('getValue')
+                term: $('#term').val()
             });
         });
         function buildDataArray(rows){
@@ -85,20 +82,22 @@
             }
             return updateRow;
         }
-        $("#save").click(function () {
+        $("#exit").click(function () {
             var tt = $('#dg');
             //获取更改的数据行内容
+
             var effectRow = {};
             var rows = tt.datagrid('getSelections');
             var length = rows.length;
             if (rows.length > 0) {
-                effectRow["inserted"] = $.toJSON(buildDataArray(rows));
+                effectRow["deleted"] = $.toJSON(buildDataArray(rows));
                 effectRow['year']=$('#year').val();
                 effectRow['term']=$('#term').val();
                 $.post('{$ROOT}/student/course/update', effectRow, function (result) {
                     if (result.status == 1) {
                         tt.datagrid('clearSelections');
                         tt.datagrid('clearChecked');
+                        tt.datagrid('reload');
                         $.messager.alert('成功', result.info, 'info');
                     } else {
                         $.messager.alert('错误', result.info, 'error');
@@ -112,17 +111,10 @@
 </script>
 <div class="container">
     <div id="toolbar">
-        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/>
-        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$NEXTYEARTERM.term}"/>
-        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="08%"/>
-        <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="6" value="%"/>
-        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
-        <label for="teachername">教师：</label><input id="teachername" class="easyui-validatebox" size="4" value="%"/>
-        <label for="school">开课学院：</label><input id="school" size="18"/>
-        <label for="weekday">星期：</label><input id="weekday" size="8"/>
-        <label for="time">节次：</label><input id="time" size="12"/>
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-course',plain:'true'" id="save">提交选课</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="exit">退课</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>
