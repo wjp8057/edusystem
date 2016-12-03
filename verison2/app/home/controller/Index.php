@@ -7,6 +7,11 @@ use think\Request;
 
 class Index extends Controller
 {
+    function captcha($id = "", $config = [])
+    {
+        $captcha = new \think\captcha\Captcha($config[]);
+        return $captcha->entry($id);
+    }
     public function _initialize()
     {
         $request = Request::instance();
@@ -39,8 +44,10 @@ class Index extends Controller
     {
         $guid = getGUID(session_id());
         session('S_GUID', $guid);
-        $this->assign('GUID', $guid);
-        $this->assign('order',rand(1,6));
+        $page['guid']=$guid;
+        $page['order']=rand(1,6);
+        $page['many']=session('S_LOGINTIMES');
+        $this->assign('page',$page);
         return $this->fetch();
     }
     public function  _empty(){

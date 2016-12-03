@@ -8,14 +8,21 @@
                     login_click();
                 }
             });
+            if('{$page.many}'<=3){
+                $('#valid').hide();
+                $('#code').hide();
+            }
+            else{
+                $('#loginForm').height(300);
+            }
         });
         function login_click(){
             var username=$('#username').val();
             var pwd=$('#pwd').val();
             if(!$("#loginForm").form('validate')||username==''||pwd=='') return;
 
-            pwd=hex_md5(hex_md5(pwd)+'{$GUID}');
-            $.post('{$ROOT}/home/login/checklogin',{username:username,pwd:pwd},function(result){
+            pwd=hex_md5(hex_md5(pwd)+'{$page.guid}');
+            $.post('{$ROOT}/home/login/checklogin',{username:username,pwd:pwd,code:$('#code').val()},function(result){
                 if (result.status==1){
                     location="{$ROOT}/home/index/index";
                 }
@@ -26,7 +33,13 @@
                     location="{$ROOT}/student/";
                 }
                 else {
+                    if(result.status==-1)
+                        $('#valid').click();
+                    if(result.times>3&&result.status==0){ //如果密码输入错误，刷新页面
+                        location=getURLString()+'?t='+Math.random();
+                    }
                     $.messager.alert("错误",result.info,"error",pwdselect);
+
                 }
             },'json');
         }
@@ -60,19 +73,25 @@
         position: relative;
         height:500px;
         width: 100%;
-        background:url("{$ROOT}/img/school{$order}.jpg") no-repeat ;
+        background:url("{$ROOT}/img/school{$page.order}.jpg") no-repeat ;
     }
     #loginForm{
         -moz-border-radius: 5px;
         -webkit-border-radius: 5px;
         border-radius:5px;
         position: absolute;
-        top:160px;
+        top:140px;
         left:660px;
         border:1px #cc9933 solid;
         width:250px;
         height:250px;
         background-color: #E0ECFF;
+    }
+    #valid{
+        position: absolute;;
+        top:185px;
+        left:120px;
+        z-index: 999;;
     }
     #loginForm input,#loginbt{
         display: block;
@@ -81,6 +100,13 @@
         margin:15px auto;
         padding-left:35px;
         width:150px;
+    }
+    input#code{
+        width:60px;
+        margin-left: 30px;
+        padding: 0 10px;
+        text-align: center;
+        font-size: 14px;;
     }
     #tip{
         display: block;
@@ -125,7 +151,9 @@
             <span id="tip">账户登录</span>
             <input type="text" name="username" id="username"  placeholder="教师号或者学号"/>
             <input type="password" name="pwd" id="pwd"   placeholder="输入密码" />
-            <a onclick="login_click()" id="loginbt" href="#">用户登录</a>
+            <input type="text"  id="code"   placeholder="验证码" size="4" maxlength="4"/>
+            <img id="valid" src="{$ROOT}/all/option/test"  onclick="this.src='{$ROOT}/all/option/test?id='+Math.random();" >
+            <a onclick="login_click()" id="loginbt" href="javascript:void(0)">用户登录</a>
         </form>
     </div>
     <div id="footer"> {$COPYRIGHT}</div>

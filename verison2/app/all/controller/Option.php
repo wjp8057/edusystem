@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 
 namespace app\all\controller;
+use app\common\access\Captcha;
 use app\common\access\MyAccess;
 use app\common\service\Classroom;
 use app\common\service\QualityStudentDetail;
@@ -504,7 +505,7 @@ class Option {
      * 测试专用
      */
     public function test(){
-       dump(QualityStudentDetail::isAllDone('1','1','1'));
+       return \app\common\vendor\Captcha::validimg();
 
     }
 }

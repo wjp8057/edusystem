@@ -8,18 +8,31 @@
 namespace app\home\controller;
 use app\common\access\MyAccess;
 use app\common\service\User;
+use app\common\vendor\Captcha;
 use app\common\vendor\CAS;
 use think\Request;
 
 class Login
 {
-    public function checklogin($username='',$pwd='')
+    public function checklogin($username='',$pwd='',$code='')
     {
         try {
+            if(session('S_LOGINTIMES')>3&&!Captcha::check($code))
+                return json(['info'=>'验证码错误！','status'=>"-1"]);
             $result=MyAccess::login($username,$pwd);
             $status=$result;
-            $info=$result==0?'用户名或者密码错误！':'登录成功！';
-            return json(['info'=>$info,'status'=>$status]);
+            if($result==0)
+            {
+                $info="用户名或者密码错误！";
+                $times=session('S_LOGINTIMES')+1;
+                session('S_LOGINTIMES',$times);
+            }
+            else
+            {
+                session('S_LOGINTIMES',0);
+                $info="登录成功";
+            }
+            return json(['info'=>$info,'status'=>$status,'times'=>session('S_LOGINTIMES')]);
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
