@@ -1,0 +1,57 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/student/course/filter',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val()
+            },
+            frozenColumns:[   [
+                {field:'year',title:'学年',width:65,align:'center'},
+                {field:'term',title:'学期',width:65,align:'center'},
+                {field:'courseno',title:'课号',width:65,align:'center'},
+                {field:'coursename',title:'课名',width:170,align:'center'},
+                {field:'credits',title:'学分',width:30,align:'center'}
+            ]],
+            columns:[[
+                {field:'coursetype',title:'类型',width:40,align:'center'},
+                {field:'examtype',title:'考核',width:40,align:'center'},
+                {field:'reason',title:'删除原因',width:200,align:'center'},
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val()
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+
+    </div>
+</div>

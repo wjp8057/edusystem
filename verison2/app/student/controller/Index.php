@@ -173,4 +173,26 @@ class Index extends Template
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
     }
+    function courseselect()
+    {
+        try {
+            $valid=Item::getValidItem('B');
+            $valid['now']=date("Y-m-d H:m:s");
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+    function mycourse()
+    {
+        try {
+            $valid=Item::getValidItem('B');
+            $valid['now']=date("Y-m-d H:m:s");
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

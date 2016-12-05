@@ -1,32 +1,18 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
-        var school=$('#school');
-        school.combobox({
-            url:'{$ROOT}/all/option/school?only=0',
-            valueField:'school',
-            textField:'name'
-        });
-        var weekday=$('#weekday');
-        weekday.combobox({
-            url:'{$ROOT}/all/option/weekday?only=0',
-            valueField:'day',
-            textField:'name',
-            panelHeight:'auto'
-        });
-        var time=$('#time');
-        time.combobox({
-            url:'{$ROOT}/all/option/timesection?only=0',
-            valueField:'time',
-            textField:'name'
-        });
+        var stopTime=new Date('{$valid.stop}');
+        var startTime=new Date('{$valid.start}');
+        var nowTime=new Date('{$valid.now}');
+        if(nowTime.getTime()>stopTime.getTime()||nowTime.getTime()<startTime.getTime()){
+            $('#exit').linkbutton('disable');
+        }
         $('#dg').datagrid({
-            title:'',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'本学期退课开放时间：{$valid.start} 至 {$valid.stop}',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/student/course/selected',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
-                term: $('#term').val(),
-                courseno:$('#courseno').val()
+                term: $('#term').val()
             },
             frozenColumns:[   [
                 {field: 'checkbox', title: '选中', checkbox: true},
@@ -83,6 +69,10 @@
             return updateRow;
         }
         $("#exit").click(function () {
+            if($("#exit").linkbutton('options').disabled) {
+                $.messager.alert('错误','现在不能退课，本学期退改选时间：{$valid.start}至{$valid.stop}','error');
+                return;
+            } //如果禁用了，就直接退出。
             var tt = $('#dg');
             //获取更改的数据行内容
 

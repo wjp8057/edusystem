@@ -160,7 +160,7 @@ class CreditApply extends MyService {
                     $condition = null;
                     $condition['id'] = $one->id;
                     $condition['school']=$one->school;
-                    $condition['audit'] = 0;
+                    $condition['verify'] = 0;
                     if($one->school!=session('S_USER_SCHOOL')&&session('S_MANAGE')!=1)
                     {
                         $errorRow++;

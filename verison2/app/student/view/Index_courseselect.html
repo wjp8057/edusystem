@@ -1,6 +1,12 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
+        var stopTime=new Date('{$valid.stop}');
+        var startTime=new Date('{$valid.start}');
+        var nowTime=new Date('{$valid.now}');
+        if(nowTime.getTime()>stopTime.getTime()||nowTime.getTime()<startTime.getTime()){
+            $('#save').linkbutton('disable');
+        }
         var school=$('#school');
         school.combobox({
             url:'{$ROOT}/all/option/school?only=0',
@@ -21,7 +27,7 @@
             textField:'name'
         });
         $('#dg').datagrid({
-            title:'',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'本学期选课开放时间：{$valid.start} 至 {$valid.stop}',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/student/course/query',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
@@ -86,6 +92,10 @@
             return updateRow;
         }
         $("#save").click(function () {
+            if($("#save").linkbutton('options').disabled) {
+                $.messager.alert('错误','现在不能选课，本学期选课时间：{$valid.start}至{$valid.stop}','error');
+                return;
+            } //如果禁用了，就直接退出。
             var tt = $('#dg');
             //获取更改的数据行内容
             var effectRow = {};
@@ -101,7 +111,7 @@
                         tt.datagrid('clearChecked');
                         $.messager.alert('成功', result.info, 'info');
                     } else {
-                        $.messager.alert('错误', result.info, 'error');
+                        $.messager.alert('提示', result.info, 'error');
                     }
                 }, 'json');
             }

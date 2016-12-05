@@ -24,14 +24,22 @@ class Index extends  Template{
     }
 
     public function managefilterstudent($year,$term,$courseno){
-      /*  try{*/
+        try{
             $result=Item::getSchedulePlanItem($year,$term,$courseno);
             $this->assign('course',$result);
-       /* }
+        }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
-        }*/
+        }
         return $this->fetch();
     }
-
+    function settingsyn(){
+        try {
+            $valid=Item::getValidItem('B');
+            $this->assign('valid', $valid);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

@@ -10,16 +10,8 @@
 // +----------------------------------------------------------------------
 
 namespace app\all\controller;
-use app\common\access\Captcha;
+use app\common\vendor\Captcha;
 use app\common\access\MyAccess;
-use app\common\service\Classroom;
-use app\common\service\QualityStudentDetail;
-use app\common\service\R32;
-use app\common\service\TestCourse;
-use app\common\service\TestStudent;
-use app\common\vendor\DrCom;
-use app\common\vendor\PHPExcel;
-use app\common\vendor\PHPWord;
 use think\Controller;
 use think\Db;
 use think\Log;
@@ -29,6 +21,9 @@ use think\Log;
  * @package app\all\controller
  */
 class Option {
+    public function verify(){
+        return Captcha::validimg();
+    }
     //角色
     public function role(){
         $result=null;

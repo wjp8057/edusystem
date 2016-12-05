@@ -18,6 +18,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\SchedulePlan;
 use app\common\service\Student;
+use app\common\service\Valid;
 use app\common\service\ViewScheduleTable;
 
 class Setting extends MyController
@@ -96,6 +97,19 @@ class Setting extends MyController
         try {
             $obj = new ViewScheduleTable();
             $result = $obj->update($year, $term);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function updatedate($start,$stop)
+    {
+        $result = null;
+        try {
+            $obj = new Valid();
+            $result = $obj->update($start,$stop,'B');
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

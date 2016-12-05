@@ -1,6 +1,18 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
+        var start=$('#start');
+        var stop=$('#stop');
+        start.datetimebox({
+            value: '{$valid.start}',
+            required: true,
+            showSeconds: false
+        });
+        stop.datetimebox({
+            value: '{$valid.stop}',
+            required: true,
+            showSeconds: false
+        });
         $("#syn").click(function() {
             $.post('{$ROOT}/selective/setting/synscheduletable',{year: $('#year').val(),term: $('#term').val()},function(result){
                 if (result.status==1){
@@ -10,27 +22,51 @@
                 }
             },'json');
         });
+        $("#save").click(function() {
+            if($("#myForm").form('validate')){
+                if(start.datetimebox("getValue")>=stop.datetimebox("getValue")){
+                    $.messager.alert("错误",'开始时间不能比结束时间晚！',"error");
+                    return;
+                }
+                $.post('{$ROOT}/selective/setting/updatedate',{start:start.datetimebox("getValue"),stop:stop.datetimebox("getValue")},function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
     });
 </script>
 <style type="text/css">
     #toolbar{height: 80px;line-height: 80px;text-align: center}
 </style>
 <div class="container">
-    <div class="pagetitle">同步课程总表</div>
+    <div class="pagetitle">选课时间设置及课程表总表同步</div>
     <form id="myForm">
         <table class="mytable" align="center" cellspacing="0" cellpadding="0">
             <tr>
                 <th><label for="year">学年：</label></th>
                 <td><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/></td>
-            </tr>
-            <tr>
                 <th><label for="term">学期：</label></th>
                 <td><input id="term" class="easyui-validatebox" size="2" value="{$NEXTYEARTERM.term}"/></td>
+            </tr>
+            <tr>
+                <th><label for="start">开始时间</label></th>
+                <td><input id="start" /></td>
+                <th><label for="stop">结束时间</label></th>
+                <td><input id="stop" /></td>
             </tr>
         </table>
     </form>
     <div id="toolbar">
-        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" style="height:35px;width:150px" id="syn">开始同步课程总表</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'"  id="syn">开始同步课程总表</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存选课时间</a>
     </div>
     <div class="space"></div>
     <div class="information">

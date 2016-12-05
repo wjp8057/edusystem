@@ -47,6 +47,7 @@ class Vacation extends MyController {
     {
         $result = null;
         try {
+
             $obj = new CreditApply();
             $result = $obj->update($_POST);
 

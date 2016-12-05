@@ -106,7 +106,9 @@
         margin-left: 30px;
         padding: 0 10px;
         text-align: center;
-        font-size: 14px;;
+        font-size: 14px;
+        font-weight:bold;
+        word-spacing:20px;
     }
     #tip{
         display: block;
@@ -152,7 +154,7 @@
             <input type="text" name="username" id="username"  placeholder="教师号或者学号"/>
             <input type="password" name="pwd" id="pwd"   placeholder="输入密码" />
             <input type="text"  id="code"   placeholder="验证码" size="4" maxlength="4"/>
-            <img id="valid" src="{$ROOT}/all/option/test"  onclick="this.src='{$ROOT}/all/option/test?id='+Math.random();" >
+            <img id="valid" src="{$ROOT}/all/option/verify"  onclick="this.src='{$ROOT}/all/option/verify?id='+Math.random();" >
             <a onclick="login_click()" id="loginbt" href="javascript:void(0)">用户登录</a>
         </form>
     </div>
