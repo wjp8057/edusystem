@@ -123,12 +123,12 @@ class Credit extends MyController {
         }
     }
     //读取创新技能申报学生名单
-    public function creativeapply($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='')
+    public function creativeapply($page = 1, $rows = 20, $year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='')
     {
         $result = null;
         try {
             $obj = new CreditApply();
-            $result = $obj->getList($page, $rows,$year,$term,$studentno,$reason,$school,'A',$audit);
+            $result = $obj->getList($page, $rows,$year,$term,$studentno,$classno,$reason,$school,'A',$audit);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -162,12 +162,12 @@ class Credit extends MyController {
         return json($result);
     }
     //导出创新技能认定表
-    public function auditexportcreative($year,$term,$studentno='%',$reason='%',$school='',$audit=''){
+    public function auditexportcreative($year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit=''){
 
         $result=null;
         try {
             $obj = new CreditApply();
-            $result = $obj->getList(1,10000,$year,$term,$studentno,$reason,$school,'A',$audit);
+            $result = $obj->getList(1,10000,$year,$term,$studentno,$classno,$reason,$school,'A',$audit);
             $data=$result['rows'];
             $file=$year."学年第".$term."学期创新技能认定汇总表（单个）";
             $sheet='全部';
@@ -187,13 +187,13 @@ class Credit extends MyController {
         }
     }
     //创新学分认定中读取学生列表
-    public function creativequery($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch='0')
+    public function creativequery($page = 1, $rows = 20, $year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch='0')
     {
         $result = null;
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList($page, $rows, $year, $term, $studentno, $reason, $school, 'A', $audit, $verify);
+                $result = $obj->getList($page, $rows, $year, $term, $studentno,$classno, $reason, $school, 'A', $audit, $verify);
             }
             else if($batch=="1"){
                 $obj=new ProjectDetail();
@@ -224,13 +224,13 @@ class Credit extends MyController {
         return json($result);
     }
     //导出认定界面创新技能认定表
-    public function verifyexportcreative($year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch){
+    public function verifyexportcreative($year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch){
         $result=null;
         $file='';
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList(1, 10000, $year, $term, $studentno, $reason, $school, 'A', $audit, $verify);
+                $result = $obj->getList(1, 10000, $year, $term, $studentno,$classno, $reason, $school, 'A', $audit, $verify);
                 $file=$year."学年第".$term."学期创新技能认定汇总表（单个）";
             }
             else if($batch=="1") {
@@ -339,12 +339,12 @@ class Credit extends MyController {
         }
     }
     //读取素质学分申报列表
-    public function qualityapply($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='')
+    public function qualityapply($page = 1, $rows = 20, $year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='')
     {
         $result = null;
         try {
             $obj = new CreditApply();
-            $result = $obj->getList($page, $rows,$year,$term,$studentno,$reason,$school,'B',$audit);
+            $result = $obj->getList($page, $rows,$year,$term,$studentno,$classno,$reason,$school,'B',$audit);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -378,12 +378,12 @@ class Credit extends MyController {
         return json($result);
     }
     //导出单个的素质学分认定汇总表
-    public function auditexportquality($year,$term,$studentno='%',$reason='%',$school='',$audit=''){
+    public function auditexportquality($year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit=''){
 
         $result=null;
         try {
             $obj = new CreditApply();
-            $result = $obj->getList(1,10000,$year,$term,$studentno,$reason,$school,'B',$audit);
+            $result = $obj->getList(1,10000,$year,$term,$studentno,$classno,$reason,$school,'B',$audit);
             $data=$result['rows'];
             $file=$year."学年第".$term."学期素质学分认定汇总表（单个）";
             $sheet='全部';
@@ -403,13 +403,13 @@ class Credit extends MyController {
         }
     }
     //读取素质学分认定信息
-    public function qualityquery($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch='0')
+    public function qualityquery($page = 1, $rows = 20, $year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch='0')
     {
         $result = null;
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList($page, $rows, $year, $term, $studentno, $reason, $school, 'B', $audit, $verify);
+                $result = $obj->getList($page, $rows, $year, $term, $studentno,$classno, $reason, $school, 'B', $audit, $verify);
             }
             else if($batch=="1"){
                 $obj=new ProjectDetail();
@@ -440,13 +440,13 @@ class Credit extends MyController {
         return json($result);
     }
     //批量导出素质学分认定
-    public function verifyexportquality($year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch){
+    public function verifyexportquality($year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch){
         $result=null;
         $file='';
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList(1, 10000, $year, $term, $studentno, $reason, $school, 'B', $audit, $verify);
+                $result = $obj->getList(1, 10000, $year, $term, $studentno,$classno, $reason, $school, 'B', $audit, $verify);
                 $file=$year."学年第".$term."学期素质学分认定汇总表（单个）";
             }
             else if($batch=="1") {
@@ -472,13 +472,13 @@ class Credit extends MyController {
         }
     }
     //检索信息
-    public function query($page = 1, $rows = 20, $year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch='0',$type='')
+    public function query($page = 1, $rows = 20, $year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch='0',$type='')
     {
         $result = null;
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList($page, $rows, $year, $term, $studentno, $reason, $school, $type, $audit, $verify);
+                $result = $obj->getList($page, $rows, $year, $term, $studentno,$classno, $reason, $school, $type, $audit, $verify);
             }
             else if($batch=="1"){
                 $obj=new ProjectDetail();
@@ -490,13 +490,13 @@ class Credit extends MyController {
         return json($result);
     }
     //导出到ecel
-    public function export($year,$term,$studentno='%',$reason='%',$school='',$audit='',$verify='',$batch,$type=''){
+    public function export($year,$term,$studentno='%',$classno='%',$reason='%',$school='',$audit='',$verify='',$batch,$type=''){
         $result=null;
         $file='';
         try {
             if($batch=="0") {
                 $obj = new CreditApply();
-                $result = $obj->getList(1, 10000, $year, $term, $studentno, $reason, $school,$type, $audit, $verify);
+                $result = $obj->getList(1, 10000, $year, $term, $studentno, $classno,$reason, $school,$type, $audit, $verify);
                 $file=$year."学年第".$term."学期学分认定汇总表（单个）";
             }
             else if($batch=="1") {

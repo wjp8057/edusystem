@@ -44,7 +44,7 @@ class Course extends MyController {
                 return json(['info'=>'现在是'.$valid['now'].',不在选课、退课时间内!','status'=>0]);
             }
             $obj = new R32();
-            $result = $obj->updateByStudent($_POST);
+            $result = $obj->selectByStudent($_POST);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

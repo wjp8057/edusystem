@@ -184,13 +184,13 @@
         <label for="school">开课学院：</label>
         <input id="school" size="15">
         <label for="halflock">锁定：</label>
-        <input id="halflock" size="5">
+        <input id="halflock" size="8">
         <label for="lock">人数限制：</label>
-        <input id="lock" size="5">
+        <input id="lock" size="8">
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存修改</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-free',plain:'true'" id="without_limit">无限制开放</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-shield',plain:'true'" id="limit">有限制开放</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-free',plain:'true'" id="without_limit">无限开放</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-shield',plain:'true'" id="limit">有限开放</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-lock',plain:'true'" id="lockall">锁定全部</a>
     </div>
     <table id="dg"></table>
@@ -198,8 +198,8 @@
     <div class="information">
         <ol>说明：
             <li>可以编辑单条课程的锁定与人数限制状态，然后点保存。</li>
-            <li>无限制开放：将所有课程无人数限制开放，即lock状态为0，halflock为0</li>
-            <li>有限制开放：将所有课程有人数限制开放，即lock状态为1，halflock为0</li>
+            <li>无限开放：将所有课程无人数限制开放，即lock状态为0，halflock为0</li>
+            <li>有限开放：将所有课程有人数限制开放，即lock状态为1，halflock为0</li>
             <li>锁定全部：将所有课程锁定，即lock状态为1，halflock为1</li>
         </ol>
     </div>

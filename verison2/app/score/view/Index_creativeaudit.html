@@ -77,6 +77,8 @@
             tt.datagrid('load', {
                 year: $('#year').val(),
                 term: $('#term').val(),
+                studentno:$('#studentno').val(),
+                classno:$('#classno').val(),
                 reason:$('#reason').val(),
                 school:school.combobox('getValue'),
                 audit:audit.combobox('getValue')
@@ -202,8 +204,9 @@
             var school=encodeURI($('#school').combobox('getValue'));
             var reason=encodeURI($('#reason').val());
             var studentno=encodeURI($('#studentno').val());
+            var classno=encodeURI($('#classno').val());
             var audit=encodeURI($('#audit').combobox('getValue'));
-            $.fileDownload("{$ROOT}/score/credit/auditexportcreative?year=" +year+"&term="+term+'&school='+school+'&reason='+reason+'&studentno='+studentno+'&audit='+audit, {
+            $.fileDownload("{$ROOT}/score/credit/auditexportcreative?year=" +year+"&term="+term+'&school='+school+'&reason='+reason+'&studentno='+studentno+'&classno='+classno+'&audit='+audit, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -247,6 +250,7 @@
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
         <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
         <label for="reason">理由：</label><input id="reason" class="easyui-validatebox" size="6" value="%"/>
         <label for="school">学院：</label><input id="school" size="15"/>
         <label for="audit">已审核：</label><input id="audit" size="7"/>

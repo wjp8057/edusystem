@@ -35,12 +35,12 @@ class Teacher extends MyController {
         return json($result);
     }
     //检索教师
-    public function query($page = 1, $rows = 20, $teacherno = '%', $name = '%', $school = '')
+    public function query($page = 1, $rows = 20, $teacherno = '%', $teachername = '%', $school = '')
     {
         $result = null;
         try {
             $teacher = new \app\common\service\Teacher();
-            $result = $teacher->getList($page, $rows, $teacherno, $name, $school);
+            $result = $teacher->getList($page, $rows, $teacherno, $teachername, $school);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

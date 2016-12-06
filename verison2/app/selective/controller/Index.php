@@ -42,4 +42,26 @@ class Index extends  Template{
         }
         return $this->fetch();
     }
+    //按学生检索，批量添加学生页
+    public function addbystudent($year,$term,$courseno){
+        try{
+            $result=Item::getSchedulePlanItem($year,$term,$courseno);
+            $this->assign('course',$result);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
+    //根据其他课程选课记录批量添加学生
+    public function addbycourse($year,$term,$courseno){
+        try{
+            $result=Item::getSchedulePlanItem($year,$term,$courseno);
+            $this->assign('course',$result);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

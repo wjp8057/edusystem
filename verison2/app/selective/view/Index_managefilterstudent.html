@@ -20,15 +20,46 @@
             url:'{$ROOT}/selective/manage/coursestudent',
             queryParams: {  year:'{$course.year}', term: '{$course.term}',courseno:'{$course.courseno}'},
             singleSelect:true,
+            remoteSort:false,
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
-                {field:'studentno',title:'学号',width:80,align:'center'},
+                {field:'studentno',title:'学号',width:80,align:'center',sortable:'true'},
                 {field:'studentname',title:'姓名',width:80,align:'center'},
                 {field:'sexname',title:'性别',width:50,align:'center'},
-                {field:'classname',title:'班级',width:90,align:'center'},
-                {field:'approachname',title:'主修班级',width:120,align:'center'},
-                {field:'estimate',title:'预计人数*',width:70,align:'center',editor:{type:'numberbox',options:{precision:0,required:true}}},
-                {field:'attendents',title:'已选人数',width:60,align:'center'}
+                {field:'classname',title:'班级',width:120,align:'center'},
+                {field:'inprogram',title:'计划内',width:50,align:'center',formatter:function(value,rec){
+                    if(value==1)
+                        return '是';
+                    else
+                        return '否';
+                }},
+                {field:'repeat',title:'重修',width:40,align:'center',formatter:function(value,rec){
+                    if(value==1)
+                        return '是';
+                    else
+                        return '否';
+                }},
+                {field:'credit',title:'总学分',width:50,align:'center',sortable:'true',sorter:sort_int},
+                {field:'amount',title:'总门数',width:50,align:'center',sortable:'true',sorter:sort_int},
+                {field:'termcredit',title:'公选学分',width:60,align:'center',sortable:'true',sorter:sort_int},
+                {field:'termamount',title:'公选门数',width:60,align:'center',sortable:'true',sorter:sort_int},
+                {field:'publiccredit',title:'已获公选学分',width:80,align:'center',sortable:'true',sorter:sort_int},
+                {field:'approach',title:'修课方式*',width:120,align:'center',editor: {
+                    type: 'combobox', options: {
+                        url: '{$ROOT}/all/option/approachcode',
+                        valueField: 'approach',
+                        textField: 'name',
+                        panelHeight:'auto',
+                        required: true,
+                        onSelect: function (rec) {
+                            var tt = $('#dg');
+                            tt.datagrid('getSelected').approachname = rec.name;
+                        }
+                    }
+                },
+                    formatter: function (val, rec) {
+                        return rec.approachname;
+                    }}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -71,33 +102,44 @@
                 amount:$('#amount').combobox('getValue')
             });
         });
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.studentno=rows[i].studentno;
+                updateObj.approach = rows[i].approach;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
         $("#save,#menu_save").click(function(){
             var tt=$('#dg');
             var length;//删除或更新的行数
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
             if(tt.datagrid('editIndex')!=undefined) return;
             //获取更改的数据行内容
-            var rows=tt.datagrid('getChanges','updated');
-            var count=0;
             var effectRow = {};
-            length=rows.length;
+            var count=0;
+            var rows=tt.datagrid('getChanges','updated');
             if(rows.length>0){
-                var updateRows=[];
-                for(var i=0;i<length;i++){
-                    var updateObj={}; //插入的单元格
-                    updateObj.recno=rows[i].recno;
-                    updateObj.lock=rows[i].lock;
-                    updateObj.halflock=rows[i].halflock;
-                    updateRows.push(updateObj);
-                }
                 count+=rows.length;
-                effectRow["updated"]=$.toJSON(updateRows);
+                effectRow["updated"]=$.toJSON(buildDataArray(rows));
             }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(buildDataArray(rows));
+            }
+            effectRow["year"]='{$course.year}';
+            effectRow["term"]='{$course.term}';
+            effectRow["courseno"]='{$course.courseno}';
             if(count<=0) { //如果没有任何更新，就退出
                 $.messager.alert('提示','没有需要更新的记录','info');
                 return;
             }
-            $.post('{$ROOT}/selective/setting/courseupdate',effectRow,function(result){
+            $.post('{$ROOT}/selective/manage/updatestudent',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -110,23 +152,83 @@
                 }
             },'json');
         });
+        $("#menu_delete,#delete").click(function(){
+            tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //随机生成筛选标记
+        $("#random").click(function() {
+            var tt= $('#dg');
+            var rows=tt.datagrid('getRows');
+            var amount=rows.length;
+            var max=$('#estimate').val();
+            var deleted=0;
+            for(;amount>max;amount--){
+                var random=Math.floor(Math.random()*amount);
+                tt.datagrid('deleteRow',random);
+                deleted++;
+            }
+            $.messager.alert('提示',deleted+'位学生被随机筛选，您还需点"保存"提交到数据库或点"取消"恢复筛选记录！','info');
+        });
+        //按次序筛选
+        $("#byorder").click(function() {
+            var tt= $('#dg');
+            var rows=tt.datagrid('getRows');
+            var amount=rows.length;
+            var max=$('#estimate').val();
+            var deleted=0;
+            for(var i=amount-max-1;i>=0;i--){
+                tt.datagrid('deleteRow',i);
+                deleted++;
+            }
+            $.messager.alert('提示',deleted+'位学生被随机筛选，您还需点"保存"提交到数据库或点"取消"恢复筛选记录！','info');
+        });
+        $("#menu_insertstudent,#inserstudent").click(function(){
+            parent.menuTabs.addTab("按学生新增-{$course.courseno}","{$ROOT}/selective/index/addbystudent?courseno={$course.courseno}&year={$course.year}&term={$course.term}","icon icon-add");
+        });
+
+        $("#menu_insertcourse,#insertcourse").click(function(){
+            parent.menuTabs.addTab("按选课新增-{$course.courseno}","{$ROOT}/selective/index/addbycourse?courseno={$course.courseno}&year={$course.year}&term={$course.term}","icon icon-add");
+        });
     });
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存修改</div>
+        <div id='menu_insertstudent' data-options="iconCls:'icon icon-add'">按学生新增</div>
+        <div id='menu_insertcourse' data-options="iconCls:'icon icon-add'">按选课新增</div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_remove' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div class="menu-sep"></div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
     </div>
     <div id="toolbar">
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="inserstudent">按学生新增</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="insertcourse">按选课新增</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>|
         <label for="estimate">人数上限：</label><input id="estimate" class="easyui-validatebox" size="4" value="{$course.estimate}"/>
-        <label for="credits">学分上限：</label><input id="credits" class="easyui-validatebox" size="2" value="40"/>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-student',plain:'true'" id="student">查看选课学生</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-water',plain:'true'" id="random">随机筛选</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-column',plain:'true'" id="byorder">按排序筛选</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>
     <div class="information">
         <ol>说明：
-            <li>开课学院可以修改本学院课程的预计人数。</li>
+            <li>按排序筛选时请点击相应的排序顺序</li>
         </ol>
     </div>
 </div>

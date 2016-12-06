@@ -15,7 +15,7 @@
             panelHeight:'auto'
         });
         $('#dg').datagrid({
-            title:'课程列表',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/selective/manage/courselist',
             queryParams: {  year: $('#year').val(), term: $('#term').val()},
             singleSelect:true,
@@ -84,8 +84,8 @@
                 for(var i=0;i<length;i++){
                     var updateObj={}; //插入的单元格
                     updateObj.recno=rows[i].recno;
-                    updateObj.lock=rows[i].lock;
-                    updateObj.halflock=rows[i].halflock;
+                    updateObj.estimate=rows[i].estimate;
+                    updateObj.courseno=rows[i].courseno;
                     updateRows.push(updateObj);
                 }
                 count+=rows.length;
@@ -95,7 +95,7 @@
                 $.messager.alert('提示','没有需要更新的记录','info');
                 return;
             }
-            $.post('{$ROOT}/selective/setting/courseupdate',effectRow,function(result){
+            $.post('{$ROOT}/selective/manage/estimate',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -116,7 +116,7 @@
                 $.messager.alert('错误','请先选择一个课程！','error');
                 return;
             }
-            parent.menuTabs.addTab("选课学生-"+row.courseno,"{$ROOT}/selective/index/managefilterstudent?courseno="+row.courseno+"&year="+year+"&term="+term,"icon-edit");
+            parent.menuTabs.addTab("选课学生-"+row.courseno,"{$ROOT}/selective/index/managefilterstudent?courseno="+row.courseno+"&year="+year+"&term="+term,"icon icon-people");
         });
         $("#syn").click(function() {
             $.post('{$ROOT}/selective/manage/syncourse',{year:$("#year").val(),term:$("#term").val()},function(result){
@@ -131,8 +131,8 @@
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存修改</div>
-        <div id='menu_student' data-options="iconCls:'icon icon-student'">查看选课学生</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div id='menu_student' data-options="iconCls:'icon icon-people'">查看选课学生</div>
     </div>
     <div id="toolbar">
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/>
@@ -149,8 +149,10 @@
             <option value="C">小于预计人数</option>
         </select>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-student',plain:'true'" id="student">查看选课学生</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="syn">同步选课人数与信息</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-people',plain:'true'" id="student">查看选课学生</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="syn">同步选课信息</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-exit',plain:'true'" id="stop">课程停开</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>

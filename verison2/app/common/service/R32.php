@@ -40,8 +40,10 @@ class R32 extends  MyService {
             ->join('classes  ',' classes.classno=students.classno')
             ->join('sexcode  ',' students.sex=sexcode.code')
             ->join('schools  ',' schools.school=classes.school')
+            ->join('selective','selective.year=r32.year and selective.term=r32.term and selective.studentno=r32.studentno','LEFT')
             ->field('r32.approach,rtrim(approachcode.name) as approachname,rtrim(students.studentno) studentno,
-            rtrim(students.name) studentname,rtrim(classes.classname) classname,rtrim(sexcode.name) sexname,rtrim(students.sex) sex,rtrim(schools.name) schoolname')
+            rtrim(students.name) studentname,rtrim(classes.classname) classname,rtrim(sexcode.name) sexname,rtrim(students.sex) sex,rtrim(schools.name) schoolname,
+            credit,amount,termcredit,termamount,publiccredit+creativecredit publiccredit,r32.repeat')
             ->order('studentno')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
@@ -127,7 +129,6 @@ class R32 extends  MyService {
         }
         return array('info' => $info, 'status' => $status);
     }
-
     //更新选课人数
     private static function updateAttendent($year,$term,$courseno){
         $condition=null;
@@ -137,13 +138,6 @@ class R32 extends  MyService {
         $amount=Db::table('r32')->where($condition)->count();
         $data['attendents']=$amount;
         Db::table('scheduleplan')->where($condition)->update($data);
-    }
-    //检查是否管理部门
-    private static function checkManage(){
-        if(session('S_LOGIN_TYPE')==1&&session('S_MANAGE')==1)
-            return true;
-        else
-            return false;
     }
     //检测是否已缴费 true 已缴纳，false  未缴纳
     private static function checkFee($studentno){
@@ -246,7 +240,7 @@ class R32 extends  MyService {
         return false;
     }
     //学生自主选课
-    public function updateByStudent($postData){
+    public function selectByStudent($postData){
         $info='';
         $status=1;
         $year=$postData['year'];
@@ -328,6 +322,7 @@ class R32 extends  MyService {
                 $condition['studentno'] = $studentno;
                 $condition['courseno'] = substr($courseno, 0, 7);
                 $condition['[group]'] = substr($courseno, 7, 2);
+                R32Dump::toDump($year,$term,$courseno,$studentno,'学生本人退课！');
                 $this->query->table('r32')->where($condition)->delete();
                 $info.=$courseno.'退课成功！</br>';
                 //更新课程人数
@@ -360,4 +355,114 @@ class R32 extends  MyService {
         return $result;
     }
 
+    //选课管理中筛选名单与修改学生修课方式。
+    public function update($postData){
+        $info='';
+        $status=1;
+        $updateRow=0;
+        $deleteRow=0;
+        $errorRow=0;
+        $insertRow=0;
+        $courseno=$postData["courseno"];
+        $year=$postData["year"];
+        $term=$postData["term"];
+        if(!MyAccess::checkCourseSchool($courseno))
+        {
+            return ["info"=>$courseno."不是开课学院，无权修改学生记录及修课方式！","status"=>"0"];
+        }
+        if (isset($postData["updated"])) {
+            $updated = $postData["updated"];
+            $listUpdated = json_decode($updated);
+            foreach ($listUpdated as $one) {
+                $condition = null;
+                $data=null;
+                $condition['year']=$year;
+                $condition['term']=$term;
+                $condition['courseno']=substr($courseno,0,7);
+                $condition['group']=substr($courseno,7,2);
+                $condition['studentno']=$one->studentno;
+                $data['approach']=$one->approach;
+                $this->query->table('r32')->where($condition)->update($data);
+                $updateRow++;
+            }
+        }
+        if (isset($postData["deleted"])) {
+            $updated = $postData["deleted"];
+            $listUpdated = json_decode($updated);
+            $course=Item::getSchedulePlanItem($year,$term,$courseno);
+            if($course['halflock']==1&&session('S_MANAGE')!=1)
+            {
+                $info.='删除失败，'.$courseno.'课程已锁定！<br/>';
+                $status=0;
+                $errorRow++;
+            }
+            else{
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['year']=$year;
+                    $condition['term']=$term;
+                    $condition['courseno']=substr($courseno,0,7);
+                    $condition['group']=substr($courseno,7,2);
+                    $condition['studentno']=$one->studentno;
+                    //写入r32dump
+                    R32Dump::toDump($year,$term,$courseno,$one->studentno,'课程限制，人数过多！');
+                    $this->query->table('r32')->where($condition)->delete();
+                    $deleteRow++;
+                }
+                self::updateAttendent($year,$term,$courseno);
+            }
+        }
+        if (isset($postData["inserted"])) {
+            $updated = $postData["inserted"];
+            $listUpdated = json_decode($updated);
+            $course=Item::getSchedulePlanItem($year,$term,$courseno);
+            if($course['halflock']==1&&session('S_MANAGE')!=1)
+            {
+                $info.='添加失败，'.$courseno.'课程已锁定！<br/>';
+                $status=0;
+                $errorRow++;
+            }
+            else if($course['lock']==1&&((int)$course['estimate']<(int)$course['attendents']+count($listUpdated)))
+            {
+                $info.='失败，'.$courseno.'预计人数'.$course['estimate'].',已选'.$course['attendents'].',本次'.count($listUpdated).',超过人数上限！<br/>';
+                $status=0;
+                $errorRow++;
+            }
+            else{
+                $examtype=self::getExamType($year,$term,$courseno);
+                foreach ($listUpdated as $one) {
+                    //获取教学计划类型
+                    $studentno=$one->studentno;
+                    if(!self::checkFee($studentno)){
+                        $info.=$studentno."欠费，无法选课！";
+                        $status=0;
+                        continue;
+                    }
+                    $program=self::getCourseType($courseno,$studentno);
+                    $data['coursetype']=$program['type'];
+                    $data['inprogram']=$program['in'];
+                    $data['repeat']=self::isRepeat($courseno,$studentno);
+                    $data['examtype']=$examtype;
+                    $data['year']=$year;
+                    $data['term']=$term;
+                    $data['studentno']=$studentno;
+                    $data['courseno']=substr($courseno,0,7);
+                    $data['group']=substr($courseno,7,2);
+                    $this->query->table('r32')->insert($data);
+                    $insertRow++;
+                }
+                self::updateAttendent($year,$term,$courseno);
+            }
+        }
+        if($updateRow+$deleteRow+$errorRow+$insertRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+            if ($deleteRow > 0) $info .= $deleteRow . '条删除！</br>';
+            if ($insertRow > 0) $info .= $insertRow . '条添加！</br>';
+        }
+        return ['info'=>$info,'status'=>$status];
+    }
 }

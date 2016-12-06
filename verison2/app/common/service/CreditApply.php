@@ -20,7 +20,7 @@ use app\common\vendor\PHPWord;
 
 class CreditApply extends MyService {
     //读取学分认定信息
-    function getList($page=1,$rows=20,$year='',$term='',$studentno='%',$reason='%',$school='',$type='',$audit='',$verify=''){
+    function getList($page=1,$rows=20,$year='',$term='',$studentno='%',$classno='%',$reason='%',$school='',$type='',$audit='',$verify=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($year!='')  $condition['creditapply.year']=$year;
@@ -28,6 +28,7 @@ class CreditApply extends MyService {
         if($school!='') $condition['classes.school']=$school;
         if($reason!='%')$condition['reason']=array('like',$reason);
         if($studentno!='%')$condition['creditapply.studentno']=array('like',$studentno);
+        if($classno!='%')$condition['students.classno']=array('like',$classno);
         if($type!='') $condition['creditapply.type']=$type;
         if($audit!='')  $condition['audit']=$audit;
         if($verify!='')  $condition['verify']=$verify;

@@ -496,6 +496,17 @@ class Option {
         }
         return json($result);
     }
+    //修课方式 正常修课、免听、免修、毕业前补考、部分免听、
+    public function approachcode(){
+        $result=null;
+        try {
+            $result =Db::table('approachcode')->field('rtrim(code) as approach,rtrim(name) as name')->where("code!='D'")->order('approach')->select();
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
     /**
      * 测试专用
      */

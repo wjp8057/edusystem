@@ -36,7 +36,7 @@ class Vacation extends MyController {
         try {
             $obj=new CreditApply();
             $studentno=session('S_USER_NAME');
-            return $obj->getList($page,$rows,$year,$term,$studentno,'%','','');
+            return $obj->getList($page,$rows,$year,$term,$studentno,'%','%','','','','');
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

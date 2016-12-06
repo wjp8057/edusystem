@@ -17,8 +17,10 @@ use app\common\access\MyController;
 use app\common\service\R32;
 use app\common\service\SchedulePlan;
 use app\common\service\Selective;
+use app\common\service\Student;
 
 class Manage extends MyController {
+    //获取课程列表
     public function  courselist($page = 1, $rows = 20, $year, $term, $courseno = '%', $coursename = '%', $classno = '%', $school = '',$amount='')
     {
         $result = null;
@@ -45,7 +47,7 @@ class Manage extends MyController {
         }
         return json($result);
     }
-
+    //获取某课程选课学生列表
     public function  coursestudent( $year, $term, $courseno)
     {
         $result = null;
@@ -57,7 +59,7 @@ class Manage extends MyController {
         }
         return json($result);
     }
-
+    //同步选课人数与selective表
     public function syncourse($year,$term){
         $result = null;
         try {
@@ -67,6 +69,52 @@ class Manage extends MyController {
             $result = $obj->update($year,$term);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    //同步选课人数与selective表
+    public function estimate(){
+        $result = null;
+        try {
+            $obj=new SchedulePlan();
+            $result=$obj->updateEstimate($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function updatestudent(){
+        $result = null;
+        try {
+            $obj=new R32();
+            $result=$obj->update($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    //检索学生
+    public function studentquery($page=1,$rows=50,$studentno='%',$name='%',$classno='%',$school=''){
+        $result=null;
+        try {
+            $student=new Student();
+            $result = $student->getList($page,$rows,$studentno,$name,$classno,$school);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function coursequery($page=1,$rows=50,$year,$term,$courseno){
+        $result=null;
+        try {
+            $obj=new R32();
+            $result = $obj->getStudentList($page,$rows,$year,$term,$courseno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
         }
         return json($result);
     }
