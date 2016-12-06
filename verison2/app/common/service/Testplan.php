@@ -48,7 +48,7 @@ class TestPlan extends MyService {
         return $result;
     }
 
-    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='')
+    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='',$teachername='%',$teacherno='%')
     {
         $result = ['total' => 0, 'rows' => []];
         $condition = null;
@@ -58,6 +58,8 @@ class TestPlan extends MyService {
         if($flag!='') $condition['testplan.flag'] = $flag;
         if($school!='') $condition['courses.school'] = $school;
         if($studentschool!='') $condition['testplan.studentschool'] = $studentschool;
+        if($teachername!='%') $condition['teachername1|teachername2|teachername3|teachername4|teachername5|teachername6']=array('like',$teachername);
+        if($teacherno!='%') $condition['teacherno1|teacherno2|teacherno3|teacherno4|teacherno5|teacherno6']=array('like',$teacherno);
         $data = $this->query->table('testplan')
             ->join('testbatch', 'testbatch.flag=testplan.flag and testbatch.year=testplan.year and testplan.term=testbatch.term and testbatch.type=testplan.type')
             ->join('courses', 'courses.courseno=substring(testplan.courseno,1,7)')
@@ -68,8 +70,8 @@ class TestPlan extends MyService {
             seats1,seats2,seats3,attendents,schools.school,rtrim(schools.name) schoolname,studentschool,rtrim(s.name) studentschoolname,
             rtrim(teachername1) teachername1, rtrim(teachername2) teachername2, rtrim(teachername3) teachername3, rtrim(teachername4) teachername4, rtrim(teachername5) teachername5,
              rtrim(teachername6) teachername6, rtrim(teachername7) teachername7, rtrim(teachername8) teachername8, rtrim(teachername9) teachername9,
-             teacherno1,teacherno2,teacherno3,teacherno4,teacherno5,teacherno6,teacherno7,teacherno8,teacherno9')
-            ->order('courseno')->page($page, $rows)->where($condition)->select();
+             teacherno1,teacherno2,teacherno3,teacherno4,teacherno5,teacherno6,teacherno7,teacherno8,teacherno9,rtrim(classes) classes,rtrim(testplan.rem) rem')
+            ->order('testtime,courseno')->page($page, $rows)->where($condition)->select();
         $count = $this->query->table('testplan')
             ->join('courses', 'courses.courseno=substring(testplan.courseno,1,7)')
             ->where($condition)->count();
@@ -220,8 +222,7 @@ class TestPlan extends MyService {
                         $used.=$one->teachername5.'教师已有监考！';
                     if($force!=1&&!self::checkTeacherUsed($one->id,$one->teacherno6))
                         $used.=$one->teachername6.'教师已有监考！';
-
-                    if(MyAccess::checkCourseSchool($one->courseno)&&$used=='')
+                    if(MyAccess::checkTestPlanSchool($one->id)&&$used=='')
                         $updateRow += $this->query->table('testplan')->where($condition)->update($data);
                     else{
                         $info.=$one->courseno.'不是本学院课程，无法更改信息'.$used;
@@ -246,4 +247,51 @@ class TestPlan extends MyService {
         $result=array('info'=>$info,'status'=>$status,'used'=>$used);
         return $result;
     }
+
+    //    设置备注
+    public function  updateRem($postData){
+        $updateRow=0;
+        $errorRow=0;
+        $info="";
+        $used="";
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $data = null;
+                    $condition['id'] = $one->id;
+                    $condition['courseno'] = $one->courseno;
+                    $data['rem']=$one->rem;
+                    if(MyAccess::checkCourseSchool($one->courseno))
+                        $updateRow += $this->query->table('testplan')->where($condition)->update($data);
+                    else{
+                        $info.=$one->courseno.'不是本学院课程，无法更改信息'.$used;
+                        $errorRow++;
+                        $status=0;
+                    }
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow+$errorRow==0){
+            $status=0;
+            $info="没有数据更新";
+        }
+        else {
+            if ($updateRow > 0) $info .= $updateRow . '条更新！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status,'used'=>$used);
+        return $result;
+    }
+
 }

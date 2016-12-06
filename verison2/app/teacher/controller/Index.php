@@ -16,6 +16,7 @@ use app\common\service\Action;
 use app\common\service\R32;
 use app\common\service\Schedule;
 use app\common\service\Score;
+use app\common\service\TestCourse;
 use app\common\service\ViewSchedule;
 
 class Index extends Template
@@ -130,5 +131,10 @@ class Index extends Template
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return $this->fetch('all@index/timetable');
+    }
+    public function finalexam(){
+        $type=['type'=>'A','typename'=>TestCourse::getTypeName('A')];
+        $this->assign('type',$type);
+        return $this->fetch('exam');
     }
 }

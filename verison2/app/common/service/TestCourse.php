@@ -76,11 +76,14 @@ class TestCourse extends MyService {
     //载入期末考试课程
     private static function loadFinalCourse($year,$term){
         $bind=array('year'=>$year,'term'=>$term);
-        $sql="insert into testcourse(year,term,type,courseno,courseno2,coursename)
-            select scheduleplan.year,scheduleplan.term,'A',scheduleplan.courseno+scheduleplan.[group],scheduleplan.courseno+scheduleplan.[group],courses.coursename
+        $sql="insert into testcourse(year,term,type,courseno,courseno2,coursename,classes)
+            select scheduleplan.year,scheduleplan.term,'A',scheduleplan.courseno+scheduleplan.[group],scheduleplan.courseno+scheduleplan.[group],courses.coursename,dbo.GROUP_CONCAT(rtrim(classes.classname),',')
             from scheduleplan
             inner join courses on courses.courseno=scheduleplan.courseno
-            where year=:year and term=:term and exam=1";
+            inner join courseplan on courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group] and courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term
+            inner join classes on classes.classno=courseplan.classno
+            where scheduleplan.year=:year and scheduleplan.term=:term and exam=1
+            group by  scheduleplan.year,scheduleplan.term,scheduleplan.courseno+scheduleplan.[group],courses.coursename";
         $rows=Db::execute($sql,$bind);
         return array('info'=>$rows.'门课程成功载入！','status'=>'1');
     }
@@ -358,8 +361,8 @@ class TestCourse extends MyService {
              where year=:year and term=:term and type=:type";
         Db::execute($sql,$bind);
         //加入新纪录
-        $sql=" insert into testplan(year,term,type,flag,attendents,courseno)
-              select year,term,type,flag,amount,courseno  from testcourse
+        $sql=" insert into testplan(year,term,type,flag,attendents,courseno,classes)
+              select year,term,type,flag,amount,courseno,classes  from testcourse
               where year=:year and term=:term and type=:type";
         Db::execute($sql,$bind);
         //如果是期末考试，更新学生学院

@@ -65,7 +65,7 @@ class Login
                     header('Location:' . Request::instance()->root() . '/teacher/index/index');
                     break;
                 case 3:
-                    header('Location:/Student/Index/index');
+                    header('Location:' . Request::instance()->root() . '/student/index/index');
                     break;
                 default:
                     echo "登录失败";

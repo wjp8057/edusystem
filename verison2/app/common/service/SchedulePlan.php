@@ -45,18 +45,21 @@ class SchedulePlan extends MyService {
         if($classno!='%')  $condition['courseplan.classno']=array('like',$classno);
         if($school!='')$condition['courses.school']=$school;
         $data=$this->query->table('scheduleplan')->join('courses','courses.courseno=scheduleplan.courseno')
-            ->join('courseplan ','courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term and courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group]')
+            ->join('courseplan ','courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term and
+             courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group]')
             ->join('examoptions','examoptions.name=courseplan.examtype')
             ->join('schools ',' schools.school=courses.school')
             ->join('classes ',' classes.classno=courseplan.classno')
-            ->where($condition)->group('examoptions.value,scheduleplan.exam,scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group],rtrim(courses.coursename), rtrim(schools.name),schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock')
-            ->field("scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group] as courseno,rtrim(courses.coursename) as coursename, rtrim(schools.name) schoolname,schools.school,
-                scheduleplan.estimate,scheduleplan.attendents,halflock,lock ,dbo.GROUP_CONCAT(rtrim(classes.classname),' ') as classname,rtrim(examoptions.value) examtypename,scheduleplan.exam")
+            ->where($condition)->group('examoptions.value,scheduleplan.exam,scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group],
+            rtrim(courses.coursename), rtrim(schools.name),schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock')
+            ->field("scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group] as courseno,rtrim(courses.coursename) as coursename,
+            rtrim(schools.name) schoolname,schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock ,
+            dbo.GROUP_CONCAT(rtrim(classes.classname),' ') as classname,rtrim(examoptions.value) examtypename,scheduleplan.exam")
             ->page($page,$rows)->where($extracondtion)->order('courseno')
             ->select();
         $count= $this->query->table('scheduleplan')->join('courses','courses.courseno=scheduleplan.courseno')
-            ->join('courseplan ','courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term and courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group]')
-            ->join('schools ',' schools.school=courses.school')
+            ->join('courseplan ','courseplan.year=scheduleplan.year and courseplan.term=scheduleplan.term and
+            courseplan.courseno+courseplan.[group]=scheduleplan.courseno+scheduleplan.[group]')
             ->join('classes ',' classes.classno=courseplan.classno')
             ->where($condition)->where($extracondtion)->count('distinct scheduleplan.courseno+scheduleplan.[group]');
         if(is_array($data)&&count($data)>0)

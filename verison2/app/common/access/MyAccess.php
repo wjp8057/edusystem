@@ -363,7 +363,7 @@ class MyAccess {
             '705'=>'访问参数错误!',
             '706'=>'数据不存在！'
         );
-        $result=!isset($error[$errorCode])?'未定义错误！':$error[$errorCode];
+        $result=!isset($error[$errorCode])?'错误未定义！':$error[$errorCode];
         return $result;
     }
 
@@ -455,6 +455,21 @@ class MyAccess {
         if(!is_array($data)||count($data)!=1)
             throw new Exception('courseno:'.$courseno, MyException::PARAM_NOT_CORRECT);
         if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+    public static function checkTestPlanSchool($id){
+        $condition=null;
+        $condition['testplan.id']=$id;
+        $data= Db::table('testplan')
+            ->join('courses','substring(testplan.courseno,1,7)=courses.courseno')
+            ->where($condition)->field('courses.school,testplan.studentschool')->select();
+        if(!is_array($data)||count($data)!=1)
+            throw new Exception('courseno:'.$courseno, MyException::PARAM_NOT_CORRECT);
+        if($data[0]['school']==session('S_USER_SCHOOL')||session('S_MANAGE')==1||$data[0]['studentschool']==session('S_USER_SCHOOL')){
             return true;
         }
         else{

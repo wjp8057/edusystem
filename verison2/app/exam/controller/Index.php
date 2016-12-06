@@ -52,10 +52,17 @@ class Index extends Template
         $this->assign('type',$type);
         return $this->fetch('room');
     }
+    //期末监考安排
     public function finalteacher(){
         $type=['type'=>'A','typename'=>TestCourse::getTypeName('A')];
         $this->assign('type',$type);
         return $this->fetch('teacher');
+    }
+    //期末结果查询
+    public function finalquery(){
+        $type=['type'=>'A','typename'=>TestCourse::getTypeName('A')];
+        $this->assign('type',$type);
+        return $this->fetch('schedule');
     }
     //教室时间表
     function roomtimetable($year = '', $term = '', $roomno = '')

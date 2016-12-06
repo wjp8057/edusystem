@@ -1,0 +1,82 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var type='{$type.type}';
+    var typename='{$type.typename}';
+    $(function () {
+        $('#dg').datagrid({
+            title: '',
+            idField: 'id',
+            striped: 'true',
+            pagination: 'true',
+            singleSelect:'true',
+            rownumbers: 'true',
+            pageSize:20,
+            url: '{$ROOT}/teacher/exam/query',
+            queryParams: {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type
+            },
+            toolbar: '#toolbar',
+            pageList: [20,40,60,100],
+            columns: [[
+                {field: 'testtime', title: '考试时间', width: 150, align: 'center',rowspan:2},
+                {field: 'courseno', title: '课号', width: 70, align: 'center',rowspan:2},
+                {field: 'coursename', title: '课名', width: 120, align: 'center',rowspan:2},
+                {field: 'attendents', title: '人数', width: 35, align: 'center',rowspan:2},
+                {field: 'schoolname', title: '开课学院', width: 80, align: 'center',rowspan:2},
+                {field: 'studentschoolname', title: '学生学院', width: 85, align: 'center',rowspan:2},
+                {field: 'classes', title: '班级', width: 120, align: 'center',rowspan:2},
+                {title: '考场1',colspan:4},
+                {title: '考场2',colspan:4},
+                {field: 'rem', title: '备注', width: 120, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]'}}}
+            ],[
+                {field: 'roomno1', title: '房间', width: 70, align: 'center'},
+                {field: 'teachername1', title: '监考1', width: 45, align: 'center'},
+                {field: 'teachername2', title: '监考2', width: 45, align: 'center'},
+                {field: 'teachername3', title: '监考3', width: 45, align: 'center'},
+                {field: 'roomno2', title: '房间', width: 70, align: 'center'},
+                {field: 'teachername4', title: '监考1', width: 45, align: 'center'},
+                {field: 'teachername5', title: '监考2', width: 45, align: 'center'},
+                {field: 'teachername6', title: '监考3', width: 45, align: 'center'}
+            ]
+            ],
+            //标题行右键菜单
+            onHeaderContextMenu: function (e, field) {
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu', cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+        });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:type,
+                flag:flag.combobox('getValue'),
+                school:courseschool.combobox('getValue'),
+                studentschool:studentschool.combobox('getValue')
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+    </div>
+        <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information" style="clear:both">
+        <ol>说明：
+
+        </ol>
+    </div>
+</div>

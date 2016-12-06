@@ -18,6 +18,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\TestBatch;
 use app\common\service\TestCourse;
+use app\common\service\TestPlan;
 use app\common\vendor\PHPExcel;
 
 //考试设置
@@ -151,4 +152,6 @@ class Auto extends  MyController {
         }
         return json($result);
     }
+
+
 }
