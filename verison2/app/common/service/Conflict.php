@@ -57,7 +57,7 @@ class Conflict extends MyService {
             $row=Db::execute($sql,$bind);
             //某些周次重复部分
             $sql="insert into conflict(year,term,type,who,day,week,time)
-                select year,term,type,teacherno,day,time,dbo.GROUP_AND(week) as week from (
+                select year,term,type,teacherno,day,dbo.GROUP_AND(week) as week,time from (
                 select schedule.year,schedule.term,'T' type,teacherno,day,weeks&OEWOPTIONS.TIMEBIT2 week,TIMESECTIONS.TIMEBITS time
                 from schedule inner join teacherplan on teacherplan.recno=schedule.map
                 inner join oewoptions on OEWOPTIONS.code=schedule.oew
@@ -80,7 +80,7 @@ class Conflict extends MyService {
             $row+=Db::execute($sql,$bind);
             //某些周次重复部分
             $sql="insert into conflict(year,term,type,who,day,week,time)
-                select year,term,type,roomno,day,time,dbo.GROUP_AND(week) as week from (
+                select year,term,type,roomno,day,dbo.GROUP_AND(week) as week,time from (
                 select schedule.year,schedule.term,'R' type,roomno,day,weeks&OEWOPTIONS.TIMEBIT2 week,TIMESECTIONS.TIMEBITS time
                 from (select distinct year,term,courseno,[group],day,time,roomno ,weeks,oew from schedule ) schedule
                 inner join oewoptions on OEWOPTIONS.code=schedule.oew
@@ -106,7 +106,7 @@ class Conflict extends MyService {
             $row+=Db::execute($sql,$bind);
             //某些周次重复部分
             $sql="insert into conflict(year,term,type,who,day,week,time)
-                select year,term,type,classno,day,time,dbo.GROUP_AND(week) as week from (
+                select year,term,type,classno,day,dbo.GROUP_AND(week) as week,time from (
                 select schedule.year,schedule.term,'C' type,classno,day,schedule.weeks&OEWOPTIONS.TIMEBIT2 week,TIMESECTIONS.TIMEBITS time
                 from (select distinct year,term,courseno,[group],day,time,roomno ,weeks,oew from schedule )  schedule
                 inner join courseplan on courseplan.courseno+courseplan.[group]=schedule.courseno+schedule.[group]

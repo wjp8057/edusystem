@@ -29,7 +29,7 @@ class Manage extends MyController {
             $condition = null;
             switch ($amount) {
                 case 'A':
-                    $condition['scheduleplan.attendents']=array('exp','<20');
+                    $condition['scheduleplan.attendents']=array('exp','<30');
                     break;
                 case 'B':
                     $condition['scheduleplan.attendents']=array('exp','>scheduleplan.estimate');

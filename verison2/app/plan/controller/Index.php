@@ -71,6 +71,6 @@ class Index extends Template
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch('timetable');
+        return $this->fetch('all@index/timetable');
     }
 }
