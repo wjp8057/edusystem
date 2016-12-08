@@ -138,6 +138,8 @@ class R32 extends  MyService {
         $amount=Db::table('r32')->where($condition)->count();
         $data['attendents']=$amount;
         Db::table('scheduleplan')->where($condition)->update($data);
+
+        Db::table('viewscheduletable')->where($condition)->update($data);
     }
     //检测是否已缴费 true 已缴纳，false  未缴纳
     private static function checkFee($studentno){
@@ -245,13 +247,22 @@ class R32 extends  MyService {
         $status=1;
         $year=$postData['year'];
         $term=$postData['term'];
-        $studentno=session('S_USER_NAME');
+        $reason="学生本人退课！";
+        if(session('S_LOGIN_TYPE')==2) {
+            $studentno = session('S_USER_NAME');
+            if(!QualityStudentDetail::isAllDone($year,$term,$studentno))
+                return ['info'=>$studentno.'尚未完成本学期学评教！','status'=>0];
+        }
+        else {
+            $studentno = $postData['studentno'];
+            if(!MyAccess::checkStudentSchool($studentno))
+                return ['info'=>'您无法修改其他学院学生'.$studentno.'的选课','status'=>"0"];
+            $reason="管理人员".session('S_REAL_NAME')."退课";
+        }
         //1、判断学生是否已经缴费
         if(!self::checkFee($studentno)){
-            return ['info'=>'您存在欠费，无法选课或退课！','status'=>0];
+            return ['info'=>$studentno.'存在欠费，无法选课或退课！','status'=>0];
         }
-        if(!QualityStudentDetail::isAllDone($year,$term,$studentno))
-            return ['info'=>'您尚未完成本学期学评教！','status'=>0];
         //选课
         if (isset($postData["inserted"])) {
             $updated = $postData["inserted"];
@@ -273,7 +284,7 @@ class R32 extends  MyService {
                     continue; //进入下一个课程。
                 }
                 //3、如果有人数上限，是否已经选满。
-                if($course['lock']==1&&$course['estimate']<$course['attendents'])
+                if($course['lock']==1&&$course['estimate']<=$course['attendents'])
                 {
                     $info.='失败，'.$courseno.'已达到人数上限！<br/>';
                     $status=0;
@@ -322,12 +333,14 @@ class R32 extends  MyService {
                 $condition['studentno'] = $studentno;
                 $condition['courseno'] = substr($courseno, 0, 7);
                 $condition['[group]'] = substr($courseno, 7, 2);
-                R32Dump::toDump($year,$term,$courseno,$studentno,'学生本人退课！');
+                R32Dump::toDump($year,$term,$courseno,$studentno,$reason);
                 $this->query->table('r32')->where($condition)->delete();
                 $info.=$courseno.'退课成功！</br>';
                 //更新课程人数
                 self::updateAttendent($year, $term, $courseno);
             }
+            $selective=new Selective();
+            $selective->update($year,$term,$studentno);
         }
         return ['info'=>$info,'status'=>$status];
     }
@@ -354,7 +367,6 @@ class R32 extends  MyService {
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-
     //选课管理中筛选名单与修改学生修课方式。
     public function update($postData){
         $info='';
@@ -408,6 +420,8 @@ class R32 extends  MyService {
                     R32Dump::toDump($year,$term,$courseno,$one->studentno,'课程限制，人数过多！');
                     $this->query->table('r32')->where($condition)->delete();
                     $deleteRow++;
+                    $selective=new Selective();
+                    $selective->update($year,$term,$one->studentno);
                 }
                 self::updateAttendent($year,$term,$courseno);
             }
@@ -450,6 +464,8 @@ class R32 extends  MyService {
                     $data['group']=substr($courseno,7,2);
                     $this->query->table('r32')->insert($data);
                     $insertRow++;
+                    $selective=new Selective();
+                    $selective->update($year,$term,$one->studentno);
                 }
                 self::updateAttendent($year,$term,$courseno);
             }
@@ -480,7 +496,8 @@ class R32 extends  MyService {
         $row=Db::execute($sql,$bind);
         return array('info'=>"统一选课完成，新增".$row."条记录",'status'=>"1");
     }
-    private function  getTypeName($type){
+    //获取
+    private static  function  getTypeName($type){
         switch($type){
             case 'M':
                 return '必';

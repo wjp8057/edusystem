@@ -75,7 +75,7 @@
         });
         function selectall(type){
             var row=checkSelectRow();
-            if(row!=null){
+            if(row!=null&&checkClassSchool(row)){
                 var effectRow={};
                 effectRow['year']=$('#year').val();
                 effectRow['term']=$('#term').val();
@@ -100,6 +100,14 @@
                 $.messager.alert('错误','请先选中一条记录','error');
                 return null;
             }
+        }
+        function checkClassSchool(row){
+            if(row.school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                $.messager.alert('错误','你无法为其他学院的班级（'+row.classname+'）选课！','error');
+                return false;
+            }
+            else
+                return true;
         }
     });
 </script>

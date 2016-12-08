@@ -58,13 +58,17 @@
                 ]
             ],
             columns: [[
+
                 {field: 'rem', title: '备注*', width: 100, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]'}}},
                 {field: 'classes', title: '班级', width: 120, align: 'center',rowspan:2},
+                {field: 'testtime', title: '考试时间', width: 150, align: 'center',rowspan:2},
                 {field: 'attendents', title: '人数', width: 35, align: 'center',rowspan:2},
                 {field: 'schoolname', title: '开课学院', width: 80, align: 'center',rowspan:2},
                 {field: 'studentschoolname', title: '学生学院', width: 85, align: 'center',rowspan:2}
             ],
-                []
+                [
+
+                ]
             ],
             //标题行右键菜单
             onHeaderContextMenu: function (e, field) {

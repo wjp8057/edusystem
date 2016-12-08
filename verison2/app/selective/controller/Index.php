@@ -66,7 +66,7 @@ class Index extends  Template{
         }
         return $this->fetch();
     }
-
+    //班级课表
     function classtable($year='', $term='',$who)
     {
         try {
@@ -86,6 +86,7 @@ class Index extends  Template{
         }
         return $this->fetch('all@index/timetable');
     }
+    //选课汇总表
     function selectedtable($year='', $term='',$who)
     {
         try {
@@ -104,5 +105,25 @@ class Index extends  Template{
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return $this->fetch('all@index/selectedtable');
+    }
+    //学生课表
+    function studenttable($year='', $term='',$who)
+    {
+        try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
+            $title['year'] = $year;
+            $title['term'] = $term;
+            $title['time'] = date("Y-m-d H:i:s");
+            $title['name'] = Item::getStudentItem($who)['name'];
+            $this->assign('title', $title);
+            $schedule = new Schedule();
+            $time = $schedule->getStudentTimeTable($year, $term, $who);
+            $this->assign('time', $time);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch('all@index/timetable');
     }
 }

@@ -1,19 +1,17 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
-        var stopTime=new Date('{$valid.stop}');
-        var startTime=new Date('{$valid.start}');
-        var nowTime=new Date('{$valid.now}');
-        var exit=$('#exit');
-        if(nowTime.getTime()>stopTime.getTime()||nowTime.getTime()<startTime.getTime()){
-            exit.linkbutton('disable');
-        }
+        var year= $('#year');
+        var term=$('#term');
+        year.val(getQueryString('year'));
+        term.val(getQueryString('term'));
         $('#dg').datagrid({
-            title:'本学期退课开放时间：{$valid.start} 至 {$valid.stop}',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/student/course/selected',toolbar:'#toolbar',
+            title:'',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/student/selected',toolbar:'#toolbar',
             queryParams: {
-                year: $('#year').val(),
-                term: $('#term').val()
+                year: year.val(),
+                term: term.val(),
+                studentno:getQueryString('studentno')
             },
             frozenColumns:[   [
                 {field: 'checkbox', title: '选中', checkbox: true},
@@ -56,7 +54,8 @@
             tt.datagrid('clearChecked');
             tt.datagrid('load', {
                 year: $('#year').val(),
-                term: $('#term').val()
+                term: $('#term').val(),
+                studentno:getQueryString('studentno')
             });
         });
         function buildDataArray(rows){
@@ -69,14 +68,9 @@
             }
             return updateRow;
         }
-        exit.click(function () {
-            if($("#exit").linkbutton('options').disabled) {
-                $.messager.alert('错误','现在不能退课，本学期退改选时间：{$valid.start}至{$valid.stop}','error');
-                return;
-            } //如果禁用了，就直接退出。
+        $("#exit").click(function () {
             var tt = $('#dg');
             //获取更改的数据行内容
-
             var effectRow = {};
             var rows = tt.datagrid('getSelections');
             var length = rows.length;
@@ -86,7 +80,8 @@
                         effectRow["deleted"] = $.toJSON(buildDataArray(rows));
                         effectRow['year']=$('#year').val();
                         effectRow['term']=$('#term').val();
-                        $.post('{$ROOT}/student/course/update', effectRow, function (result) {
+                        effectRow['studentno']=getQueryString('studentno');
+                        $.post('{$ROOT}/selective/student/update', effectRow, function (result) {
                             if (result.status == 1) {
                                 tt.datagrid('clearSelections');
                                 tt.datagrid('clearChecked');
@@ -98,6 +93,7 @@
                         }, 'json');
                     }
                 });
+
             }
             else
                 $.messager.alert('提示','请先选择课程！', 'info');

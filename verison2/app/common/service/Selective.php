@@ -23,6 +23,8 @@ use think\Db;
  */
 class Selective extends MyService
 {
+
+    //更新创新技能获得情况表
     public function  update($year, $term, $studentno = '%')
     {
         $this->query->startTrans();
@@ -68,6 +70,35 @@ class Selective extends MyService
         }
         $this->query->commit();
         return ['status' => "1", 'info' => "更新成功"];
+    }
+
+    public function getList($page=1,$rows=20,$year,$term,$studentno='%',$name='%',$classno='%',$school=''){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['selective.year']=$year;
+        $condition['selective.term']=$term;
+        $subsql = Db::table('selective')
+            ->field('studentno,credit,amount,termcredit,termamount')
+            ->where($condition)->buildSql();
+        $condition=null;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($name!='%') $condition['students.name']=array('like',$name);
+        if($classno!='%') $condition['students.classno']=array('like',$classno);
+        if($school!='') $condition['classes.school']=$school;
+        $data=$this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools','schools.school=classes.school')
+            ->join($subsql.' t','t.studentno=students.studentno','left')
+            ->field('students.studentno,students.name,students.classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,credit,amount,termcredit,termamount')
+            ->page($page,$rows)
+            ->where($condition)
+            ->select();
+        $count= $this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
     }
 
 }

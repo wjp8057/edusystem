@@ -31,7 +31,7 @@ $(function(){
     <div class="title">{$course.year}学年第{$course.term}学期{$course.typename}考位表</div>
     <div class="course">课号：{$course.courseno} 课名：{$course.coursename} 开课学院：{$course.schoolname} 人数：{$course.attendents} <a id="nextpage" href="#">下一页>></a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>
-    <div class="course">考试时间：{$course.testtime} 考场:{$course.roomname} 监考教师：{$course.teachername} 班级：{$course.classes}  </div>
+    <div class="course">考试时间：{$course.testtime} 考场：{$course.roomname} 监考教师：{$course.teachername} 班级：{$course.classes}  </div>
     <table id="seat">
         <tr><td>学号</td><td>姓名</td><td>考位</td><td>学号</td><td>姓名</td><td>考位</td><td>学号</td><td>姓名</td><td>考位</td></tr>
         {$seat}

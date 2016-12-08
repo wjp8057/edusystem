@@ -221,4 +221,15 @@ class Item {
         }
         return $data;
     }
+    //获取学生个人信息
+    public static function getStudentItem($studentno,$alert=true){
+        $condition=null;
+        $condition['studentno']=$studentno;
+        $data=Db::table('students')->where($condition)->field('studentno,rtrim(name) name,classno')->find();
+        if(!is_array($data)) {
+            if($alert)
+                throw new Exception('studentno' . $studentno, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
 }
