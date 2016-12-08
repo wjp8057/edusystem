@@ -1,0 +1,45 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+$(function(){
+    $("#nextpage").click(function(){
+        var page=getQueryString('page');
+        if(page==null)
+            page=2;
+        location.href=getURLString()+"?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page;
+    });
+    $("#print").click(function(){
+        window.print();
+    });
+});
+
+</script>
+<style type="text/css">
+    body{font-size:10pt}
+    .title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}
+    .course{text-align: center;line-height:20px;height: 20px;}
+    #seat{width:100%;margin: 0 auto 5px;}
+    td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
+    table{border-collapse: collapse;border: none;}
+    #seat td{width:11%}
+    .tip ol li,.information ol{margin-left: 30px;}
+    @media print {
+        #nextpage,#print{display: none}
+        td{height:19px;line-height: 19px;}
+    }
+</style>
+<div class="container2">
+    <div class="title">{$course.year}学年第{$course.term}学期{$course.typename}考位表</div>
+    <div class="course">课号：{$course.courseno} 课名：{$course.coursename} 开课学院：{$course.schoolname} 人数：{$course.attendents} <a id="nextpage" href="#">下一页>></a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>
+    <div class="course">考试时间：{$course.testtime} 考场:{$course.roomname} 监考教师：{$course.teachername} 班级：{$course.classes}  </div>
+    <table id="seat">
+        <tr><td>学号</td><td>姓名</td><td>考位</td><td>学号</td><td>姓名</td><td>考位</td><td>学号</td><td>姓名</td><td>考位</td></tr>
+        {$seat}
+    </table>
+    <div class="tip">
+        <ol>说明：
+            <li>监考员请提前半个小时到达考场。</li>
+            <li>考生应按照本表安排参加考试。</li>
+        </ol>
+    </div>
+</div>

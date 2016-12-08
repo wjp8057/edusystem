@@ -59,7 +59,10 @@
                 {title: '考场2',colspan:4},
                 {field: 'rem', title: '备注', width: 120, align: 'center',rowspan:2}
             ],[
-                {field: 'roomno1', title: '房间', width: 70, align: 'center'},
+                {field: 'roomno1', title: '房间', width: 70, align: 'center',formatter:function(val,rec){
+                    if(val!=null)
+                        return "<a class='blue_link'href='javascript:print(\""+rec.courseno+"\")' >"+rec.roomno1+"</a>" ;
+                }},
                 {field: 'teachername1', title: '监考1', width: 45, align: 'center'},
                 {field: 'teachername2', title: '监考2', width: 45, align: 'center'},
                 {field: 'teachername3', title: '监考3', width: 45, align: 'center'},
@@ -119,7 +122,7 @@
         });
     });
     function print(item){
-        var url='/exam/index/roomtimetable?roomno='+item+'&year='+$("#year").val()+"&term="+$("#term").val();
+        var url='/exam/index/seat?courseno='+item+'&year='+$("#year").val()+"&term="+$("#term").val()+"&type="+type;
         window.open('{$ROOT}'+url);
     }
 </script>

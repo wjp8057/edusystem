@@ -48,7 +48,7 @@ class TestPlan extends MyService {
         return $result;
     }
 
-    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='',$teachername='%',$teacherno='%')
+    public function  getList($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='',$teachername='%',$teacherno='%',$courseno='%')
     {
         $result = ['total' => 0, 'rows' => []];
         $condition = null;
@@ -60,6 +60,7 @@ class TestPlan extends MyService {
         if($studentschool!='') $condition['testplan.studentschool'] = $studentschool;
         if($teachername!='%') $condition['teachername1|teachername2|teachername3|teachername4|teachername5|teachername6']=array('like',$teachername);
         if($teacherno!='%') $condition['teacherno1|teacherno2|teacherno3|teacherno4|teacherno5|teacherno6']=array('like',$teacherno);
+        if($courseno!='%') $condition['testplan.courseno'] = array('like',$courseno);
         $data = $this->query->table('testplan')
             ->join('testbatch', 'testbatch.flag=testplan.flag and testbatch.year=testplan.year and testplan.term=testbatch.term and testbatch.type=testplan.type')
             ->join('courses', 'courses.courseno=substring(testplan.courseno,1,7)')
