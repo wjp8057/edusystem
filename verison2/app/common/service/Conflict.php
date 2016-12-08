@@ -28,7 +28,7 @@ class Conflict extends MyService {
         $data = $this->query->table('conflict')->page($page, $rows)
             ->join('timesections','timesections.timebits=conflict.time','LEFT')
             ->join('whotype','whotype.who=conflict.type')
-            ->field('year,term,rtrim(conflict.who) who,conflict.type,rtrim(whotype.name) typename,day,time,rtrim(timesections.value) timename,week')
+            ->field('year,term,rtrim(conflict.who) who,conflict.type,rtrim(whotype.name) typename,day,time,rtrim(timesections.value) timename,week,rtrim(conflict.name) name')
             ->where($condition)->order('type,who')->select();
         $count = $this->query->table('conflict')->where($condition)->count();
         if (is_array($data) && count($data) > 0)
@@ -119,6 +119,25 @@ class Conflict extends MyService {
                 group by year,term,type,classno,day,time
                 having count(*)>1 and dbo.GROUP_AND(week)>0";
             $row+=Db::execute($sql,$bind);
+
+
+            $sql="update conflict
+                set name=classes.classname
+                from conflict inner join classes on classes.classno=conflict.who
+                where conflict.year=:year and conflict.term=:term and conflict.type='C'";
+            Db::execute($sql,$bind);
+
+            $sql="update conflict
+                set name=classrooms.jsn
+                from conflict inner join classrooms on classrooms.roomno=conflict.who
+                where conflict.year=:year and conflict.term=:term and conflict.type='R'";
+            Db::execute($sql,$bind);
+
+            $sql="update conflict
+                set name=teachers.name
+                from conflict inner join teachers on teachers.teacherno=conflict.who
+                where conflict.year=:year and conflict.term=:term and conflict.type='T'";
+            Db::execute($sql,$bind);
 
         }
         catch(\Exception $e){

@@ -41,13 +41,33 @@
                 $.messager.alert('错误','输入数据有误，请检查！','error');
             }
         });
+        $("#selectM").click(function() {
+            selectall('M');
+        });
+        $("#selectT").click(function() {
+            selectall('T');
+        });
+        function selectall(type){
+            var effectRow={};
+            effectRow['year']=$('#year').val();
+            effectRow['term']=$('#term').val();
+            effectRow['classno']=$('#classno').val();
+            effectRow['type']=type;
+            $.post('{$ROOT}/selective/setting/selectall',effectRow,function(result){
+                if (result.status==1){
+                    $.messager.alert('成功',result.info,'info');
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        }
     });
 </script>
 <style type="text/css">
     #toolbar{height: 80px;line-height: 80px;text-align: center}
 </style>
 <div class="container">
-    <div class="pagetitle">选课时间设置及课程表总表同步</div>
+    <div class="pagetitle">j基本设置</div>
     <form id="myForm">
         <table class="mytable" align="center" cellspacing="0" cellpadding="0">
             <tr>
@@ -62,16 +82,25 @@
                 <th><label for="stop">结束时间</label></th>
                 <td><input id="stop" /></td>
             </tr>
+            <tr>
+                <th><label for="classno">班号</label></th>
+                <td><input id="classno" class="easyui-validatebox" size="7" value="%"/></td>
+                <th></th>
+                <td></td>
+            </tr>
         </table>
     </form>
     <div id="toolbar">
         <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'"  id="syn">开始同步课程总表</a>
         <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存选课时间</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-caluate'" id="selectM">统一选必修课</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-pen'" id="selectT">统一选模块课</a>
     </div>
     <div class="space"></div>
     <div class="information">
         <ol>说明：
             <li>课程总表是为提高选课时的访问速度，将视图存储为实际表，因此在课程调整后，务必运行同步，保证学生选课时看到最新信息</li>
+            <li>统一选必修课和模块课时，需设置好班号，如给16级新生选课，将班号设置为"16%"</li>
         </ol>
     </div>
 </div>

@@ -1,0 +1,119 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+
+        $('#dg').datagrid({
+            title:'',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/student/query',
+            queryParams: {studentno:''},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'studentno',title:'学号',width:90,align:'center'},
+                {field:'name',title:'姓名',width:70,align:'center'},
+                {field:'sexname',title:'性别',width:40,align:'center'},
+                {field:'classno',title:'班号',width:60,align:'center'},
+                {field:'classname',title:'班级',width:160,align:'center'},
+                {field:'schoolname',title:'学院',width:130,align:'center'},
+                {field:'credit',title:'已选学分',width:130,align:'center'},
+                {field:'amount',title:'已选门数',width:130,align:'center'},
+                {field:'termcredit',title:'公选学分',width:130,align:'center'},
+                {field:'termamount',title:'公选门数',width:130,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+            onClickCell:function(index, field){
+                var tt= $('#dg');
+                tt.datagrid('startEditing',{index:index,field:field});
+                current_datagrid=tt;
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                classno: $('#classno').val(),
+                name: $('#name').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        //修改密码
+        $("#menu_changepassword,#changepassword").click(function(){
+            var row= $('#dg').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('错误','请先选择一个学生！','error');
+                return;
+            }
+            if(row.school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1') {
+                $.messager.alert('错误', '你无法修改其它学院学生的密码！（' + row.name + '）！', 'error');
+                return;
+            }
+            $.messager.prompt('修改', '请输入新密码:', function(password){
+                if (password){
+                    $.post('{$ROOT}/base/student/changepassword',{studentno:row.studentno,password:password},function(result){
+                        if (result.status==1){
+                            $.messager.alert('提示',result.info,'info');
+                        } else {
+                            $.messager.alert('错误',result.info,'error');
+                        }
+                    },'json');
+                }
+            });
+        });
+
+    });
+</script>
+<div class="container">
+
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_changepassword' data-options="iconCls:'icon icon-shield'">修改密码</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" size="2" value="{$YEARTERM.term}"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school" size="15">
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-shield',plain:'true'" id="changepassword">修改密码</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>导出数据分为基础数据与详细数据两种，基础数据为表格中列举的内容，详细数据包含身份证、联系电话、家庭住址等重要信息，仅学籍相关管理人员能够导出。</li>
+        </ol>
+    </div>
+</div>

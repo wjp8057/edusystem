@@ -12,10 +12,11 @@
             columns:[[
                 {field:'year',title:'学年',width:50,align:'center'},
                 {field:'term',title:'学期',width:50,align:'center'},
-                {field:'who',title:'班号/教室号/教师号',width:120,align:'center',formatter:function(val,rec){
+                {field:'typename',title:'类型',width:50,align:'center'},
+                {field:'who',title:'代码',width:120,align:'center',formatter:function(val,rec){
                     return "<a class='blue_link'href='javascript:timetable(\""+rec.type+"\",\""+rec.who+"\")' >"+rec.who+"</a>" ;
                 }},
-                {field:'typename',title:'类型',width:50,align:'center'},
+                {field:'name',title:'名称',width:180,align:'center'},
                 {field:'day',title:'星期',width:70,align:'center'},
                 {field:'week',title:'周次',width:180,align:'center', formatter:function(value,rec){
                     var string=parseInt(value).toString(2);

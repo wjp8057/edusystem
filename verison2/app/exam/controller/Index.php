@@ -71,7 +71,7 @@ class Index extends Template
             $title['year'] = $year;
             $title['term'] = $term;
             $title['time'] = date("Y-m-d H:i:s");
-            $title['roomname']=Item::getRoomItem($roomno)['name'];
+            $title['name']=Item::getRoomItem($roomno)['name'];
             $this->assign('title', $title);
             $schedule = new Schedule();
             $time = $schedule->getRoomTimeTable($year, $term, $roomno);
@@ -80,7 +80,7 @@ class Index extends Template
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
-        return $this->fetch();
+        return $this->fetch('all@index/timetable');
 
     }
 }

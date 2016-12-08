@@ -1,0 +1,131 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+        $('#dg').datagrid({
+            title:'',idField:'classno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/classes/query',singleSelect:true,
+            queryParams: {classno:''},
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'classno',title:'班号',width:90,align:'center'},
+                {field:'classname',title:'班级名称',width:150,align:'center'},
+                {field:'schoolname',title:'学院',width:120,align:'center'},
+                {field:'students',title:'预计人数',width:60,align:'center'},
+                {field:'amount',title:'实际人数',width:60,align:'center'},
+                {field:'year',title:'入校时间',width:100,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                classno: $('#classno').val(),
+                classname: $('#classname').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        $("#menu_timetable,#timetable").click(function() {
+            var row=checkSelectRow();
+            if(row!=null){
+                parent.menuTabs.addTab("班级课表","{$ROOT}/selective/index/classtable?year="+$('#year').val()+"&term="+$('#term').val()+"&who="+row.classno,"icon icon-print");
+            }
+        });
+        $("#menu_selectedtable,#selectedtable").click(function() {
+            var row=checkSelectRow();
+            if(row!=null){
+                parent.menuTabs.addTab("选课汇总表","{$ROOT}/selective/index/selectedtable?year="+$('#year').val()+"&term="+$('#term').val()+"&who="+row.classno,"icon icon-print");
+            }
+        });
+        $("#selectM").click(function() {
+            selectall('M');
+        });
+        $("#selectT").click(function() {
+            selectall('T');
+        });
+        function selectall(type){
+            var row=checkSelectRow();
+            if(row!=null){
+                var effectRow={};
+                effectRow['year']=$('#year').val();
+                effectRow['term']=$('#term').val();
+                effectRow['classno']=row.classno;
+                effectRow['type']=type;
+                $.post('{$ROOT}/selective/classes/selectall',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert('成功',result.info,'info');
+                    } else {
+                        $.messager.alert('错误',result.info,'error');
+                    }
+                },'json');
+            }
+        }
+        function checkSelectRow(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                return row;
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error');
+                return null;
+            }
+        }
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_timetable' data-options="iconCls:'icon icon-print'">班级课表</div>
+        <div id='menu_selectedtable' data-options="iconCls:'icon icon-print'">选课汇总表</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" size="2" value="{$YEARTERM.term}"/>
+        <label for="classno">班号：</label><input id="classno" size="6" value="%"/>
+        <label for="classname">班名：</label><input id="classname"  size="9" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school" size="15">
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">班级课表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="selectedtable">选课汇总表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-tip',plain:'true'" id="selectM">统一选必修课</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-work',plain:'true'" id="selectT">统一选模块课</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>班号设置后无法更改！</li>
+        </ol>
+    </div>
+</div>

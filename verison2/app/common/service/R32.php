@@ -465,4 +465,83 @@ class R32 extends  MyService {
         }
         return ['info'=>$info,'status'=>$status];
     }
+        //   按班级统一选必修课，模块课
+    public static  function selectAll($year,$term,$classno,$type){
+         MyAccess::checkAccess('E');
+        $bind=["year"=>$year,"term"=>$term,'classno'=>$classno,'type'=>$type];
+        //完全重复
+        $sql="insert into r32(year,term,courseno,[group],studentno,inprogram,coursetype,examtype)
+            select year,term,courseno,[group],studentno ,1,coursetype,examtype
+            from courseplan
+            inner join students on students.classno=courseplan.classno
+             where year=:year and term=:term and courseplan.classno like :classno and coursetype=:type
+            and  not exists (select * from r32 where r32.year=courseplan.year and r32.term=courseplan.term
+             and r32.courseno+r32.[group]=courseplan.courseno+courseplan.[group]  and r32.studentno=students.studentno)";
+        $row=Db::execute($sql,$bind);
+        return array('info'=>"统一选课完成，新增".$row."条记录",'status'=>"1");
+    }
+    private function  getTypeName($type){
+        switch($type){
+            case 'M':
+                return '必';
+            case 'T':
+                return '模';
+            case  'E':
+                return '选';
+            default:
+                return '选';
+        }
+    }
+    //班级选课汇总表
+    public function selectedTable($year,$term,$classno){
+        $condition=null;
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $condition['students.classno']=$classno;
+        $course=$this->query->table('r32')
+            ->join('students','students.studentno=r32.studentno')
+            ->join('courses','courses.courseno=r32.courseno')
+            ->field('distinct rtrim(coursename) coursename')
+            ->where($condition)
+            ->order('coursename')
+            ->select();
+        $cAmount=count($course);
+        $selective=$this->query->table('r32')
+            ->join('students','students.studentno=r32.studentno')
+            ->join('courses','courses.courseno=r32.courseno')
+            ->field('rtrim(r32.studentno) studentno,rtrim(students.name) studentname,rtrim(coursename) coursename,coursetype')
+            ->where($condition)
+            ->order('studentno,coursename')
+            ->select();
+        $sAmount=count($selective);
+        $content="<tr><td class='studentno'>学号</td><td class='studentname'>姓名</td>";
+        for($i=0;$i<$cAmount;$i++)
+            $content.="<td class='coursename'>".htmlspecialchars($course[$i]["coursename"])."</td>";
+        $content.="</tr>";
+        $lastStudent="";
+        $i=0;
+        for($j=0;$j<$sAmount;$j++){
+            if($lastStudent!=$selective[$j]['studentno'])
+            {
+                if($lastStudent!="")
+                    $content.="</tr>";
+                $lastStudent=$selective[$j]['studentno'];
+                $content.="<tr><td>".htmlspecialchars($selective[$j]["studentno"])."</td><td>".htmlspecialchars($selective[$j]["studentname"])."</td>";
+                $i=0;
+            }
+            $type="";
+            for($v=$i;$v<$cAmount;$v++){
+                if($selective[$j]["coursename"]==$course[$v]["coursename"]) {
+                    $i=$v+1;
+                    $content.="<td>".self::getTypeName($selective[$j]["coursetype"])."</td>";
+                    break;
+                }
+                else
+                    $content.="<td>&nbsp;</td>";
+            }
+        }
+        $content.="</tr>";
+        return  $content;
+    }
+
 }

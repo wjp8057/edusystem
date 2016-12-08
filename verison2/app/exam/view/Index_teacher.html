@@ -2,7 +2,7 @@
 <script type="text/javascript">
     var type='{$type.type}';
     var typename='{$type.typename}';
-    $(function () {
+    $(function(){
         var flag = $('#flag');
         flag.combobox({
             url: '{$ROOT}/all/option/testbatch?only=0&year={$YEARTERM.year}&term={$YEARTERM.term}&type='+type,
@@ -32,40 +32,39 @@
             textField: 'name'
         });
         $('#dg').datagrid({
-            title: '考试课程列表',
-            idField: 'id',
-            striped: 'true',
-            pagination: 'true',
-            singleSelect:'true',
-            rownumbers: 'true',
-            pageSize:20,
-            url: '{$ROOT}/exam/teacher/courselist',
+            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url: '{$ROOT}/exam/teacher/courselist',singleSelect:true,
             queryParams: {
                 year:$("#year").val(),
                 term:$('#term').val(),
-                type:type
-            },
-            toolbar: '#toolbar',
-            pageList: [20,40,60,100],
+                type:type},
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            frozenColumns:[
+                [
+                    {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2},
+                    {field: 'coursename', title: '课名', width: 120, align: 'center',rowspan:2},
+                    {title: '考场1',colspan:4},
+                    {title: '考场2',colspan:4}
+
+                ],[
+                    {field: 'roomno1', title: '房间', width: 70, align: 'center'},
+                    {field: 'teachername1', title: '监考1', width: 45, align: 'center'},
+                    {field: 'teachername2', title: '监考2', width: 45, align: 'center'},
+                    {field: 'teachername3', title: '监考3', width: 45, align: 'center'},
+                    {field: 'roomno2', title: '房间', width: 70, align: 'center'},
+                    {field: 'teachername4', title: '监考1', width: 45, align: 'center'},
+                    {field: 'teachername5', title: '监考2', width: 45, align: 'center'},
+                    {field: 'teachername6', title: '监考3', width: 45, align: 'center'}
+                ]
+            ],
             columns: [[
-                {field: 'courseno', title: '课号', width: 60, align: 'center',rowspan:2},
-                {field: 'coursename', title: '课名', width: 120, align: 'center',rowspan:2},
+                {field: 'rem', title: '备注*', width: 100, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]'}}},
+                {field: 'classes', title: '班级', width: 120, align: 'center',rowspan:2},
                 {field: 'attendents', title: '人数', width: 35, align: 'center',rowspan:2},
                 {field: 'schoolname', title: '开课学院', width: 80, align: 'center',rowspan:2},
-                {field: 'studentschoolname', title: '学生学院', width: 85, align: 'center',rowspan:2},
-                {title: '考场1',colspan:4},
-                {title: '考场2',colspan:4}
-
-            ],[
-                {field: 'roomno1', title: '房间', width: 70, align: 'center'},
-                {field: 'teachername1', title: '监考1', width: 45, align: 'center'},
-                {field: 'teachername2', title: '监考2', width: 45, align: 'center'},
-                {field: 'teachername3', title: '监考3', width: 45, align: 'center'},
-                {field: 'roomno2', title: '房间', width: 70, align: 'center'},
-                {field: 'teachername4', title: '监考1', width: 45, align: 'center'},
-                {field: 'teachername5', title: '监考2', width: 45, align: 'center'},
-                {field: 'teachername6', title: '监考3', width: 45, align: 'center'}
-            ]
+                {field: 'studentschoolname', title: '学生学院', width: 85, align: 'center',rowspan:2}
+            ],
+                []
             ],
             //标题行右键菜单
             onHeaderContextMenu: function (e, field) {
@@ -76,6 +75,12 @@
                     left: e.pageX,
                     top: e.pageY
                 });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
             }
         });
         $("#search").click(function () {
@@ -128,6 +133,60 @@
                     top: e.pageY
                 });
             }
+        });
+        function checkCourseSchool(rows){
+            var count=rows.length;
+            for(var i=0;i<count;i++){ //教师所在学院不是本学院的，且登录账户不在职能部门不允许修改。
+                if(rows[i].school!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                    $.messager.alert('错误','你无法修改其他学院的课程信息（'+rows[i].coursename+'）！','error');
+                    $("#cancel").click();
+                    return false;
+                }
+            }
+            return true;
+        }
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id=rows[i].id;
+                updateObj.courseno=rows[i].courseno;
+                updateObj.rem = rows[i].rem;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows=tt.datagrid('getRows');
+            rows=tt.datagrid('getChanges','updated');
+            if(!checkCourseSchool(rows)) return;
+            var count=0;
+            var effectRow ={};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(buildDataArray(rows));
+            }
+            if(count<=0){ //如果没有任何更新，就退出
+                $.messager.alert('提示','没有数据需要保存！','info');
+                return;
+            }
+            $.post('{$ROOT}/exam/teacher/updaterem',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
         });
         function selectCheck(row,row2){
             if (!row||!row2) { //如果没有任何更新，就退出
@@ -188,7 +247,6 @@
                 }
             }, 'json');
         }
-
         $("#setteacher1,#menu_setteacher1").click(function () {
             var tt=$('#dg');
             var row=tt.datagrid('getSelected');
@@ -343,10 +401,11 @@
         <div id="toolbar">
             <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
-            <label for="courseschool">开课学院：</label><input id="courseschool" size="18" />
-            <label for="studentschool">学生学院：</label><input id="studentschool" size="18" />
+            <label for="courseschool">开课学院：</label><input id="courseschool" size="16" />
+            <label for="studentschool">学生学院：</label><input id="studentschool" size="16" />
             <label for="flag">场次：</label><input id="flag" size="24">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存备注</a>
         </div>
         <table id="dg"></table>
     </div>
@@ -372,7 +431,7 @@
     <div class="space"></div>
     <div class="information" style="clear:both">
         <ol>说明：
-
+            <li>学位课、一页开卷等情况请各学院自行设置备注！</li>
         </ol>
     </div>
 </div>

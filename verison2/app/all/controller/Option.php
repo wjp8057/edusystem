@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 
 namespace app\all\controller;
+use app\common\service\R32;
 use app\common\vendor\Captcha;
 use app\common\access\MyAccess;
 use think\Controller;
@@ -511,7 +512,8 @@ class Option {
      * 测试专用
      */
     public function test(){
-       return \app\common\vendor\Captcha::validimg();
+       $obj=new R32();
+        echo $obj->selectedTable('2016','1','1530104');
 
     }
 }

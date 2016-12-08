@@ -16,6 +16,7 @@ namespace app\selective\controller;
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\R32;
 use app\common\service\SchedulePlan;
 use app\common\service\Student;
 use app\common\service\Valid;
@@ -23,6 +24,17 @@ use app\common\service\ViewScheduleTable;
 
 class Setting extends MyController
 {
+    //统一选必修课模块课
+    public function selectall($year,$term,$classno,$type)
+    {
+        $result=null;
+        try {
+            $result = R32::selectAll($year,$term,$classno,$type);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     public function  courselist($page = 1, $rows = 20, $year, $term, $courseno = '%', $coursename = '%', $classno = '%', $school = '', $halflock = '', $lock = '')
     {
         $result = null;
