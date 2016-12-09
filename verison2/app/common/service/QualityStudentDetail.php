@@ -75,9 +75,9 @@ class QualityStudentDetail extends MyService{
             ->join('teachers','teachers.teacherno=qualitystudent.teacherno')
             ->join('qualitystudenttype','qualitystudenttype.type=qualitystudent.type')
             ->where($condition)
-            ->field('qualitystudentdetail.id,qualitystudent.courseno,rtrim(coursename) coursename,one,two,three,four,qualitystudentdetail.total,
+            ->field('qualitystudentdetail.id,rank,qualitystudent.courseno,rtrim(coursename) coursename,one,two,three,four,qualitystudentdetail.total,
             done,rtrim(teachers.name) teachername,rtrim(qualitystudenttype.name) typename,qualitystudent.type')
-            ->order('courseno')->select();
+            ->order('rank,courseno')->select();
         $count= $this->query->table('qualitystudentdetail')
             ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
@@ -88,7 +88,8 @@ class QualityStudentDetail extends MyService{
     public static function getNextID($year,$term,$id,$studentno){
         $bind=['year'=>$year,'term'=>$term,'id'=>$id,'studentno'=>$studentno];
         $sql="select top 1 id from qualitystudentdetail as q1
-            where q1.year=:year and q1.term=:term and enabled=1 and studentno=:studentno and id!=:id and done=0";
+            where q1.year=:year and q1.term=:term and enabled=1 and studentno=:studentno and id!=:id and done=0
+            order by rank";
         $result=Db::query($sql,$bind);
         if(count($result)!=0)
             return $result[0]['id'];

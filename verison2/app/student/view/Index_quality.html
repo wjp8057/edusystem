@@ -15,10 +15,11 @@
                 term: $('#term').val()
             },
             columns:[[
-                {field:'done',title:'完成',width:80,align:'center',
+                {field:'rank',title:'排序*',width:50,align:'center',editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field:'done',title:'完成',width:50,align:'center',
                     formatter:function(val,rec){if(val==1)return '√';}},
                 {field:'courseno',title:'课号',width:80,align:'center'},
-                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'coursename',title:'课名',width:230,align:'center'},
                 {field:'typename',title:'类型',width:100,align:'center'},
                 {field:'teachername',title:'任课教师',width:150,align:'center'},
                 {field:'total',title:'总分',width:100,align:'center'}
@@ -32,6 +33,12 @@
                     left: e.pageX,
                     top: e.pageY
                 });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
             }
         });
         $("#search").click(function() {
@@ -84,6 +91,7 @@
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索&刷新得分</a> |
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存排序</a>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-work',plain:'true'" id="start">开始给老师评分</a>
     </div>
     <div class="center">
