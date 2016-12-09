@@ -62,7 +62,7 @@ class Course extends MyController {
         }
     }
     //被筛选记录
-    public function filter($page=1,$rows=20,$year='',$term=''){
+    public function filter($page=1,$rows=20,$year,$term){
         try {
             $studentno=session('S_USER_NAME');
             $obj=new R32Dump();

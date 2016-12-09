@@ -175,8 +175,6 @@ class SchedulePlan extends MyService {
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
-
     //修改预计人数
     public function updateEstimate($postData){
         $updateRow=0;
@@ -215,5 +213,46 @@ class SchedulePlan extends MyService {
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;
+    }
+    //停开课程
+    public function stop($year,$term,$courseno,$recno){
+       if(!MyAccess::checkCourseSchool($courseno))
+           return ["info"=>"您无法停开其他学院的课程","status"=>0];
+
+        $this->query->startTrans();
+        try {
+            //删除开课计划courseplan
+            $condition=null;
+            $condition['year']=$year;
+            $condition['term']=$term;
+            $condition['courseno+[group]']=$courseno;
+            $this->query->table('courseplan')->where($condition)->delete();
+            //删除排课计划scheduleplan
+            $condition=null;
+            $condition['recno']=$recno;
+            $this->query->table('scheduleplan')->where($condition)->delete();
+            //删除教师安排teacherplan
+            $condition=null;
+            $condition['map']=$recno;
+            $this->query->table('teacherplan')->where($condition)->delete();
+            //删除排课表schedule
+            $condition=null;
+            $condition['year']=$year;
+            $condition['term']=$term;
+            $condition['courseno+[group]']=$courseno;
+            $this->query->table('schedule')->where($condition)->delete();
+            //删除选课记录R32
+            $condition=null;
+            $condition['year']=$year;
+            $condition['term']=$term;
+            $condition['courseno+[group]']=$courseno;
+            $this->query->table('r32')->where($condition)->delete();
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        return array('info'=>$courseno."停开成功",'status'=>"1");
     }
 }

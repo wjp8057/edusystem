@@ -121,11 +121,36 @@
         $("#syn").click(function() {
             $.post('{$ROOT}/selective/manage/syncourse',{year:$("#year").val(),term:$("#term").val()},function(result){
                 if (result.status==1){
+                    $('#dg').datagrid('reload');
                     $.messager.alert('成功',result.info,'info');
                 } else {
                     $.messager.alert('错误',result.info,'error');
                 }
             },'json');
+        });
+
+        $("#stop").click(function() {
+            var row= $('#dg').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('错误','请先选择一个课程！','error');
+                return;
+            }
+            $.messager.confirm('警告', '停开课程将删除该课程开课记录、选课记录、排课记录，确定停开么?', function(r) {
+                if (r) {
+                    $.messager.confirm('再次警告', '停开课程将删除该课程开课记录、选课记录、排课记录，确定停开么?', function(r) {
+                        if (r) {
+                            $.post('{$ROOT}/selective/manage/stop',{year:$("#year").val(),term:$("#term").val(),courseno:row.courseno,recno:row.recno},function(result){
+                                if (result.status==1){
+                                    $('#dg').datagrid('reload');
+                                    $.messager.alert('成功',result.info,'info');
+                                } else {
+                                    $.messager.alert('错误',result.info,'error');
+                                }
+                            },'json');
+                        }
+                    });
+                }
+            });
         });
     });
 </script>
@@ -159,6 +184,7 @@
     <div class="information">
         <ol>说明：
             <li>开课学院可以修改本学院课程的预计人数。</li>
+            <li>课程停开只能由教务处排课管理人员才能操作。</li>
         </ol>
     </div>
 </div>

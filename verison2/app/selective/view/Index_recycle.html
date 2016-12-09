@@ -1,0 +1,112 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/recycle/query',
+            queryParams: {
+                year:$('#year').val(),
+                term:$('#term').val(),
+                studentno:''
+            },
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'checkbox',title:'选中',checkbox:true},
+                {field:'courseno',title:'课号',width:70,align:'center'},
+                {field:'coursename',title:'课名',width:140,align:'center'},
+                {field:'studentno',title:'学号',width:65,align:'center'},
+                {field:'studentname',title:'姓名',width:60,align:'center'},
+                {field:'classno',title:'班号',width:50,align:'center'},
+                {field:'classname',title:'班级',width:160,align:'center'},
+                {field:'credits',title:'学分',width:40,align:'center'},
+                {field:'coursetypename',title:'类型',width:40,align:'center'},
+                {field:'examtypename',title:'考核',width:40,align:'center'},
+                {field:'selecttime',title:'选课时间',width:120,align:'center'},
+                {field:'date',title:'删除时间',width:120,align:'center'},
+                {field:'reason',title:'原因',width:130,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                year:$('#year').val(),
+                term:$('#term').val(),
+                studentno: $('#studentno').val(),
+                courseno: $('#courseno').val()
+            });
+        });
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno = rows[i].recno;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#menu_rescue,#rescue").click(function() {
+            var tt=$('#dg');
+            var rows=tt.datagrid('getSelections');
+            var effectRow = {};
+            if(rows.length>0) {
+                effectRow["inserted"] = $.toJSON(buildDataArray(rows));
+                $.post('{$ROOT}/selective/recycle/recover',effectRow, function (result) {
+                    if (result.status == 1) {
+                        tt.datagrid('clearSelections');
+                        tt.datagrid('clearChecked');
+                        tt.datagrid('reload');
+                        $.messager.alert('提示', result.info, 'info');
+                    } else {
+                        $.messager.alert('错误', result.info, 'error');
+                    }
+                }, 'json');
+            }
+            else
+                $.messager.alert('提示','至少选中一条记录！', 'info');
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_rescue' data-options="iconCls:'icon icon-print'">恢复选课记录</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" size="2" value="{$YEARTERM.term}"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="9" value="%"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-rescue',plain:'true'" id="rescue">恢复选课记录</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+<           li>如果学生已经选了其他前七位课号相同的课程，会恢复失败！</li>
+        </ol>
+    </div>
+</div>

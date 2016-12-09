@@ -173,6 +173,7 @@ class Index extends Template
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
     }
+    //我要选课
     function courseselect()
     {
         try {
@@ -184,6 +185,7 @@ class Index extends Template
         }
         return $this->fetch();
     }
+    //我的已选课程
     function mycourse()
     {
         try {
@@ -194,5 +196,24 @@ class Index extends Template
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return $this->fetch();
+    }
+    //教室课表
+    function roomtable($year = '', $term = '', $who)
+    {
+        try {
+            $year=$year==''?get_year_term()['year']:$year;
+            $term=$term==''?get_year_term()['term']:$term;
+            $title['year'] = $year;
+            $title['term'] = $term;
+            $title['time'] = date("Y-m-d H:i:s");
+            $title['name'] = Item::getRoomItem($who)['name'];
+            $this->assign('title', $title);
+            $schedule = new Schedule();
+            $time = $schedule->getRoomTimeTable($year, $term, $who, true);
+            $this->assign('time', $time);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch('all@index/timetableall');
     }
 }

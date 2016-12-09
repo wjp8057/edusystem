@@ -211,7 +211,7 @@ class Classroom extends MyService {
             ->join('areas ',' areas.name=classrooms.area')
             ->join($subsql.'  t ',' t.who=classrooms.roomno','LEFT')
             ->page($page,$rows)
-            ->field("roomno,area,rtrim(areas.value) areaname,rtrim(building) building,rtrim(no) no,rtrim(jsn) name,seats,testers,equipment,
+            ->field("roomno,area,rtrim(areas.value) areaname,rtrim(building) building,rtrim(no) no,rtrim(jsn) roomname,seats,testers,equipment,
             rtrim(roomoptions.value) equipmentname,isnull(mon,0) mon,isnull(tue,0) tue,isnull(wes,0) wes,isnull(thu,0) thu,isnull(fri,0) fri,
             isnull(sat,0) sat,isnull(sun,0) sun")
             ->where($condition)->where($section)->order('roomno')->select();

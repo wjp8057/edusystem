@@ -65,7 +65,7 @@
 
         $('#dg').datagrid({
             title:'',idField:'roomno', striped:'true',pagination:'true',rownumbers:false,pageSize:20,
-            url:'{$ROOT}/base/room/roomusagelist',
+            url:'{$ROOT}/student/resource/room',
             queryParams: {area:area.combobox('getValue') ,year:$('#year').val(),term:$('#term').val()},
             singleSelect:true,
             toolbar:'#toolbar',pageList:[20,50,100,200],
@@ -317,36 +317,7 @@
             var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {
-               print(row.roomno,false);
-            }
-            else{
-                $.messager.alert('错误','请先选中一条记录','error')
-            }
-        });
-        $("#printall,#menu_printall").click(function() {
-            var tt=$('#dg');
-            var row = tt.datagrid('getSelected');
-            if (row) {
                 print(row.roomno,true);
-            }
-            else{
-                $.messager.alert('错误','请先选中一条记录','error')
-            }
-        });
-        $("#refresh").click(function(){
-            $.post('{$ROOT}/base/room/refresh',{year:$("#year").val(),term:$("#term").val()},function(result){
-                if (result.status==1){
-                    $.messager.alert('成功',result.info,'info');
-                } else {
-                    $.messager.alert('错误',result.info,'error');
-                }
-            },'json');
-        });
-        $("#reserve,#menu_reserve").click(function(){
-            var tt=$('#dg');
-            var row = tt.datagrid('getSelected');
-            if (row) {
-                parent.menuTabs.addTab("借用教室申请","{$ROOT}/base/index/roomreserveapply?roomno="+row.roomno,"icon icon-schedule");
             }
             else{
                 $.messager.alert('错误','请先选中一条记录','error')
@@ -356,17 +327,13 @@
 
     });
     function print(roomno,all){
-        var url='/base/index/roomtimetable?';
-        if(all)
-            url='/base/index/roomtimetableall?';
+        var url='/student/index/roomtable?';
         window.open('{$ROOT}'+url+'year='+$("#year").val()+"&term="+$("#term").val()+"&who="+roomno);
     }
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div data-options="iconCls:'icon icon-schedule'" id="menu_reserve" >借用教室</div>
-        <div data-options="iconCls:'icon icon-print'" id="menu_print" >打印课表</div>
-        <div data-options="iconCls:'icon icon-print'" id="menu_printall" >打印课表(含借用)</div>
+        <div data-options="iconCls:'icon icon-print'" id="menu_print" >查看课表</div>
     </div>
     <div id="toolbar">
         <div>
@@ -377,18 +344,15 @@
             <label for="name">名称：</label><input id="name" class="easyui-validatebox" size="8" value="%"/>
             <label for="area">校区：</label><input id="area" size="15">
             <label for="equipment">设施：</label><input id="equipment" size="15">
-            <label for="school">优先学院：</label><input id="school" size="15">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-schedule',plain:'true'" id="reserve">借用选定教室</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="print">打印课表</a>
-        </div>
-        <span id="toolbar_hide">
-            <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
-            <label for="weekday">空闲日期：</label><input id="weekday" size="8">
+            <label for="weekday">空闲日期：</label><input id="weekday" size="7">
             <label for="oew">单双周：</label><input id="oew" size="5">
             <label for="time">节次：</label><input id="time" size="12">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-reload',plain:'true'" id="refresh">刷新教室资源时间表</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="printall">打印课表(含借用)</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索教室</a> |
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="print">查看课表</a>
+        </div>
+        <span id="toolbar_hide">
+            <label for="school">优先学院：</label><input id="school" size="15">
+            <label for="seatmin">座位数：</label><input id="seatmin" class="easyui-validatebox" size="1" value="0"/> - <input id="seatmax" class="easyui-validatebox" size="1" value="1000"/>
         </span>
     </div>
     <table id="dg"></table>

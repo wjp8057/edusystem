@@ -119,4 +119,14 @@ class Manage extends MyController {
         return json($result);
     }
 
+    public function stop($year,$term,$courseno,$recno){
+        $result=null;
+        try {
+            $obj=new SchedulePlan();
+            $result = $obj->stop($year,$term,$courseno,$recno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
 } 
