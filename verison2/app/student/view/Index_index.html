@@ -1,10 +1,11 @@
 <layout name="all@index/indexlayout" />
 <body class="easyui-layout"   fit="true"   scroll="no" >
+
 <script type="text/javascript">
     var menuTabs = null;
     $(function() {
         _menus = eval('(' + '{$menu}' + ')');
-        menuTabs = $("#west").cwebsFrame(_menus, "功能介绍");
+        menuTabs = $("#west").cwebsFrame(_menus, "欢迎");
 
         $('#loading-mask').fadeOut(); //关闭遮罩
         //绑定退出事件
@@ -31,9 +32,25 @@
     });
 
 </script>
+
 <noscript>
     抱歉，请开启脚本支持！
 </noscript>
+<style type="text/css" scoped="">
+    #notice h2,#select h2{
+        text-align: center;
+        line-height:50px;
+        font-size: 18px;
+        padding-top:30px;
+        color:blue;
+    }
+    #notice p,#select p{
+        line-height: 25px;
+        padding: 0 30px;
+        font-size: 16px;
+        text-indent: 2em;;
+    }
+</style>
 <!-- 正在加载窗口 -->
 <div id="loading-mask" >
     <div id="pageloading">
@@ -54,8 +71,28 @@
 <!-- 初始内容页 -->
 <div data-options="region:'center',border:'false'" style="overflow: hidden" scroll="no">
     <div class="easyui-tabs" name="__mainTabs__"  fit="true" border="false" style="overflow: hidden" scroll="no" >
-        <div class="welcome">
-             欢迎使用教务管理系统
+        <div>
+            <div id="notice">
+                <h2>公告栏</h2>
+                <p>教务管理系统全新改版，优化了操作界面，增加了"学业预警"、“学期积点”、“有空教室”、“联系老师”等功能，欢迎大家使用。如果你有好的意见或建议，可以发送邮件到fangrenfu@nbcc.cn向我反馈。</p>
+            </div>
+            <div id="select">
+                <h2>2016学年第2学期选课须知</h2>
+                <p>1、选课时间：2016年12月20日（周二）—23日(周五)，[溪口校区：2016年12月22日（周四）—23日（周五）]</p>
+                <p>2、退改选时间：2017年1月4日（周三）—6日（周五）</p>
+                <p>3、选课流程：</p>
+                <p>3.1 选前评教。你需要给本学期的每一位老师打分，从本学期开始打分前不再需要排序，每位老师的打分必须不同。如果出现相同打分，会出现错误提示并无法保存。
+                    打分完成的课程条目的“完成”列会显示“√”，你可能需要点击“检索&刷新得分”获得最新打分情况。</p>
+                <p>3.2 选必修课和模块课。必修课（不包括体育健康、大学体育）与模块课已由系统统一选课，体育健康、大学体育课程以选项的形式进行，学生选体育课程，应对照《体育课程分项目列表》进行选课。
+                    16级三年制《应用英语》课程采用分类教学教学，学生在选课时应根据自己的英语水平和发展方向，对照《应用英语分类教学课程列表》和《应用英语分类教学课程说明》进行选课，其中《应用基础英语（2）》是针对未通过英语B级的学生。</p>
+                <p>3.3 选专业选修课与公选课。 在“我要选课”页面，检索课号条件为“08%”（校内公选课）、“088%（网络视频课程）”,可以检索出所有的公共选修课，对照自己的课表，选择没有时间冲突的课程。
+                    部分公选课有对选课学生的限制要求，请仔细阅读课程后面备注栏中的说明。<span class="warn">特别注意公选课每人不能超过3门，否则会被删除所有公共选修课记录。</span>  </p>
+                <p>3.4 退课。如果课程误选、错选，可以进入“已选课程”页面进行退课，在相应课程前打勾以后，点击“退课”按钮。</p>
+                <p>4、注意事项：A、学生一定要保管好自己的密码，因密码泄露导致选课数据被他人修改，后果自负。
+                    B、选课系统在指定的最后时间关闭后，此时的选课数据为本人的最终选课结果，学生无法更改。
+                    C、学期结束前，网上公布的各课程上课时间一般不再变动，但上课地点可能会因人数变化而作调整，故请同学们于报到当天，在网上查看“我的周课表”，以防届时找不到教室。
+                    D、新学期的最终选课名单以开学初第三周时选课汇总表为准，请同学们查看“我的周课表”核查自己的选课，未经选课直接去上课的成绩作无效处理。选课后请对照班课表和我的周课表查看自己的选课情况</p>
+            </div>
         </div>
     </div>
 </div>
