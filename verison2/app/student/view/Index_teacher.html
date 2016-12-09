@@ -1,0 +1,36 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/student/resource/phone',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val()
+            },
+            columns:[[
+                {field:'courseno',title:'课号',width:90,align:'center'},
+                {field:'coursename',title:'课名',width:250,align:'center'},
+                {field:'teachername',title:'教师',width:70,align:'center'},
+                {field:'tel',title:'短号',width:90,align:'center'}
+            ]]
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val()
+            });
+        });
+
+    });
+</script>
+<div class="container">
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a>
+    </div>
+    <table id="dg"></table>
+</div>

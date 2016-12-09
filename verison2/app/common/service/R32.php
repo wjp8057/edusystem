@@ -241,7 +241,7 @@ class R32 extends  MyService {
         }
         return false;
     }
-    //学生自主选课
+    //以学生为主体选课
     public function selectByStudent($postData){
         $info='';
         $status=1;
@@ -310,7 +310,6 @@ class R32 extends  MyService {
             if(self::hasConflict($year,$term,$studentno))
             {
                 $info.='部分课程存在冲突！<br/>';
-                $status=0;
             }
         }
 

@@ -84,6 +84,7 @@ class Index extends Template
         }
         return $this->fetch('all@index/timetable');
     }
+    //打印座位表
     function seat($year, $term, $courseno,$type='A', $page = 1)
     {
         try {
@@ -126,5 +127,55 @@ class Index extends Template
         }
         return $this->fetch('seat');
 
+    }
+
+    //期初自动排考
+    public function startauto(){
+        $type=['type'=>'B','typename'=>TestCourse::getTypeName('B')];
+        $this->assign('type',$type);
+        return $this->fetch('auto');
+    }
+    //期初考场安排
+    public function startroom(){
+        $type=['type'=>'B','typename'=>TestCourse::getTypeName('B')];
+        $this->assign('type',$type);
+        return $this->fetch('room');
+    }
+    //期初监考安排
+    public function startteacher(){
+        $type=['type'=>'B','typename'=>TestCourse::getTypeName('B')];
+        $this->assign('type',$type);
+        return $this->fetch('teacher');
+    }
+    //期初结果查询
+    public function startquery(){
+        $type=['type'=>'B','typename'=>TestCourse::getTypeName('B')];
+        $this->assign('type',$type);
+        return $this->fetch('schedule');
+    }
+
+    //毕业自动排考
+    public function graduateauto(){
+        $type=['type'=>'C','typename'=>TestCourse::getTypeName('C')];
+        $this->assign('type',$type);
+        return $this->fetch('auto');
+    }
+    //毕业考场安排
+    public function graduateroom(){
+        $type=['type'=>'C','typename'=>TestCourse::getTypeName('C')];
+        $this->assign('type',$type);
+        return $this->fetch('room');
+    }
+    //毕业监考安排
+    public function graduateteacher(){
+        $type=['type'=>'C','typename'=>TestCourse::getTypeName('C')];
+        $this->assign('type',$type);
+        return $this->fetch('teacher');
+    }
+    //毕业结果查询
+    public function graduatequery(){
+        $type=['type'=>'C','typename'=>TestCourse::getTypeName('C')];
+        $this->assign('type',$type);
+        return $this->fetch('schedule');
     }
 }

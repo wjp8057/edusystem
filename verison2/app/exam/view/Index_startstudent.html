@@ -1,9 +1,28 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
+        var courseschool = $('#courseschool');
+        courseschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        var studentschool = $('#studentschool');
+        studentschool.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        var examrem = $('#examrem');
+        examrem.combobox({
+            url: '{$ROOT}/all/option/examrem?only=0',
+            valueField: 'examrem',
+            textField: 'name',
+            panelHeight:'auto'
+        });
         $('#dg').datagrid({
             title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/selective/recycle/query',
+            url:'{$ROOT}/exam/start/query',
             queryParams: {
                 year:$('#year').val(),
                 term:$('#term').val(),
@@ -14,16 +33,14 @@
                 {field:'checkbox',title:'选中',checkbox:true},
                 {field:'courseno',title:'课号',width:70,align:'center'},
                 {field:'coursename',title:'课名',width:140,align:'center'},
+                {field:'schoolname',title:'开课学院',width:140,align:'center'},
                 {field:'studentno',title:'学号',width:65,align:'center'},
                 {field:'studentname',title:'姓名',width:60,align:'center'},
                 {field:'classno',title:'班号',width:50,align:'center'},
                 {field:'classname',title:'班级',width:160,align:'center'},
-                {field:'credits',title:'学分',width:40,align:'center'},
-                {field:'coursetypename',title:'类型',width:40,align:'center'},
-                {field:'examtypename',title:'考核',width:40,align:'center'},
-                {field:'selecttime',title:'选课时间',width:120,align:'center'},
-                {field:'date',title:'删除时间',width:120,align:'center'},
-                {field:'reason',title:'原因',width:130,align:'center'}
+                {field:'studentschoolname',title:'所在学院',width:140,align:'center'},
+                {field:'score',title:'成绩',width:50,align:'center'},
+                {field:'examremname',title:'考试备注',width:80,align:'center'}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -95,12 +112,18 @@
         <div id='menu_rescue' data-options="iconCls:'icon icon-print'">恢复选课记录</div>
     </div>
     <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="add">新增</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
         <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
-        <label for="term">学期：</label><input id="term" size="2" value="{$YEARTERM.term}"/>
-        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
-        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="9" value="%"/>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-rescue',plain:'true'" id="rescue">恢复选课记录</a>
+        <label for="term">学期：</label><input id="term" size="1" value="{$YEARTERM.term}"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
+        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+        <label for="courseschool">开课学院：</label><input id="courseschool" size="16" />
+        <label for="studentschool">学生学院：</label><input id="studentschool" size="16" />
+        <label for="examrem">考试备注：</label><input id="examrem" size="8" />
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-tool',plain:'true'" id="init">生成名单</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>

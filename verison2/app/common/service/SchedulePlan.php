@@ -242,6 +242,7 @@ class SchedulePlan extends MyService {
             $condition['courseno+[group]']=$courseno;
             $this->query->table('schedule')->where($condition)->delete();
             //删除选课记录R32
+            R32Dump::toDump($year,$term,$courseno,'%','课程停开');
             $condition=null;
             $condition['year']=$year;
             $condition['term']=$term;

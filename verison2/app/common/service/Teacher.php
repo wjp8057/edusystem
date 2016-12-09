@@ -142,6 +142,26 @@ class Teacher extends  MyService
         }
         $result = array('info' => $info, 'status' => $status);
         return $result;
-
+    }
+    //获取学生课程任课教师的联系电话（短号）
+    function getPhoneNumber($page = 1, $rows = 20, $year,$term,$studentno)
+    {
+        $result=['total'=>0,'rows'=>[]];
+        $condition = null;
+        $condition['r32.year']=$year;
+        $condition['r32.term']=$term;
+        $condition['r32.studentno']=$studentno;
+        $data = $this->query->table('teachers')
+            ->join('teacherplan t','t.teacherno=teachers.teacherno')
+            ->join('scheduleplan s','s.recno=t.map')
+            ->join('r32','r32.year=s.year and r32.term=s.term and r32.courseno+r32.[group]=s.courseno+s.[group]')
+            ->join('courses','courses.courseno=s.courseno')
+            ->page($page, $rows)
+            ->field('distinct rtrim(tel) tel,teachers.teacherno,rtrim(teachers.name) teachername,s.courseno+s.[group] courseno,rtrim(courses.coursename) coursename')
+            ->where($condition)->order('courseno')->select();
+        $count = $this->query->table('r32')->where($condition)->count();
+        if (is_array($data) && count($data) > 0)
+            $result = array('total' => $count, 'rows' => $data);
+        return $result;
     }
 }

@@ -507,7 +507,20 @@ class Option {
         }
         return json($result);
     }
+    public function examrem($only=1){
+        $result=null;
+        try {
+            $result =Db::table('examremoptions')->field('rtrim(code) as examrem,rtrim(name) as name')->order('examrem')->select();
+            if($only==0) {
+                $all[] = array('examrem' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
     /**
      * 测试专用
      */
