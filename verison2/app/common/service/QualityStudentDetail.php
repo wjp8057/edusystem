@@ -152,12 +152,28 @@ class QualityStudentDetail extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-    //检查是否有相同的给分
-    private  static function checkSameScore($id,$studentno,$total)
+    //        检查是否有排名在前的打分更低
+    private  static function checkLessScore($id,$studentno,$total)
     {
         $bind=['id'=>$id,'studentno'=>$studentno,'total'=>$total];
-        $sql='select id from qualitystudentdetail as q1 where studentno=:studentno and total=:total and  exists(
+
+        $sql='select id from qualitystudentdetail as q1 where studentno=:studentno  and total<=:total and enabled=1 and  exists(
               select * from qualitystudentdetail as q2 where q1.studentno=q2.studentno and q2.id=:id and q1.id!=q2.id and q1.year=q2.year and q1.term=q2.term
+              and  q1.rank<q2.rank
+            )';
+        $result=Db::query($sql,$bind);
+        if(count($result)==0)
+            return true;
+        else return false;
+    }
+    //检查是否有排名在后的打分更高。
+    private  static function checkMoreScore($id,$studentno,$total)
+    {
+        $bind=['id'=>$id,'studentno'=>$studentno,'total'=>$total];
+        //        检查是否有排名在前的打分更低
+        $sql='select id from qualitystudentdetail as q1 where studentno=:studentno  and total>=:total and  enabled=1 and   exists(
+              select * from qualitystudentdetail as q2 where q1.studentno=q2.studentno and q2.id=:id and q1.id!=q2.id and q1.year=q2.year and q1.term=q2.term
+              and  q1.rank>q2.rank
             )';
         $result=Db::query($sql,$bind);
         if(count($result)==0)
@@ -178,13 +194,17 @@ class QualityStudentDetail extends MyService{
         $total=(int)$data['one']+(int)$data['two']+(int)$data['three']+(int)$data['four'];
         $data['total']=$total;
         $data['done']=1;
-        if(self::checkSameScore($id,$studentno,$total)) {
-            $this->query->table('qualitystudentdetail')->where($condition)->update($data);
-            return array('info'=>'保存成功','status'=>'1');
+        if(!self::checkLessScore($id,$studentno,$total)) {
+            return array('info'=>'您的本次打分比排序在前的老师相同或更高，请做适当调整！','status'=>'0');
+        }
+        else if(!self::checkMoreScore($id,$studentno,$total)){
+            return array('info'=>'您的本次打分比排序在后的老师相同或更低，请做适当调整！','status'=>'0');
         }
         else
         {
-            return array('info'=>'您已经给其他教师打过'.$total.'分！<br />请做适当调整！','status'=>'0');
+            $this->query->table('qualitystudentdetail')->where($condition)->update($data);
+            return array('info'=>'保存成功','status'=>'1');
+
         }
 
     }
@@ -202,4 +222,48 @@ class QualityStudentDetail extends MyService{
         else
             return true;
     }
+//    检查该排序是否存在
+    private  static function checkSameRank($id,$studentno,$rank)
+    {
+        $bind=['id'=>$id,'studentno'=>$studentno,'rank'=>$rank];
+        $sql='select id from qualitystudentdetail as q1 where studentno=:studentno and rank=:rank and  exists(
+              select * from qualitystudentdetail as q2 where q1.studentno=q2.studentno and q2.id=:id and q1.id!=q2.id and q1.year=q2.year and q1.term=q2.term
+            )';
+        $result=Db::query($sql,$bind);
+        if(count($result)==0)
+            return true;
+        else return false;
+    }
+    public function  updateRank($postData){
+        $updateRow=0;
+        $errorRow=0;
+        $info="";
+        $status=1;
+        $studentno=session('S_USER_NAME');
+        if (isset($postData["updated"])) {
+            $updated = $postData["updated"];
+            $listUpdated = json_decode($updated);
+            foreach ($listUpdated as $one) {
+                $condition = null;
+                $condition['id'] = $one->id;
+                $condition['studentno'] = $studentno;
+                $data=null;
+                $data['rank']=$one->rank;
+                if(self::checkSameRank($one->id,$studentno,$one->rank))
+                    $updateRow += $this->query->table('qualitystudentdetail')->where($condition)->update($data);
+                else
+                {
+                    $errorRow++;
+                    $info.="排序".$one->rank."出现重复，请重新设置！";
+                    $status=0;
+                }
+            }
+        }
+        else {
+            if ($updateRow> 0) $info .= $updateRow . '条排序完成！</br>';
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
+    }
+
 }

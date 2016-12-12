@@ -69,7 +69,7 @@ class QualityStudent extends MyService {
             ->where($condition)
             ->field('qualitystudent.id,qualitystudent.year,qualitystudent.term,qualitystudent.teacherno,rtrim(teachers.name) teachername,qualitystudent.type,
             rtrim(qualitystudenttype.name) typename,qualitystudent.courseno,rtrim(courses.coursename) coursename,qualitystudent.school,rtrim(schools.name) schoolname,
-            qualitystudent.enabled,qualitystudent.lock')
+            qualitystudent.enabled')
             ->order('year,term,courseno,teacherno')->select();
         $count= $this->query->table('qualitystudent')
             ->join('teachers','teachers.teacherno=qualitystudent.teacherno')

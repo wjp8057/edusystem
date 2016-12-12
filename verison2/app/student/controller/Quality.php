@@ -44,4 +44,17 @@ class Quality extends MyController{
         }
         return json($result);
     }
+
+    public function updaterank()
+    {
+        $result = null;
+       try {
+            $obj = new QualityStudentDetail();
+            $result = $obj->updateRank($_POST);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 }

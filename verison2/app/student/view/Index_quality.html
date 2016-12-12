@@ -4,18 +4,20 @@
         var stopTime=new Date('{$valid.stop}');
         var startTime=new Date('{$valid.start}');
         var nowTime=new Date('{$valid.now}');
+        var start=$('#start');
         if(nowTime.getTime()>stopTime.getTime()||nowTime.getTime()<startTime.getTime()){
-            $('#start').linkbutton('disable');
+            start.linkbutton('disable');
         }
         $('#dg').datagrid({
-            title:'学评教开放时间：{$valid.start} 至 {$valid.stop}',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            title:'学评教开放时间：{$valid.start} 至 {$valid.stop}',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:50,
+            pageList:[50,100,200],
             url:'{$ROOT}/student/quality/query',toolbar:'#toolbar',
             queryParams: {
                 year: $('#year').val(),
                 term: $('#term').val()
             },
             columns:[[
-                {field:'rank',title:'排序*',width:50,align:'center',editor:{type:'numberbox',options:{required:true, precision: 0}}},
+                {field:'rank',title:'排序*',width:50,align:'center',editor:{type:'validatebox',options:{validType:'integer',required:true}}},
                 {field:'done',title:'完成',width:50,align:'center',
                     formatter:function(val,rec){if(val==1)return '√';}},
                 {field:'courseno',title:'课号',width:80,align:'center'},
@@ -49,17 +51,74 @@
                 term: $('#term').val()
             });
         });
-        $("#menu_start,#start").click(function() {
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.id=rows[i].id;
+                updateObj.rank=rows[i].rank;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        start.click(function() {
+            if($("#start").linkbutton('options').disabled) {
+                $.messager.alert('错误','现在不能给教师打分，学评教时间：{$valid.start}至{$valid.stop}','error');
+                return;
+            } //如果禁用了，就直接退出。
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            var rows=tt.datagrid('getRows');
+            var amount=rows.length;
+
+            var ranks=[];
+            for(var i=0;i<amount;i++)
+            {
+                if(rows[i].rank==0) {
+                    $.messager.alert('错误', '您还未给' + rows[i].coursename + ',' + rows[i].teachername + '排序', 'error');
+                    return;
+                }
+                var rank=rows[i].rank;
+                if(ranks.indexOf(rank)!=-1){
+                    $.messager.alert('错误', '您给' + rows[i].coursename + ',' + rows[i].teachername + '排序值与其他教师相同！', 'error');
+                    return;
+                }
+                else
+                {
+                    ranks.push(rank);
+                }
+            }
+            var effectRow = {};
+            effectRow["updated"] = $.toJSON(buildDataArray(rows));
+            $.post('{$ROOT}/student/quality/updaterank', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('reload');
+                    parent.menuTabs.addTab("评价教师","{$ROOT}/student/index/qualitycourse","icon icon-note");
+                } else {
+                    $.messager.alert('提示', result.info, 'error');
+                }
+            }, 'json');
+        });
+        $("#menu_modify,#modify").click(function() {
             if($("#start").linkbutton('options').disabled) {
                 $.messager.alert('错误','现在不能给教师打分，学评教时间：{$valid.start}至{$valid.stop}','error');
                 return;
             } //如果禁用了，就直接退出。
             var tt=$('#dg');
             var row=tt.datagrid('getSelected');
-            var url='';
-            if(row)
-                url='?id='+row.id;
-            parent.menuTabs.addTab("评价教师","{$ROOT}/student/index/qualitycourse"+url,"icon icon-note");
+            if(!row){
+                $.messager.alert('提示',"请先选中一位已打分的老师", 'error');
+                return ;
+            }
+            else if(row.done==0){
+                $.messager.alert('提示',"尚未完成打分，你可以刷新得分获取最新完成状态。", 'error');
+                return ;
+            }
+            else{
+                parent.menuTabs.addTab("修改评分","{$ROOT}/student/index/qualitycourse?id="+row.id,"icon icon-note");
+            }
         });
     });
 </script>
@@ -85,14 +144,14 @@
         <p class="remark">教务处</p>
     </div>
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div id='menu_start' data-options="iconCls:'icon icon-work'">给这位老师打分</div>
+        <div id='menu_modify' data-options="iconCls:'icon icon-note'">修改评分</div>
     </div>
     <div id="toolbar">
         <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索&刷新得分</a> |
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存排序</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-work',plain:'true'" id="start">开始给老师评分</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-work',plain:'true'" id="start">保存排序并开始评分</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-note',plain:'true'" id="modify">修改评分</a>
     </div>
     <div class="center">
         <table id="dg"></table>

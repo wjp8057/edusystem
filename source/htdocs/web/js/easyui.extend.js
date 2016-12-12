@@ -187,6 +187,14 @@ $.extend($.fn.validatebox.defaults.rules, {
             return value.length == param[0];
         },
         message: '应为{0}个字符！'
+    },
+    integer: {// 验证整数 可正负数
+        validator: function (value) {
+            //return /^[+]?[1-9]+\d*$/i.test(value);
+
+            return /^([+]?[0-9])|([-]?[0-9])+\d*$/i.test(value);
+        },
+        message: '请输入整数'
     }
 });
 //按数字排序
