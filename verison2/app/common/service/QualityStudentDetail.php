@@ -40,20 +40,25 @@ class QualityStudentDetail extends MyService{
         return ["info"=>"同步学生成功！".$row."条记录添加","status"=>"1"];
     }
     //获取学生信息
-    function getStudentList($page=1,$rows=20,$map){
+    function getStudentList($page=1,$rows=20,$map=0,$year='',$term='',$courseno=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
-        $condition['map']=$map;
+        if($map!=0) $condition['map']=$map;
+        if($year!='')  $condition['qualitystudentdetail.year']=$year;
+        if($term!='')  $condition['qualitystudentdetail.term']=$term;
+        if($courseno!='') $condition['qualitystudent.courseno']=$courseno;
         $data=$this->query->table('qualitystudentdetail')->page($page,$rows)
+            ->join('qualitystudent','qualitystudent.id=qualitystudentdetail.map')
             ->join('students','students.studentno=qualitystudentdetail.studentno')
             ->join('classes','classes.classno=students.classno')
             ->join('schools','schools.school=classes.school')
             ->join('statusoptions','statusoptions.name=students.status')
             ->where($condition)
-            ->field('id,map,students.studentno,rtrim(students.name) studentname,rtrim(classes.classname)  classname,rtrim(schools.name) schoolname,
+            ->field('distinct qualitystudentdetail.id,map,students.studentno,rtrim(students.name) studentname,rtrim(classes.classname)  classname,rtrim(schools.name) schoolname,
             rtrim(statusoptions.value) statusname')
             ->order('studentno')->select();
         $count= $this->query->table('qualitystudentdetail')
+            ->join('qualitystudent','qualitystudent.id=qualitystudentdetail.map')
             ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);

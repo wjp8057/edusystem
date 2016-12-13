@@ -100,7 +100,11 @@
                 studentno: $('#studentno').val(),
                 classno: $('#classno').val(),
                 name: $('#name').val(),
-                school:$('#school').combobox('getValue')
+                school:$('#school').combobox('getValue'),
+                courseno:$('#courseno').val(),
+                year:$('#year').val(),
+                term:$('#term').val()
+
             });
         });
 
@@ -205,13 +209,21 @@
     </div>
     <div id="right" style="width:680px;float:left;padding-left:5px;">
         <div id="toolbar2">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中加入参评</a>
-            <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
-            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
-            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
-            <label for="school">学院：</label>
-            <input id="school" size="13">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+            <div>
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中加入</a>
+                <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
+                <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="5" value="%"/>
+                <label for="school">学院：</label>
+                <input id="school" size="13">
+                <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+            </div>
+            <div>
+                <label for="year">根据恰课程检索 学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}" />
+                <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
+                <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" data-options="validType: 'equalLength[9]'" size="9" placeholder="9位课号" />
+            </div>
+
         </div>
         <table id="dg2"></table>
     </div>

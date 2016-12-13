@@ -60,6 +60,7 @@
             tt.datagrid('insertRow',{
                 index: 0,
                 row: {
+                    id:0,
                     year:'{$YEARTERM.year}',
                     term:'{$YEARTERM.term}',
                     type:'B',
@@ -142,6 +143,10 @@
             var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {
+                if(row.id==0){
+                    $.messager.alert('提示','请先保存项目。','info')
+                    return
+                }
                 parent.menuTabs.addTab(row.name+"-参加人员名单","{$ROOT}/score/index/qualitystudent?id="+row.id,"icon icon-people");
             }
             else{

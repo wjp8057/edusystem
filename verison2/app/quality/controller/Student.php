@@ -84,11 +84,22 @@ class Student extends MyController {
         return json($result);
     }
     //检索学生
-    public function studentsearch($page=1,$rows=50,$studentno='%',$name='%',$classno='%',$school=''){
+    public function studentsearch($page=1,$rows=50,$studentno='%',$name='%',$classno='%',$school='',$courseno='',$year='',$term=''){
         $result=null;
         try {
-            $student=new \app\common\service\Student();
-            $result = $student->getList($page,$rows,$studentno,$name,$classno,$school);
+            if($courseno=='') {
+                $student = new \app\common\service\Student();
+                $result = $student->getList($page, $rows, $studentno, $name, $classno, $school);
+            }
+            else {
+                $obj=new QualityStudentDetail();
+                $result=$obj->getStudentList($page,$rows,0,$year,$term,$courseno);
+                $data=$result['rows'];
+                $amount=count($data);
+                for($i=0;$i<$amount;$i++)
+                    $data[$i]['name']=$data[$i]['studentname'];
+                $result['rows']=$data;
+            }
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
