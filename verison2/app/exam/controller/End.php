@@ -17,6 +17,7 @@ namespace app\exam\controller;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\SchedulePlan;
+use app\common\service\Score;
 use app\common\service\TestCourse;
 use app\common\vendor\PHPExcel;
 
@@ -53,7 +54,7 @@ class End extends MyController{
         return json($result);
     }
     //导出数据
-    public function  export ($year, $term,$courseno='%',$coursename='%',$classno='%',$school='',$exam=''){
+    public function export ($year, $term,$courseno='%',$coursename='%',$classno='%',$school='',$exam=''){
         try{
             $student=new SchedulePlan();
             $condition = null;
@@ -78,6 +79,30 @@ class End extends MyController{
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
+    }
+    //检索学生成绩记录
+    public function  studentquery($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$delay='')
+    {
+        $result=null;
+        try {
+            $obj=new Score();
+            $result=$obj->getStudentDetail($page,$rows,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$delay);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function  studentupdate()
+    {
+        $result=null;
+        try {
+            $obj=new Score();
+            $result=$obj->updateDelay($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
     }
 
 }

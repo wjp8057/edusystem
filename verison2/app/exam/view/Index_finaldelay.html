@@ -13,16 +13,17 @@
             valueField: 'school',
             textField: 'name'
         });
-        var examrem = $('#examrem');
-        examrem.combobox({
-            url: '{$ROOT}/all/option/examrem?only=0',
-            valueField: 'examrem',
+        var delay = $('#delay');
+        delay.combobox({
+            url: '{$ROOT}/all/option/delay?only=0',
+            valueField: 'delay',
             textField: 'name',
             panelHeight:'auto'
         });
         $('#dg').datagrid({
-            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/exam/start/query',
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/exam/end/studentquery',
+            singleSelect:true,
             queryParams: {
                 year:$('#year').val(),
                 term:$('#term').val(),
@@ -30,7 +31,6 @@
             },
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
-                {field:'checkbox',title:'选中',checkbox:true},
                 {field:'courseno',title:'课号',width:70,align:'center'},
                 {field:'coursename',title:'课名',width:140,align:'center'},
                 {field:'courseschoolname',title:'开课学院',width:140,align:'center'},
@@ -39,8 +39,15 @@
                 {field:'plantypename',title:'修课',width:60,align:'center'},
                 {field:'classname',title:'班级',width:160,align:'center'},
                 {field:'studentschoolname',title:'所在学院',width:140,align:'center'},
-                {field:'score',title:'成绩',width:50,align:'center'},
-                {field:'examremname',title:'考试备注',width:80,align:'center'}
+                {field:'delay',title:'缓考原因*',width:150,align:'center',editor:{type:'combobox',
+                    options:{url:'{$ROOT}/all/option/delay',valueField:'delay',textField:'name',required:true,panelHeight:'auto',
+                        onSelect:function(rec) {
+                            var tt=$('#dg');
+                            tt.datagrid('getSelected').delayname=rec.name;
+                        }}},
+                    formatter:function(val,rec){
+                        return rec.delayname;
+                    }}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -51,6 +58,12 @@
                     left:e.pageX,
                     top:e.pageY
                 });
+            },
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
             },
             //数据行上右键菜单
             onRowContextMenu:function(e,rowindex,row){
@@ -75,28 +88,8 @@
                 courseno: $('#courseno').val(),
                 courseschool: $('#courseschool').combobox('getValue'),
                 studentschool: $('#studentschool').combobox('getValue'),
-                examrem: $('#examrem').combobox('getValue')
+                delay: $('#delay').combobox('getValue')
             });
-        });
-        function buildDataArray(rows){
-            var updateRow=[];
-            var length=rows.length;
-            for (var i = 0; i < length; i++) {
-                var updateObj = {}; //插入的单元格
-                updateObj.recno = rows[i].recno;
-                updateRow.push(updateObj);
-            }
-            return updateRow;
-        }
-        //初始化
-        $("#init").click(function() {
-                $.post('{$ROOT}/exam/start/init',{year:$("#year").val(),term:$("#term").val()}, function (result) {
-                    if (result.status == 1) {
-                        $.messager.alert('提示', result.info, 'info');
-                    } else {
-                        $.messager.alert('错误', result.info, 'error');
-                    }
-                }, 'json');
         });
         //导出
         $('#menu_export,#export').click(function(){
@@ -116,24 +109,65 @@
             });
             return false; //this is critical to stop the click event which will trigger a normal file download!
         });
+
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno = rows[i].recno;
+                updateObj.delay = rows[i].delay;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#menu_save,#save").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('endEditing');
+            if(tt.datagrid('editIndex')!=undefined) return;
+            var rows=tt.datagrid('getChanges','updated');
+            var effectRow = {};
+            if(rows.length>0) {
+                effectRow["updated"] = $.toJSON(buildDataArray(rows));
+                $.post('{$ROOT}/exam/end/studentupdate',effectRow, function (result) {
+                    if (result.status == 1) {
+                        tt.datagrid('reload');
+                        $.messager.show({	// show error message
+                            title: '成功',
+                            msg: result.info
+                        });
+                    } else {
+                        $.messager.alert('错误', result.info, 'error');
+                    }
+                }, 'json');
+            }
+            else
+                $.messager.alert('提示','没有需要保存的记录！', 'info');
+        });
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
     });
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div id='menu_export' data-options="iconCls:'icon icon-print'">导出</div>
     </div>
     <div id="toolbar">
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-tool',plain:'true'" id="init">生成名单</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
         <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" size="1" value="{$YEARTERM.term}"/>
         <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
         <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
         <label for="courseschool">开课学院：</label><input id="courseschool" size="16" />
         <label for="studentschool">学生学院：</label><input id="studentschool" size="16" />
-        <label for="examrem">考试备注：</label><input id="examrem" size="8" />
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        <label for="delay">缓考原因：</label><input id="delay" size="16" />
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
     </div>
     <table id="dg"></table>

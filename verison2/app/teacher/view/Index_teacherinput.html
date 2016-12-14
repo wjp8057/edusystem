@@ -19,7 +19,11 @@
                 {field:'studentno',title:'学号',width:100,align:'center'},
                 {field:'name',title:'姓名',width:140,align:'center'},
                 {field:'approachname',title:'修课方式',width:140,align:'center'},
-                {field:'score',title:'成绩',width:190,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[5]'}},
+                {field:'delay',title:'已申请缓考',width:80,align:'center',formatter:function(val,rec){
+                    if(val!="A")
+                        return '已申请';
+                }},
+                {field:'score',title:'成绩*',width:190,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[5]'}},
                     formatter:function(val,rec){
                         if(val==undefined||val=='')
                             return;

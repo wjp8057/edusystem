@@ -25,15 +25,58 @@ class Makeup extends  MyService {
     public function  init($year,$term){
         MyAccess::checkAccess('E');
         //同步学生的修课方式
-
+        $bind=["year"=>$year,"term"=>$term];
+        $sql="update r32
+            set coursetype=r12.coursetype
+            from r32
+            inner join studentplan on studentplan.studentno=r32.studentno
+            inner join r30 on r30.majorplan_rowid=studentplan.majorplanid
+            inner join r12 on r12.programno=r30.progno
+            where r32.year=:year and r32.term=:term and r12.courseno=r32.courseno
+            and  r32.coursetype!=r12.coursetype";
+        Db::execute($sql,$bind);
+        $sql="update scores
+            set plantype=r12.coursetype
+            from scores
+            inner join studentplan on studentplan.studentno=scores.studentno
+            inner join r30 on r30.majorplan_rowid=studentplan.majorplanid
+            inner join r12 on r12.programno=r30.progno
+            where scores.year=:year and scores.term=:term and r12.courseno=scores.courseno
+            and  plantype!=r12.coursetype";
+        Db::execute($sql,$bind);
         //一般课程添加到makeup表中
-
+        $sql="insert into makeup(year,term,studentno,courseno)
+            select year,term,studentno,courseno
+            from scores
+            where scores.examscore<60 and scores.testscore not in ('合格','及格','中等','良好','优秀') and qm not in ('缺考','违纪')
+            and scores.year=:year and scores.term=:term and scores.plantype!='E'  and scores.[group] not in ('BY','ZX')
+            and not exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno  )
+            ";
+        $rows=Db::execute($sql,$bind);
         //学位课程部分
+        $sql="insert into makeup(year,term,studentno,courseno)
+            select year,term,studentno,courseno
+             from scores
+            where year=:year and term=:term and examscore<75  and scores.[group] not in ('BY','ZX')
+            and exists (select * from scheduleplan
+                where scheduleplan.year=scores.year and scheduleplan.term=scores.term and scheduleplan.courseno+scheduleplan.[group]=scores.courseno+scores.[group] and degree=1 )
+            and not  exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno)
+        ";
+        $rows+=Db::execute($sql,$bind);
+        //缓考部分
+        $sql="insert into makeup(year,term,studentno,courseno)
+            select year,term,studentno,courseno
+             from scores
+            where year=:year and term=:term and delay!='A' and scores.[group] not in ('BY','ZX')
+            and  not  exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno)
+        ";
+        $rows+=Db::execute($sql,$bind);
+        return ["info"=>"成功,".$rows."条记录添加！","status"=>"1"];
     }
 
     //读取补考的学生信息
     public function getList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['makeup.year']=$year;
         $condition['makeup.term']=$term;
@@ -79,11 +122,8 @@ class Makeup extends  MyService {
      * @return array|null
      * @throws Exception
      */
-    public function getCourseList($page=1,$rows=20,$year='',$term='',$courseno='%',$school='',$type=''){
-        if($year==''||$term=='')
-            throw new Exception('year term is empty', MyException::PARAM_NOT_CORRECT);
-
-        $result=null;
+    public function getCourseList($page=1,$rows=20,$year,$term,$courseno='%',$school='',$type=''){
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($courseno!='%')
             $condition['makup.courseno']=array('like',$courseno);
@@ -123,7 +163,7 @@ class Makeup extends  MyService {
      * @throws \think\Exception
      */
     public function getStudentList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
-        $result=null;
+        $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['makeup.year']=$year;
         $condition['makeup.term']=$term;
@@ -241,9 +281,7 @@ class Makeup extends  MyService {
      * @return bool|string
      * @throws \think\Exception
      */
-    public function getCourseExamDate($year='',$term='',$courseno=''){
-        if($year==''||$term==''||$courseno=='')
-            throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+    public function getCourseExamDate($year,$term,$courseno){
         $condition=null;
         $condition['courseno']=$courseno;
         $condition['year']=$year;
@@ -262,9 +300,7 @@ class Makeup extends  MyService {
      * @return mixed
      * @throws \think\Exception
      */
-    public function getCoursePercent($year='',$term='',$courseno=''){
-        if($year==''||$term==''||$courseno=='')
-            throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+    public function getCoursePercent($year,$term,$courseno){
         $condition=null;
         $result=[];
         $condition['makeup.courseno']=$courseno;
@@ -328,10 +364,9 @@ class Makeup extends  MyService {
      * @return mixed
      * @throws Exception
      */
-    public function getCourseInfo($year='',$term='',$courseno='')
+    public function getCourseInfo($year,$term,$courseno)
     {
-        if ($year == '' || $term == '' || $courseno == '')
-            throw new  Exception('year term courseno is empty ', MyException::PARAM_NOT_CORRECT);
+        $condition=null;
         $condition['makeup.courseno']=$courseno;
         $condition['makeup.year']=$year;
         $condition['makeup.term']=$term;

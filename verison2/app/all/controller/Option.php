@@ -507,12 +507,30 @@ class Option {
         }
         return json($result);
     }
+    //考试备注
     public function examrem($only=1){
         $result=null;
         try {
-            $result =Db::table('examremoptions')->field('rtrim(code) as examrem,rtrim(name) as name')->order('examrem')->select();
+            $result =Db::table('examremoptions')->field('rtrim(code) as examrem,rtrim(name) as name')
+               ->order('examrem')->select();
             if($only==0) {
                 $all[] = array('examrem' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+            }
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+    //缓考原因
+    public function delay($only=1){
+        $result=null;
+        try {
+            $result =Db::table('delaycode')->field('delay,rtrim(name) as name')
+                ->order('delay')->select();
+            if($only==0) {
+                $all[] = array('delay' => '', 'name' => '全部缓考');
                 $result = array_merge($all, $result);
             }
 

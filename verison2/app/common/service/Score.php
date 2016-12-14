@@ -44,7 +44,7 @@ class Score extends  MyService {
             ->join('approachcode ',' approachcode.code=scores.approach')
             ->where($condition)->page($page,$rows)
             ->field("scores.lock,case when testscore='' then cast(examscore as char) else rtrim(testscore) end printscore,isnull(rtrim(qm),'') as score,
-            scores.recno,scores.studentno,students.name,scores.testscore,scores.examscore,approachcode.name as approachname,examrem")
+            scores.recno,scores.studentno,students.name,scores.testscore,scores.examscore,approachcode.name as approachname,examrem,delay")
             ->order('studentno')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
@@ -261,6 +261,77 @@ class Score extends  MyService {
         $count= $this->query->table('scores')->where($condition)->count('distinct studentno');
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
+    //获取学生的详细信息
+    public function getStudentDetail($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$delay=''){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['scores.year']=$year;
+        $condition['scores.term']=$term;
+        if($courseno!='%') $condition['scores.courseno+scores.[group]']=array('like',$courseno);
+        if($studentno!='%') $condition['scores.studentno']=array('like',$studentno);
+        if($courseschool!='') $condition['courses.school']=$courseschool;
+        if($studentschool!='') $condition['classes.school']=$studentschool;
+        if($delay=='')
+            $condition['scores.delay']=array('neq','A');
+        else
+            $condition['scores.delay']=$delay;
+        $data=$this->query->table('scores')
+            ->join('students ',' students.studentno=scores.studentno')
+            ->join('approachcode ',' approachcode.code=scores.approach')
+            ->join('courses','courses.courseno=scores.courseno')
+            ->join('classes','classes.classno=students.classno')
+            ->join('delaycode','delaycode.delay=scores.delay')
+            ->join('schools cs','cs.school=courses.school')
+            ->join('schools ss','ss.school=classes.school')
+            ->join('plantypecode','plantypecode.code=scores.plantype')
+            ->where($condition)->page($page,$rows)
+            ->field("scores.recno,scores.studentno,rtrim(students.name) studentname,approachcode.name as approachname,scores.delay,rtrim(delaycode.name) delayname,
+            scores.courseno+scores.[group] courseno,rtrim(courses.coursename) coursename,courses.school courseschool,rtrim(cs.name) courseschoolname,ss.school studentschool,
+            rtrim(ss.name) as studentschoolname,students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype")
+            ->order('courseno,studentno')->select();
+        $count= $this->query->table('scores')
+            ->join('students ',' students.studentno=scores.studentno')
+            ->join('courses','courses.courseno=scores.courseno')
+            ->join('classes','classes.classno=students.classno')
+            ->where($condition)->count();// 查询满足要求的总记录数
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+    //更新考试备注 修改缓考之类的信息。
+    public function updateDelay($postData){
+        $updateRow=0;
+        $info='';
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+            if (isset($postData["updated"])) {
+                $updated = $postData["updated"];
+                $listUpdated = json_decode($updated);
+                foreach ($listUpdated as $one) {
+                    $condition = null;
+                    $condition['recno'] = $one->recno;
+                    $data['delay'] = $one->delay;
+                    $updateRow += $this->query->table('scores')->where($condition)->update($data);
+                }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow>0) $info.=$updateRow.'条更新！</br>';
+        if($info=='') {
+            $info="没有数据被更新";
+            $status=0;
+        }
+        $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
 }
