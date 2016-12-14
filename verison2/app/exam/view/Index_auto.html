@@ -46,7 +46,7 @@
                 {field:'coursename',title:'课名',width:250,align:'center'},
                 {field:'amount',title:'人数',width:50,align:'center'},
                 {field:'schoolname',title:'开课学院',width:100,align:'center'},
-                {field:'classname',title:'主修班级',width:250,align:'center'}
+                {field:'classes',title:'主修班级',width:250,align:'center'}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -154,7 +154,7 @@
             tt.datagrid('load', {
                 year: $('#year').val(),
                 term: $('#term').val(),
-                classno: $('#classno').val(),
+                classname: $('#classname').val(),
                 courseno:$('#courseno').val(),
                 status:status.combobox('getValue'),
                 type:type
@@ -293,7 +293,7 @@
             <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
             <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$YEARTERM.term}"/>
             <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
-            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+            <label for="classname">班名：</label><input id="classname" class="easyui-validatebox" size="6" value="%"/>
             <label for="status">是否锁定：</label><input id="status" size="7"/>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
@@ -306,7 +306,7 @@
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-base',plain:'true'" id="load">1、载入课程</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-clear',plain:'true'" id="init">2、初始化</a>
             <label for="courseno">场次从：</label><input id="start" class="easyui-validatebox" size="2" value="0"/>
-            <label for="classno">到：</label><input id="end" class="easyui-validatebox" size="2" value="0"/>
+            <label for="end">到：</label><input id="end" class="easyui-validatebox" size="2" value="0"/>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-clock',plain:'true'" id="schedule">3、开始排考</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-note',plain:'true'" id="exportplan">4、导出到考试安排表</a>
             <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-plan',plain:'true'" id="flagset">5、设定时间表</a>

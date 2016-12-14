@@ -21,7 +21,7 @@
             panelHeight:'auto'
         });
         $('#dg').datagrid({
-            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/exam/start/query',
             queryParams: {
                 year:$('#year').val(),
@@ -33,10 +33,10 @@
                 {field:'checkbox',title:'选中',checkbox:true},
                 {field:'courseno',title:'课号',width:70,align:'center'},
                 {field:'coursename',title:'课名',width:140,align:'center'},
-                {field:'schoolname',title:'开课学院',width:140,align:'center'},
+                {field:'courseschoolname',title:'开课学院',width:140,align:'center'},
                 {field:'studentno',title:'学号',width:65,align:'center'},
                 {field:'studentname',title:'姓名',width:60,align:'center'},
-                {field:'classno',title:'班号',width:50,align:'center'},
+                {field:'plantypename',title:'修课',width:60,align:'center'},
                 {field:'classname',title:'班级',width:160,align:'center'},
                 {field:'studentschoolname',title:'所在学院',width:140,align:'center'},
                 {field:'score',title:'成绩',width:50,align:'center'},
@@ -72,7 +72,10 @@
                 year:$('#year').val(),
                 term:$('#term').val(),
                 studentno: $('#studentno').val(),
-                courseno: $('#courseno').val()
+                courseno: $('#courseno').val(),
+                courseschool: $('#courseschool').combobox('getValue'),
+                studentschool: $('#studentschool').combobox('getValue'),
+                examrem: $('#examrem').combobox('getValue')
             });
         });
         function buildDataArray(rows){

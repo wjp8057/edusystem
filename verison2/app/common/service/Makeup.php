@@ -20,6 +20,54 @@ use think\Exception;
  * @package app\common\service
  */
 class Makeup extends  MyService {
+
+    //生成补考名单
+    public function  init($year,$term){
+        MyAccess::checkAccess('E');
+        //同步学生的修课方式
+
+        //一般课程添加到makeup表中
+
+        //学位课程部分
+    }
+
+    //读取补考的学生信息
+    public function getList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
+        $result=null;
+        $condition=null;
+        $condition['makeup.year']=$year;
+        $condition['makeup.term']=$term;
+        if($courseno!='%') $condition['makeup.courseno']=array('like',$courseno);
+        if($studentno!='%') $condition['makeup.studentno']=array('like',$studentno);
+        if($courseschool!='') $condition['courses.school']=$courseschool;
+        if($studentschool!='') $condition['classes.school']=$studentschool;
+        if($examrem!='') $condition['scores.examrem']=$examrem;
+        $data=$this->query->table('makeup')
+            ->join('scores','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')
+            ->join('students ',' students.studentno=scores.studentno')
+            ->join('approachcode ',' approachcode.code=scores.approach')
+            ->join('courses','courses.courseno=makeup.courseno')
+            ->join('classes','classes.classno=students.classno')
+            ->join('examremoptions','examremoptions.code=scores.examrem')
+            ->join('schools cs','cs.school=courses.school')
+            ->join('schools ss','ss.school=classes.school')
+            ->join('plantypecode','plantypecode.code=scores.plantype')
+            ->where($condition)->page($page,$rows)
+            ->field("makeup.id,rtrim(case when testscore='' then cast(examscore as char) else rtrim(testscore) end) score,
+            scores.studentno,rtrim(students.name) studentname,approachcode.name as approachname,examrem,rtrim(examremoptions.name) examremname,
+            scores.courseno+scores.[group] courseno,rtrim(courses.coursename) coursename,courses.school courseschool,rtrim(cs.name) courseschoolname,ss.school studentschool,rtrim(ss.name) as studentschoolname,
+            students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype")
+            ->order('courseno,studentno')->select();
+        $count= $this->query->table('makeup')
+            ->join('scores','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')
+            ->join('students ',' students.studentno=scores.studentno')
+            ->join('courses','courses.courseno=makeup.courseno')
+            ->join('classes','classes.classno=students.classno')
+            ->where($condition)->count();// 查询满足要求的总记录数
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
     /**获取补考课程
      * @param int $page
      * @param int $rows
@@ -74,28 +122,36 @@ class Makeup extends  MyService {
      * @return array|null
      * @throws \think\Exception
      */
-    public function getStudentList($page=1,$rows=20,$year='',$term='',$courseno=''){
-        if($year==''||$term==''||$courseno=='')
-            throw new Exception('year term courseno is empty', MyException::PARAM_NOT_CORRECT);
-
+    public function getStudentList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
         $result=null;
         $condition=null;
-        $condition['makeup.courseno']=$courseno;
         $condition['makeup.year']=$year;
         $condition['makeup.term']=$term;
-        $count= $this->query->table('makeup')->where($condition)->count();// 查询满足要求的总记录数
-        $data=$this->query->table('scores')->join('students ',' students.studentno=scores.studentno')
+        if($courseno!='%') $condition['makeup.courseno']=array('like',$courseno);
+        if($studentno!='%') $condition['makeup.studentno']=array('like',$studentno);
+        if($courseschool!='') $condition['courses.school']=$courseschool;
+        if($studentschool!='') $condition['classes.school']=$studentschool;
+        if($examrem!='') $condition['scores.examrem']=$examrem;
+        $data=$this->query->table('scores')
+            ->join('students ',' students.studentno=scores.studentno')
             ->join('approachcode ',' approachcode.code=scores.approach')
             ->join('makeup','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')
+            ->join('courses','courses.courseno=makeup.courseno')
+            ->join('classes','classes.classno=students.classno')
+            ->join('examremoptions','examremoptions.code=scores.examrem')
             ->where($condition)->page($page,$rows)
             ->field("makeup.lock,case when testscore2='' then cast(examscore2 as char) else rtrim(testscore2) end printscore,
             rtrim(case when testscore2='' then cast(examscore2 as char) else rtrim(testscore2) end)  score,
-            scores.recno,scores.studentno,students.name,scores.testscore2,scores.examscore2,approachcode.name as approachname,examrem")
-            ->order('studentno')->select();
+            scores.recno,scores.studentno,rtrim(students.name) name,scores.testscore2,scores.examscore2,approachcode.name as approachname,examrem,rtrim(examremoptions.name) examremname,
+            makeup.courseno,rtrim(courses.coursename) ")
+            ->order('courseno,studentno')->select();
+        $count= $this->query->table('makeup')->where($condition)->count();// 查询满足要求的总记录数
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+
+
 
     /**更新考试成绩
      * @param $postData

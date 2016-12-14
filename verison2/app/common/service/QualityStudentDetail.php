@@ -33,6 +33,13 @@ class QualityStudentDetail extends MyService{
                 where qualitystudent.year=:year and qualitystudent.term=:term and qualitystudent.courseno like :courseno
                 and not exists (select * from qualitystudentdetail as d where d.map=qualitystudent.id and d.studentno=r32.studentno)";
             $row=Db::execute($sql,$bind);
+
+            $sql="update qualitystudent
+                set amount=isnull(t.amount,0)
+                from qualitystudent left join (select map,count(*) amount from qualitystudentdetail group by map) as t on t.map=qualitystudent.id
+                where qualitystudent.year=:year and qualitystudent.term=:term and qualitystudent.courseno like :courseno";
+            Db::execute($sql,$bind);
+
         }
         catch(\Exception $e){
             throw $e;
@@ -101,6 +108,14 @@ class QualityStudentDetail extends MyService{
         else
             return 0;
     }
+    private  static function  updateAttendent($id){
+        $bind=['id'=>$id];
+        $sql="update qualitystudent
+                set amount=isnull(t.amount,0)
+                from qualitystudent left join (select map,count(*) amount from qualitystudentdetail group by map) as t on t.map=qualitystudent.id
+                where qualitystudent.id=:id";
+        Db::execute($sql,$bind);
+    }
     //更新学生名单
     public function  update($postData){
         $deleteRow=0;
@@ -110,9 +125,10 @@ class QualityStudentDetail extends MyService{
         $status=1;
         //更新部分
         //开始事务
+        $map=$postData["map"];
         $this->query->startTrans();
         try {
-            $map=$postData["map"];
+
             if(MyAccess::checkQualityStudentSchool($map)) {
                 if (isset($postData["inserted"])) {
                     $updated = $postData["inserted"];
@@ -134,6 +150,7 @@ class QualityStudentDetail extends MyService{
                         $deleteRow += $this->query->table('qualitystudentdetail')->where($condition)->delete();
                     }
                 }
+
             }
             else
             {
@@ -146,6 +163,7 @@ class QualityStudentDetail extends MyService{
             throw $e;
         }
         $this->query->commit();
+        self::updateAttendent($map);
         if($deleteRow+$insertRow+$errorRow==0){
             $status=0;
             $info="没有数据更新";

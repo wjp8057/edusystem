@@ -14,18 +14,21 @@
 namespace app\exam\controller;
 
 
+use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\Makeup;
 
 class Start extends  MyController{
     //读取补考学生名单
-    public function  query($page = 1, $rows = 20,$studentno='%',$courseno='%',$courseschool='',$studentschool='',$examrem='')
+    public function  query($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem='')
     {
         $result=null;
-        try {
-
-        } catch (\Exception $e) {
+       // try {
+            $obj=new Makeup();
+            $result=$obj->getList($page,$rows,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$examrem);
+    /*    } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
+        }*/
         return json($result);
     }
 }

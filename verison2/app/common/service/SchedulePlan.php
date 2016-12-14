@@ -51,10 +51,10 @@ class SchedulePlan extends MyService {
             ->join('schools ',' schools.school=courses.school')
             ->join('classes ',' classes.classno=courseplan.classno')
             ->where($condition)->group('examoptions.value,scheduleplan.exam,scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group],
-            rtrim(courses.coursename), rtrim(schools.name),schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock')
+            rtrim(courses.coursename), rtrim(schools.name),schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock,degree')
             ->field("scheduleplan.recno,scheduleplan.courseno+scheduleplan.[group] as courseno,rtrim(courses.coursename) as coursename,
             rtrim(schools.name) schoolname,schools.school,scheduleplan.estimate,scheduleplan.attendents,halflock,lock ,
-            dbo.GROUP_CONCAT(rtrim(classes.classname),',') as classname,rtrim(examoptions.value) examtypename,scheduleplan.exam")
+            dbo.GROUP_CONCAT(rtrim(classes.classname),',') as classname,rtrim(examoptions.value) examtypename,scheduleplan.exam,degree")
             ->page($page,$rows)->where($extracondtion)->order('courseno')
             ->select();
         $count= $this->query->table('scheduleplan')->join('courses','courses.courseno=scheduleplan.courseno')
@@ -152,6 +152,7 @@ class SchedulePlan extends MyService {
                     if(MyAccess::checkCourseSchool(substr($one->courseno,0,7))){
                         $condition['recno'] = $one->recno;
                         $data['exam'] = $one->exam;
+                        $data['degree']=$one->degree;
                         $updateRow += $this->query->table('scheduleplan')->where($condition)->update($data);
                     }
                     else{

@@ -28,7 +28,7 @@ class QualityStudent extends MyService {
             $bind=["year"=>$year,"term"=>$term,"courseno"=>$courseno];
             //同步课程信息
             $sql="insert into qualitystudent(year,term,teacherno,type,courseno,school)
-                select scheduleplan.year,scheduleplan.term ,teacherplan.teacherno,courses.form,scheduleplan.courseno+scheduleplan.[group] as courseno,courses.school
+                select distinct scheduleplan.year,scheduleplan.term ,teacherplan.teacherno,courses.form,scheduleplan.courseno+scheduleplan.[group] as courseno,courses.school
                 from scheduleplan
                 inner join teacherplan on teacherplan.map=scheduleplan.recno
                 inner join courses on courses.courseno=scheduleplan.courseno
@@ -69,7 +69,7 @@ class QualityStudent extends MyService {
             ->where($condition)
             ->field('qualitystudent.id,qualitystudent.year,qualitystudent.term,qualitystudent.teacherno,rtrim(teachers.name) teachername,qualitystudent.type,
             rtrim(qualitystudenttype.name) typename,qualitystudent.courseno,rtrim(courses.coursename) coursename,qualitystudent.school,rtrim(schools.name) schoolname,
-            qualitystudent.enabled')
+            qualitystudent.enabled,amount')
             ->order('year,term,courseno,teacherno')->select();
         $count= $this->query->table('qualitystudent')
             ->join('teachers','teachers.teacherno=qualitystudent.teacherno')

@@ -32,43 +32,27 @@ class TestCourse extends MyService {
         }
     }
     //读取期末考试课程列表
-    function getList($page = 1, $rows = 20,$year,$term,$courseno='%',$classno='%',$lock='',$type='A')
+    function getList($page = 1, $rows = 20,$year,$term,$courseno='%',$classname='%',$lock='',$type='A')
     {
         $result=['total'=>0,'rows'=>[]];
         $condition = null;
-        $condition['courseplan.year']=$year;
-        $condition['courseplan.term']=$term;
-        $condition['testcourse.type']='A';
+        $condition['testcourse.year']=$year;
+        $condition['testcourse.term']=$term;
+        $condition['testcourse.type']=$type;
         if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
         if($lock!='') $condition['testcourse.lock']=array('like',$lock);
-        if($type=='A') {
-            if($classno!='%') $condition['courseplan.classno']=array('like',$classno);
+        if($classname!='%') $condition['classes']=array('like',$classname);
             $data = $this->query->table('testcourse')->page($page, $rows)
                 ->join('courses', 'courses.courseno=substring(testcourse.courseno,1,7)')
                 ->join('courseplan', 'courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
                 ->join('classes', 'classes.classno=courseplan.classno')
                 ->join('schools', 'schools.school=courses.school')
                 ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
-            courses.school,rtrim(schools.name) schoolname,dbo.GROUP_CONCAT(rtrim(classes.classname),',') classname")
-                ->group('testcourse.id,courses.school,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,courses.coursename,schools.name,
-            testcourse.courseno2')
-                ->order('courseno')
-                ->where($condition)->select();
-            $count = $this->query->table('testcourse')
-                ->join('courseplan', 'courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
-                ->where($condition)->count('distinct testcourse.courseno');
-        }
-        else{
-            $data = $this->query->table('testcourse')->page($page, $rows)
-                ->join('courses', 'courses.courseno=substring(testcourse.courseno,1,7)')
-                ->join('schools', 'schools.school=courses.school')
-                ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
-            courses.school,'' classname")
+            courses.school,rtrim(schools.name) schoolname,classes")
                 ->order('courseno')
                 ->where($condition)->select();
             $count = $this->query->table('testcourse')
                 ->where($condition)->count();
-        }
         if (is_array($data) && count($data) > 0)
             $result = array('total' => $count, 'rows' => $data);
         return $result;

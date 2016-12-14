@@ -22,7 +22,7 @@ use app\common\vendor\PHPExcel;
 
 class End extends MyController{
     //获取统一排考课程列表
-    public function courselist($page = 1, $rows = 20, $year, $term,$courseno='%',$coursename='%',$classno='%',$school='',$exam='')
+    public function courselist($page = 1, $rows = 20, $year, $term,$courseno='%',$coursename='%',$classno='%',$school='',$exam='',$degree='')
     {
         $result = null;
         try {
@@ -30,6 +30,8 @@ class End extends MyController{
             $condition = null;
             if($exam!='')
                 $condition['scheduleplan.exam']=$exam;
+            if($degree!='')
+                $condition['scheduleplan.degree']=$degree;
             $result = $obj->getList($page, $rows, $year, $term, $courseno, $coursename, $classno, $school, $condition);
 
 
@@ -63,10 +65,12 @@ class End extends MyController{
             $sheet='全部';
             $title='统考课程列表';
             $count=count($data);
-            for($i=0;$i<$count;$i++)
-                $data[$i]['exam']=$data[$i]['exam']=="1"?"是":"否";
+            for($i=0;$i<$count;$i++) {
+                $data[$i]['exam'] = $data[$i]['exam'] == "1" ? "是" : "否";
+                $data[$i]['degree'] = $data[$i]['degree'] == "1" ? "是" : "否";
+            }
             $template= array("courseno"=>"课号","coursename"=>"课名","schoolname"=>"开课学院","examtypename"=>"考试类型","classname"=>"主修班级",
-                "exam"=>"统一排考");
+                "exam"=>"统一排考",'degree'=>'学位课程');
             $string=array("courseno");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
             PHPExcel::export2Excel($file,$array);

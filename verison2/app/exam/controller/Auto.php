@@ -24,12 +24,12 @@ use app\common\vendor\PHPExcel;
 //考试设置
 class Auto extends  MyController {
     //检索排考的课程
-    public function query($page = 1, $rows = 20, $year, $term,$classno='%',$courseno='%',$status='',$type)
+    public function query($page = 1, $rows = 20, $year, $term,$classname='%',$courseno='%',$status='',$type)
     {
         $result = null;
         try {
             $obj = new TestCourse();
-            $result = $obj->getList($page, $rows, $year, $term,$courseno,$classno,$status,$type);
+            $result = $obj->getList($page, $rows, $year, $term,$courseno,$classname,$status,$type);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }

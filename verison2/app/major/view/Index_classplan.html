@@ -74,7 +74,7 @@
             pageSize: 20,
             singleSelect:'true',
             url: '{$ROOT}/major/plan/classplansearch',
-            queryParams: {year: $('#year').val()},
+            queryParams: {year: $('#year').val(),school:school2.combobox('getValue')},
             toolbar: '#toolbar2',
             pageList: [20,50, 100, 200],
             columns: [[

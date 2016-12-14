@@ -11,6 +11,13 @@
         exam.combobox({
             panelHeight:'auto'
         });
+        var degree=$('#degree');
+        degree.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
         //设置默认学院，非管理部门为本学院
         if('{$USERINFO.manage}'!='1')
             school.combobox('select','{$USERINFO.school}');
@@ -24,6 +31,8 @@
             },
             columns:[[
                 {field:'exam',title:'统一排考*',width:60,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
+                    formatter:function(val,rec){if(val==1)return '√';}},
+                {field:'degree',title:'学位课程*',width:60,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},
                     formatter:function(val,rec){if(val==1)return '√';}},
                 {field:'courseno',title:'课号',width:80,align:'center'},
                 {field:'coursename',title:'课名',width:250,align:'center'},
@@ -83,6 +92,7 @@
                     var data={};
                     data.recno=rows[i].recno;
                     data.exam=rows[i].exam;
+                    data.degree=rows[i].degree;
                     data.courseno=rows[i].courseno;
                     updateRows.push(data);
                 }
@@ -114,7 +124,8 @@
                 courseno: $('#courseno').val(),
                 coursename: $('#coursename').val(),
                 school:$('#school').combobox('getValue'),
-                exam:$('#exam').combobox('getValue')
+                exam:$('#exam').combobox('getValue'),
+                degree:$('#degree').combobox('getValue')
             });
         });
         $('#menu_export,#export').click(function(){
@@ -182,6 +193,8 @@
             <option value="1">统一排考</option>
             <option value="0">自主安排</option>
         </select>
+        <label for="degree">学位课程：</label>
+        <input id="degree" size="8">
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
