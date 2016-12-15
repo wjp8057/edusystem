@@ -178,4 +178,11 @@ class Index extends Template
         $this->assign('type',$type);
         return $this->fetch('schedule');
     }
+
+    //增加考试通告页面
+    public function examnote($recno){
+        $exam=Item::getExamItem($recno);
+        $this->assign('exam',$exam);
+        return $this->fetch();
+    }
 }

@@ -232,4 +232,19 @@ class Item {
         }
         return $data;
     }
+
+    //获取统考科目信息
+    public static function getExamItem($recno,$alert=true){
+        $condition=null;
+        $condition['recno']=$recno;
+        $data=Db::table('standardexams')->where($condition)
+            ->field('rtrim(courseno) courseno,rtrim(examname) examname,rtrim(schoolcode) schoolcode,
+            rtrim(testcode) testcode,rtrim(rem) rem,recno')
+            ->find();
+        if(!is_array($data)) {
+            if($alert)
+                throw new Exception('recno' . $recno, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
 }

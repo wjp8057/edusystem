@@ -1,0 +1,90 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        {
+            var examdate=$('#examdate');
+            var deadline=$('#deadline');
+            examdate.datebox({
+                required: true,
+                showSeconds: false
+            });
+            deadline.datetimebox({
+                required: true,
+                showSeconds: false
+            });
+        }
+        $("#save").click(function() {
+            if($("#myForm").form('validate')){
+                var effectRow ={};
+                var updateRow=[];
+                var updateObj = {}; //插入的单元格
+                updateObj.map='{$exam.recno}';
+                updateObj.year=$("#year").val();
+                updateObj.term=$("#term").val();
+                updateObj.deadline=deadline.datetimebox('getValue');
+                updateObj.examdate=examdate.datetimebox('getValue');
+                updateObj.fee=$("#fee").val();
+                updateObj.rem=$("#rem").val();
+                updateRow.push(updateObj);
+                effectRow["inserted"]=$.toJSON(updateRow);
+                $.post('{$ROOT}/exam/grade/noteupdate',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
+        $("#myForm").form('validate');
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">新增考试统考</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>科目课号</th>
+            <td>{$exam.courseno}</td>
+            <th>考试代码</th>
+            <td>{$exam.testcode}</td>
+        </tr>
+        <tr>
+            <th>考试名称</th>
+            <td>{$exam.examname}</td>
+            <th>学校代码</th>
+            <td>{$exam.schoolcode}</td>
+        </tr>
+        <tr>
+            <th><label for="year">学年</label></th>
+            <td><input id="year" size="4" class="easyui-validatebox" data-options="required:true,validType:'integer'" value="{$YEARTERM.year}"/></td>
+            <th><label for="term">学期</label></th>
+            <td><input id="term" size="1" class="easyui-validatebox" data-options="required:true,validType:'integer'" value="{$YEARTERM.term}"/></td>
+        </tr>
+
+        <tr>
+            <th><label for="examdate">考试日期</label></th>
+            <td><input id="examdate" /></td>
+            <th><label for="deadline">报名截止时间</label></th>
+            <td><input id="deadline" /></td>
+        </tr>
+        <tr>
+            <th><label for="fee">报名费</label></th>
+            <td><input id="fee" size="4" class="easyui-validatebox" data-options="required:true,validType:'integer'" value="30" /></td>
+            <th><label for="rem">考试说明</label></th>
+            <td><input id="rem" size="30" class="easyui-validatebox" data-options="validType:'maxLength[30]'"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">发布考试通告</a>
+    </div>
+</div>
