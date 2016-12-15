@@ -44,12 +44,14 @@ class Makeup extends  MyService {
             where scores.year=:year and scores.term=:term and r12.courseno=scores.courseno
             and  plantype!=r12.coursetype";
         Db::execute($sql,$bind);
-        //一般课程添加到makeup表中
+        //一般课程添加到makeup表中,以开课的课程未参考依据
         $sql="insert into makeup(year,term,studentno,courseno)
             select year,term,studentno,courseno
             from scores
             where scores.examscore<60 and scores.testscore not in ('合格','及格','中等','良好','优秀') and qm not in ('缺考','违纪')
-            and scores.year=:year and scores.term=:term and scores.plantype!='E'  and scores.[group] not in ('BY','ZX')
+            and scores.year=:year and scores.term=:term  and scores.[group] not in ('BY','ZX')
+            and exists (select * from courseplan where courseplan.year=scores.year and courseplan.term=scores.term and courseplan.courseno+courseplan.[group]=scores.courseno+scores.[group]
+                  and courseplan.coursetype!='E')
             and not exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno  )
             ";
         $rows=Db::execute($sql,$bind);
@@ -99,7 +101,7 @@ class Makeup extends  MyService {
             ->field("makeup.id,rtrim(case when testscore='' then cast(examscore as char) else rtrim(testscore) end) score,
             scores.studentno,rtrim(students.name) studentname,approachcode.name as approachname,examrem,rtrim(examremoptions.name) examremname,
             scores.courseno+scores.[group] courseno,rtrim(courses.coursename) coursename,courses.school courseschool,rtrim(cs.name) courseschoolname,ss.school studentschool,rtrim(ss.name) as studentschoolname,
-            students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype")
+            students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype,makeup.lock,qm")
             ->order('courseno,studentno')->select();
         $count= $this->query->table('makeup')
             ->join('scores','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')
@@ -109,6 +111,41 @@ class Makeup extends  MyService {
             ->where($condition)->count();// 查询满足要求的总记录数
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+    //更新补考名单
+    public function update($postData){
+        $updateRow=0;
+        $info='';
+        $status=1;
+        //更新部分
+        //开始事务
+        $this->query->startTrans();
+        try {
+                if (isset($postData["deleted"])) {
+                    $updated = $postData["deleted"];
+                    $listUpdated = json_decode($updated);
+                    foreach ($listUpdated as $one) {
+                        $condition = null;
+                        $condition['id'] = (int)$one->id;
+                        $condition['lock'] = 0;
+
+                        $updateRow += $this->query->table('makeup')
+                            ->where($condition)->delete();
+                    }
+            }
+        }
+        catch(\Exception $e){
+            $this->query->rollback();
+            throw $e;
+        }
+        $this->query->commit();
+        if($updateRow>0) $info.=$updateRow.'条删除！</br>';
+        if($info=='') {
+            $info="没有数据被更新";
+            $status=0;
+        }
+        $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
     /**获取补考课程
@@ -403,4 +440,6 @@ class Makeup extends  MyService {
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
+
+
 }

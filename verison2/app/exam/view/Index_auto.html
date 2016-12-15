@@ -269,7 +269,7 @@
         }
         function setStatus(lock){
             $.post('{$ROOT}/exam/auto/lockfree',{year:$('#year').val(),term:$('#term').val(),courseno:$('#courseno').val(),
-                classno:$('#classno').val(),lock:lock,type:type},function(result){
+                classname:$('#classname').val(),lock:lock,type:type},function(result){
                 if (result.status==1){
                     $('#dg').datagrid('reload');
                     $.messager.alert("成功",result.info,"info");
@@ -299,7 +299,7 @@
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="lock">按班号锁定</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="lock">按班名锁定</a>
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="neglock">锁定反向</a>
         </div>
         <div>

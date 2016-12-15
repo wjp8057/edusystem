@@ -22,7 +22,7 @@
         });
         $('#dg').datagrid({
             title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
-            url:'{$ROOT}/exam/end/studentquery',
+            url:'{$ROOT}/exam/end/delayquery',
             singleSelect:true,
             queryParams: {
                 year:$('#year').val(),
@@ -99,8 +99,8 @@
             var courseno=encodeURI($('#courseno').val());
             var courseschool=encodeURI($('#courseschool').combobox('getValue'));
             var studentschool=encodeURI($('#studentschool').combobox('getValue'));
-            var examrem=encodeURI($('#examrem').combobox('getValue'));
-            $.fileDownload("{$ROOT}/exam/start/export?year=" +year+"&term="+term+'&courseno='+courseno+'&studentno='+studentno+'&courseschool='+courseschool+'&studentschool='+studentschool+'&examrem='+examrem, {
+            var delay=encodeURI($('#delay').combobox('getValue'));
+            $.fileDownload("{$ROOT}/exam/end/delayexport?year=" +year+"&term="+term+'&courseno='+courseno+'&studentno='+studentno+'&courseschool='+courseschool+'&studentschool='+studentschool+'&delay='+delay, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -129,7 +129,7 @@
             var effectRow = {};
             if(rows.length>0) {
                 effectRow["updated"] = $.toJSON(buildDataArray(rows));
-                $.post('{$ROOT}/exam/end/studentupdate',effectRow, function (result) {
+                $.post('{$ROOT}/exam/end/delayupdate',effectRow, function (result) {
                     if (result.status == 1) {
                         tt.datagrid('reload');
                         $.messager.show({	// show error message
@@ -175,6 +175,7 @@
     <div class="information">
         <ol>说明：
             <li>生成补考名单时会添加缓考的学生记录。</li>
+            <li>添加缓考，设置学号，课号，缓考原因为“正常”，检索数据，将缓考原因列修改为具体的缓考理由，最后点保存。</li>
         </ol>
     </div>
 </div>

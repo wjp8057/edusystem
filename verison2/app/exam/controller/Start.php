@@ -53,7 +53,7 @@ class Start extends  MyController{
             $sheet='全部';
             $title=$file;
             $template= array("courseno"=>"课号","coursename"=>"课名","courseschoolname"=>"开课学院","studentno"=>"学号","studentname"=>"姓名",
-                "classname"=>"班级","plantypename"=>"类型","studentschoolname"=>"所在学院","score"=>"成绩","examremname"=>"考试备注");
+                "classname"=>"班级","plantypename"=>"类型","studentschoolname"=>"所在学院","qm"=>"期末","score"=>"总评","examremname"=>"考试备注");
             $string=array("studentno","courseno");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
             PHPExcel::export2Excel($file,$array);
@@ -61,7 +61,18 @@ class Start extends  MyController{
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
-
+    }
+    //更新名单
+    public function update()
+    {
+        $result=null;
+        try {
+            $obj=new Makeup();
+            $result=$obj->update($_POST);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
     }
 
 }

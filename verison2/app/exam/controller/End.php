@@ -80,8 +80,8 @@ class End extends MyController{
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
     }
-    //检索学生成绩记录
-    public function  studentquery($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$delay='')
+    //缓考检索学生
+    public function  delayquery($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$delay='')
     {
         $result=null;
         try {
@@ -92,8 +92,8 @@ class End extends MyController{
         }
         return json($result);
     }
-
-    public function  studentupdate()
+    //缓考状态保存
+    public function  delayupdate()
     {
         $result=null;
         try {
@@ -103,6 +103,27 @@ class End extends MyController{
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
         return json($result);
+    }
+
+    //导出缓考信息
+    public function delayexport($year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$delay=''){
+        try{
+            $obj=new Score();
+            $result=$obj->getStudentDetail(1,2000,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$delay);
+            $data=$result['rows'];
+            $file=$year."学年第".$term."学期学期期末缓考名单";
+            $sheet='全部';
+            $title=$file;
+            $template= array("courseno"=>"课号","coursename"=>"课名","courseschoolname"=>"开课学院","studentno"=>"学号","studentname"=>"姓名",
+                "classname"=>"班级","plantypename"=>"类型","studentschoolname"=>"所在学院","delayname"=>"缓考原因");
+            $string=array("studentno","courseno");
+            $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
+            PHPExcel::export2Excel($file,$array);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+
     }
 
 }

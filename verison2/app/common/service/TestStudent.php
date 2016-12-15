@@ -28,6 +28,26 @@ class TestStudent extends MyService {
             where testcourse.year=:year and testcourse.term=:term and testcourse.type='A' and testcourse.lock=0";
         return Db::execute($sql,$bind);
     }
+    //载入学期初补考学生名单
+    public static function  loadStart($year,$term){
+        $bind=array('year'=>$year,'term'=>$term);
+        $sql="insert into teststudent(map,studentno)
+            select testcourse.id,makeup.studentno
+            from testcourse inner join makeup on makeup.courseno=substring(testcourse.courseno,1,7)
+            and makeup.year=testcourse.year and makeup.term=testcourse.term
+            where testcourse.year=:year and testcourse.term=:term and testcourse.type='B' and testcourse.lock=0";
+        return Db::execute($sql,$bind);
+    }
+    public static function  loadGraduate($year,$term){
+        $bind=array('year'=>$year,'term'=>$term);
+        $sql="insert into teststudent(map,studentno)
+            select testcourse.id,scores.studentno
+            from testcourse inner join scores on scores.courseno+scores.[group]=testcourse.courseno
+            and scores.year=testcourse.year and scores.term=testcourse.term
+            where testcourse.year=:year and testcourse.term=:term and testcourse.type='C' and testcourse.lock=0";
+        return Db::execute($sql,$bind);
+    }
+
     //清空名单
     public static function clear(){
         $sql="delete from teststudent";

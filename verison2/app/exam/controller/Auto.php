@@ -48,11 +48,11 @@ class Auto extends  MyController {
         return json($result);
     }
     //批量开放与锁定课程
-    public function lockfree($year,$term,$type,$courseno='%',$classno='%',$lock=0){
+    public function lockfree($year,$term,$type,$courseno='%',$classname='%',$lock=0){
         $result = null;
         try {
             $obj = new TestCourse();
-            $result = $obj->setCourseStatus($year,$term,$type,$courseno,$classno,$lock);
+            $result = $obj->setCourseStatus($year,$term,$type,$courseno,$classname,$lock);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -106,7 +106,7 @@ class Auto extends  MyController {
             $file = $year."学年第".$term."学期".$typename."时间安排表";
             $sheet = '全部';
             $title = $file;
-            $template = array('courseno'=>'课号','coursename'=>'课名','schoolname'=>'学院','classname'=>'班级','amount'=>'人数','flag'=>'时间',);
+            $template = array('courseno'=>'课号','coursename'=>'课名','schoolname'=>'学院','classes'=>'班级','amount'=>'人数','flag'=>'时间',);
             $string = array("courseno");
             $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
             PHPExcel::export2Excel($file, $array);

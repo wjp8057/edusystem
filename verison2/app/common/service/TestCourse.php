@@ -13,8 +13,10 @@ namespace app\common\service;
 
 
 use app\common\access\MyAccess;
+use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Db;
+use think\Exception;
 
 class TestCourse extends MyService {
     public static function getTypeName($type='A')
@@ -44,11 +46,9 @@ class TestCourse extends MyService {
         if($classname!='%') $condition['classes']=array('like',$classname);
             $data = $this->query->table('testcourse')->page($page, $rows)
                 ->join('courses', 'courses.courseno=substring(testcourse.courseno,1,7)')
-                ->join('courseplan', 'courseplan.courseno+courseplan.[group]=testcourse.courseno and testcourse.year=courseplan.year and courseplan.term=testcourse.term')
-                ->join('classes', 'classes.classno=courseplan.classno')
                 ->join('schools', 'schools.school=courses.school')
                 ->field("testcourse.id,testcourse.lock,testcourse.flag,testcourse.amount,testcourse.courseno,testcourse.courseno2,rtrim(courses.coursename)coursename,
-            courses.school,rtrim(schools.name) schoolname,classes")
+            courses.school,rtrim(schools.name) schoolname,rtrim(classes) classes")
                 ->order('courseno')
                 ->where($condition)->select();
             $count = $this->query->table('testcourse')
@@ -71,6 +71,26 @@ class TestCourse extends MyService {
         $rows=Db::execute($sql,$bind);
         return array('info'=>$rows.'门课程成功载入！','status'=>'1');
     }
+    //载入学期初补考课程
+    private static function loadStartCourse($year,$term){
+        $bind=array('year'=>$year,'term'=>$term);
+        $sql="insert into testcourse(year,term,type,courseno,courseno2,coursename,classes)
+            select distinct year,term,'B',makeup.courseno+'BK',makeup.courseno+'BK',rtrim(courses.coursename),''
+            from makeup inner join courses on courses.courseno=makeup.courseno
+            where makeup.year=:year and makeup.term=:term";
+        $rows=Db::execute($sql,$bind);
+        return array('info'=>$rows.'门课程成功载入！','status'=>'1');
+    }
+    //载入毕业前补考的课程
+    private static function loadGraduateCourse($year,$term){
+        $bind=array('year'=>$year,'term'=>$term);
+        $sql="insert into testcourse(year,term,type,courseno,courseno2,coursename,classes)
+            select distinct year,term,'C',scores.courseno+scores.[group],scores.courseno+scores.[group],rtrim(courses.coursename),''
+            from scores  inner join courses on courses.courseno=scores.courseno
+            where scores.year=:year and scores.term=:term and scores.[group]='BY'";
+        $rows=Db::execute($sql,$bind);
+        return array('info'=>$rows.'门课程成功载入！','status'=>'1');
+    }
     function  loadCourse($year,$term,$type='A'){
         $bind=array('year'=>$year,'term'=>$term,'type'=>$type);
         MyAccess::checkAccess('E');
@@ -79,13 +99,17 @@ class TestCourse extends MyService {
         switch($type){
             case 'A':
                 return self::loadFinalCourse($year,$term);
-
+            case 'B':
+                return self::loadStartCourse($year,$term);
+            case 'C':
+                return self::loadGraduateCourse($year,$term);
             default:
-                return self::loadFinalCourse($year,$term);
+                return  array('info'=>'排考类型参数错误！','status'=>'0');
+
         }
     }
     //锁定，解锁
-    public function setCourseStatus($year,$term,$type,$courseno='%',$classno='%',$lock=0){
+    public function setCourseStatus($year,$term,$type,$courseno='%',$classname='%',$lock=0){
         try {
             if($lock==0){
                 $data['lock']=array('exp','lock^1');
@@ -99,16 +123,9 @@ class TestCourse extends MyService {
             $condition['testcourse.term']=$term;
             $condition['testcourse.type']=$type;
             if($courseno!='%') $condition['testcourse.courseno']=array('like',$courseno);
-            if($classno!='%') {
-                $condition['courseplan.classno'] = array('like', $classno);
-                $row = $this->query->table('testcourse')
-                    ->join('courseplan', 'testcourse.courseno=courseplan.courseno+courseplan.[group] and testcourse.year=courseplan.year and testcourse.term=courseplan.term')
+            if($classname!='%')  $condition['testcourse.classes'] = array('like', $classname);
+            $row = $this->query->table('testcourse')
                     ->where($condition)->update($data);
-            }
-            else {
-                $row = $this->query->table('testcourse')
-                    ->where($condition)->update($data);
-            }
         }
         catch(\Exception $e){
             throw $e;
@@ -241,10 +258,10 @@ class TestCourse extends MyService {
                 $total=TestStudent::loadFinal($year,$term);
                 break;
             case 'B': //期初补考
-                $total=TestStudent::loadFinal($year,$term);
+                $total=TestStudent::loadStart($year,$term);
                 break;
             case 'C': //毕业前补考
-                $total=TestStudent::loadFinal($year,$term);
+                $total=TestStudent::loadGraduate($year,$term);
                 break;
             default:
                 return  array('info'=>'排考类型参数错误！','status'=>'0');

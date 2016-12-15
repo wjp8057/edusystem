@@ -39,8 +39,11 @@
                 {field:'plantypename',title:'修课',width:60,align:'center'},
                 {field:'classname',title:'班级',width:160,align:'center'},
                 {field:'studentschoolname',title:'所在学院',width:140,align:'center'},
-                {field:'score',title:'成绩',width:50,align:'center'},
-                {field:'examremname',title:'考试备注',width:80,align:'center'}
+                {field:'qm',title:'期末',width:50,align:'center'},
+                {field:'score',title:'总评',width:50,align:'center'},
+                {field:'examremname',title:'考试备注',width:80,align:'center'},
+                {field:'lock',title:'锁定',width:50,align:'center',formatter:function(val,rec){if(val==1)return '√';}}
+
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){
@@ -83,11 +86,47 @@
             var length=rows.length;
             for (var i = 0; i < length; i++) {
                 var updateObj = {}; //插入的单元格
-                updateObj.recno = rows[i].recno;
+                updateObj.id = rows[i].id;
                 updateRow.push(updateObj);
             }
             return updateRow;
         }
+        function checkLock(rows){
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                if(rows[i].lock==1){
+                    $.messager.alert('错误', '课号：'+rows[i].courseno+'学号：'+rows[i].studentno+'已锁定，无法删除！', 'error');
+                    return false;
+                }
+            }
+            return true;
+        }
+        $("#save,#menu_save").click(function () {
+            var tt = $('#dg');
+            var rows = tt.datagrid('getChanges', 'deleted');
+            var length=rows.length;
+            if (length<= 0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '没有数据需要保存！', 'info');
+                return;
+            }
+            if(!checkLock(rows))
+                return;
+            var effectRow = {};
+            effectRow["deleted"] = $.toJSON(buildDataArray(rows));
+            $.post('{$ROOT}/exam/start/update', effectRow, function (result) {
+                if (result.status == 1) {
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误', result.info, 'error');
+                }
+            }, 'json');
+        });
+
         //初始化
         $("#init").click(function() {
                 $.post('{$ROOT}/exam/start/init',{year:$("#year").val(),term:$("#term").val()}, function (result) {
@@ -114,18 +153,43 @@
                     $.messager.alert('错误',html,'error');
                 }
             });
-            return false; //this is critical to stop the click event which will trigger a normal file download!
+            return false;
         });
+
+        $("#menu_delete,#delete").click(function(){
+            var tt = $('#dg');
+            var rows=tt.datagrid('getSelections');
+            if(!checkLock(rows))
+                return;
+            var length=rows.length;
+            for(var i=length-1;i>=0;i--){
+                var index=tt.datagrid('getRowIndex',rows[i].id);
+                tt.datagrid('deleteRow',index);
+            }
+        });
+
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+
     });
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+        <div class="menu-sep"></div>
         <div id='menu_export' data-options="iconCls:'icon icon-print'">导出</div>
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
     </div>
     <div id="toolbar">
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-tool',plain:'true'" id="init">生成名单</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
         <label for="year">学年：</label><input id="year" size="4" value="{$YEARTERM.year}"/>
         <label for="term">学期：</label><input id="term" size="1" value="{$YEARTERM.term}"/>
         <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
