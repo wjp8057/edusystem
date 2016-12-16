@@ -74,7 +74,7 @@ class Login
             header('Location:' . Request::instance()->root() . '/teacher/?233');
         }
         else if($forward=="login") {
-            self::switchbystatus($status);
+            self::redirect();
         }
         else if ($forward=="room"){
             header('Location:' . Request::instance()->root() . '/teacher/?1478');

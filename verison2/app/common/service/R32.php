@@ -265,7 +265,7 @@ class R32 extends  MyService {
                 }
                 //2、判断是否锁定，如果锁定了且非管理员就退出
                 $course=Item::getSchedulePlanItem($year,$term,$courseno);
-                if($course['halflock']==1)
+                if($course['halflock']==1&&session('S_MANAGE')!=1)
                 {
                     $info.='失败，'.$courseno.'已锁定！<br/>';
                     $status=0;
@@ -309,7 +309,7 @@ class R32 extends  MyService {
                 $courseno = $one->courseno;
                 //判断是否锁定，如果锁定了且非管理员就退出
                 $course = Item::getSchedulePlanItem($year, $term, $courseno);
-                if ($course['halflock'] == 1) {
+                if ($course['halflock'] == 1&&session('S_MANAGE')!=1) {
                     $info .= '失败，' . $courseno . '已锁定！<br/>';
                     $status = 0;
                     continue; //进入下一个课程。
