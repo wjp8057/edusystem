@@ -18,20 +18,48 @@ use think\Db;
 use think\Request;
 
 class MultiServer {
-
+    //选择一个服务器
     public static function selectServer(){
         $config=config('logdb');
         $condition=null;
         $condition['status']=1;
         $result=Db::connect($config)->table('server')->field('rtrim(ip) ip,cpu')->where($condition)->order('cpu')->find();
         if($result!=null) {
-            $ip = $result['ip'];
-            $request = Request::instance();
-            if(session('S_LOGIN_TYPE')==2) {
-                header('Location:http://'.$ip.'/' . $request->root().'/');
+            return  $result['ip'];
         }
         else
-            echo '无可用服务器';
-
+           return null;
     }
+
+    // 切换服务器
+    public static function changeServer($serverip,$pageurl){
+        $username=session('S_USER_NAME');
+        $condition['username']=$username;
+        $time=time();
+        $data['timeflag']=$time;
+        Db::table('sessions')->where($condition)->update($data);
+        $request = Request::instance();
+        header('Location:http://' . $serverip . $request->root() .$pageurl."?username=".$username."&timeflag=".$time);
+    }
+    public static function checkFlag($username,$timeflag){
+        $time=time();
+        //如果大于10分钟
+        if((int)$time-(int)$timeflag>600)
+            return ['status'=>false,'info'=>'凭据失效'];
+
+        $condition['username']=$username;
+        $condition['timeflag']=$timeflag;
+        $result=Db::table('sessions')->where($condition)->find();
+        //凭据清空
+        $condition=null;
+        $condition['username']=$username;
+        $data['timeflag']='';
+        Db::table('sessions')->where($condition)->update($data);
+        if($result==null)
+            return ['status'=>false,'info'=>'凭据无效'];
+        else
+            return ['status'=>true,'info'=>'校验成功'];
+    }
+
+
 }

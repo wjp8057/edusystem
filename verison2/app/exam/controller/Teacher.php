@@ -22,12 +22,12 @@ use app\common\vendor\PHPExcel;
 
 class Teacher extends MyController {
     //考试课程列表
-    public function  courselist($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='')
+    public function  courselist($page=1,$rows=20,$year,$term,$type,$flag='',$school='',$studentschool='',$teachername='%')
     {
         $result=null;
         try {
             $obj = new TestPlan();
-            $result = $obj->getList($page,$rows,$year,$term,$type,$flag,$school,$studentschool);
+            $result = $obj->getList($page,$rows,$year,$term,$type,$flag,$school,$studentschool,$teachername);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

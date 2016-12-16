@@ -544,6 +544,6 @@ class Option {
      * 测试专用
      */
     public function test(){
-       MultiServer::selectServer();
+       MultiServer::changeServer();
     }
 }

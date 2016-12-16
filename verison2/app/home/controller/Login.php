@@ -10,6 +10,7 @@ use app\common\access\MyAccess;
 use app\common\service\User;
 use app\common\vendor\Captcha;
 use app\common\vendor\CAS;
+use app\common\vendor\MultiServer;
 use think\Request;
 
 class Login
@@ -46,7 +47,23 @@ class Login
         session(null);
         header('Location:'.Request::instance()->root().'/home/index/login');
     }
-
+    private  function switchbystatus($status)
+    {
+        switch ($status) {
+            case 1:
+                header('Location:' . Request::instance()->root() . '/home/index/index');
+                break;
+            case 2:
+                header('Location:' . Request::instance()->root() . '/teacher/index/index');
+                break;
+            case 3:
+                header('Location:' . Request::instance()->root() . '/student/index/index');
+                break;
+            default:
+                echo  "登录失败";
+                break;
+        }
+    }
     /**
      *统一登录
      */
@@ -57,23 +74,30 @@ class Login
             header('Location:' . Request::instance()->root() . '/teacher/?233');
         }
         else if($forward=="login") {
-            switch ($status) {
-                case 1:
-                    header('Location:' . Request::instance()->root() . '/home/index/index');
-                    break;
-                case 2:
-                    header('Location:' . Request::instance()->root() . '/teacher/index/index');
-                    break;
-                case 3:
-                    header('Location:' . Request::instance()->root() . '/student/index/index');
-                    break;
-                default:
-                    echo "登录失败";
-                    break;
-            }
+            self::switchbystatus($status);
         }
         else if ($forward=="room"){
             header('Location:' . Request::instance()->root() . '/teacher/?1478');
         }
     }
+
+    public function redirect($serverip=''){
+        if($serverip=='')
+            $serverip=MultiServer::selectServer();
+        MultiServer::changeServer($serverip,'/home/login/redirectlogin');
+    }
+
+    public function redirectlogin($username='',$timeflag=''){
+        $result=MultiServer::checkFlag($username,$timeflag);
+        if($result['status']){
+            $status=MyAccess::signInAsUserName($username);
+            if($result==0)
+                $status=MyAccess::signInAsStudent($username);
+            self::switchbystatus($status);
+        }
+        else
+            echo $result['info'];
+
+    }
+
 }
