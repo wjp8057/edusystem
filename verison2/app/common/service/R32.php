@@ -129,18 +129,6 @@ class R32 extends  MyService {
         }
         return array('info' => $info, 'status' => $status);
     }
-    //更新选课人数
-    private static function updateAttendent($year,$term,$courseno){
-        $condition=null;
-        $condition['year']=$year;
-        $condition['term']=$term;
-        $condition['courseno+[group]']=$courseno;
-        $amount=Db::table('r32')->where($condition)->count();
-        $data['attendents']=$amount;
-        Db::table('scheduleplan')->where($condition)->update($data);
-
-        Db::table('viewscheduletable')->where($condition)->update($data);
-    }
     //检测是否已缴费 true 已缴纳，false  未缴纳
     private static function checkFee($studentno){
         $condition=null;
@@ -493,9 +481,20 @@ class R32 extends  MyService {
             and  not exists (select * from r32 where r32.year=courseplan.year and r32.term=courseplan.term
              and r32.courseno+r32.[group]=courseplan.courseno+courseplan.[group]  and r32.studentno=students.studentno)";
         $row=Db::execute($sql,$bind);
+        self::updateAttendent($year,$term,'%');
         return array('info'=>"统一选课完成，新增".$row."条记录",'status'=>"1");
     }
-    //获取
+    public static  function updateAttendent($year,$term,$courseno){
+        $bind=["year"=>$year,"term"=>$term,'courseno'=>$courseno];
+        //完全重复
+        $sql="update scheduleplan set attendents=t.amount
+          from scheduleplan inner join (select year,term,courseno+[group] courseno,count(*) amount from r32
+          where year=:year and term=:term and courseno+[group] like :courseno
+          group by year,term,courseno+[group]) as t on t.year=scheduleplan.year and t.term=scheduleplan.term
+          and t.courseno=scheduleplan.courseno+scheduleplan.[group]";
+        Db::execute($sql,$bind);
+    }
+    //获取类型简称
     private static  function  getTypeName($type){
         switch($type){
             case 'M':

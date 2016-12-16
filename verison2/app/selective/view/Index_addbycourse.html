@@ -106,7 +106,7 @@
                 var amount=classrows.length;
                 for(var j=0;j<amount;j++){
                     if(rows[i].studentno==classrows[j].studentno){
-                        $.messager.alert('错误', rows[i].studentno+rows[i].name+'已在成员列表中！' , 'error');
+                        $.messager.alert('错误', rows[i].studentno+rows[i].studentname+'已在成员列表中！' , 'error');
                         return;
                     }
                 }
@@ -120,6 +120,8 @@
                     }
                 });
             }
+            tt2.datagrid('clearSelections');
+            tt2.datagrid('clearChecked');
         });
         $("#remove,#menu_remove").click(function () {
             var tt = $('#dg');
@@ -130,6 +132,8 @@
                     var index=tt.datagrid('getRowIndex',rows[i].studentno);
                     tt.datagrid('deleteRow',index);
             }
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
 
         });
         //绑定点击保存按钮事件

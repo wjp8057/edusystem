@@ -13,6 +13,7 @@ namespace app\all\controller;
 use app\common\service\R32;
 use app\common\vendor\Captcha;
 use app\common\access\MyAccess;
+use app\common\vendor\MultiServer;
 use think\Controller;
 use think\Db;
 use think\Log;
@@ -543,8 +544,6 @@ class Option {
      * 测试专用
      */
     public function test(){
-       $obj=new R32();
-        echo $obj->selectedTable('2016','1','1530104');
-
+       MultiServer::selectServer();
     }
 }

@@ -239,7 +239,7 @@ class Score extends  MyService {
             ->where($condition)->page($page,$rows)
             ->field("scores.year,scores.term,students.studentno,students.name studentname,scores.courseno+scores.[group] courseno,
                 courses.credits,rtrim(courses.coursename) coursename,isnull(case when testscore = '' then cast(examscore as char) else rtrim(testscore) end,'') as score,
-                isnull(case when testscore2 = '' then cast(examscore2 as char) else rtrim(testscore2) end,'') as makup,
+                isnull(case when testscore2 = '' then cast(examscore2 as char) else rtrim(testscore2) end,'') as makeup,
                 rtrim(examremoptions.name) examremname,rtrim(approachcode.name) as approachname,point,rtrim(examoptions.value) as examtypename,
                 rtrim(courseapproaches.value) courseapproachname")
             ->order('year,term,courseno')->select();

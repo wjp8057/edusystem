@@ -121,21 +121,6 @@ class SchedulePlan extends MyService {
         $result=array('info'=>"设置成功",'status'=>1);
         return $result;
     }
-    //同步选课人数
-    public function updateAttendent($year,$term,$courseno='%'){
-        $condition = null;
-        $condition['r32.year'] = $year;
-        $condition['r32.term'] = $term;
-        if($courseno!='%') $condition['r32.courseno+r32.[group]']=$courseno;
-        $subsql = $this->query->table('r32')->where($condition)->field('courseno+[group] courseno,count(*) amount ')->group('courseno+[group]')->buildSql();
-
-        $condition = null;
-        $condition['year'] = $year;
-        $condition['term'] = $term;
-        if($courseno!='%') $condition['scheduleplan.courseno+scheduleplan.[group]']=$courseno;
-        $data['attendents']=array('exp','t.amount');
-        $this->query->table('scheduleplan')->join($subsql.' t','t.courseno=scheduleplan.courseno')->where($condition)->update($data);
-    }
     //修改是否统一排考
     public function updateExam($postData){
         $updateRow=0;

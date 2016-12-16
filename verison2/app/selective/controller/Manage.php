@@ -62,14 +62,11 @@ class Manage extends MyController {
     //同步选课人数与selective表
     public function syncourse($year,$term){
         $result = null;
-        try {
-            $obj=new SchedulePlan();
-            $obj->updateAttendent($year,$term);
+   //     try {
+            R32::updateAttendent($year,$term,'%');
             $obj = new Selective();
             $result = $obj->update($year,$term);
-        } catch (\Exception $e) {
-            MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
+
         return json($result);
     }
 
