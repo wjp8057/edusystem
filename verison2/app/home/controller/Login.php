@@ -51,7 +51,7 @@ class Login
     {
         switch ($status) {
             case 1:
-                header('Location:' . Request::instance()->root() . '/home/index/index');
+                header('Location:' . Request::instance()->root() . '/');
                 break;
             case 2:
                 header('Location:' . Request::instance()->root() . '/teacher/index/index');
@@ -70,6 +70,7 @@ class Login
     public function caslogin($ticket="",$forward=""){
         $service= 'http://'.$_SERVER["SERVER_NAME"]."/web/home/login/caslogin?forward=".$forward;
         $status=CAS::signinNormal($ticket,$service);
+        session_write_close();
         if($forward=="score"){
             header('Location:' . Request::instance()->root() . '/teacher/?233');
         }

@@ -26,6 +26,7 @@ class CAS {
 
         if($ticket==""){
             header('Location:'.$ssoURL."login?service=".$service);
+            die();
         }
         $validateURL=$ssoURL."serviceValidate?ticket=".$ticket."&service=".$service;
         $string= file_get_contents($validateURL);
