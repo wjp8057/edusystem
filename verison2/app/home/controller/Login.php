@@ -44,8 +44,9 @@ class Login
      */
     public function logout()
     {
-        session(null);
-        header('Location:'.Request::instance()->root().'/home/index/login');
+        MyAccess::clearSession();
+        $serverip=MultiServer::selectServer();
+        header('Location:http://'.$serverip.Request::instance()->root().'/home/index/login');
     }
     private  function switchbystatus($status)
     {
@@ -78,7 +79,7 @@ class Login
             self::redirect();
         }
         else if ($forward=="room"){
-            header('Location:' . Request::instance()->root() . '/teacher/?1478');
+            header('Location:' . Request::instance()->root() . '/teacher/?1700');
         }
     }
 

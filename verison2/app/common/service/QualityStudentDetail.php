@@ -14,6 +14,7 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyService;
 use think\Db;
@@ -126,6 +127,7 @@ class QualityStudentDetail extends MyService{
         //更新部分
         //开始事务
         $map=$postData["map"];
+        $item=Item::getQualityStudentItem($map);
         $this->query->startTrans();
         try {
 
@@ -136,6 +138,8 @@ class QualityStudentDetail extends MyService{
                     foreach ($listUpdated as $one) {
                         $data = null;
                         $data['map'] = $map;
+                        $data['year']=$item['year'];
+                        $data['term']=$item['term'];
                         $data['studentno'] = $one->studentno;
                         $insertRow += $this->query->table('qualitystudentdetail')->insert($data);
                     }

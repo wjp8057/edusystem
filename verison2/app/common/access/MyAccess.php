@@ -10,12 +10,21 @@
 // +----------------------------------------------------------------------
 
 namespace app\common\access;
+use app\common\vendor\MultiServer;
 use think\Db;
 use think\Exception;
+use think\Log;
 use think\Request;
 
 class MyAccess {
-
+    public static function clearSession(){
+        $sql='delete from sessions where username=:username';
+        $username=session('S_USER_NAME');
+        Log::log($username);
+        $bind=['username'=>$username];
+        Db::execute($sql,$bind);
+        session(null);
+    }
     /**设置用户的session 信息
      * @param $data
      * @param $username
@@ -327,9 +336,11 @@ class MyAccess {
         header("HTTP/1.1 ".$errorCode." ".$errorMessage." ".MyAccess::getErrorMessage($errorCode)." ");
 
         $redirect='';
-        if($errorCode=='701'||$errorCode=="702")
-            $redirect='<script language="javascript">top.location="'.Request::instance()->root().'/home/index/login"</script>';
-        echo '<html><head><meta charset="UTF-8">'.$redirect.'</head><body>'.$errorMessage.'<br/>'.MyAccess::getErrorChineseMessage($errorCode).'</body></html>';
+        if($errorCode=='701'||$errorCode=="702") {
+            $serverip=MultiServer::selectServer();
+            $redirect = '<script language="javascript">top.location="http://'.$serverip . Request::instance()->root() . '/home/index/login"</script>';
+            echo '<html><head><meta charset="UTF-8">' . $redirect . '</head><body>' . $errorMessage . '<br/>' . MyAccess::getErrorChineseMessage($errorCode) . '</body></html>';
+        }
         die();
     }
     /**获取错误代码消息
@@ -546,4 +557,5 @@ class MyAccess {
             return false;
         }
     }
+
 }

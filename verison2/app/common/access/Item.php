@@ -247,4 +247,17 @@ class Item {
         }
         return $data;
     }
+
+    public static function getQualityStudentItem($id,$alert=true){
+        $condition=null;
+        $condition['id']=$id;
+        $data=Db::table('qualitystudent')->where($condition)
+            ->field('id,year,term,teacherno,type,courseno')
+            ->find();
+        if(!is_array($data)) {
+            if($alert)
+                throw new Exception('id' . $id, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
 }
