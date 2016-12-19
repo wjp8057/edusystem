@@ -41,13 +41,16 @@ class Classes extends MyService{
         $subsql = Db::table('students')->group('classno')->field('classno,count(*) amount')->buildSql();
 
         $data=$this->query->table('classes')->join('schools ',' schools.school=classes.school')
-            ->join('majorcode ',' majorcode.code=classes.major','LEFT')
-            ->join('majordirection ','majordirection.direction=classes.direction','LEFT')
+            ->join('classplan',' classplan.classno=classes.classno','LEFT')
+            ->join('majorplan','majorplan.rowid=classplan.majorplanid','LEFT')
+            ->join('majors','majors.majorschool=majorplan.majorschool','LEFT')
+            ->join('majorcode ',' majorcode.code=majors.majorno','LEFT')
+            ->join('majordirection ','majordirection.direction=majors.direction','LEFT')
             ->join($subsql.' t ',' t.classno=classes.classno','LEFT')
             ->page($page,$rows)
             ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,
-            classes.major,rtrim(majorcode.name) as majorname,classes.students,isnull(t.amount,0) amount,
-            year,rtrim(majordirection.name) directionname,rtrim(classes.direction) direction')
+            rtrim(majors.majorno) major,rtrim(majorcode.name) as majorname,classes.students,isnull(t.amount,0) amount,
+            classes.year,rtrim(majordirection.name) directionname,rtrim(majors.direction) direction')
             ->where($condition)->order('classno')->select();
         $count= $this->query->table('classes')->where($condition)->count();
         if(is_array($data)&&count($data)>0)

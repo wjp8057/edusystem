@@ -152,4 +152,24 @@ class Classes extends MyController {
             MyAccess::throwException($e->getCode(),$e->getMessage());
         }
     }
+    //导出班级信息
+    public function exportclass($classno='%',$classname='%',$school='')
+    {
+        try{
+            $class=new \app\common\service\Classes();
+            $result =  $class->getList(1,10000,$classno,$classname,$school);
+            $data = $result['rows'];
+            $file = "班级列表";
+            $sheet = '全部';
+            $title = '';
+            $template = array("classno" => "班号", "classname" => "班名","students"=>"预计人数","amount"=>"实际人数","schoolname"=>"学院",
+                "major"=>"专业代码","majorname"=>"专业","direction"=>"专业方向代码","directionname"=>"专业方向名称");
+            $string = array("classno");
+            $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
+            PHPExcel::export2Excel($file, $array);
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+    }
 } 

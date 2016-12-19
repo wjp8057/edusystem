@@ -93,7 +93,7 @@ class Login
         $result=MultiServer::checkFlag($username,$timeflag);
         if($result['status']){
             $status=MyAccess::signInAsUserName($username);
-            if($result==0)
+            if($status==0)
                 $status=MyAccess::signInAsStudent($username);
             self::switchbystatus($status);
         }
