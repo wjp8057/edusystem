@@ -55,7 +55,7 @@ class Student extends MyService {
             ->field("students.studentno,rtrim(students.name) name,students.sex,rtrim(sexcode.name) sexname,
             students.classno,rtrim(classes.classname) as classname,classes.school,rtrim(schools.name) schoolname,
             personal.party,rtrim(partycode.name) partyname,personal.nationality,rtrim(nationalitycode.name) nationalityname,
-            personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free,score")
+            personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free,score,students.years")
             ->where($condition)->order('studentno')->select();
         $count= $this->query->table('students')->join('classes  ',' classes.classno=students.classno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
@@ -105,7 +105,17 @@ class Student extends MyService {
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
-
+    //读取毕业信息
+    public function getGraduate($studentno){
+        $condition['studentno']=$studentno;
+        $data=$this->query->table('students')
+            ->field('rtrim(degree) degree,rtrim(majorname) majorname,rtrim(thesis) thesis,rtrim(mentor) mentor,rtrim(graduateno) graduateno,rtrim(verdict) verdict')
+            ->where($condition)->find();
+        if(!is_array($data)) {
+                throw new Exception('studentno' . $studentno, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
     /**修改学生密码(管理员更改）
      * @param string $studentno 学号
      * @param string $password 新密码

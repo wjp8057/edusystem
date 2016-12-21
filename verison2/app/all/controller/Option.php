@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 
 namespace app\all\controller;
+use app\common\service\AddCredit;
 use app\common\service\R32;
 use app\common\vendor\Captcha;
 use app\common\access\MyAccess;
@@ -544,6 +545,7 @@ class Option {
      * 测试专用
      */
     public function test(){
-       MultiServer::changeServer();
+       $obj=new AddCredit();
+        dump($obj->getStudentSummary('134150101'));
     }
 }

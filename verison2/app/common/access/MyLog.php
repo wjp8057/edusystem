@@ -34,10 +34,15 @@ class MyLog {
     public function write($operate=''){
         $request = Request::instance();
         $data['host']=$request->domain();
-        $data['username']=session("S_USER_NAME");
+        if(session("S_USER_NAME")!=null) {
+            $data['username']=session("S_USER_NAME");
+
+        }
+        else{
+            $data['username']='unknown';
+        }
         $data['name']=session("S_REAL_NAME");
         $data['role']=session("S_ROLES");
-
         $data['url']=$request->url();
         $data['remoteip']=get_client_ip();
         $dataString='';

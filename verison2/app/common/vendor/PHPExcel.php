@@ -12,6 +12,10 @@
 
 namespace app\common\vendor;
 
+use app\common\service\AddCredit;
+use app\common\service\Student;
+use app\teacher\controller\Score;
+
 require ROOT_PATH . '/vendor/PHPExcel/PHPExcel.php';
 
 class PHPExcel
@@ -195,12 +199,242 @@ class PHPExcel
         }
         PHPExcel::save2File($filename,$PHPExcel);
     }
+    //获得一个经过处理的学生成绩记录
+    private  static function getSingleScore($studentno){
+        $obj=new \app\common\service\Score();
+        $scoretemp=$obj->getScoreList(1,200,'','',$studentno)['rows'];
+        $scoreamount=count($scoretemp);
+        //清除没有成绩的项目
+        $score=array();
+        for($i=0;$i<$scoreamount;$i++) {
+            if ($scoretemp[$i]['score']!='') {
+                $single[] = array(
+                    "year"=>$scoretemp[$i]['year'],
+                    "term"=> $scoretemp[$i]['term'],
+                    "courseapproachname"=>$scoretemp[$i]['courseapproachname'],
+                    "coursename"=> $scoretemp[$i]['coursename'],
+                    "credits"=>$scoretemp[$i]['credits'],
+                    "score"=>$scoretemp[$i]['score'],
+                    "makeup"=> $scoretemp[$i]['makeup']
+                );
+                $score = array_merge($score, $single);
+                $single=null;
+            }
+        }
+        return $score;
+    }
+    //打印成绩总表
+    static function  printScore($filename='',$studentno='%',$classno='%',$graduate=0){
+        $PHPExcel = new \PHPExcel();
+        set_time_limit(0);
+        $title_nbcc="宁波城市职业技术学院课程成绩总表";
+        $title_nbu="宁波大学职教学院课程成绩总表";
+        $title_style=array(
+            'alignment' => array('horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,'vertical'=>\PHPExcel_Style_Alignment::VERTICAL_CENTER),
+            'font' => array('name' => '黑体', 'size' => '17')
+        );
+        //学年学期子标题样式
+        $subtitle_style=array(
+            'alignment' => array('horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,'vertical'=>\PHPExcel_Style_Alignment::VERTICAL_CENTER),
+            'font' => array('name' => '宋体', 'size' => '10','bold'=>true)
+        );
+        $normal_style=array(
+            'alignment' => array('horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER,'vertical'=>\PHPExcel_Style_Alignment::VERTICAL_CENTER),
+            'font' => array('name' => '宋体', 'size' => '10'));
+        $template=array("courseapproachname"=>"类型","coursename"=>"课程名称","credits"=>"学分","score"=>"成绩","makeup"=>"补考");
+        $blank="--以下空白--";
+        $addStr="创新、技能、素质学分共计";
+        $graduateInfo="";//毕业论文信息
+        $obj=new Student();
+        $students=$obj->getList(1,200,$studentno,'%',$classno,'','','');
+        $students=$students['rows'];
+        $count = count($students);
+        $rowIndex=1; //当前的行标
+        $sheetIndex=0;
+        $PHPExcel->setActiveSheetIndex($sheetIndex);
+        $commonWidth=4.5;
+        $courseWidth=28;
+        $styles=array(
+            "big"=>array( //45条
+                'lines'=>30,
+                'lineheight'=>23,
+                'fontsize'=>10
+            ),
+            "normal"=>array( //60条
+                'lines'=>43,
+                'lineheight'=>16,
+                'fontsize'=>10
+            ),
+            "small"=>array( //90条
+                'lines'=>50,
+                'lineheight'=>13.5,
+                'fontsize'=>10
+            ),
+        );
+        //设置列宽
+        for($col=0;$col<10;$col++){
+           $width=$commonWidth;
+            if($col==1||$col==6) {
+                $width = $courseWidth;
+            }
+            $PHPExcel->getActiveSheet($sheetIndex)->getColumnDimensionByColumn($col)->setWidth($width);
+        }
+        $start=0;
+        for ($now = 0; $now < $count; $now++) {
+            $studentno=$students[$now]['studentno'];
+            //先输出学生基本信息部分
+            //1.标题
+            $title=$students[$now]['years']==4?$title_nbu:$title_nbcc;
+            $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0,$rowIndex,9, $rowIndex);
+            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $title);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A'.$rowIndex)->applyFromArray($title_style);
+            $rowIndex++;
 
-    /**打印成绩单
-     * @param string $filename
-     * @param array $array
-     */
-    static function  printScore($filename='',$array=[]){
+            //2.基本信息  学号 姓名  班级 学院
+            $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0,$rowIndex,9, $rowIndex);
+            $studentinfo="学号：".$studentno." 姓名".$students[$now]['name']." 班级：".$students[$now]['classname']." 学院：".$students[$now]['schoolname'];
+            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $studentinfo);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A'.$rowIndex)->applyFromArray($subtitle_style);
+            $PHPExcel->getActiveSheet($sheetIndex)->getRowDimension($rowIndex)->setRowHeight(18);
+            $rowIndex++;
+            //如果是毕业的，再输出一行信息
+            if($graduate==1){
+                $obj=new Student();
+                $graduateInfo=$obj->getGraduate($studentno);
+                $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0,$rowIndex,9, $rowIndex);
+                $studentinfo="学位:".$graduateInfo['degree']." ".$graduateInfo['majorname']."  证书号:".$graduateInfo['graduateno'];
+                $info=$PHPExcel->getActiveSheet($sheetIndex)->getCellByColumnAndRow(0, $rowIndex-1);
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex-1,$info." 结论:".$graduateInfo['verdict']);
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $studentinfo);
+                $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A'.$rowIndex)->applyFromArray($subtitle_style);
+                $PHPExcel->getActiveSheet($sheetIndex)->getRowDimension($rowIndex)->setRowHeight(18);
+                $rowIndex++;
+            }
+            //读取学生成绩信息,经过处理的
+            $score=self::getSingleScore($studentno);
+            $scoreamount=count($score);
+            if($scoreamount<=45)
+                $style=$styles['big'];
+            else if ($scoreamount>45&&$scoreamount<=68)
+                $style=$styles['normal'];
+            else
+                $style=$styles['small'];
+            $pageLines=$style['lines'];
+            $lineHeight=$style['lineheight'];
+            $normal_style["font"]["size"]=$style['fontsize'];
+            //设置行高
+            for($i=0;$i<$pageLines;$i++)
+                $PHPExcel->getActiveSheet($sheetIndex)->getRowDimension($rowIndex+$i)->setRowHeight($lineHeight);
+            $year='';
+            $term='';
+            $yearterm='';
+            $toPrintTitle=false;
+            $isFirstCol=true; //成绩两列输出，标记是否第一列
+            $start=$rowIndex; //成绩记录开始的行标
+            $colBase=0;
+            $colBaseStr="A";
+            $colBaseStrEnd="E";
+            for($i=0;$i<$scoreamount;$i++){
+                //快到底就剩下两行了，要判断一下
+                if($rowIndex-$start<$pageLines&&$rowIndex-$start>=$pageLines-2&&($year!=$score[$i]['year']||$term!=$score[$i]['term'])){
+                        //刚好切换学年学期了，那就输出以下空白
+                        $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow($colBase,$rowIndex,$colBase+4, $rowIndex);
+                        $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase, $rowIndex, $blank);
+                        $PHPExcel->getActiveSheet($sheetIndex)->getStyle($colBaseStr.$rowIndex.":".$colBaseStrEnd.$rowIndex)->applyFromArray($normal_style);
+                        $isFirstCol=false;//切换到第二个列
+                        $rowIndex=$start;
+                }
+                //已经到底了，到第二页，并打印标题行
+                if($rowIndex-$start>=$pageLines){
+                    $isFirstCol=false;
+                    $toPrintTitle = true;
+                    $rowIndex=$start;
+                    if($year==$score[$i]['year']&&$term==$score[$i]['term']) {
+                        $yearterm= $score[$i]['year']."-".( $score[$i]['year']+1)."学年 第".$term."学期(续)";
+                    }
+                    else{
+
+                        $yearterm= $score[$i]['year']."-".( $score[$i]['year']+1)."学年 第".$term."学期";
+                    }
+                    $year = $score[$i]['year'];
+                    $term = $score[$i]['term'];
+                }
+
+                $colBase=$isFirstCol?0:5;
+                $colBaseStr=$isFirstCol?"A":"F";
+                $colBaseStrEnd=$isFirstCol?"E":"J";
+                //第二种情况，刚刚开始或者不同学年学期，需要打印标题行
+                if($year==''||$year!=$score[$i]['year']||$term!=$score[$i]['term']) {
+                    $year = $score[$i]['year'];
+                    $term = $score[$i]['term'];
+                    $yearterm=$year."-".($year+1)."学年 第".$term."学期";
+                    $toPrintTitle=true;
+                }
+                if($toPrintTitle==true){
+                    $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow($colBase,$rowIndex,$colBase+4, $rowIndex);
+                    $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase, $rowIndex, $yearterm);
+                    $PHPExcel->getActiveSheet($sheetIndex)->getStyleByColumnAndRow($colBase,$rowIndex)->applyFromArray($subtitle_style);
+                    $rowIndex++;
+                    $colIndex=0;
+                    foreach ($template as $v) {
+                        $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase+$colIndex, $rowIndex, $v);
+                        $colIndex++;
+                    }
+                    $PHPExcel->getActiveSheet($sheetIndex)->getStyle($colBaseStr.$rowIndex.":".$colBaseStrEnd.$rowIndex)->applyFromArray($subtitle_style);
+                    $rowIndex++;
+                    $toPrintTitle=false;
+                }
+                //有成绩的才输出
+                if($score[$i]['score']!='') {
+                    $colIndex = 0;
+                    foreach ($template as $k => $v) {
+                        $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase + $colIndex, $rowIndex, $score[$i][$k]);
+                        $PHPExcel->getActiveSheet($sheetIndex)->getStyle($colBaseStr . $rowIndex . ":" . $colBaseStrEnd . $rowIndex)->applyFromArray($normal_style);
+                        $colIndex++;
+                    }
+                    $rowIndex++;
+                }
+            }
+            //创新技能学分部分。
+            $obj=new AddCredit();
+            $addcredit=$obj->getStudentSummary($studentno);
+            $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow($colBase, $rowIndex, $colBase + 4, $rowIndex);
+            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase, $rowIndex, $addStr.$addcredit);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle($colBaseStr . $rowIndex . ":" . $colBaseStrEnd . $rowIndex)->applyFromArray($subtitle_style);
+            $rowIndex++;
+            //最后打印一个以下空白
+            if($rowIndex-$start<$pageLines) {
+                $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow($colBase, $rowIndex, $colBase + 4, $rowIndex);
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow($colBase, $rowIndex, $blank);
+                $PHPExcel->getActiveSheet($sheetIndex)->getStyle($colBaseStr.$rowIndex.":".$colBaseStrEnd.$rowIndex)->applyFromArray($normal_style);
+            }
+            //设置课名的对齐方式
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle("B". $start . ":B". ($start+$pageLines-1))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT)->setShrinkToFit(true);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle("G". $start . ":G". ($start+$pageLines-1))->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT)->setShrinkToFit(true);
+            //论文部分
+            $rowIndex=$start+$pageLines;
+            $PHPExcel->getActiveSheet($sheetIndex)->getRowDimension($rowIndex)->setRowHeight(40);
+            $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0, $rowIndex,5, $rowIndex);
+            if($graduate==true) {
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, "论文题目:" . $graduateInfo['thesis'] . "\n指导教师:" . $graduateInfo['mentor']);
+                $PHPExcel->getActiveSheet($sheetIndex)->getStyle("A" . $rowIndex)->getAlignment()->setWrapText(true);
+            }
+            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(6,$rowIndex,"制表人：".session('S_REAL_NAME')."\n制表日期：".date("Y年m月d日",time()));
+            $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(7, $rowIndex,9, $rowIndex);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle("G".$rowIndex)->getAlignment()->setWrapText(true);
+            $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(7,$rowIndex,"教务处盖章");
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle("A". $rowIndex . ":J". $rowIndex)->applyFromArray($normal_style);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle("A". $rowIndex . ":G". $rowIndex)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+            $PHPExcel->getActiveSheet($sheetIndex)->getStyle( 'A'.$start.':J'.($start+$pageLines))->getBorders()->getAllBorders()->setBorderStyle(\PHPExcel_Style_Border::BORDER_THIN);
+            $rowIndex++;
+            $PHPExcel->getActiveSheet()->setBreak( 'A'.($start+$pageLines) , \PHPExcel_Worksheet::BREAK_ROW );
+        }
+        $PHPExcel->getActiveSheet($sheetIndex)->getPageSetup()->setPaperSize(\PHPExcel_Worksheet_PageSetup::PAPERSIZE_A4);
+        $PHPExcel->getActiveSheet($sheetIndex)->getPageMargins()->setTop(0.5);
+        $PHPExcel->getActiveSheet($sheetIndex)->getPageMargins()->setBottom(0.5);
+        $PHPExcel->getActiveSheet($sheetIndex)->getPageMargins()->setLeft(0.5);
+        $PHPExcel->getActiveSheet($sheetIndex)->getPageMargins()->setRight(0.5);
+        PHPExcel::save2File($filename,$PHPExcel);
 
     }
 }

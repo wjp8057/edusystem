@@ -190,9 +190,6 @@ class MyAccess {
      * @throws \think\exception\DbException
      */
     public static function login($username,$password){
-        $log=new MyLog();
-        session("S_USER_NAME",$username);
-        $log->write('R');
         $result=self::loginAsUser($username,$password);
         if($result==0){
             $result=self::loginAsStudent($username,$password);

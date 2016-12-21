@@ -7,14 +7,21 @@
  */
 namespace app\home\controller;
 use app\common\access\MyAccess;
-use app\common\service\User;
+use app\common\access\MyLog;
 use app\common\vendor\Captcha;
 use app\common\vendor\CAS;
 use app\common\vendor\MultiServer;
+use think\Controller;
 use think\Request;
 
-class Login
+class Login extends Controller
 {
+    public function _initialize()
+    {
+        $log=new MyLog();
+        config('log2db')&&$log->write('R');
+    }
+
     public function checklogin($username='',$pwd='',$code='')
     {
         try {
@@ -71,19 +78,19 @@ class Login
     public function caslogin($ticket="",$forward=""){
         $service= 'http://'.$_SERVER["SERVER_NAME"]."/web/home/login/caslogin?forward=".$forward;
         $status=CAS::signinNormal($ticket,$service);
-        session_write_close();
         if($forward=="score"){
             header('Location:' . Request::instance()->root() . '/teacher/?233');
         }
         else if($forward=="login") {
-            self::redirect();
+            self::redserver();
         }
         else if ($forward=="room"){
             header('Location:' . Request::instance()->root() . '/teacher/?1700');
         }
+        die();
     }
 
-    public function redirect($serverip=''){
+    public function redserver($serverip=''){
         if($serverip=='')
             $serverip=MultiServer::selectServer();
         MultiServer::changeServer($serverip,'/home/login/redirectlogin');

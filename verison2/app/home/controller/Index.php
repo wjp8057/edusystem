@@ -2,6 +2,7 @@
 namespace app\home\controller;
 
 use app\common\access\MyAccess;
+use app\common\access\MyLog;
 use think\Controller;
 use think\Request;
 
@@ -22,6 +23,8 @@ class Index extends Controller
 
         $this->assign("TITLE",config('site.title'));
         $this->assign("COPYRIGHT",config('site.copyright'));
+        $log=new MyLog();
+        config('log2db')&&$log->write('R');
     }
 
     public function index()

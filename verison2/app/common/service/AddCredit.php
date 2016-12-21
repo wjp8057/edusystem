@@ -32,4 +32,14 @@ class AddCredit extends MyService {
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+    //获取指定学生的创新技能学分认定总计
+    function getStudentSummary($studentno){
+        $condition['studentno']=$studentno;
+        $data=$this->query->table('addcredit')
+            ->where($condition)
+            ->field('rtrim(isnull(sum(credit),0)) total')
+            ->find();
+
+        return $data['total'];
+    }
 }

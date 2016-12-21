@@ -1,0 +1,113 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $("#type").combobox({
+            panelHeight:"auto"
+        });
+        $('#dg').datagrid({
+            title:'',idField:'studentno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/score/printer/studentquery',
+            queryParams: {studentno:''},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'studentno',title:'学号',width:90,align:'center'},
+                {field:'name',title:'姓名',width:70,align:'center'},
+                {field:'sexname',title:'性别',width:40,align:'center'},
+                {field:'classno',title:'班号',width:60,align:'center'},
+                {field:'classname',title:'班级',width:160,align:'center'},
+                {field:'schoolname',title:'学院',width:130,align:'center'},
+                {field:'majorname',title:'专业',width:180,align:'center'},
+                {field:'statusname',title:'学籍状态',width:70,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                studentno: $('#studentno').val(),
+                classno: $('#classno').val()
+            });
+        });
+        $('#menu_expor,#export').click(function(){
+            var row= $('#dg').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('错误','请先选择一个学生！','error');
+                return;
+            }
+            exportdata(false);
+        });
+        $('#menu_exportall,#exportall').click(function(){
+            exportdata(true);
+        });
+        /**
+         * 导出数据
+         * @param all true所有数据/false 基础数据
+         */
+        function exportdata(all){
+            var url="";
+            var studentno;
+            var graduate= $('#type').combobox('getValue');
+            if(all)
+            {
+                studentno=encodeURI($('#studentno').val());
+            }
+            else
+                studentno=$('#dg').datagrid('getSelected').studentno;
+            var classno=encodeURI($('#classno').val());
+            $.fileDownload("{$ROOT}/score/printer/studentexport?graduate="+graduate+"&studentno="+studentno+"&classno="+classno, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        }
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export" >导出单个成绩总表</div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_exportall">导出全部成绩总表</div>
+    </div>
+    <div id="toolbar">
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <select id="type">
+            <option value="0" selected="selected">平时成绩总表</option>
+            <option value="1">毕业成绩总表</option>
+        </select>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出单个成绩总表</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="exportall">导出全部成绩总表</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>导出数据分为基础数据与详细数据两种，基础数据为表格中列举的内容，详细数据包含身份证、联系电话、家庭住址等重要信息，仅学籍相关管理人员能够导出。</li>
+        </ol>
+    </div>
+</div>
