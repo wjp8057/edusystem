@@ -2,6 +2,7 @@
 <script type="text/javascript">
     $(function(){
         var school=$('#school');
+        var attendent='{$course.attendents}';
         school.combobox({
             url:'{$ROOT}/all/option/school?only=0&active=1',
             valueField:'school',
@@ -15,7 +16,7 @@
             panelHeight:'auto'
         });
         $('#dg').datagrid({
-            title:'课号：{$course.courseno} 课名：{$course.coursename} 预计人数：{$course.estimate} 实际人数：{$course.attendents}',
+            title:'课号：{$course.courseno} 课名：{$course.coursename} 预计人数：{$course.estimate} 实际人数：'+attendent,
             idField:'studentno', striped:'true',rownumbers:true,
             url:'{$ROOT}/selective/manage/coursestudent',
             queryParams: {  year:'{$course.year}', term: '{$course.term}',courseno:'{$course.courseno}'},
@@ -23,6 +24,10 @@
             remoteSort:false,
             toolbar:'#toolbar',pageList:[20,50,100,200],
             columns:[[
+                {field:'del',title:'删除*',width:40,align:'center',editor:{type:'checkbox',options:{on:1,off:0}},formatter:function(value,rec){
+                    if(value==1)
+                        return '√';
+                }},
                 {field:'studentno',title:'学号',width:80,align:'center',sortable:'true'},
                 {field:'studentname',title:'姓名',width:80,align:'center'},
                 {field:'sexname',title:'性别',width:50,align:'center'},
@@ -91,8 +96,6 @@
         $("#search").click(function() {
             var tt=$('#dg');
             tt.datagrid('loadData',{total:0,rows:[]});
-            tt.datagrid('clearSelections');
-            tt.datagrid('clearChecked');
             tt.datagrid('load', {
                 year: $('#year').val(),
                 term: $('#term').val(),
@@ -113,7 +116,7 @@
             }
             return updateRow;
         }
-        $("#save,#menu_save").click(function(){
+        $("#save").click(function(){
             var tt=$('#dg');
             var length;//删除或更新的行数
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
@@ -153,16 +156,16 @@
             },'json');
         });
         $("#menu_delete,#delete").click(function(){
-            tt=$('#dg');
-            var row = tt.datagrid('getSelected');
-            if (row) {
-                tt.datagrid('endEditing');
-                var rowIndex = tt.datagrid('getRowIndex', row);
-                tt.datagrid('deleteRow', rowIndex);
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            var rows=tt.datagrid('getRows');
+            var amount=rows.length;
+            for(var i=amount-1;i>=0;i--){
+                if(rows[i].del==1)
+                    tt.datagrid('deleteRow', i);
             }
-            else{
-                $.messager.alert('错误','请先选中一条记录','error')
-            }
+            $("#save").click();
         });
         $("#cancel,#menu_cancel").click(function(){
             var tt= $('#dg');
@@ -172,29 +175,50 @@
         //随机生成筛选标记
         $("#random").click(function() {
             var tt= $('#dg');
+            tt.datagrid('rejectChanges');
             var rows=tt.datagrid('getRows');
             var amount=rows.length;
             var max=$('#estimate').val();
+            var studentno=$('#studentno').val();
             var deleted=0;
-            for(;amount>max;amount--){
-                var random=Math.floor(Math.random()*amount);
-                tt.datagrid('deleteRow',random);
-                deleted++;
+            //全部清空
+            var times=0; //循环次数
+            while(deleted<amount-max&&times<2*amount){
+                var index=Math.floor(Math.random()*amount);
+                var start=0;
+                if(studentno!=''){
+                    start = rows[index].studentno.indexOf(studentno);
+                }
+                if(start==0&& rows[index].del==0) {
+                    rows[index].del=1;
+                    tt.datagrid('refreshRow',index);
+                    deleted++;
+                }
+                times++;
             }
-            $.messager.alert('提示',deleted+'位学生被随机筛选，您还需点"保存"提交到数据库或点"取消"恢复筛选记录！','info');
         });
         //按次序筛选
         $("#byorder").click(function() {
             var tt= $('#dg');
+            tt.datagrid('rejectChanges');
             var rows=tt.datagrid('getRows');
             var amount=rows.length;
             var max=$('#estimate').val();
+            var studentno=$('#studentno').val(); //学号前缀
             var deleted=0;
-            for(var i=amount-max-1;i>=0;i--){
-                tt.datagrid('deleteRow',i);
-                deleted++;
+            var index=0;
+            while(deleted<amount-max&&index<amount){
+                var start=0;
+                if(studentno!=''){
+                    start = rows[index].studentno.indexOf(studentno);
+                }
+                if(start==0&& rows[index].del==0) {
+                    rows[index].del=1;
+                    tt.datagrid('refreshRow',index);
+                    deleted++;
+                }
+                index++;
             }
-            $.messager.alert('提示',deleted+'位学生被随机筛选，您还需点"保存"提交到数据库或点"取消"恢复筛选记录！','info');
         });
         $("#menu_insertstudent,#inserstudent").click(function(){
             parent.menuTabs.addTab("按学生新增-{$course.courseno}","{$ROOT}/selective/index/addbystudent?courseno={$course.courseno}&year={$course.year}&term={$course.term}","icon icon-add");
@@ -209,20 +233,18 @@
     <div id="menu" class="easyui-menu" style="width:150px;">
         <div id='menu_insertstudent' data-options="iconCls:'icon icon-add'">按学生新增</div>
         <div id='menu_insertcourse' data-options="iconCls:'icon icon-add'">按选课新增</div>
-        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
         <div id='menu_remove' data-options="iconCls:'icon icon-cancel'">取消</div>
-        <div class="menu-sep"></div>
-        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
     </div>
     <div id="toolbar">
+        <label for="estimate">人数上限：</label><input id="estimate" class="easyui-validatebox" size="4" value="{$course.estimate}"/>
+        <label for="studentno">随机学号前缀：</label><input id="studentno" class="easyui-validatebox" size="4" value=""/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-water',plain:'true'" id="random">随机标记</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-column',plain:'true'" id="byorder">按序标记</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除有√标记的学生</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>|
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="inserstudent">按学生新增</a>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-add',plain:'true'" id="insertcourse">按选课新增</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a>|
-        <label for="estimate">人数上限：</label><input id="estimate" class="easyui-validatebox" size="4" value="{$course.estimate}"/>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-water',plain:'true'" id="random">随机筛选</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-column',plain:'true'" id="byorder">按排序筛选</a>
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
     </div>
     <table id="dg"></table>
     <div class="space"></div>

@@ -121,6 +121,10 @@
                 }
             });
         });
+        $('#seatcommon').click(function(){
+            var url='/exam/index/seatcommon?courseno='+$("#courseno").val()+'&year='+$("#year").val()+"&term="+$("#term").val()+"&type="+type;
+            window.open('{$ROOT}'+url);
+        });
     });
     function print(item){
         var url='/exam/index/seat?courseno='+item+'&year='+$("#year").val()+"&term="+$("#term").val()+"&type="+type;
@@ -140,7 +144,9 @@
         <label for="flag">场次：</label><input id="flag" size="24">
         <label for="teachername">监考姓名：</label><input id="teachername" class="easyui-validatebox" size="5" value="%"/>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a> |
+        <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="9"  data-options="validType:'equalLength[9]'"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-print',plain:'true'" id="seatcommon">非统排考位表</a>
     </div>
         <table id="dg"></table>
     <div class="space"></div>

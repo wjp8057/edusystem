@@ -338,6 +338,8 @@ class MyAccess {
             $redirect = '<script language="javascript">top.location="http://'.$serverip . Request::instance()->root() . '/home/index/login"</script>';
             echo '<html><head><meta charset="UTF-8">' . $redirect . '</head><body>' . $errorMessage . '<br/>' . MyAccess::getErrorChineseMessage($errorCode) . '</body></html>';
         }
+        else
+            echo '<html><head><meta charset="UTF-8">' . $redirect . '</head><body>' . $errorMessage . '<br/>' . MyAccess::getErrorChineseMessage($errorCode) . '</body></html>';
         die();
     }
     /**获取错误代码消息

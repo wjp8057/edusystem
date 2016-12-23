@@ -43,7 +43,7 @@ class R32 extends  MyService {
             ->join('selective','selective.year=r32.year and selective.term=r32.term and selective.studentno=r32.studentno','LEFT')
             ->field('r32.approach,rtrim(approachcode.name) as approachname,rtrim(students.studentno) studentno,
             rtrim(students.name) studentname,rtrim(classes.classname) classname,rtrim(sexcode.name) sexname,rtrim(students.sex) sex,rtrim(schools.name) schoolname,
-            credit,amount,termcredit,termamount,publiccredit+creativecredit publiccredit,r32.repeat')
+            credit,amount,termcredit,termamount,publiccredit+creativecredit publiccredit,r32.repeat,0 as del ')
             ->order('studentno')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
@@ -520,6 +520,7 @@ class R32 extends  MyService {
             ->where($condition)
             ->order('coursename')
             ->select();
+        //课程数
         $cAmount=count($course);
         $selective=$this->query->table('r32')
             ->join('students','students.studentno=r32.studentno')
@@ -528,6 +529,7 @@ class R32 extends  MyService {
             ->where($condition)
             ->order('studentno,coursename')
             ->select();
+        //学生数
         $sAmount=count($selective);
         $content="<tr><td class='studentno'>学号</td><td class='studentname'>姓名</td>";
         for($i=0;$i<$cAmount;$i++)
@@ -538,8 +540,11 @@ class R32 extends  MyService {
         for($j=0;$j<$sAmount;$j++){
             if($lastStudent!=$selective[$j]['studentno'])
             {
-                if($lastStudent!="")
-                    $content.="</tr>";
+                if($lastStudent!="") {
+                    for($q=$i;$q<$cAmount;$q++)
+                        $content.="<td>&nbsp;</td>";
+                    $content .= "</tr>";
+                }
                 $lastStudent=$selective[$j]['studentno'];
                 $content.="<tr><td>".htmlspecialchars($selective[$j]["studentno"])."</td><td>".htmlspecialchars($selective[$j]["studentname"])."</td>";
                 $i=0;
@@ -555,6 +560,8 @@ class R32 extends  MyService {
                     $content.="<td>&nbsp;</td>";
             }
         }
+        for($q=$i;$q<$cAmount;$q++)
+            $content.="<td>&nbsp;</td>";
         $content.="</tr>";
         return  $content;
     }

@@ -13,6 +13,7 @@ use app\common\access\Item;
 use app\common\access\Template;
 use app\common\access\MyAccess;
 use app\common\service\Action;
+use app\common\service\Course;
 use app\common\service\R32;
 use app\common\service\Schedule;
 use app\common\service\TestCourse;
@@ -128,7 +129,57 @@ class Index extends Template
         return $this->fetch('seat');
 
     }
+    function seatcommon($year, $term, $courseno, $page = 1)
+    {
+        try {
+            //头部信息
 
+            $obj=new R32();
+            $result=$obj->getStudentList($page,120,$year,$term,$courseno);
+            $attendents=$result['total'];
+            $result=$result['rows'];
+            $amount = count($result);
+            //给一个默认的座位
+            for($i=0;$i<$amount;$i++)
+                $result[$i]['seat']=$i+1;
+            //每一个开始都随机换一个位置
+
+            for($i=0;$i<$amount;$i++){
+                $temp=$result[$i]['seat'];
+                $seat=rand(1,$amount-1);
+                $result[$i]['seat']=$result[$seat]['seat'];
+                $result[$seat]['seat']=$temp;
+            }
+
+            $obj2=new Course();
+            $course=$obj2->getList(1,1,substr($courseno,0,7))['rows'][0];
+            $course['courseno']=$courseno;
+            $course['attendents']=$attendents;
+            $course['teachername']="__________";
+            $course['roomname']="__________";
+            $course['testtime']="__________";
+            $course['classes']="__________";
+            $course['year']=$year;
+            $course['term']=$term;
+            $course['typename']=TestCourse::getTypeName('A');
+
+            $this->assign('course', $course);
+            $seatstring = '';
+            for ($i = 0; $i < 40; $i++) {
+                $seatstring .= '<tr>';
+                $seatstring .= $i < $amount ? '<td>' . $result[$i]["studentno"] . '</td><td>' . $result[$i]["studentname"] . '</td><td>' . $result[$i]["seat"] . '</td>' : '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $seatstring .= ($i + 40) < $amount ? '<td>' . $result[$i + 40]["studentno"] . '</td><td>' . $result[$i + 40]["studentname"] . '</td><td>' . $result[$i + 40]["seat"] . '</td>' : '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $seatstring .= ($i + 80) < $amount ? '<td>' . $result[$i + 80]["studentno"] . '</td><td>' . $result[$i + 80]["studentname"] . '</td><td>' . $result[$i + 80]["seat"] . '</td>' : '<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $seatstring .= '</tr>';
+            }
+            $this->assign('seat', $seatstring);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch('seat');
+
+    }
     //期初自动排考
     public function startauto(){
         $type=['type'=>'B','typename'=>TestCourse::getTypeName('B')];
