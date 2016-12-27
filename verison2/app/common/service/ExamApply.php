@@ -8,7 +8,7 @@
 // +----------------------------------------------------------------------
 // | Author: fangrenfu <fangrenfu@126.com> 
 // +----------------------------------------------------------------------
-// | Created:2016/12/15 16:10
+// | Created:2016/12/26 11:08
 // +----------------------------------------------------------------------
 
 namespace app\common\service;
@@ -16,22 +16,29 @@ namespace app\common\service;
 
 use app\common\access\MyService;
 
-class ExamNotification extends  MyService{
-    //getList检索
-    function getList($page=1,$rows=20,$year,$term,$lock=''){
+class ExamApply extends MyService {
+    //读取
+    function getList($page=1,$rows=30,$map,$studentno='%',$studentname='%',$classno='%',$school='',$fee=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
-        $condition['year']=$year;
-        $condition['term']=$term;
-        if($lock!='') $condition['lock']=$lock;
-        $data=$this->query->table('examnotification')
-            ->join('standardexams','standardexams.recno=examnotification.map')
-            ->join('testlevel','testlevel.name=standardexams.testlevel')
+        $condition['map']=$map;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($studentname!='%') $condition['students.name']=array('like',$studentname);
+        if($classno!='%') $condition['students.classno']=array('like',$classno);
+        if($school!='') $condition['classes.school']=$school;
+        if($fee!='') $condition['examapplies.fee']=$fee;
+        $data=$this->query->table('examapplies')
+            ->join('students','students.studentno=examapplies.studentno')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools','schools.school=classes.school')
             ->page($page,$rows)->where($condition)
-            ->field('examnotification.recno,examname,rtrim(testlevel.value) testlevelname,deadline,dateofexam,fee,lock,rtrim(examnotification.rem) rem,
-                rtrim(standardexams.rem) standrem')
-            ->order('examname')->select();
-        $count= $this->query->table('examnotification')->where($condition)->count();
+            ->field('students.studentno,students.name studentname,students.classno,rtrim(classes.classname) classname,
+            schools.school,rtrim(schools.name) schoolname,fee')
+            ->order('studentno')->select();
+        $count= $this->query->table('examapplies')
+            ->join('students','students.studentno=examapplies.studentno')
+            ->join('classes','classes.classno=students.classno')
+            ->where($condition)->count();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
@@ -105,5 +112,4 @@ class ExamNotification extends  MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
 }

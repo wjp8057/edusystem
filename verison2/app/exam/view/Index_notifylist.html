@@ -1,0 +1,160 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+
+    $(function(){
+        var lock=$('#lock');
+        lock.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
+
+        lock.combobox('select','0');
+        $('#dg').datagrid({
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/exam/grade/notequery',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                lock:lock.combobox('getValue')
+            },
+            columns:[[
+                {field:'examname',title:'考试名称',width:150,align:'center'},
+                {field:'testlevelname',title:'级别',width:80,align:'center'},
+                {field:'dateofexam',title:'考试时间*',width:120,align:'center',editor:{type:'datetimebox',options:{required:true,showSeconds: false}}},
+                {field:'deadline',title:'报名截止时间*',width:120,align:'center',editor:{type:'datetimebox',options:{required:true,showSeconds: false}}},
+                {field:'fee',title:'报名费*',width:50,align:'center',editor:{type:'validatebox',options:{validType:' integer',required:true}}},
+                {field:'standrem',title:'考试备注',width:250,align:'center'},
+                {field:'rem',title:'本次备注*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[30]'}}},
+                {field:'lock',title:'报名截止*',width:60,editor:{type:'checkbox',options:{on:1,off:0}},align:'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }}
+            ]],
+            //点击单元格时候的事件
+            onClickCell:function(index, field){
+                var tt=$('#dg');
+                tt.datagrid('startEditing',{field:field,index:index});
+                current_datagrid=tt;
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                lock:lock.combobox('getValue')
+            });
+        });
+        //取消更改
+        $("#cancel,#menu_cancel").click(function(){
+            var tt= $('#dg');
+            tt.datagrid('rejectChanges');
+            current_datagrid=null;
+        });
+        //绑定点击保存按钮事件
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.recno=rows[i].recno;
+                updateObj.dateofexam= rows[i].dateofexam;
+                updateObj.deadline = rows[i].deadline;
+                updateObj.fee= rows[i].fee;
+                updateObj.rem= rows[i].rem;
+                updateObj.lock=rows[i].lock;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
+        $("#save,#menu_save").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
+            if(tt.datagrid('editIndex')!=undefined) return;
+            //获取更改的数据行内容
+            var rows;
+            rows=tt.datagrid('getChanges','updated');
+            var count=0;
+            var effectRow = {};
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["updated"]=$.toJSON(buildDataArray(rows));
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(buildDataArray(rows));
+            }
+            if(count<=0) //如果没有任何更新，就退出
+                return;
+
+            $.post('{$ROOT}/exam/grade/noteupdate',effectRow,function(result){
+                if (result.status==1){
+                    tt.datagrid('acceptChanges');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+        //右键菜单删除按钮
+        $("#menu_remove,#remove").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                tt.datagrid('endEditing');
+                var rowIndex = tt.datagrid('getRowIndex', row);
+                tt.datagrid('deleteRow', rowIndex);
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+        <div class="menu-sep"></div>
+        <div id='menu_remove' data-options="iconCls:'icon icon-remove'">删除</div>
+        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
+    </div>
+    <div id="toolbar">
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">删除</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+        <label for="lock">报名截止：</label><input id="lock" size="7"/>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-circle',plain:'true'" id="student">查看报名情况</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-caluate',plain:'true'" id="enroll">考试报名</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，点击后可以修改内容。</li>
+        </ol>
+    </div>
+</div>

@@ -4,7 +4,7 @@
         {
             var examdate=$('#examdate');
             var deadline=$('#deadline');
-            examdate.datebox({
+            examdate.datetimebox({
                 required: true,
                 showSeconds: false
             });
@@ -22,7 +22,7 @@
                 updateObj.year=$("#year").val();
                 updateObj.term=$("#term").val();
                 updateObj.deadline=deadline.datetimebox('getValue');
-                updateObj.examdate=examdate.datetimebox('getValue');
+                updateObj.dateofexam=examdate.datetimebox('getValue');
                 updateObj.fee=$("#fee").val();
                 updateObj.rem=$("#rem").val();
                 updateRow.push(updateObj);
@@ -71,7 +71,7 @@
         </tr>
 
         <tr>
-            <th><label for="examdate">考试日期</label></th>
+            <th><label for="examdate">考试时间</label></th>
             <td><input id="examdate" /></td>
             <th><label for="deadline">报名截止时间</label></th>
             <td><input id="deadline" /></td>
