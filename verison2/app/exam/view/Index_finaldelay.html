@@ -116,6 +116,8 @@
             for (var i = 0; i < length; i++) {
                 var updateObj = {}; //插入的单元格
                 updateObj.recno = rows[i].recno;
+                updateObj.studentno=rows[i].studentno;
+                updateObj.courseno=rows[i].courseno;
                 updateObj.delay = rows[i].delay;
                 updateRow.push(updateObj);
             }

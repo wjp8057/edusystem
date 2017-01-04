@@ -52,7 +52,7 @@ class R32Dump extends MyService {
         $sql="insert into r32dump(year,term,courseno,[group],studentno,inprogram,conflicts,confirm,approach,repeat,fee,coursetype,examtype,selecttime,reason)
               select year,term,courseno,[group],studentno,inprogram,conflicts,confirm,approach,repeat,fee,coursetype,examtype,selecttime,:reason
               from r32
-              where year=:year and term=:term and courseno+[group]=:courseno and studentno like :studentno";
+              where year=:year and term=:term and courseno+[group] like :courseno and studentno like :studentno";
         Db::execute($sql,$bind);
     }
 

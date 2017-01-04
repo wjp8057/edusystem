@@ -326,9 +326,10 @@ class R32 extends  MyService {
                 //更新课程人数
                 self::updateAttendent($year, $term, $courseno);
             }
-            $selective=new Selective();
-            $selective->update($year,$term,$studentno);
         }
+
+        $selective=new Selective();
+        $selective->update($year,$term,$studentno);
         return ['info'=>$info,'status'=>$status];
     }
     //检索学生的选课
@@ -356,6 +357,7 @@ class R32 extends  MyService {
     }
     //选课管理中筛选名单与修改学生修课方式。
     public function update($postData){
+        set_time_limit(0);
         $info='';
         $status=1;
         $updateRow=0;
@@ -365,24 +367,29 @@ class R32 extends  MyService {
         $courseno=$postData["courseno"];
         $year=$postData["year"];
         $term=$postData["term"];
-        if(!MyAccess::checkCourseSchool($courseno))
-        {
-            return ["info"=>$courseno."不是开课学院，无权修改学生记录及修课方式！","status"=>"0"];
-        }
+        $isCourseSchool=MyAccess::checkCourseSchool($courseno);
+
         if (isset($postData["updated"])) {
             $updated = $postData["updated"];
             $listUpdated = json_decode($updated);
             foreach ($listUpdated as $one) {
                 $condition = null;
                 $data=null;
-                $condition['year']=$year;
-                $condition['term']=$term;
-                $condition['courseno']=substr($courseno,0,7);
-                $condition['group']=substr($courseno,7,2);
-                $condition['studentno']=$one->studentno;
-                $data['approach']=$one->approach;
-                $this->query->table('r32')->where($condition)->update($data);
-                $updateRow++;
+                $studentno=$one->studentno;
+                if($isCourseSchool||MyAccess::checkStudentSchool($studentno)) {
+                    $condition['year'] = $year;
+                    $condition['term'] = $term;
+                    $condition['courseno'] = substr($courseno, 0, 7);
+                    $condition['group'] = substr($courseno, 7, 2);
+                    $condition['studentno'] = $studentno;
+                    $data['approach'] = $one->approach;
+                    $this->query->table('r32')->where($condition)->update($data);
+                    $updateRow++;
+                }
+                else {
+                    $status=0;
+                    $info .= '修改失败，你既不是课程' . $courseno . '的开课学院也不是学生' . $studentno . '所在学院！<br/>';
+                }
             }
         }
         if (isset($postData["deleted"])) {
@@ -398,19 +405,26 @@ class R32 extends  MyService {
             else{
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['year']=$year;
-                    $condition['term']=$term;
-                    $condition['courseno']=substr($courseno,0,7);
-                    $condition['group']=substr($courseno,7,2);
-                    $condition['studentno']=$one->studentno;
-                    //写入r32dump
-                    R32Dump::toDump($year,$term,$courseno,$one->studentno,'课程限制，人数过多！');
-                    $this->query->table('r32')->where($condition)->delete();
-                    $deleteRow++;
-                    $selective=new Selective();
-                    $selective->update($year,$term,$one->studentno);
+                    $studentno=$one->studentno;
+                    if($isCourseSchool||MyAccess::checkStudentSchool($studentno)) {
+                        $condition['year'] = $year;
+                        $condition['term'] = $term;
+                        $condition['courseno'] = substr($courseno, 0, 7);
+                        $condition['group'] = substr($courseno, 7, 2);
+                        $condition['studentno'] = $studentno;
+                        //写入r32dump
+                        R32Dump::toDump($year, $term, $courseno, $studentno, '课程限制，人数过多！');
+                        $this->query->table('r32')->where($condition)->delete();
+                        $deleteRow++;
+                    }
+                    else {
+                        $status=0;
+                        $info .= '删除失败，你既不是课程' . $courseno . '的开课学院也不是学生' . $studentno . '所在学院！<br/>';
+                    }
                 }
                 self::updateAttendent($year,$term,$courseno);
+                $selective=new Selective();
+                $selective->update($year,$term,'%');
             }
         }
         if (isset($postData["inserted"])) {
@@ -439,20 +453,26 @@ class R32 extends  MyService {
                         $status=0;
                         continue;
                     }
-                    $program=self::getCourseType($courseno,$studentno);
-                    $data['coursetype']=$program['type'];
-                    $data['inprogram']=$program['in'];
-                    $data['repeat']=self::isRepeat($courseno,$studentno);
-                    $data['examtype']=$examtype;
-                    $data['year']=$year;
-                    $data['term']=$term;
-                    $data['studentno']=$studentno;
-                    $data['courseno']=substr($courseno,0,7);
-                    $data['group']=substr($courseno,7,2);
-                    $this->query->table('r32')->insert($data);
-                    $insertRow++;
-                    $selective=new Selective();
-                    $selective->update($year,$term,$one->studentno);
+                    if($isCourseSchool||MyAccess::checkStudentSchool($studentno)) {
+                        $program = self::getCourseType($courseno, $studentno);
+                        $data['coursetype'] = $program['type'];
+                        $data['inprogram'] = $program['in'];
+                        $data['repeat'] = self::isRepeat($courseno, $studentno);
+                        $data['examtype'] = $examtype;
+                        $data['year'] = $year;
+                        $data['term'] = $term;
+                        $data['studentno'] = $studentno;
+                        $data['courseno'] = substr($courseno, 0, 7);
+                        $data['group'] = substr($courseno, 7, 2);
+                        $this->query->table('r32')->insert($data);
+                        $insertRow++;
+                        $selective = new Selective();
+                        $selective->update($year, $term, $one->studentno);
+                    }
+                    else {
+                        $status=0;
+                        $info .= '添加失败，你既不是课程' . $courseno . '的开课学院也不是学生' . $studentno . '所在学院！<br/>';
+                    }
                 }
                 self::updateAttendent($year,$term,$courseno);
             }
@@ -468,7 +488,7 @@ class R32 extends  MyService {
         }
         return ['info'=>$info,'status'=>$status];
     }
-        //   按班级统一选必修课，模块课
+    //   按班级统一选必修课，模块课
     public static  function selectAll($year,$term,$classno,$type){
          MyAccess::checkAccess('E');
         $bind=["year"=>$year,"term"=>$term,'classno'=>$classno,'type'=>$type];
@@ -484,14 +504,16 @@ class R32 extends  MyService {
         self::updateAttendent($year,$term,'%');
         return array('info'=>"统一选课完成，新增".$row."条记录",'status'=>"1");
     }
+    //更新选课人数
     public static  function updateAttendent($year,$term,$courseno){
-        $bind=["year"=>$year,"term"=>$term,'courseno'=>$courseno];
+        $bind=["year"=>$year,"term"=>$term,"year2"=>$year,"term2"=>$term,'courseno'=>$courseno];
         //完全重复
-        $sql="update scheduleplan set attendents=t.amount
-          from scheduleplan inner join (select year,term,courseno+[group] courseno,count(*) amount from r32
-          where year=:year and term=:term and courseno+[group] like :courseno
+        $sql="update scheduleplan set attendents=isnull(t.amount,0)
+          from scheduleplan left  join (select year,term,courseno+[group] courseno,count(*) amount from r32
+          where year=:year and term=:term
           group by year,term,courseno+[group]) as t on t.year=scheduleplan.year and t.term=scheduleplan.term
-          and t.courseno=scheduleplan.courseno+scheduleplan.[group]";
+          and t.courseno=scheduleplan.courseno+scheduleplan.[group]
+          where scheduleplan.year=:year2 and scheduleplan.term=:term2 and scheduleplan.courseno+scheduleplan.[group] like :courseno";
         Db::execute($sql,$bind);
     }
     //获取类型简称
@@ -566,4 +588,30 @@ class R32 extends  MyService {
         return  $content;
     }
 
+
+    //清除公选课超过限制的学生选课记录 公选课为08开头的课程
+    private static function  clearLimit($year,$term,$studentno,$amount=3){
+
+        $bind=["year"=>$year,"term"=>$term,'studentno'=>$studentno,'reason'=>'公共选修课超过'.$amount."门",'amount'=>$amount];
+        $sql="insert into r32dump(year,term,courseno,[group],studentno,inprogram,conflicts,confirm,approach,repeat,fee,coursetype,examtype,selecttime,reason)
+              select year,term,courseno,[group],studentno,inprogram,conflicts,confirm,approach,repeat,fee,coursetype,examtype,selecttime,:reason
+              from r32 where year=:year and term=:term and studentno like :studentno and courseno like '08%'and  exists (
+              select * from selective as s where s.year=r32.year and s.term=r32.term and s.studentno=r32.studentno and termamount> :amount)";
+        Db::execute($sql,$bind);
+
+        $bind=["year"=>$year,"term"=>$term,'studentno'=>$studentno,'amount'=>$amount];
+        //完全重复
+        $sql="delete  from r32 where year=:year and term=:term and studentno like :studentno and courseno like '08%'and  exists (
+            select * from selective as s where s.year=r32.year and s.term=r32.term and s.studentno=r32.studentno and termamount> :amount)";
+        Db::execute($sql,$bind);
+    }
+    //删除超过限制选课的
+    public function deleteOverLimit($year,$term,$studentno='%',$amount=3){
+        //删除选课记录
+        self::clearLimit($year,$term,$studentno,$amount);
+        //更新选课情况表
+        $obj=new Selective();
+        $obj->update($year,$term,'%');
+        return ['status' => "1", 'info' => "删除完成"];
+    }
 }

@@ -126,4 +126,26 @@ class Manage extends MyController {
         }
         return json($result);
     }
+
+    public function overlist($page=1,$rows=50,$year,$term,$studentno='%',$amount=0){
+        $result=null;
+        try {
+            $obj=new Selective();
+            $result = $obj->getOverList($page,$rows,$year,$term,$studentno,$amount);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function overclear($year,$term,$studentno='%',$amount=3){
+        $result=null;
+        try {
+            $obj=new R32();
+            $result = $obj->deleteOverLimit($year,$term,$studentno,$amount);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+        return json($result);
+    }
 } 

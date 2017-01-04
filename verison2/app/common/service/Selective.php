@@ -71,8 +71,8 @@ class Selective extends MyService
         $this->query->commit();
         return ['status' => "1", 'info' => "更新成功"];
     }
-
-    public function getList($page=1,$rows=20,$year,$term,$studentno='%',$name='%',$classno='%',$school=''){
+    //获取选课情况
+    public function getList($page=1,$rows=20,$year,$term,$studentno='%',$name='%',$classno='%',$school='',$amount=0){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['selective.year']=$year;
@@ -100,5 +100,32 @@ class Selective extends MyService
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+
+    //获取选课情况
+    public function getOverList($page=1,$rows=20,$year,$term,$studentno='%',$amount=0){
+        $result=['total'=>0,'rows'=>[]];
+        $condition=null;
+        $condition['selective.year']=$year;
+        $condition['selective.term']=$term;
+        if($studentno!='%') $condition['students.studentno']=array('like',$studentno);
+        if($amount!=0) $condition['selective.termamount']=array('gt',$amount);
+        $data=$this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->join('schools','schools.school=classes.school')
+            ->join('selective','selective.studentno=students.studentno')
+            ->field('students.studentno,students.name,students.classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,credit,amount,termcredit,termamount')
+            ->page($page,$rows)
+            ->order('termamount desc')
+            ->where($condition)
+            ->select();
+        $count= $this->query->table('students')
+            ->join('classes','classes.classno=students.classno')
+            ->join('selective','selective.studentno=students.studentno')
+            ->where($condition)->count();
+        if(is_array($data)&&count($data)>0)
+            $result=array('total'=>$count,'rows'=>$data);
+        return $result;
+    }
+
 
 }

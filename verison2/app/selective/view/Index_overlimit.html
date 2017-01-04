@@ -1,0 +1,88 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
+            url:'{$ROOT}/selective/manage/overlist',
+            queryParams: {  year: $('#year').val(), term: $('#term').val()},
+            singleSelect:true,
+            toolbar:'#toolbar',pageList:[20,50,100,200],
+            columns:[[
+                {field:'studentno',title:'学号',width:80,align:'center'},
+                {field:'name',title:'姓名',width:120,align:'center'},
+                {field:'classname',title:'班级',width:200,align:'center'},
+                {field:'schoolname',title:'学院',width:200,align:'center'},
+                {field:'termamount',title:'公选课门数',width:70,align:'center'}
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                studentno: $('#studentno').val(),
+                amount: $('#amount').val()
+            });
+        });
+        $("#delete,#menu_delete").click(function(){
+
+            $.post('{$ROOT}/selective/manage/overclear',{year: $('#year').val(), term: $('#term').val(), studentno: $('#studentno').val(), amount: $('#amount').val()},function(result){
+                if (result.status==1){
+                    var tt=$('#dg');
+                    tt.datagrid('reload');
+                    $.messager.show({	// show error message
+                        title: '成功',
+                        msg: result.info
+                    });
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+
+
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除全部</div>
+    </div>
+    <div id="toolbar">
+        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/>
+        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="2" value="{$NEXTYEARTERM.term}"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="amount">门数上限：</label><input id="amount" class="easyui-validatebox" size="2" value="3"/>
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除所有学生的全部公选课</a>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>公共选修课定义为课号是08开头的课程。</li>
+        </ol>
+    </div>
+</div>

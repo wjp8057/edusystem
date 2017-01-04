@@ -315,9 +315,16 @@ class Score extends  MyService {
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    $condition['recno'] = $one->recno;
-                    $data['delay'] = $one->delay;
-                    $updateRow += $this->query->table('scores')->where($condition)->update($data);
+                    if(MyAccess::checkStudentSchool($one->studentno)||MyAccess::checkCourseSchool($one->courseno)) {
+                        $condition['recno'] = $one->recno;
+                        $data['delay'] = $one->delay;
+                        $updateRow += $this->query->table('scores')->where($condition)->update($data);
+                    }
+                    else
+                    {
+                        $status=0;
+                        $info .= '修改失败，你既不是课程' . $one->courseno . '的开课学院也不是学生' . $one->studentno . '所在学院！<br/>';
+                    }
                 }
             }
         }
