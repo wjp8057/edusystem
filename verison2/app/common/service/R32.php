@@ -515,6 +515,13 @@ class R32 extends  MyService {
           and t.courseno=scheduleplan.courseno+scheduleplan.[group]
           where scheduleplan.year=:year2 and scheduleplan.term=:term2 and scheduleplan.courseno+scheduleplan.[group] like :courseno";
         Db::execute($sql,$bind);
+
+        $bind=["year"=>$year,"term"=>$term,'courseno'=>$courseno];
+        //完全重复
+        $sql="update viewscheduletable set attendents=s.attendents
+          from viewscheduletable as v inner join scheduleplan as s on s.recno=v.recno
+          where s.year=:year and s.term=:term and s.courseno+s.[group] like :courseno";
+        Db::execute($sql,$bind);
     }
     //获取类型简称
     private static  function  getTypeName($type){
