@@ -87,6 +87,26 @@
                 type: $('#type').combobox('getValue')
             });
          });
+        $('#menu_unlock,#unlock').click(function(){
+            var year=$('#year').val();
+            var term=$('#term').val();
+            var row=$('#dg').datagrid('getSelected');
+            if(!row){
+                $.messager.alert('错误','请选择一条课程记录', 'info');
+                return false;
+            }
+            var courseno=row.courseno;
+            $.post('{$ROOT}/score/record/beginunlock',{year:year,term:term,courseno:courseno},function(result){
+                if (result.status==1){
+                    $.messager.alert('成功',result.info,'info');
+                } else {
+                    $.messager.alert('错误',result.info,'error');
+                }
+            },'json');
+        });
+
+
+
     });
     //打开成绩输入页面
     function openTeacherInput(title,icon,type){
@@ -107,6 +127,7 @@
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_unlock' data-options="iconCls:'icon icon-lock'">解锁课程</div>
         <div id='menu_hundred' data-options="iconCls:'icon icon-ten'">按百分制输入</div>
         <div id='menu_five' data-options="iconCls:'icon icon-five'">按五级制输入</div>
         <div id='menu_two' data-options="iconCls:'icon icon-two'">按两级制输入</div>
@@ -124,6 +145,7 @@
             <option value="1">未完成</option>
         </select>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索课程</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-lock',plain:'true'" id="unlock">解锁课程</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-ten',plain:'true'" id="hundred">按百分制输入</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-five', plain:'true'" id="five">按五级制输入</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"   data-options="iconCls:'icon icon-two', plain:'true'" id="two">按两级制输入</a>

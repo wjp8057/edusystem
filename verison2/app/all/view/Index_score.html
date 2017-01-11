@@ -6,7 +6,7 @@ $(function(){
         var page=getQueryString('page');
         if(page==null)
             page=2;
-        location.href=("{$ROOT}/teacher/index/printscore?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
+        location.href=(getURLString()+"?year="+getQueryString('year')+"&term="+getQueryString('term')+"&courseno="+getQueryString('courseno')+"&page="+page);
     });
     $("#print").click(function(){
         window.print();
@@ -17,7 +17,7 @@ $(function(){
 <style type="text/css">
     body{font-size:10pt}
     .title{text-align: center;font-size: 15pt;font-family:"Microsoft YaHei";line-height:40px}
-    .course{text-align: center;line-height:40px;height: 40px;}
+    .course{text-align: center;line-height:20px;height: 20px;}
     #score,#summary{width:100%;margin: 0 auto}
     td{ border: solid #000 1px;text-align: center;height:17px;line-height: 17px;}
     table{border-collapse: collapse;border: none;}
@@ -28,9 +28,10 @@ $(function(){
     .sign div{width:33%;float: left;text-align: center}
 </style>
 <div class="container2">
-    <div class="title">{$year}学年第{$term}学期学期初补考成绩登记表</div>
+    <div class="title">{$title}</div>
     <div class="course">课号：{$course.courseno} 课名：{$course.coursename} 开课学院：{$course.schoolname} 人数：{$course.attendents} <a id="nextpage" href="#">下一页>></a>
         <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a></div>
+    <div class="course">任课教师：{$course.teachername} 班级：{$course.classname} </div>
     <table id="score">
         <tr><td>学号</td><td>姓名</td><td>成绩</td><td>学号</td><td>姓名</td><td>成绩</td><td>学号</td><td>姓名</td><td>成绩</td></tr>
         {$score}

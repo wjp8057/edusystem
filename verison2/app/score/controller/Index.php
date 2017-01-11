@@ -26,8 +26,8 @@ class Index extends  Template {
     function printfinalview($year='',$term='',$courseno='',$page=1){
         try{
             //头部信息
-            $this->assign('year',$year);
-            $this->assign('term',$term);
+            $title=$year."学年第".$term."学期期末成绩登记表";
+            $this->assign('title',$title);
             $schedule=new ViewScheduleTable();
             $course=$schedule->getCourseInfo($year,$term,$courseno);
             $this->assign('course',$course);
@@ -47,7 +47,38 @@ class Index extends  Template {
             $this->assign('score',$scorestring);
             $summary=$score->getCoursePercent($year,$term,$courseno);
             $this->assign('summary',$summary);
-            return $this->fetch();
+            return $this->fetch("all@index/score");
+        }
+        catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(),$e->getMessage());
+        }
+
+    }
+    function printfinalviewblank($year='',$term='',$courseno='',$page=1){
+        try{
+            //头部信息
+            $title=$year."学年第".$term."学期期末成绩登记表(空白)";
+            $this->assign('title',$title);
+            $schedule=new ViewScheduleTable();
+            $course=$schedule->getCourseInfo($year,$term,$courseno);
+            $this->assign('course',$course);
+            //成绩信息
+            $score=new \app\common\service\Score();
+            $student=$score->getStudentList($page,120,$year,$term,$courseno);
+            $result=$student['rows'];
+            $amount=count($result);//当前页行数
+            $scorestring='';
+            for($i=0;$i<40;$i++){
+                $scorestring.='<tr>';
+                $scorestring.=$i<$amount?'<td>'.$result[$i]["studentno"].'</td><td>'.$result[$i]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.=($i+40)<$amount?'<td>'.$result[$i+40]["studentno"].'</td><td>'.$result[$i+40]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.=($i+80)<$amount?'<td>'.$result[$i+80]["studentno"].'</td><td>'.$result[$i+80]["name"].'</td><td>&nbsp;</td>':'<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>';
+                $scorestring.='</tr>';
+            }
+            $this->assign('score',$scorestring);
+            $summary=null;;
+            $this->assign('summary',$summary);
+            return $this->fetch("all@index/score");
         }
         catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());

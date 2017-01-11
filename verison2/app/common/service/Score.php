@@ -9,6 +9,7 @@
 namespace app\common\service;
 
 
+use app\common\access\Item;
 use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
@@ -74,6 +75,7 @@ class Score extends  MyService {
             $year=$postData["year"];
             $term=$postData["term"];
             $courseno=$postData["courseno"];
+            $worktype=Item::getCourseItem($courseno)['worktype'];
             if(MyAccess::checkCourseTeacher($year,$term,$courseno)) {
                 if (isset($postData["updated"])) {
                     $updated = $postData["updated"];
@@ -88,7 +90,7 @@ class Score extends  MyService {
                         $data['qm'] = $one->score;
                         $data['ps'] = '无';
                         $data['edate'] = $examdate;
-                        $data['lock'] = 1;
+                        if($worktype=='C'||$worktype=='D') $data['lock'] = 1;
                         $data['date'] = date('Y-m-d H:i:s');
                         $data['examrem'] = $one->examrem;
                         $updateRow += $this->query->table('scores')->where($condition)->update($data);
@@ -315,7 +317,7 @@ class Score extends  MyService {
                 $listUpdated = json_decode($updated);
                 foreach ($listUpdated as $one) {
                     $condition = null;
-                    if(MyAccess::checkStudentSchool($one->studentno)||MyAccess::checkCourseSchool($one->courseno)) {
+                    if(MyAccess::checkStudentSchool($one->studentno)) {
                         $condition['recno'] = $one->recno;
                         $data['delay'] = $one->delay;
                         $updateRow += $this->query->table('scores')->where($condition)->update($data);
@@ -323,7 +325,7 @@ class Score extends  MyService {
                     else
                     {
                         $status=0;
-                        $info .= '修改失败，你既不是课程' . $one->courseno . '的开课学院也不是学生' . $one->studentno . '所在学院！<br/>';
+                        $info .= '修改失败，你不是学生' . $one->studentno . '所在学院！<br/>';
                     }
                 }
             }
@@ -337,6 +339,27 @@ class Score extends  MyService {
         if($info=='') {
             $info="没有数据被更新";
             $status=0;
+        }
+        $result=array('info'=>$info,'status'=>$status);
+        return $result;
+    }
+
+    public function  unlockCourse($year,$term,$courseno){
+        $condition=null;
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $condition['courseno+[group]']=$courseno;
+        $data=null;
+        $data['lock']=0;
+        $effectRow=$this->query->table('scores')->where($condition)->update($data);
+        if($effectRow>0)
+        {
+            $info="开锁成功！";
+            $status=1;
+        }
+        else {
+            $info="没有开锁！";
+            $status=1;
         }
         $result=array('info'=>$info,'status'=>$status);
         return $result;

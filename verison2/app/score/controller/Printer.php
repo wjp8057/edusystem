@@ -9,18 +9,20 @@ namespace app\score\controller;
 
 use app\common\access\MyAccess;
 use app\common\access\MyController;
+use app\common\service\Score;
+use app\common\service\Student;
 use app\common\service\ViewFinalScoreCourse;
 use app\common\vendor\PHPExcel;
 
 class Printer extends MyController
 {
 
-    public function finalcourselist($page = 1, $rows = 20, $year = '', $term = '', $courseno = '%', $coursename = '%', $school = '')
+    public function finalcourselist($page = 1, $rows = 20, $year = '', $term = '', $courseno = '%', $coursename = '%', $school = '',$type='')
     {
         $result = null;
         try {
             $course = new ViewFinalScoreCourse();
-            $result = $course->getList($page, $rows, $year, $term, $courseno, $coursename, $school);
+            $result = $course->getList($page, $rows, $year, $term, $courseno, $coursename, $school,$type);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -31,7 +33,7 @@ class Printer extends MyController
     {
         $result=null;
         try {
-            $student=new \app\common\service\Student();
+            $student=new Student();
             $result = $student->getList($page,$rows,$studentno,'%',$classno,'','','');
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(),$e->getMessage());
@@ -50,4 +52,16 @@ class Printer extends MyController
         return json($result);
     }
 
+    public function finalunlock($year,$term,$courseno)
+    {
+        $result = null;
+        try {
+            $score = new Score();
+            $result = $score->unlockCourse($year,$term,$courseno);
+
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
 }

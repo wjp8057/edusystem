@@ -220,7 +220,7 @@ class Makeup extends  MyService {
             ->field("makeup.lock,case when testscore2='' then cast(examscore2 as char) else rtrim(testscore2) end printscore,
             rtrim(case when testscore2='' then cast(examscore2 as char) else rtrim(testscore2) end)  score,
             scores.recno,scores.studentno,rtrim(students.name) name,scores.testscore2,scores.examscore2,approachcode.name as approachname,examrem,rtrim(examremoptions.name) examremname,
-            makeup.courseno,rtrim(courses.coursename) ")
+            makeup.courseno,rtrim(courses.coursename) coursename ")
             ->order('courseno,studentno')->select();
         $count= $this->query->table('makeup')->where($condition)->count();// 查询满足要求的总记录数
         if(is_array($data)&&count($data)>0)
@@ -424,14 +424,14 @@ class Makeup extends  MyService {
         $condition=null;
         $condition['year']=$year;
         $condition['term']=$term;
-        $condition['course']=$courseno;
+        $condition['courseno']=$courseno;
         $data=null;
-        $data['lock']=1;
+        $data['lock']=0;
         $effectRow=$this->query->table('makeup')->where($condition)->update($data);
-        if($effectRow>=0)
+        if($effectRow>0)
         {
             $info="开锁成功！";
-            $status=0;
+            $status=1;
         }
         else {
             $info="没有开锁！";
