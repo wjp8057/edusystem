@@ -22,11 +22,11 @@ function getGUID($sessionId){
 function get_year_term(){
     $year=date('Y',time());
     $month=date('m',time());
-    if($month>=3&&$month<=8){
+    if($month>=2&&$month<=8){
         $workyear['term']=2;
         $workyear['year']=$year-1;
     }
-    elseif($month<3){
+    elseif($month<2){
         $workyear['term']=1;
         $workyear['year']=$year-1;
     }
@@ -40,11 +40,11 @@ function get_year_term(){
 function get_next_year_term(){
     $year=date('Y',time());
     $month=date('m',time());
-    if($month>=3&&$month<=8){
+    if($month>=2&&$month<=8){
         $workyear['term']=1;
         $workyear['year']=$year;
     }
-    elseif($month<3){
+    elseif($month<2){
         $workyear['term']=2;
         $workyear['year']=$year-1;
     }
