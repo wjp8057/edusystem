@@ -20,6 +20,13 @@
             textField: 'name',
             panelHeight:'auto'
         });
+        var delay = $('#delay');
+        delay.combobox({
+            url: '{$ROOT}/all/option/delay?only=0',
+            valueField: 'delay',
+            textField: 'name',
+            panelHeight:'auto'
+        });
         $('#dg').datagrid({
             title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/exam/start/query',
@@ -42,6 +49,7 @@
                 {field:'qm',title:'期末',width:50,align:'center'},
                 {field:'score',title:'总评',width:50,align:'center'},
                 {field:'examremname',title:'考试备注',width:80,align:'center'},
+                {field:'delayname',title:'缓考原因',width:80,align:'center'},
                 {field:'lock',title:'锁定',width:50,align:'center',formatter:function(val,rec){if(val==1)return '√';}}
 
             ]],
@@ -78,7 +86,8 @@
                 courseno: $('#courseno').val(),
                 courseschool: $('#courseschool').combobox('getValue'),
                 studentschool: $('#studentschool').combobox('getValue'),
-                examrem: $('#examrem').combobox('getValue')
+                examrem: $('#examrem').combobox('getValue'),
+                delay:$('#delay').combobox('getValue')
             });
         });
         function buildDataArray(rows){
@@ -146,7 +155,9 @@
             var courseschool=encodeURI($('#courseschool').combobox('getValue'));
             var studentschool=encodeURI($('#studentschool').combobox('getValue'));
             var examrem=encodeURI($('#examrem').combobox('getValue'));
-            $.fileDownload("{$ROOT}/exam/start/export?year=" +year+"&term="+term+'&courseno='+courseno+'&studentno='+studentno+'&courseschool='+courseschool+'&studentschool='+studentschool+'&examrem='+examrem, {
+            var delay=encodeURI($('#delay').combobox('getValue'));
+            $.fileDownload("{$ROOT}/exam/start/export?year=" +year+"&term="+term+'&courseno='+courseno+'&studentno='+studentno+'&courseschool='+courseschool
+            +'&studentschool='+studentschool+'&examrem='+examrem+'&delay='+delay, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -197,6 +208,7 @@
         <label for="courseschool">开课学院：</label><input id="courseschool" size="16" />
         <label for="studentschool">学生学院：</label><input id="studentschool" size="16" />
         <label for="examrem">考试备注：</label><input id="examrem" size="8" />
+        <label for="delay">缓考原因：</label><input id="delay" size="16" />
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
         <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
     </div>
@@ -204,7 +216,8 @@
     <div class="space"></div>
     <div class="information">
         <ol>说明：
-            <li>生成补考名单时会添加缓考的学生记录。</li>
+            <li>生成补考名单时会添加已报名缓考的学生。</li>
+            <li>考试备注为任课教师输入的内容。</li>
         </ol>
     </div>
 </div>

@@ -21,12 +21,12 @@ use app\common\vendor\PHPExcel;
 
 class Start extends  MyController{
     //读取补考学生名单
-    public function  query($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem='')
+    public function  query($page = 1, $rows = 20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem='',$delay='')
     {
         $result=null;
         try {
             $obj=new Makeup();
-            $result=$obj->getList($page,$rows,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$examrem);
+            $result=$obj->getList($page,$rows,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$examrem,$delay);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
@@ -44,16 +44,16 @@ class Start extends  MyController{
         }
         return json($result);
     }
-    public function export($year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
+    public function export($year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem='',$delay=''){
         try{
             $obj=new Makeup();
-            $result=$obj->getList(1,5000,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$examrem);
+            $result=$obj->getList(1,5000,$year,$term,$courseno,$studentno,$courseschool,$studentschool,$examrem,$delay);
             $data=$result['rows'];
             $file=$year."学年第".$term."学期学期初补考名单";
             $sheet='全部';
             $title=$file;
             $template= array("courseno"=>"课号","coursename"=>"课名","courseschoolname"=>"开课学院","studentno"=>"学号","studentname"=>"姓名",
-                "classname"=>"班级","plantypename"=>"类型","studentschoolname"=>"所在学院","qm"=>"期末","score"=>"总评","examremname"=>"考试备注");
+                "classname"=>"班级","plantypename"=>"类型","studentschoolname"=>"所在学院","qm"=>"期末","score"=>"总评","examremname"=>"考试备注","delayname"=>"缓考原因");
             $string=array("studentno","courseno");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
             PHPExcel::export2Excel($file,$array);

@@ -532,7 +532,9 @@ class Option {
             $result =Db::table('delaycode')->field('delay,rtrim(name) as name')
                 ->order('delay')->select();
             if($only==0) {
-                $all[] = array('delay' => '', 'name' => '全部缓考');
+                $all[] = array('delay' => '', 'name' => '全部');
+                $result = array_merge($all, $result);
+                $all[] = array('delay' => 'L', 'name' => '全部缓考');
                 $result = array_merge($all, $result);
             }
 

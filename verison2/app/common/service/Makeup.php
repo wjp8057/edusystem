@@ -73,11 +73,13 @@ class Makeup extends  MyService {
             and  not  exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno)
         ";
         $rows+=Db::execute($sql,$bind);
+
+
         return ["info"=>"成功,".$rows."条记录添加！","status"=>"1"];
     }
 
     //读取补考的学生信息
-    public function getList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem=''){
+    public function getList($page=1,$rows=20,$year,$term,$courseno='%',$studentno='%',$courseschool='',$studentschool='',$examrem='',$delay=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['makeup.year']=$year;
@@ -87,6 +89,13 @@ class Makeup extends  MyService {
         if($courseschool!='') $condition['courses.school']=$courseschool;
         if($studentschool!='') $condition['classes.school']=$studentschool;
         if($examrem!='') $condition['scores.examrem']=$examrem;
+        if($delay==''){
+            //不添加条件
+        }
+        else if($delay=='L')
+            $condition['scores.delay']=array('neq','A');
+        else
+            $condition['scores.delay']=$delay;
         $data=$this->query->table('makeup')
             ->join('scores','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')
             ->join('students ',' students.studentno=scores.studentno')
@@ -97,11 +106,12 @@ class Makeup extends  MyService {
             ->join('schools cs','cs.school=courses.school')
             ->join('schools ss','ss.school=classes.school')
             ->join('plantypecode','plantypecode.code=scores.plantype')
+            ->join('delaycode','delaycode.delay=scores.delay')
             ->where($condition)->page($page,$rows)
             ->field("makeup.id,rtrim(case when testscore='' then cast(examscore as char) else rtrim(testscore) end) score,
             scores.studentno,rtrim(students.name) studentname,approachcode.name as approachname,examrem,rtrim(examremoptions.name) examremname,
             scores.courseno+scores.[group] courseno,rtrim(courses.coursename) coursename,courses.school courseschool,rtrim(cs.name) courseschoolname,ss.school studentschool,rtrim(ss.name) as studentschoolname,
-            students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype,makeup.lock,qm")
+            students.classno,rtrim(classes.classname) classname,rtrim(plantypecode.name) plantypename,scores.plantype,makeup.lock,qm,delaycode.name delayname")
             ->order('courseno,studentno')->select();
         $count= $this->query->table('makeup')
             ->join('scores','makeup.year=scores.year and makeup.term=scores.term and makeup.courseno=scores.courseno and scores.studentno=makeup.studentno')

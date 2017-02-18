@@ -53,7 +53,7 @@ class PHPExcel
         $count = count($array);
         for ($now = 0; $now < $count; $now++) {
             $sheetIndex = $now;
-            $sheet = $array[$now]['sheet'];
+            $sheet = mb_substr($array[$now]['sheet'],0,30);
             $template = $array[$now]['template'];
             $data = $array[$now]['data'];
             $string = $array[$now]['string'];
@@ -125,7 +125,8 @@ class PHPExcel
         $count = count($array);
         for ($now = 0; $now < $count; $now++) {
             $sheetIndex = $now;
-            $sheet = $array[$now]['sheet'];
+            $sheet = mb_substr($array[$now]['sheet'],0,30);
+
             $title = $array[$now]['title'];
             $info= $array[$now]['info'];
             $template = $array[$now]['template'];
