@@ -376,6 +376,7 @@ class TestCourse extends MyService {
             where testplan.year=:year and testplan.term=:term and testplan.type=:type";
             Db::execute($sql,$bind);
         }
+
     }
     //导出到排考计划表testplan
     public function exportPlan($year,$term,$type){

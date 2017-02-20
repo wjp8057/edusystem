@@ -14,7 +14,7 @@
             $('#hours').text('{$course.hours}');
 
             var year = $('#year');
-            year.validatebox({required: true, validType: 'equalLength[4]'});
+            year.validatebox({required: true, validType: 'equalLength[1]'});
             year.val("{$course.year}");
             var term = $('#term');
             term.validatebox({required: true, validType: 'equalLength[1]'});

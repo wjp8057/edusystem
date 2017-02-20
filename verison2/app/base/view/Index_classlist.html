@@ -30,29 +30,8 @@
                 {field:'students',title:'预计人数*',width:60,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision: 0}}},
                 {field:'amount',title:'实际人数',width:60,align:'center'},
                 {field:'year',title:'入校时间*',width:100,align:'center',editor:{type:'datebox',options:{required:true}}},
-                {field:'major',title:'专业*',width:150,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/major',valueField:'major',textField:'name',
-                    onSelect:function(rec) {
-                        var tt=$('#dg');
-                        tt.datagrid('getSelected').majorname=rec.name;
-                    }}},
-                    formatter:function(val,rec){
-                        return rec.majorname;
-                    }},
-                {field:'direction',title:'专业方向*',width:250,align:'center', editor:{type:'combobox', options:{valueField:'direction',textField:'name',panelHeight:'auto',
-                    loader:function(param,success,error){
-                        var tt=$('#dg');
-                        var major=tt.datagrid('getSelected').major;
-                        $.post('{$ROOT}/all/option/majordirection',{major:major},function(result){
-                            success(result);
-                        },'json');
-                    },
-                    onSelect:function(rec) {
-                        var tt=$('#dg');
-                        tt.datagrid('getSelected').directionname=rec.name;
-                    }}},
-                    formatter:function(val,rec){
-                        return rec.directionname;
-                    }}
+                {field:'majorname',title:'专业',width:150,align:'center'},
+                {field:'directionname',title:'专业方向',width:250,align:'center'}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function(e, field){

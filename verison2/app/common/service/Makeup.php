@@ -53,13 +53,14 @@ class Makeup extends  MyService {
             and exists (select * from courseplan where courseplan.year=scores.year and courseplan.term=scores.term and courseplan.courseno+courseplan.[group]=scores.courseno+scores.[group]
                   and courseplan.coursetype!='E')
             and not exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno  )
+            and scores.courseno not like '008%'
             ";
         $rows=Db::execute($sql,$bind);
         //学位课程部分
         $sql="insert into makeup(year,term,studentno,courseno)
             select year,term,studentno,courseno
              from scores
-            where year=:year and term=:term and examscore<75  and scores.[group] not in ('BY','ZX')
+            where year=:year and term=:term and examscore<75  and scores.[group] not in ('BY','ZX') and qm not in ('缺考','违纪')
             and exists (select * from scheduleplan
                 where scheduleplan.year=scores.year and scheduleplan.term=scores.term and scheduleplan.courseno+scheduleplan.[group]=scores.courseno+scores.[group] and degree=1 )
             and not  exists (select * from makeup where makeup.year=scores.year and makeup.term=scores.term and scores.studentno=makeup.studentno and scores.courseno=makeup.courseno)

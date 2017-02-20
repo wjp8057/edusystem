@@ -44,6 +44,16 @@
             tt.datagrid('rejectChanges');
             current_datagrid=null;
         });
+        $("#search").click(function () {
+            var tt = $('#dg');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('load', {
+                year:$("#year").val(),
+                term:$('#term').val(),
+                type:$('#').,
+                flag:flag.combobox('getValue')
+            });
+        });
         //绑定点击保存按钮事件
         function buildDataArray(rows){
             var updateRow=[];

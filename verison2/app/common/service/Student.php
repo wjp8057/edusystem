@@ -50,12 +50,16 @@ class Student extends MyService {
             ->join('personal  ',' personal.studentno=students.studentno')
             ->join('nationalitycode  ',' nationalitycode.code=personal.nationality','LEFT')
             ->join('partycode  ',' partycode.code=personal.party','LEFT')
-            ->join('majorcode  ',' majorcode.code=personal.major','LEFT')
+            ->join('studentplan'," students.studentno=studentplan.studentno and studentplan.type='M'",'LEFT')
+            ->join('majorplan','majorplan.rowid=studentplan.majorplanid','LEFT')
+            ->join('majors','majors.majorschool=majorplan.majorschool','LEFT')
+            ->join('majorcode ',' majorcode.code=majors.majorno','LEFT')
+            ->join('majordirection ','majordirection.direction=majors.direction','LEFT')
             ->page($page,$rows)
             ->field("students.studentno,rtrim(students.name) name,students.sex,rtrim(sexcode.name) sexname,
             students.classno,rtrim(classes.classname) as classname,classes.school,rtrim(schools.name) schoolname,
             personal.party,rtrim(partycode.name) partyname,personal.nationality,rtrim(nationalitycode.name) nationalityname,
-            personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free,score,students.years")
+            personal.major,rtrim(majorcode.name) majorname,rtrim(majordirection.name) directionname,students.status,rtrim(statusoptions.value) statusname,'' rem,students.free,score,students.years")
             ->where($condition)->order('studentno')->select();
         $count= $this->query->table('students')->join('classes  ',' classes.classno=students.classno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
@@ -87,9 +91,13 @@ class Student extends MyService {
             ->join('personal  ',' personal.studentno=students.studentno')
             ->join('nationalitycode  ',' nationalitycode.code=personal.nationality','LEFT')
             ->join('partycode  ',' partycode.code=personal.party','LEFT')
-            ->join('majorcode  ',' majorcode.code=personal.major')
             ->join('provincecode  ',' provincecode.code=personal.province','LEFT')
             ->join('classcode  ',' classcode.code=personal.class','LEFT')
+            ->join('studentplan'," students.studentno=studentplan.studentno and studentplan.type='M'",'LEFT')
+            ->join('majorplan','majorplan.rowid=studentplan.majorplanid','LEFT')
+            ->join('majors','majors.majorschool=majorplan.majorschool','LEFT')
+            ->join('majorcode ',' majorcode.code=majors.majorno','LEFT')
+            ->join('majordirection ','majordirection.direction=majors.direction','LEFT')
             ->page($page,$rows)
             ->field("students.studentno,rtrim(students.name) name,students.sex,rtrim(sexcode.name) sexname,
             students.classno,rtrim(classes.classname) as classname,classes.school,rtrim(schools.name) schoolname,
@@ -98,7 +106,7 @@ class Student extends MyService {
             students.years,personal.id,personal.examno,personal.province,rtrim(provincecode.name) provincename,personal.birthday,
             rtrim(personal.midschool) midschool,rtrim(personal.address) address,rtrim(tel) tel,rtrim(origin) as origin,
             cast('20'+substring(classes.classno,1,2) as char(4)) as grade,students.enterdate,personal.class classcode,
-            rtrim(classcode.name) classcodename,rtrim(personal.photo) photo")
+            rtrim(classcode.name) classcodename,rtrim(personal.photo) photo,majordirection.direction,rtrim(majordirection.name) directionname")
             ->where($condition)->order('studentno')->select();
         $count= $this->query->table('students')->join('classes  ',' classes.classno=students.classno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
