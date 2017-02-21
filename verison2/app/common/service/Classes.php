@@ -41,6 +41,7 @@ class Classes extends MyService{
         $subsql = Db::table('students')->group('classno')->field('classno,count(*) amount')->buildSql();
 
         $data=$this->query->table('classes')->join('schools ',' schools.school=classes.school')
+            ->join('areas','areas.name=classes.area')
             ->join('classplan',' classplan.classno=classes.classno','LEFT')
             ->join('majorplan','majorplan.rowid=classplan.majorplanid','LEFT')
             ->join('majors','majors.majorschool=majorplan.majorschool','LEFT')
@@ -50,7 +51,7 @@ class Classes extends MyService{
             ->page($page,$rows)
             ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,
             rtrim(majors.majorno) major,rtrim(majorcode.name) as majorname,classes.students,isnull(t.amount,0) amount,
-            classes.year,rtrim(majordirection.name) directionname,rtrim(majors.direction) direction')
+            classes.year,rtrim(majordirection.name) directionname,rtrim(majors.direction) direction,classes.area,areas.value areaname')
             ->where($condition)->order('classno')->select();
         $count= $this->query->table('classes')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
@@ -83,8 +84,7 @@ class Classes extends MyService{
                     $data['classname'] = $one->classname;
                     $data['school'] = $one->school;
                     $data['year'] = $one->year;
-                    $data['major'] = $one->major;
-                    $data['direction'] = $one->direction;
+                    $data['area'] = $one->area;
                     $data['students'] = $one->students;
                     if ($data['school'] != session('S_USER_SCHOOL') && session('S_MANAGE') == 0) {
                         $info .= '无法为其它学院添加班级'.$one->classname .'</br>';
@@ -108,8 +108,7 @@ class Classes extends MyService{
                     $data['classname'] = $one->classname;
                     $data['school'] = $one->school;
                     $data['year'] = $one->year;
-                    $data['major'] = $one->major;
-                    $data['direction'] = $one->direction;
+                    $data['area'] = $one->area;
                     $data['students'] = $one->students;
                     if(MyAccess::checkClassSchool($one->classno))
                         $updateRow += $this->query->table('classes')->where($condition)->update($data);
@@ -118,7 +117,6 @@ class Classes extends MyService{
                         $errorRow++;
                         $status=0;
                     }
-
                 }
             }
             //删除部分

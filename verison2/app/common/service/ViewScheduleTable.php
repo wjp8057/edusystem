@@ -94,7 +94,7 @@ dbo.GROUP_CONCAT(distinct rtrim(teachername),'，') as teachername,attendents")-
         return $data;
     }
     //检索课程
-    function getList($page=1,$rows=20,$year,$term,$courseno='%',$classno='%',$coursename='%',$teachername='%',$school='',$day='',$time=''){
+    function getList($page=1,$rows=20,$year,$term,$courseno='%',$classno='%',$coursename='%',$teachername='%',$school='',$day='',$time='',$rest=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['year']=$year;
@@ -106,7 +106,14 @@ dbo.GROUP_CONCAT(distinct rtrim(teachername),'，') as teachername,attendents")-
         if($day!='') $condition['day']=$day;
         if($time!='') $condition['time']=$time;
         if($school!='') $condition['school']=$school;
-        $data=$this->query->table('viewscheduletable')->where($condition)->page($page,$rows)
+        $condition2=null;
+        if($rest!='') {
+            if($rest=='1')
+                $condition2="estimate>attendents";
+            else if($rest=="0")
+                $condition2="estimate<=attendents";
+        }
+        $data=$this->query->table('viewscheduletable')->where($condition)->where($condition2)->page($page,$rows)
             ->field("coursenogroup,year,term,credits,weekhours,coursetype,examtype,rem,dbo.GROUP_CONCAT(distinct rtrim(classname),',') classname,
             dbo.GROUP_CONCAT(distinct rtrim(teachername),',') teachername,dbo.GROUP_CONCAT(distinct dayntime,',') dayntime ,estimate,attendents,attendents-estimate amount,schoolname,coursename")
             ->group('coursenogroup,year,term,credits,coursetype,examtype,schoolname,rem,estimate,attendents,weekhours,schoolname,coursename')

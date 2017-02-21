@@ -27,6 +27,14 @@
                     formatter:function(val,rec){
                         return rec.schoolname;
                     }},
+                {field:'area',title:'校区*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/area',valueField:'area',textField:'name',panelWidth:'120',required:true,
+                    onSelect:function(rec) {
+                        var tt=$('#dg');
+                        tt.datagrid('getSelected').areaname=rec.name;
+                    }}},
+                    formatter:function(val,rec){
+                        return rec.areaname;
+                    }},
                 {field:'students',title:'预计人数*',width:60,align:'center',editor:{type:'numberbox',options:{required:true,min:0, precision: 0}}},
                 {field:'amount',title:'实际人数',width:60,align:'center'},
                 {field:'year',title:'入校时间*',width:100,align:'center',editor:{type:'datebox',options:{required:true}}},

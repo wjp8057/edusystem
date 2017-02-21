@@ -68,10 +68,10 @@ class Student extends MyController {
         return json($result);
     }
     //检索课程
-    public function querycourse($page=1,$rows=20,$year,$term,$courseno='%',$classno='%',$coursename='%',$teachername='%',$school='',$weekday='',$time=''){
+    public function querycourse($page=1,$rows=20,$year,$term,$courseno='%',$classno='%',$coursename='%',$teachername='%',$school='',$weekday='',$time='',$rest=''){
         try {
             $obj=new ViewScheduleTable();
-            return $obj->getList($page,$rows,$year,$term,$courseno,$classno,$coursename,$teachername,$school,$weekday,$time);
+            return $obj->getList($page,$rows,$year,$term,$courseno,$classno,$coursename,$teachername,$school,$weekday,$time,$rest);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

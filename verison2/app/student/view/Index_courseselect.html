@@ -26,6 +26,13 @@
             valueField:'time',
             textField:'name'
         });
+        var rest=$('#rest');
+        rest.combobox({
+            url:'{$ROOT}/all/option/zo?only=0',
+            valueField:'zo',
+            textField:'name',
+            panelHeight:'auto'
+        });
         $('#dg').datagrid({
             title:'本学期选课开放时间：{$valid.start} 至 {$valid.stop}',idField:'coursenogroup', striped:'true',pagination:'true',rownumbers:true,pageSize:20,
             url:'{$ROOT}/student/course/query',toolbar:'#toolbar',
@@ -78,7 +85,8 @@
                 classno:$('#classno').val(),
                 school:school.combobox('getValue'),
                 weekday:weekday.combobox('getValue'),
-                time:time.combobox('getValue')
+                time:time.combobox('getValue'),
+                rest:rest.combobox('getValue')
             });
         });
         function buildDataArray(rows){
@@ -131,6 +139,7 @@
         <label for="school">开课学院：</label><input id="school" size="18"/>
         <label for="weekday">星期：</label><input id="weekday" size="8"/>
         <label for="time">节次：</label><input id="time" size="12"/>
+        <label for="rest">有空位：</label><input id="rest" size="12"/>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-course',plain:'true'" id="save">提交选课</a>
     </div>
