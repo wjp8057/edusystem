@@ -83,9 +83,9 @@
             if (rows.length > 0) {
                 $.messager.confirm('提示', '您确定要退掉这些课程么?', function(r) {
                     if (r) {
-                        effectRow["deleted"] = $.toJSON(buildDataArray(rows));
                         effectRow['year']=$('#year').val();
                         effectRow['term']=$('#term').val();
+                        effectRow["deleted"] = $.toJSON(buildDataArray(rows));
                         $.post('{$ROOT}/student/course/update', effectRow, function (result) {
                             if (result.status == 1) {
                                 tt.datagrid('clearSelections');

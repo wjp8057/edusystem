@@ -49,22 +49,23 @@ class MyLog {
         //获得插入的内容
         try {
             if (isset($_POST["inserted"])) {
-                $string = is_array($_POST["inserted"]) ? json_decode($_POST["inserted"]) : $_POST["inserted"];
-                $dataString .= 'insert:' . $string;
+              /*  $string = is_array($_POST["inserted"]) ? json_decode($_POST["inserted"]) : $_POST["inserted"];
+                $dataString .= 'insert:' . $string;*/
                 $operate .= 'A';
             }
             //获得更新的内容
             if (isset($_POST["updated"])) {
-                $string = is_array($_POST["updated"]) ? json_decode($_POST["updated"]) : $_POST["updated"];
-                $dataString .= 'update' . $string;
+              /*  $string = is_array($_POST["updated"]) ? json_decode($_POST["updated"]) : $_POST["updated"];
+                $dataString .= 'update:' . $string;*/
                 $operate .= 'M';
             }
             //获得删除的内容
             if (isset($_POST["deleted"])) {
-                $string = is_array($_POST["deleted"]) ? json_decode($_POST["deleted"]) : $_POST["deleted"];
-                $dataString .= 'delete' . $string;
-                $operate .= 'M';
+               /* $string = is_array($_POST["deleted"]) ? json_decode($_POST["deleted"]) : $_POST["deleted"];
+                $dataString .= 'delete:' . $string;*/
+                $operate .= 'D';
             }
+            $dataString=json_decode($_POST);
         }catch (\Exception $e) {
             $dataString='';
                 //捕捉异常
@@ -73,7 +74,6 @@ class MyLog {
         $dataString=$dataString==''?json_encode($_POST):$dataString;
         $data['data']=mb_substr($dataString,0,1000,"utf-8");
         $data['operate']=$operate;
-        $data['requesttime']=date("Y-m-d H:i:s");
         $this->query->table('log')->insert($data);
     }
 

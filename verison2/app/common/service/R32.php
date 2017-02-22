@@ -229,6 +229,14 @@ class R32 extends  MyService {
         }
         return false;
     }
+    public static  function getPublicAmount($year,$term,$studentno){
+        $condition=null;
+        $condition['studentno']=$studentno;
+        $condition['year']=$year;
+        $condition['term']=$term;
+        $result=Db::table('r32')->where($condition)->where("courseno like '08%'")->count();
+        return $result;
+    }
     //以学生为主体选课
     public function selectByStudent($postData){
         $info='';
@@ -251,6 +259,8 @@ class R32 extends  MyService {
         if(!self::checkFee($studentno)){
             return ['info'=>$studentno.'存在欠费，无法选课或退课！','status'=>0];
         }
+
+
         //选课
         if (isset($postData["inserted"])) {
             $updated = $postData["inserted"];
@@ -258,6 +268,12 @@ class R32 extends  MyService {
             foreach ($listUpdated as $one) {
                 $condition = null;
                 $courseno=$one->courseno;
+                if(substr($courseno,0,2)=="08"&&self::getPublicAmount($year,$term,$studentno)>=3)
+                {
+                    $info.='失败，'.$courseno.'本学期已选修前3门及以上08开头的公选课，请适当退课！<br/>';
+                    $status=0;
+                    continue; //进入下一个课程。
+                }
                 if(self::isSelected($year,$term,$courseno,$studentno)){
                     $info.='失败，'.$courseno.'本学期已选修前7位课号相同课程！<br/>';
                     $status=0;

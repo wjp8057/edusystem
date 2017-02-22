@@ -110,9 +110,9 @@
             var rows = tt.datagrid('getSelections');
             var length = rows.length;
             if (rows.length > 0) {
-                effectRow["inserted"] = $.toJSON(buildDataArray(rows));
                 effectRow['year']=$('#year').val();
                 effectRow['term']=$('#term').val();
+                effectRow["inserted"] = $.toJSON(buildDataArray(rows));
                 $.post('{$ROOT}/student/course/update', effectRow, function (result) {
                     if (result.status == 1) {
                         tt.datagrid('clearSelections');

@@ -547,7 +547,6 @@ class Option {
      * 测试专用
      */
     public function test(){
-       $obj=new AddCredit();
-        dump($obj->getStudentSummary('134150101'));
+        echo substr('0814411',0,2);
     }
 }
