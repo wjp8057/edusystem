@@ -236,4 +236,22 @@ class Index extends Template
         $this->assign('exam',$exam);
         return $this->fetch();
     }
+
+    //考试报名页面
+    public function examenroll($recno){
+        $valid=Item::getExamNotificationItem($recno);
+        $valid['now']=date("Y-m-d H:m:s");
+        if(strtotime($valid['now'])>strtotime($valid['deadline']))
+        {
+            echo '报名已截止，现在是'.$valid['now'].',报名截止时间:'.$valid['deadline'];
+            die();
+        }
+        return $this->fetch();
+    }
+    //查看报名情况表
+    public function examstudent($recno){
+        $exam=Item::getExamNotificationItem($recno);
+        $this->assign('title',$exam['year']."学年第".$exam['term']."学期《".$exam['examname']."》考试 学校代码：" . $exam['schoolcode'] . "  级别代码：" . $exam['testcode'] . "  报名费：" . $exam['fee']);
+        return $this->fetch();
+    }
 }

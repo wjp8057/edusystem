@@ -10,15 +10,24 @@
         //设置默认学院，非管理部门为本学院
         if ('{$USERINFO.manage}' != '1')
             school.combobox('select', '{$USERINFO.school}');
+        var school2 = $('#school2');
+        school2.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1')
+            school2.combobox('select', '{$USERINFO.school}');
         $('#dg').datagrid({
-            title: '已绑定学生列表',
+            title: '已报名学生列表',
             idField: 'studentno',
             striped: 'true',
             pagination: 'true',
             rownumbers: true,
             pageSize: 50,
-            url: '{$ROOT}/major/plan/majorplanstudent',
-            queryParams: {majorplanid: getQueryString('majorplanid')},
+            url: '{$ROOT}/exam/grade/applyquery',
+            queryParams: { school:school.combobox('getValue'),map:getQueryString('recno')},
             toolbar: '#toolbar',
             pageList: [50, 100, 200],
             columns: [[
@@ -27,9 +36,15 @@
                     formatter:function(value,rec){
                         return "<a class='blue_link' href='javascript:detail(\""+rec.studentno+"\")' >"+rec.studentno+"</a>" ;
                     }},
-                {field: 'name', title: '姓名', width: 110, align: 'center'},
+                {field: 'studentname', title: '姓名', width: 110, align: 'center'},
                 {field: 'classname', title: '班级', width: 110, align: 'center'},
-                {field: 'schoolname', title: '学院', width: 100, align: 'center'}
+                {field: 'schoolname', title: '学院', width: 100, align: 'center'},
+                {field: 'fee', title: '费用', width: 100, align: 'center',formatter:function(val,rec){
+                    if(val==1)
+                        return '√';
+                    else
+                        return '';
+                }}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function (e, field) {
@@ -54,13 +69,13 @@
         });
 
         $('#dg2').datagrid({
-            title: '检索新学生',
+            title: '检索学生',
             idField: 'studentno',
             striped: 'true',
             pagination: 'true',
             rownumbers: true,
             pageSize: 20,
-            url: '{$ROOT}/major/plan/searchstudent',
+            url: '{$ROOT}/exam/grade/studentsearch',
             queryParams: {studentno: ''},
             toolbar: '#toolbar2',
             pageList: [20,50, 100, 200],
@@ -70,10 +85,13 @@
                     formatter:function(value,rec){
                     return "<a class='blue_link' href='javascript:detail(\""+rec.studentno+"\")' >"+rec.studentno+"</a>" ;
                 }},
-                {field: 'name', title: '姓名', width: 110, align: 'center'},
+                {field: 'studentname', title: '姓名', width: 80, align: 'center'},
                 {field: 'classname', title: '班级', width: 110, align: 'center'},
                 {field: 'schoolname', title: '学院', width: 100, align: 'center'},
-                {field: 'statusname', title: '学籍状态', width: 110, align: 'center'}
+                {field: 'pretcoa', title: 'A级', width: 40, align: 'center'},
+                {field: 'pretcob', title: 'B级', width: 40, align: 'center'},
+                {field: 'cet3', title: '三级', width: 40, align: 'center'},
+                {field: 'cet4', title: '四级', width: 40, align: 'center'}
             ]],
             //标题行右键菜单
             onHeaderContextMenu: function (e, field) {
@@ -97,15 +115,27 @@
             }
         });
         $("#search").click(function () {
-            var tt = $('#dg2');
+            var tt = $('#dg');
             tt.datagrid('loadData', {total: 0, rows: []});
             tt.datagrid('clearSelections');
             tt.datagrid('clearChecked');
             tt.datagrid('load', {
                 studentno: $('#studentno').val(),
-                classno: $('#classno').val(),
-                name: $('#name').val(),
-                school:$('#school').combobox('getValue')
+                school:$('#school').combobox('getValue'),
+                map:getQueryString('recno')
+            });
+        });
+
+        $("#search2").click(function () {
+            var tt = $('#dg2');
+            tt.datagrid('loadData', {total: 0, rows: []});
+            tt.datagrid('clearSelections');
+            tt.datagrid('clearChecked');
+            tt.datagrid('load', {
+                studentno: $('#studentno2').val(),
+                classno: $('#classno2').val(),
+                name: $('#name2').val(),
+                school:$('#school2').combobox('getValue')
             });
         });
         function checkStudentSchool(rows) {
@@ -137,11 +167,11 @@
                     index: 0,
                     row: {
                         studentno:rows[i].studentno,
-                        name:rows[i].name,
+                        studentname:rows[i].studentname,
                         classname:rows[i].classname,
                         schoolname:rows[i].schoolname,
                         school:rows[i].school,
-                        old:0
+                        fee:1
                     }
                 });
             }
@@ -151,43 +181,45 @@
             var rows=tt.datagrid('getSelections');
             var length=rows.length;
             var message="";
-            for(var i=length-1;i>=0;i--){
-                if(rows[i].old=='1'){
-                    message+= rows[i].studentno+rows[i].name+',';
-                }
-                else{
-                    var index=tt.datagrid('getRowIndex',rows[i].studentno);
-                    tt.datagrid('deleteRow',index);
-                }
-
+            for(var i=length-1;i>=0;i--) {
+                var index = tt.datagrid('getRowIndex', rows[i].studentno);
+                tt.datagrid('deleteRow', index);
             }
-            if(message!="")
-                $.messager.alert('提示',message+'是原有学生无法移除！', 'info');
         });
         //绑定点击保存按钮事件
+        function buildDataArray(rows){
+            var updateRow=[];
+            var length=rows.length;
+            for (var i = 0; i < length; i++) {
+                var updateObj = {}; //插入的单元格
+                updateObj.studentno=rows[i].studentno;
+                updateRow.push(updateObj);
+            }
+            return updateRow;
+        }
         $("#save,#menu_save").click(function () {
             var tt = $('#dg');
-            tt.datagrid('endEditing');
-            if (tt.datagrid('editIndex') != undefined) return;
-            //获取更改的数据行内容
-            var rows = tt.datagrid('getChanges', 'inserted');
-            if (!checkStudentSchool(rows)) return;
-            var length=rows.length;
-            if (length<= 0) { //如果没有任何更新，就退出
+            var rows;
+            var count=0;
+            var effectRow = {};
+            effectRow["map"] = getQueryString('recno');
+            //获取添加的行
+            rows=tt.datagrid('getChanges','inserted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["inserted"]=$.toJSON(buildDataArray(rows));
+            }
+            //获取删除的行
+            rows=tt.datagrid('getChanges','deleted');
+            if(rows.length>0){
+                count+=rows.length;
+                effectRow["deleted"]=$.toJSON(buildDataArray(rows));
+            }
+            if(count<=0) { //如果没有任何更新，就退出
                 $.messager.alert('提示', '没有数据需要保存！', 'info');
                 return;
             }
-            var effectRow = {};
-            var updateRows=[];
-            for (var i = 0; i < length; i++) {
-                var updateObj = {}; //插入的单元格
-                updateObj.studentno = rows[i].studentno;
-                updateRows.push(updateObj);
-            }
-
-            effectRow["inserted"] = $.toJSON(updateRows);
-            effectRow["majorplanid"] = getQueryString('majorplanid');
-            $.post('{$ROOT}/major/plan/majorplanstudentupdate', effectRow, function (result) {
+            $.post('{$ROOT}/exam/grade/enroll', effectRow, function (result) {
                 if (result.status == 1) {
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -204,8 +236,12 @@
          * 导出学生名单
          */
         $('#menu_export,#export').click(function () {
-            var majorplanid = getQueryString('majorplanid');
-            $.fileDownload("{$ROOT}/major/plan/majorplanstudentexport?majorplanid=" + majorplanid, {
+            var map = getQueryString('recno');
+            var studentno=$('#studentno').val();
+            var school=$('#school').combobox('getValue');
+            studentno=encodeURI(studentno);
+            school=encodeURI(school);
+            $.fileDownload("{$ROOT}/exam/grade/exportexcel?map=" + map+"&studentno="+studentno+"&school="+school, {
                 preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                 dialogOptions: {modal: true, title: '提示'},
                 failCallback: function (html, url) {
@@ -226,30 +262,34 @@
     <div id="menu2" class="easyui-menu" style="width:150px;">
         <div data-options="iconCls:'icon icon-back'" id="menu_add">将选中加入该班</div>
     </div>
-    <div id="left" style="width:570px;float:left">
+    <div id="left" style="width:620px;float:left">
         <div id="toolbar">
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出学生名单</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存名单</a>
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-redo',plain:'true'" id="remove">将选中学生移出列表</a>
-        </div>
-        <table id="dg"></table>
-    </div>
-    <div id="right" style="width:680px;float:left;padding-left:5px;">
-        <div id="toolbar2">
-            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中加入该班</a>
             <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
-            <label for="name">姓名：</label><input id="name" class="easyui-validatebox" size="4" value="%"/>
-            <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="6" value="%"/>
             <label for="school">学院：</label>
             <input id="school" size="13">
             <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出学生名单</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存名单</a>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-redo',plain:'true'" id="remove">将选中学生删除</a>
+        </div>
+        <table id="dg"></table>
+    </div>
+    <div id="right" style="width:600px;float:left;padding-left:5px;">
+        <div id="toolbar2">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add">将选中报名</a>
+            <label for="studentno2">学号：</label><input id="studentno2" class="easyui-validatebox" size="9" value="%"/>
+            <label for="name2">姓名：</label><input id="name2" class="easyui-validatebox" size="4" value="%"/>
+            <label for="classno2">班号：</label><input id="classno2" class="easyui-validatebox" size="6" value="%"/>
+            <label for="school2">学院：</label>
+            <input id="school2" size="13">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
         </div>
         <table id="dg2"></table>
     </div>
     <div class="space"></div>
     <div class="information" style="clear:both">
         <ol>说明：
-            <li>因为每个学生都需要有一个培养计划，无法删除原有已绑定学生。</li>
+            <li></li>
         </ol>
     </div>
 </div>

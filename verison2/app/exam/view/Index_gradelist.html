@@ -72,7 +72,7 @@
             tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
             if(tt.datagrid('editIndex')!=undefined) return;
             //获取更改的数据行内容
-            var rows=tt.datagrid('getRows');
+            var rows;
             rows=tt.datagrid('getChanges','updated');
             var count=0;
             var effectRow = {};
@@ -92,8 +92,10 @@
                 count+=rows.length;
                 effectRow["inserted"]=$.toJSON(rows);
             }
-            if(count<=0) //如果没有任何更新，就退出
+            if(count<=0) { //如果没有任何更新，就退出
+                $.messager.alert('提示', '没有数据需要保存！', 'info');
                 return;
+            }
 
             $.post('{$ROOT}/exam/grade/update',effectRow,function(result){
                 if (result.status==1){

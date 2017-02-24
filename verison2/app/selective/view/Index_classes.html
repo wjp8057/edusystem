@@ -56,13 +56,13 @@
             });
         });
         $("#menu_timetable,#timetable").click(function() {
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null){
                 parent.menuTabs.addTab("班级课表","{$ROOT}/selective/index/classtable?year="+$('#year').val()+"&term="+$('#term').val()+"&who="+row.classno,"icon icon-print");
             }
         });
         $("#menu_selectedtable,#selectedtable").click(function() {
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null){
                 parent.menuTabs.addTab("选课汇总表","{$ROOT}/selective/index/selectedtable?year="+$('#year').val()+"&term="+$('#term').val()+"&who="+row.classno,"icon icon-print");
             }
@@ -74,7 +74,7 @@
             selectall('T');
         });
         function selectall(type){
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null&&checkClassSchool(row)){
                 var effectRow={};
                 effectRow['year']=$('#year').val();
@@ -90,7 +90,7 @@
                 },'json');
             }
         }
-        function checkSelectRow(){
+        function getSelectRow(){
             var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {

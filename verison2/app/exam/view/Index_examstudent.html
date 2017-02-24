@@ -2,37 +2,50 @@
 <script type="text/javascript">
 
     $(function(){
-        var lock=$('#lock');
-        lock.combobox({
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if ('{$USERINFO.manage}' != '1')
+            school.combobox('select', '{$USERINFO.school}');
+
+        var fee=$('#fee');
+        fee.combobox({
             url:'{$ROOT}/all/option/zo?only=0',
             valueField:'zo',
             textField:'name',
             panelHeight:'auto'
         });
-
-        lock.combobox('select','0');
         $('#dg').datagrid({
-            title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
-            url:'{$ROOT}/exam/grade/notequery',toolbar:'#toolbar',
+            title:'{$title}',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/exam/grade/applydetailquery',toolbar:'#toolbar',
             queryParams: {
-                year: $('#year').val(),
-                term: $('#term').val(),
-                lock:lock.combobox('getValue')
+                 map:getQueryString('recno')
             },
             columns:[[
-                {field:'examname',title:'考试名称',width:150,align:'center'},
-                {field:'testlevelname',title:'级别',width:80,align:'center'},
-                {field:'dateofexam',title:'考试时间*',width:120,align:'center',editor:{type:'datetimebox',options:{required:true,showSeconds: false}}},
-                {field:'deadline',title:'报名截止时间*',width:120,align:'center',editor:{type:'datetimebox',options:{required:true,showSeconds: false}}},
-                {field:'fee',title:'报名费*',width:50,align:'center',editor:{type:'validatebox',options:{validType:' integer',required:true}}},
-                {field:'standrem',title:'考试备注',width:250,align:'center'},
-                {field:'rem',title:'本次备注*',width:200,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[30]'}}},
-                {field:'lock',title:'报名截止*',width:60,editor:{type:'checkbox',options:{on:1,off:0}},align:'center',formatter:function(val,rec){
+                {field: 'fee', title: '费用', width: 50, align: 'center',formatter:function(val,rec){
                     if(val==1)
                         return '√';
                     else
                         return '';
-                }}
+                }},
+                {field:'studentno',title:'学号',width:70,align:'center'},
+                {field:'studentname',title:'姓名',width:70,align:'center'},
+                {field:'sexname',title:'性别',width:40,align:'center'},
+                {field:'nationalityname',title:'民族',width:50,align:'center'},
+                {field:'birthday',title:'出生年月',width:90,align:'center'},
+                {field:'id',title:'身份证号',width:150,align:'center'},
+                {field:'schoolname',title:'学院',width:110,align:'center'},
+                {field:'classname',title:'班级',width:110,align:'center'},
+                {field:'grade',title:'年级',width:60,align:'center'},
+                {field:'years',title:'学制',width:60,align:'center'},
+                {field:'pretcob',title:'英语B级',width:60,align:'center'},
+                {field:'pretcoa',title:'英语A级',width:60,align:'center'},
+                {field:'cet3',title:'英语三级',width:60,align:'center'},
+                {field:'cet4',title:'英语四级',width:60,align:'center'}
             ]],
             //点击单元格时候的事件
             onClickCell:function(index, field){
@@ -55,9 +68,12 @@
             var tt=$('#dg');
             tt.datagrid('loadData',{total:0,rows:[]});
             tt.datagrid('load', {
-                year: $('#year').val(),
-                term: $('#term').val(),
-                lock:lock.combobox('getValue')
+                map:getQueryString('recno'),
+                studentno: $('#studentno').val(),
+                studentname: $('#studentname').val(),
+                classno: $('#classno').val(),
+                school:$('#school').combobox('getValue'),
+                fee:$('#fee').combobox('getValue')
             });
         });
         //取消更改
@@ -72,29 +88,18 @@
             var length=rows.length;
             for (var i = 0; i < length; i++) {
                 var updateObj = {}; //插入的单元格
-                updateObj.recno=rows[i].recno;
-                updateObj.dateofexam= rows[i].dateofexam;
-                updateObj.deadline = rows[i].deadline;
-                updateObj.fee= rows[i].fee;
-                updateObj.rem= rows[i].rem;
-                updateObj.lock=rows[i].lock;
+                updateObj.studentno=rows[i].studentno;
                 updateRow.push(updateObj);
             }
             return updateRow;
         }
         $("#save,#menu_save").click(function(){
             var tt=$('#dg');
-            tt.datagrid('endEditing');//结束编辑,如果没有验证通过就退出
-            if(tt.datagrid('editIndex')!=undefined) return;
             //获取更改的数据行内容
             var rows;
-            rows=tt.datagrid('getChanges','updated');
             var count=0;
             var effectRow = {};
-            if(rows.length>0){
-                count+=rows.length;
-                effectRow["updated"]=$.toJSON(buildDataArray(rows));
-            }
+            effectRow["map"] = getQueryString('recno');
             //获取删除的行
             rows=tt.datagrid('getChanges','deleted');
             if(rows.length>0){
@@ -104,7 +109,7 @@
             if(count<=0) //如果没有任何更新，就退出
                 return;
 
-            $.post('{$ROOT}/exam/grade/noteupdate',effectRow,function(result){
+            $.post('{$ROOT}/exam/grade/enroll',effectRow,function(result){
                 if (result.status==1){
                     tt.datagrid('acceptChanges');
                     tt.datagrid('reload');
@@ -129,38 +134,24 @@
         });
 
 
-        $("#menu_student,#student").click(function(){
-            var row=getSelectRow();
-            if (row!=null) {
-                parent.menuTabs.addTab(row.examname + "-查看报名情况", "{$ROOT}/exam/index/examstudent?recno=" + row.recno, "icon icon-circle");
-            }
-        });
-        $("#menu_enroll,#enroll").click(function(){
-            var row=getSelectRow();
-            if (row!=null) {
-                if(row!=null){
-                    if(row.lock==1)
-                    {
-                        $.messager.alert('错误',"报名已截止",'error');
-                        return;
-                    }
-                    parent.menuTabs.addTab(row.examname+"-考试报名","{$ROOT}/exam/index/examenroll?recno="+row.recno,"icon icon-caluate");
-                }
-            }
-        });
-
         $('#menu_export,#export').click(function () {
-            var row=getSelectRow();
-            if (row!=null) {
-                var map = row.recno;
-                $.fileDownload("{$ROOT}/exam/grade/exportexcel?map=" + map, {
-                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
-                    dialogOptions: {modal: true, title: '提示'},
-                    failCallback: function (html, url) {
-                        $.messager.alert('错误', html, 'error');
-                    }
-                });
-            }
+            var map = getQueryString('recno');
+            var studentno=$('#studentno').val();
+            var studentname=$('#studentname').val();
+            var classno=$('#classno').val();
+            var school=$('#school').combobox('getValue');
+            var fee=$('#fee').combobox('getValue');
+            studentno=encodeURI(studentno);
+            studentname=encodeURI(studentname);
+            classno=encodeURI(classno);
+            school=encodeURI(school);
+            $.fileDownload("{$ROOT}/exam/grade/exportexcel?map=" + map+"&studentno="+studentno+"&school="+school+"&studentname="+studentname+"&classno="+classno+"&fee="+fee, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误', html, 'error');
+                }
+            });
         });
 
         function getSelectRow(){
@@ -179,8 +170,6 @@
 </script>
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:150px;">
-        <div id='menu_student' data-options="iconCls:'icon icon-circle'">查看报名情况</div>
-        <div id='menu_enroll' data-options="iconCls:'icon icon-caluate'">考试报名</div>
         <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出报考名单</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
@@ -191,12 +180,14 @@
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-remove',plain:'true'" id="remove">删除</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-        <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
-        <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
-        <label for="lock">报名截止：</label><input id="lock" size="7"/>
+        <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="9" value="%"/>
+        <label for="studentname">姓名：</label><input id="studentname" class="easyui-validatebox" size="4" value="%"/>
+        <label for="classno">班号：</label><input id="classno" class="easyui-validatebox" size="7" value="%"/>
+        <label for="school">学院：</label>
+        <input id="school" size="13">
+        <label for="fee">费用缴清：</label>
+        <input id="fee" size="5">
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-circle',plain:'true'" id="student">查看报名情况</a>
-        <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-caluate',plain:'true'" id="enroll">考试报名</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出报考名单</a>
     </div>
     <table id="dg"></table>

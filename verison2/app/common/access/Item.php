@@ -247,7 +247,7 @@ class Item {
         }
         return $data;
     }
-
+//   /读取学生评教信息
     public static function getQualityStudentItem($id,$alert=true){
         $condition=null;
         $condition['id']=$id;
@@ -260,4 +260,21 @@ class Item {
         }
         return $data;
     }
+    public static function getExamNotificationItem($id,$alert=true){
+        $condition=null;
+        $condition['e.recno']=$id;
+        $data=Db::table('examnotification e')
+            ->join('standardexams se','se.recno=e.map')
+            ->where($condition)
+            ->field('year,term,fee,rtrim(e.rem) rem,rtrim(examname) examname,rtrim(testcode) testcode,rtrim(schoolcode) schoolcode,deadline')
+            ->find();
+        if(!is_array($data)) {
+            if($alert)
+                throw new Exception('id' . $id, MyException::ITEM_NOT_EXISTS);
+        }
+        return $data;
+    }
+
+
+
 }

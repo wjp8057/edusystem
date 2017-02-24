@@ -74,7 +74,7 @@
         });
         //修改密码
         $("#menu_changepassword,#changepassword").click(function(){
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null&&checkClassSchool(row)) {
                 $.messager.prompt('修改', '请输入新密码:', function (password) {
                     if (password) {
@@ -93,24 +93,24 @@
             }
         });
         $("#menu_timetable,#timetable").click(function() {
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null){
                 parent.menuTabs.addTab(row.name+"-学生课表","{$ROOT}/selective/index/studenttable?year="+$('#year').val()+"&term="+$('#term').val()+"&who="+row.studentno,"icon icon-print");
             }
         });
         $("#menu_exit,#exit").click(function() {
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null&&checkClassSchool(row)){
                 parent.menuTabs.addTab(row.name+"-退课","{$ROOT}/selective/index/studentcourse?year="+$('#year').val()+"&term="+$('#term').val()+"&studentno="+row.studentno,"icon icon-exit");
             }
         });
         $("#menu_select,#select").click(function() {
-            var row=checkSelectRow();
+            var row=getSelectRow();
             if(row!=null&&checkClassSchool(row)){
                 parent.menuTabs.addTab(row.name+"-选课","{$ROOT}/selective/index/courseselect?year="+$('#year').val()+"&term="+$('#term').val()+"&studentno="+row.studentno,"icon icon-tip");
             }
         });
-        function checkSelectRow(){
+        function getSelectRow(){
             var tt=$('#dg');
             var row = tt.datagrid('getSelected');
             if (row) {

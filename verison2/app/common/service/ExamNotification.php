@@ -28,7 +28,7 @@ class ExamNotification extends  MyService{
             ->join('standardexams','standardexams.recno=examnotification.map')
             ->join('testlevel','testlevel.name=standardexams.testlevel')
             ->page($page,$rows)->where($condition)
-            ->field('examnotification.recno,examname,rtrim(testlevel.value) testlevelname,deadline,dateofexam,fee,lock,rtrim(examnotification.rem) rem,
+            ->field('examnotification.recno,rtrim(examname) examname,rtrim(testlevel.value) testlevelname,deadline,dateofexam,fee,lock,rtrim(examnotification.rem) rem,
                 rtrim(standardexams.rem) standrem')
             ->order('examname')->select();
         $count= $this->query->table('examnotification')->where($condition)->count();

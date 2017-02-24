@@ -65,14 +65,26 @@ class PHPExcel
             //如果标题不为空设置标题
             $colCount = count($template);
             if (isset($array[$now]['title'])&&$array[$now]['title'] != "") {
-                $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0, 1, $colCount - 1, 1);
-                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, 1, $array[$now]['title']);
+                $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0, $rowIndex, $colCount - 1, $rowIndex);
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $array[$now]['title']);
                 //设置font
                 $styleArray = array(
                     'font' => array('name' => '黑体', 'size' => '14'),
                     'alignment' => array('horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
                 );
-                $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A1')->applyFromArray($styleArray);
+                $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A'.$rowIndex)->applyFromArray($styleArray);
+                $rowIndex++;
+            }
+            // 二级标题
+            if (isset($array[$now]['subtitle'])&&$array[$now]['subtitle'] != "") {
+                $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0, $rowIndex, $colCount - 1, $rowIndex);
+                $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $array[$now]['subtitle']);
+                //设置font
+                $styleArray = array(
+                    'font' => array('name' => '宋体', 'size' => '10'),
+                    'alignment' => array('horizontal' => \PHPExcel_Style_Alignment::HORIZONTAL_CENTER)
+                );
+                $PHPExcel->getActiveSheet($sheetIndex)->getStyle('A'.$rowIndex)->applyFromArray($styleArray);
                 $rowIndex++;
             }
             $contentstart = "A" . $rowIndex; //数据区域开始单元格。

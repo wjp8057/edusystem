@@ -260,7 +260,6 @@ class R32 extends  MyService {
             return ['info'=>$studentno.'存在欠费，无法选课或退课！','status'=>0];
         }
 
-
         //选课
         if (isset($postData["inserted"])) {
             $updated = $postData["inserted"];
@@ -268,7 +267,7 @@ class R32 extends  MyService {
             foreach ($listUpdated as $one) {
                 $condition = null;
                 $courseno=$one->courseno;
-                if(substr($courseno,0,2)=="08"&&self::getPublicAmount($year,$term,$studentno)>=3)
+                if(substr($courseno,0,2)=="08"&&self::getPublicAmount($year,$term,$studentno)>=4)
                 {
                     $info.='失败，'.$courseno.'本学期已选修前3门及以上08开头的公选课，请适当退课！<br/>';
                     $status=0;
