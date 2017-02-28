@@ -15,6 +15,7 @@ namespace app\common\service;
 
 
 use app\common\access\Item;
+use app\common\access\MyAccess;
 use app\common\access\MyException;
 use app\common\access\MyService;
 use think\Exception;
@@ -81,6 +82,8 @@ class ExamApply extends MyService {
 
     //更新
     function update($postData){
+        $info="";
+        $status=1;
         $deleteRow=0;
         $insertRow=0;
         //更新部分
@@ -110,6 +113,12 @@ class ExamApply extends MyService {
                     $data['map'] = $map;
                     $data['fee'] = 1;
                     $data['studentno'] = $one->studentno;
+                    if(!MyAccess::checkStudentSchool($one->studentno))
+                    {
+                        $info.="你无法修改其他学院的学生报名状态".$one->studentno;
+                        $status=0;
+                        continue;
+                    }
                     $row = $this->query->table('examapplies')->insert($data);
                     if ($row > 0)
                         $insertRow++;
@@ -123,6 +132,12 @@ class ExamApply extends MyService {
                     $condition = null;
                     $condition['map'] = $map;
                     $condition['studentno'] = $one->studentno;
+                    if(!MyAccess::checkStudentSchool($one->studentno))
+                    {
+                        $info.="你无法修改其他学院的学生报名状态".$one->studentno;
+                        $status=0;
+                        continue;
+                    }
                     $deleteRow += $this->query->table('examapplies')->where($condition)->delete();
                 }
             }
@@ -135,7 +150,6 @@ class ExamApply extends MyService {
         $info='';
         if($deleteRow>0) $info.=$deleteRow.'条删除！</br>';
         if($insertRow>0) $info.=$insertRow.'条添加！</br>';
-        $status=1;
         if($info=='') {
             $info="没有数据被更新";
             $status=0;

@@ -88,8 +88,9 @@ class QualityStudentDetail extends MyService{
             ->join('teachers','teachers.teacherno=qualitystudent.teacherno')
             ->join('qualitystudenttype','qualitystudenttype.type=qualitystudent.type')
             ->where($condition)
-            ->field('qualitystudentdetail.id,rank,qualitystudent.courseno,rtrim(coursename) coursename,one,two,three,four,qualitystudentdetail.total,
-            done,rtrim(teachers.name) teachername,rtrim(qualitystudenttype.name) typename,qualitystudent.type')
+            ->field('qualitystudentdetail.id,rank,qualitystudent.courseno,rtrim(coursename) coursename,qualitystudentdetail.one,qualitystudentdetail.two,
+            qualitystudentdetail.three,qualitystudentdetail.four,qualitystudentdetail.total,
+            qualitystudentdetail.done,rtrim(teachers.name) teachername,rtrim(qualitystudenttype.name) typename,qualitystudent.type')
             ->order('rank,courseno')->select();
         $count= $this->query->table('qualitystudentdetail')
             ->where($condition)->count();

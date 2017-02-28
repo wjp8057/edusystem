@@ -142,7 +142,7 @@
             var count = rows.length;
             for (var i = 0; i < count; i++) {
                 if (rows[i].school != '{$USERINFO.school}' && '{$USERINFO.manage}' != '1') {
-                    $.messager.alert('错误', '你无法修改其他学院的学生计划（' + rows[i].name + '）！', 'error');
+                    $.messager.alert('错误', '你无法修改其他学院的学生报名状态（' + rows[i].studentname + '）！', 'error');
                     $("#cancel").click();
                     return false;
                 }
@@ -206,12 +206,16 @@
             //获取添加的行
             rows=tt.datagrid('getChanges','inserted');
             if(rows.length>0){
+                if(!checkStudentSchool(rows))
+                    return;
                 count+=rows.length;
                 effectRow["inserted"]=$.toJSON(buildDataArray(rows));
             }
             //获取删除的行
             rows=tt.datagrid('getChanges','deleted');
             if(rows.length>0){
+                if(!checkStudentSchool(rows))
+                    return;
                 count+=rows.length;
                 effectRow["deleted"]=$.toJSON(buildDataArray(rows));
             }

@@ -110,7 +110,7 @@ class Graduate extends MyService{
         foreach ($program as  $oneprogram) {
             $result=$ok;
             $course=$graduate->getCourse(1,1000,'%','%','%','%','','',$oneprogram['rowid'])['rows'];
-            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||count($course)>0)
+            if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||(count($course)>0&&$oneprogram['form']=='1'))
                 $result=$fail;
             $detail.="<div class='program'>".$oneprogram['progname']."(".$oneprogram['programno']."),".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
             $nopass=''; //选了没有过的
