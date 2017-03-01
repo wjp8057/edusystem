@@ -48,7 +48,7 @@
                     if (r){
                         $.post('{$ROOT}/student/quality/update', {id: id, one:one,two:two,three:three,four:four}, function (result) {
                             if (result.status == 1) {
-                                location=getURLString()+"?id={$course.nextid}";
+                                location=getURLString()+"?year="+getQueryString('year')+"&term="+getQueryString('term')+"&id={$course.nextid}";
                             }
                             else {
                                 $.messager.alert("错误", result.info, "error");

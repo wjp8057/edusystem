@@ -174,7 +174,7 @@ class Makeup extends  MyService {
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         if($courseno!='%')
-            $condition['makup.courseno']=array('like',$courseno);
+            $condition['makeup.courseno']=array('like',$courseno);
         if($school!='')
             $condition['courses.school']=$school;
         if($type!='')

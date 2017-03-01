@@ -25,11 +25,11 @@
             striped: 'true',
             pagination: 'true',
             rownumbers: true,
-            pageSize: 50,
+            pageSize: 20,
             url: '{$ROOT}/exam/grade/applyquery',
             queryParams: { school:school.combobox('getValue'),map:getQueryString('recno')},
             toolbar: '#toolbar',
-            pageList: [50, 100, 200],
+            pageList: [20,50, 100, 200],
             columns: [[
                 {field: 'checkbox', title: '选中', checkbox: true},
                 {field: 'studentno', title: '学号', width: 70, align: 'center',
@@ -127,6 +127,9 @@
         });
 
         $("#search2").click(function () {
+           searchstudent();
+        });
+        function searchstudent(){
             var tt = $('#dg2');
             tt.datagrid('loadData', {total: 0, rows: []});
             tt.datagrid('clearSelections');
@@ -137,7 +140,7 @@
                 name: $('#name2').val(),
                 school:$('#school2').combobox('getValue')
             });
-        });
+        }
         function checkStudentSchool(rows) {
             var count = rows.length;
             for (var i = 0; i < count; i++) {
@@ -253,7 +256,19 @@
                 }
             });
         });
+
+        //默认回车检索学生
+        $(document).keydown(function (event) {
+            if (current_datagrid == null) { //如果正在编辑
+                if (event.which == 13) {
+                    event.preventDefault();
+                    searchstudent();
+                }
+            }
+        });
     });
+
+
     function detail(studentno){
         var url='/base/index/studentdetail?';
         parent.menuTabs.addTab("学生详情",'{$ROOT}'+url+'studentno='+studentno,"icon icon-student");

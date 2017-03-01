@@ -95,7 +95,9 @@
             $.post('{$ROOT}/student/quality/updaterank', effectRow, function (result) {
                 if (result.status == 1) {
                     tt.datagrid('reload');
-                    parent.menuTabs.addTab("评价教师","{$ROOT}/student/index/qualitycourse","icon icon-note");
+                    var year=$('#year').val();
+                    var term=$('#term').val();
+                    parent.menuTabs.addTab("评价教师","{$ROOT}/student/index/qualitycourse?year="+year+"&term="+term,"icon icon-note");
                 } else {
                     $.messager.alert('提示', result.info, 'error');
                 }
@@ -117,7 +119,9 @@
                 return ;
             }
             else{
-                parent.menuTabs.addTab("修改评分","{$ROOT}/student/index/qualitycourse?id="+row.id,"icon icon-note");
+                var year=$('#year').val();
+                var term=$('#term').val();
+                parent.menuTabs.addTab("修改评分","{$ROOT}/student/index/qualitycourse?year="+year+"&term="+term+"&id="+row.id,"icon icon-note");
             }
         });
     });
