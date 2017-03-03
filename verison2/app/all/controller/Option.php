@@ -547,6 +547,7 @@ class Option {
      * 测试专用
      */
     public function test(){
-        echo substr('0814411',0,2);
+        $obj=new R32();
+        $obj->selectedTable('2016','2','1630408');
     }
 }

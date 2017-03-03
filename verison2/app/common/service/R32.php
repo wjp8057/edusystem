@@ -565,6 +565,7 @@ class R32 extends  MyService {
             ->order('coursename')
             ->select();
         //课程数
+
         $cAmount=count($course);
         $selective=$this->query->table('r32')
             ->join('students','students.studentno=r32.studentno')
@@ -576,10 +577,12 @@ class R32 extends  MyService {
         //学生数
         $sAmount=count($selective);
         $content="<tr><td class='studentno'>学号</td><td class='studentname'>姓名</td>";
+
         for($i=0;$i<$cAmount;$i++)
             $content.="<td class='coursename'>".htmlspecialchars($course[$i]["coursename"])."</td>";
         $content.="</tr>";
         $lastStudent="";
+        $lastCourseName="";
         $i=0;
         for($j=0;$j<$sAmount;$j++){
             if($lastStudent!=$selective[$j]['studentno'])
@@ -598,6 +601,10 @@ class R32 extends  MyService {
                 if($selective[$j]["coursename"]==$course[$v]["coursename"]) {
                     $i=$v+1;
                     $content.="<td>".self::getTypeName($selective[$j]["coursetype"])."</td>";
+                    $lastCourseName=$selective[$j]["coursename"];
+                    break;
+                }
+                else if($selective[$j]["coursename"]==$lastCourseName){
                     break;
                 }
                 else
