@@ -17,6 +17,7 @@ use app\common\access\MyController;
 use app\common\service\Classroom;
 use app\common\service\ViewSchedule;
 use app\common\service\R32;
+use app\common\vendor\PHPExcel;
 
 class Process extends MyController
 {
@@ -80,9 +81,27 @@ class Process extends MyController
             }
             $template = array("roomno" => "教室号", "no" => "房间号","roomname"=>"名称", "building" => "楼名", "areaname" => "校区","seats"=>"座位数",
                 "equipmentname"=>"设施", "used"=>"周课时","rate"=>"利用率");
-            $string = array("roomno,no");
+            $string = array("roomno","no");
             $array[] = array("sheet" => $sheet, "title" => $title, "template" => $template, "data" => $data, "string" => $string);
             PHPExcel::export2Excel($file, $array);
+
+
+            $room = new Classroom();
+            $result = $room->getList(1, 10000, $roomno, $name, $building, $area, $equipment, $school, $status, $reserved, $seatmin, $seatmax, $testmin, $testmax);
+            $data=$result['rows'];
+            $file="教室汇总表";
+            $sheet='全部';
+            $title='教室汇总表';
+            $length=count($data);
+            for($i=0;$i<$length;$i++){
+                $data[$i]['status']=$data[$i]['status']==1?'是':'否';
+                $data[$i]['reserved']=$data[$i]['reserved']==1?'是':'否';
+            }
+            $template= array("roomno"=>"教室号","no"=>"房间号","roomname"=>"教室名","building"=>"楼名","areaname"=>"校区","equipment"=>"设施",
+                "seats"=>"座位数", "testers"=>"考位数","schoolname"=>"优先学院","usagename"=>"排课约束","reserved"=>"保留","status"=>"可用");
+            $string=array("roomno");
+            $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);
+            PHPExcel::export2Excel($file,$array);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

@@ -595,6 +595,7 @@ class R32 extends  MyService {
                 $lastStudent=$selective[$j]['studentno'];
                 $content.="<tr><td>".htmlspecialchars($selective[$j]["studentno"])."</td><td>".htmlspecialchars($selective[$j]["studentname"])."</td>";
                 $i=0;
+                $lastCourseName='';
             }
             $type="";
             for($v=$i;$v<$cAmount;$v++){
