@@ -1,13 +1,6 @@
 <layout name="all@index/layout" />
 <script type="text/javascript">
     $(function(){
-
-       /* $data['courseno'] = $one->courseno;
-        $data['examname'] = $one->examname;
-        $data['testlevel'] = $one->testlevel;
-        $data['testcode'] = $one->testcode;
-        $data['schoolcode'] = $one->schoolcode;
-        $data['rem'] = $one->rem;*/
         $('#dg').datagrid({
             title:'',idField:'recno', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20, url:'{$ROOT}/exam/grade/query',toolbar:'#toolbar',
             columns:[[

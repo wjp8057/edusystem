@@ -12,6 +12,8 @@
         if ('{$USERINFO.manage}' != '1')
             school.combobox('select', '{$USERINFO.school}');
 
+        if(getQueryString('school')!='')
+            school.combobox('select', getQueryString('school'));
         var fee=$('#fee');
         fee.combobox({
             url:'{$ROOT}/all/option/zo?only=0',

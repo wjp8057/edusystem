@@ -70,7 +70,7 @@ class ExamApply extends MyService {
             ->field('students.studentno,rtrim(students.name) studentname,students.classno,rtrim(classes.classname) classname,
             schools.school,rtrim(schools.name) schoolname,fee,personal.id,pretcoa,pretcob,cet3,cet4,rtrim(nc.name) nationalityname,
             rtrim(sexcode.name) sexname,CONVERT(varchar(100), birthday, 23) birthday,students.years,DATEPART(year,classes.year) grade')
-            ->order('studentno')->select();
+            ->order('school,grade,classno,studentno')->select();
         $count= $this->query->table('examapplies')
             ->join('students','students.studentno=examapplies.studentno')
             ->join('classes','classes.classno=students.classno')

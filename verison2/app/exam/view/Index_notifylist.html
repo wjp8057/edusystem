@@ -2,6 +2,12 @@
 <script type="text/javascript">
 
     $(function(){
+        var school = $('#school');
+        school.combobox({
+            url: '{$ROOT}/all/option/school?only=0&active=1',
+            valueField: 'school',
+            textField: 'name'
+        });
         var lock=$('#lock');
         lock.combobox({
             url:'{$ROOT}/all/option/zo?only=0',
@@ -132,7 +138,7 @@
         $("#menu_student,#student").click(function(){
             var row=getSelectRow();
             if (row!=null) {
-                parent.menuTabs.addTab(row.examname + "-查看报名情况", "{$ROOT}/exam/index/examstudent?recno=" + row.recno, "icon icon-circle");
+                parent.menuTabs.addTab(row.examname + "-查看报名情况", "{$ROOT}/exam/index/examstudent?recno=" + row.recno+"&school="+school.combobox('getValue'), "icon icon-circle");
             }
         });
         $("#menu_enroll,#enroll").click(function(){
@@ -153,7 +159,7 @@
             var row=getSelectRow();
             if (row!=null) {
                 var map = row.recno;
-                $.fileDownload("{$ROOT}/exam/grade/exportexcel?map=" + map, {
+                $.fileDownload("{$ROOT}/exam/grade/exportexcel?map=" + map+"&school="+school.combobox('getValue'), {
                     preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
                     dialogOptions: {modal: true, title: '提示'},
                     failCallback: function (html, url) {
@@ -195,6 +201,8 @@
         <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
         <label for="lock">报名截止：</label><input id="lock" size="7"/>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+        <label for="school">学院：</label>
+        <input id="school" size="13">
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-circle',plain:'true'" id="student">查看报名情况</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-caluate',plain:'true'" id="enroll">考试报名</a>
         <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出报考名单</a>
