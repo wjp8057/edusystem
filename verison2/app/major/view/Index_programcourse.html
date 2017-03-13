@@ -20,15 +20,15 @@ $(function () {
         queryParams: {programno:getQueryString('programno')},
         pageList: [50, 100, 200],
         columns: [[
-            {field: 'courseno', title: '课号', width: 70, align: 'center'},
-            {field: 'coursename', title: '课名', width: 250, align: 'center'},
+            {field: 'courseno', title: '课号', width: 55, align: 'center'},
+            {field: 'coursename', title: '课名', width: 140, align: 'center'},
             {field: 'credits', title: '学分', width: 30, align: 'center'},
-            {field: 'hours', title: '周课时', width: 50, align: 'center'},
-            {field: 'schoolname', title: '开课学院', width: 90, align: 'center'},
+         <!--   {field: 'hours', title: '周课时', width: 40, align: 'center'},-->
+            {field: 'schoolname', title: '开课学院', width: 70, align: 'center'},
             {field: 'year', title: '学年*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
             {field: 'term', title: '学期*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
             {field: 'coursetype', title: '类别*', width: 50, align: 'center',
-                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/courseapproach', valueField: 'approach', textField: 'name', panelHeight: 'auto', required: true,
+                editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/courseapproach', valueField: 'approach', textField: 'name', panelHeight: 'auto',panelWidth:50, required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
                         tt.datagrid('getSelected').coursetypename = rec.name;
@@ -100,16 +100,52 @@ $(function () {
             });
         }
     });
+    $('#dg2').datagrid({
+        title: '检索课程',
+        idField: 'courseno',
+        striped: 'true',
+        pagination: 'true',
+        rownumbers: true,
+        pageSize: 20,
+        url: '{$ROOT}/major/plan/coursesearch',
+        queryParams: {courseno:''},
+        toolbar: '#toolbar2',
+        pageList: [20,50, 100, 200],
+        columns: [[
+            {field: 'checkbox', title: '选中', checkbox: true},
+            {field: 'courseno', title: '课号', width: 55, align: 'center'},
+            {field: 'coursename', title: '课名', width: 180, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 80, align: 'center'},
+            {field: 'credits', title: '学分', width: 30, align: 'center'}
+        ]],
+        //标题行右键菜单
+        onHeaderContextMenu: function (e, field) {
+            e.preventDefault();
+            if (!cmenu_obj.cmenu)//没有的话创建一个
+                $('#dg2').datagrid('createColumnMenu', cmenu_obj);
+            cmenu_obj.cmenu.menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        },
+        //数据行上右键菜单
+        onRowContextMenu: function (e, rowindex, row) {
+            e.preventDefault();
+            var tt = $('#dg2');
+            tt.datagrid('selectRow', rowindex);
+            $('#menu2').menu('show', {
+                left: e.pageX,
+                top: e.pageY
+            });
+        }
+    });
     $("#menu_edit,#edit").click(function(){
         var row= $('#dg').datagrid('getSelected');
         if(!row){
             $.messager.alert('提示','请先选择一个课程！','info');
             return;
         }
-        parent.menuTabs.addTab(getQueryString('programno')+"-编辑详情","{$ROOT}/major/index/programcoursedetail?courseno="+row.courseno+"&programno="+getQueryString('programno'),"icon-edit");
-    });
-    $("#menu_add,#add").click(function(){
-        parent.menuTabs.addTab(getQueryString('programno')+"-添加课程","{$ROOT}/major/index/programcoursedetail?programno="+getQueryString('programno'),"icon icon-add");
+        parent.menuTabs.addTab(getQueryString('programno')+"-编辑周次","{$ROOT}/major/index/programcoursedetail?courseno="+row.courseno+"&programno="+getQueryString('programno'),"icon-edit");
     });
     //取消更改
     $("#cancel,#menu_cancel").click(function () {
@@ -118,7 +154,24 @@ $(function () {
         current_datagrid = null;
     });
 
-
+    function buildDataArray(rows){
+        var updateRow=[];
+        var length=rows.length;
+        for (var i = 0; i < length; i++) {
+            var updateObj = {}; //插入的单元格
+            updateObj.courseno=rows[i].courseno;
+            updateObj.oldcourseno=rows[i].courseno;
+            updateObj.year = rows[i].year;
+            updateObj.term= rows[i].term;
+            updateObj.coursetype= rows[i].coursetype;
+            updateObj.examtype = rows[i].examtype;
+            updateObj.test=rows[i].test;
+            updateObj.category = rows[i].category;
+            updateObj.weeks=rows[i].weeks;
+            updateRow.push(updateObj);
+        }
+        return updateRow;
+    }
     //绑定点击保存按钮事件
     $("#save,#menu_save").click(function () {
         var tt = $('#dg');
@@ -132,13 +185,18 @@ $(function () {
         effectRow['programno']=getQueryString('programno');
         if (rows.length > 0) {
             count += rows.length;
-            effectRow["updated"] = $.toJSON(rows);
+            effectRow["updated"] = $.toJSON(buildDataArray(rows));
         }
         //获取删除的行
         rows = tt.datagrid('getChanges', 'deleted');
         if (rows.length > 0) {
             count += rows.length;
-            effectRow["deleted"] = $.toJSON(rows);
+            effectRow["deleted"] = $.toJSON(buildDataArray(rows))
+        }
+        rows = tt.datagrid('getChanges', 'inserted');
+        if (rows.length > 0) {
+            count += rows.length;
+            effectRow["inserted"] = $.toJSON(buildDataArray(rows))
         }
         if (count <= 0) { //如果没有任何更新，就退出
             $.messager.alert('提示', '没有数据需要保存！', 'info');
@@ -197,36 +255,96 @@ $(function () {
             }
         });
     });
+
+    $("#search2").click(function () {
+        var tt = $('#dg2');
+        tt.datagrid('loadData', {total: 0, rows: []});
+        tt.datagrid('clearSelections');
+        tt.datagrid('clearChecked');
+        tt.datagrid('load', {
+            courseno: $('#courseno2').val(),
+            coursename: $('#coursename2').val()
+        });
+    });
+
+    $("#add2,#menu_add2").click(function () {
+        var tt = $('#dg');
+        var tt2=$('#dg2');
+        var rows=tt2.datagrid('getSelections');
+        var length=rows.length;
+        for(var i=0;i<length;i++){
+            var dgRows=tt.datagrid('getRows');
+            var amount=dgRows.length;
+            for(var j=0;j<amount;j++){
+                if(rows[i].courseno==dgRows[j].courseno){
+                    $.messager.alert('错误', rows[i].courseno+rows[i].coursename+'已在教学计划列表中！' , 'error');
+                    return;
+                }
+            }
+            tt.datagrid('insertRow', {
+                index: 0,
+                row: {
+                    courseno:rows[i].courseno,
+                    coursename:rows[i].coursename,
+                    schoolname:rows[i].schoolname,
+                    credits:rows[i].credits,
+                    year:1,
+                    term:1,
+                    coursetype:'M',
+                    coursetypename:'必修',
+                    examtype:'T',
+                    examtypename:'考试',
+                    test:'T',
+                    testname:'教师自考',
+                    category:'A',
+                    categoryname:'公共基础课',
+                    weeks:'262143'
+                }
+            });
+        }
+    });
 });
 </script>
 <div class="container">
-    <div id="menu" class="easyui-menu" style="width:100px;">
-        <div id='menu_add' data-options="iconCls:'icon icon-add'">新增</div>
-        <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">编辑详情</div>
-        <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
-        <div class="menu-sep"></div>
-        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
-        <div class="menu-sep"></div>
-        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
-        <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
-    </div>
-    <div id="toolbar">
-        <div>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'" id="add">新增</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">编辑详情</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
-            <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="4" value="%"/>
-            <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="6" value="%"/>
-            <label for="school">学院：</label>
-            <input id="school">
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a> |
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
+    <div id="left" style="width:820px;float:left">
+        <div id="menu" class="easyui-menu" style="width:100px;">
+            <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">修改周次</div>
+            <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
+            <div class="menu-sep"></div>
+            <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出</div>
+            <div class="menu-sep"></div>
+            <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+            <div id='menu_cancel' data-options="iconCls:'icon icon-cancel'">取消</div>
         </div>
+        <div id="toolbar">
+            <div>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">修改周次</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-cancel',plain:'true'" id="cancel">取消</a> |
+                <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="4" value="%"/>
+                <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="6" value="%"/>
+                <label for="school">学院：</label>
+                <input id="school">
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-search',plain:'true'" id="search">筛选</a> |
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出</a>
+            </div>
+        </div>
+        <table id="dg">
+        </table>
     </div>
-    <table id="dg">
-    </table>
+    <div id="right" style="width:430px;float:left;padding-left:5px;">
+        <div id="menu2" class="easyui-menu" style="width:150px;">
+            <div data-options="iconCls:'icon icon-back'" id="menu_add">添加选中的课程</div>
+        </div>
+        <div id="toolbar2">
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-back',plain:'true'" id="add2">将选中添加</a>
+            <label for="courseno2">课号：</label><input id="courseno2" class="easyui-validatebox" size="7" value="%"/>
+            <label for="coursename2">课名：</label><input id="coursename2" class="easyui-validatebox" size="9" value="%"/>
+            <a href="#" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search2">检索</a>
+        </div>
+        <table id="dg2"></table>
+    </div>
     <div class="information" style="clear:both">
         <ol>说明：
             <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>

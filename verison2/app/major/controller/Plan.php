@@ -16,6 +16,7 @@ use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\Classes;
 use app\common\service\Classplan;
+use app\common\service\Course;
 use app\common\service\Majorcode;
 use app\common\service\Majordirection;
 use app\common\service\Majorplan;
@@ -376,6 +377,18 @@ class Plan extends MyController
             $effectRow = $obj->bind($_POST['studentno'],$_POST['majorplanid']);
             if($effectRow>0)
                 $result=array('info'=>'绑定成功','status'=>1);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+
+    public function coursesearch($page = 1, $rows = 20,$courseno='%',$coursename='%')
+    {
+        $result = null;
+        try {
+            $course=new Course();
+            $result = $course->getList($page, $rows,$courseno,$coursename,'');
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
