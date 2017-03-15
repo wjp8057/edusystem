@@ -113,26 +113,29 @@ class Graduate extends MyService{
             if(((float)$oneprogram['mcredits'])>((float)$oneprogram['gcredits'])||(count($course)>0&&$oneprogram['form']=='1'))
                 $result=$fail;
             $detail.="<div class='program'>".$oneprogram['progname']."(".$oneprogram['programno']."),".$oneprogram['formname'].",总学分：".$oneprogram['credits'].",应获得：".$oneprogram['mcredits'].",已获得：".$oneprogram['gcredits'].$result."</div>";
-            $nopass=''; //选了没有过的
-            $noselect=''; //没有选课的
-            $noend='';//未结束的
-            foreach ($course as  $onecourse) {
-                switch($onecourse['form']){
-                    case 'A':
-                        $nopass.="<div class='course'>".$fail.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
-                        break;
-                    case 'B':
-                        $noselect.="<div class='course'>".$unselect.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
-                        break;
-                    case 'C':
-                        $noend.="<div class='course'>".$process.$onecourse['courseno']." ".$onecourse['coursename']." ".$onecourse['credits']."学分</div>";
-                        break;
-                    default:break;
+            if($result==$fail) {
+                $nopass = ''; //选了没有过的
+                $noselect = ''; //没有选课的
+                $noend = '';//未结束的
+                foreach ($course as $onecourse) {
+                    switch ($onecourse['form']) {
+                        case 'A':
+                            $nopass .= "<div class='course'>" . $fail . $onecourse['courseno'] . " " . $onecourse['coursename'] . " " . $onecourse['credits'] . "学分</div>";
+                            break;
+                        case 'B':
+                            $noselect .= "<div class='course'>" . $unselect . $onecourse['courseno'] . " " . $onecourse['coursename'] . " " . $onecourse['credits'] . "学分</div>";
+                            break;
+                        case 'C':
+                            $noend .= "<div class='course'>" . $process . $onecourse['courseno'] . " " . $onecourse['coursename'] . " " . $onecourse['credits'] . "学分</div>";
+                            break;
+                        default:
+                            break;
+                    }
                 }
+                $detail = $noend == '' ? $detail : $detail . '<div class="coursetitle">课程未结束</div>' . $noend;
+                $detail = $nopass == '' ? $detail : $detail . '<div  class="coursetitle">已选但未通过</div>' . $nopass;
+                $detail = $noselect == '' ? $detail : $detail . '<div class="coursetitle">未选修课程</div>' . $noselect;
             }
-            $detail=$noend==''?$detail:$detail.'<div class="coursetitle">课程未结束</div>'.$noend;
-            $detail=$nopass==''?$detail:$detail.'<div  class="coursetitle">已选但未通过</div>'.$nopass;
-            $detail=$noselect==''?$detail:$detail.'<div class="coursetitle">未选修课程</div>'.$noselect;
         }
         $resultString.='<div class="detail">'.$detail.'</div>';
         return array("amount"=>1,"data"=>$resultString);
