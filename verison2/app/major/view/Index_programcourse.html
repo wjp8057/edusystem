@@ -20,14 +20,14 @@ $(function () {
         queryParams: {programno:getQueryString('programno')},
         pageList: [50, 100, 200],
         columns: [[
-            {field: 'courseno', title: '课号', width: 55, align: 'center'},
+            {field: 'courseno', title: '课号', width: 50, align: 'center'},
             {field: 'coursename', title: '课名', width: 140, align: 'center'},
             {field: 'credits', title: '学分', width: 30, align: 'center'},
-         <!--   {field: 'hours', title: '周课时', width: 40, align: 'center'},-->
+            {field: 'total', title: '总学时', width: 40, align: 'center'},
             {field: 'schoolname', title: '开课学院', width: 70, align: 'center'},
-            {field: 'year', title: '学年*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
-            {field: 'term', title: '学期*', width: 40, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
-            {field: 'coursetype', title: '类别*', width: 50, align: 'center',
+            {field: 'year', title: '学年*', width: 38, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
+            {field: 'term', title: '学期*', width: 38, align: 'center', editor: {type: 'validatebox', options: {validType: 'equalLength[1]'}}},
+            {field: 'coursetype', title: '类别*', width: 45, align: 'center',
                 editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/courseapproach', valueField: 'approach', textField: 'name', panelHeight: 'auto',panelWidth:50, required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
@@ -45,7 +45,7 @@ $(function () {
                 formatter: function (val, rec) {
                     return rec.examtypename;
                 }},
-            {field: 'test', title: '考试级别*', width: 70, align: 'center',
+            {field: 'test', title: '考试级别*', width: 60, align: 'center',
                 editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/testlevel', valueField: 'level', textField: 'name', panelHeight: 'auto', required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
@@ -54,7 +54,7 @@ $(function () {
                 formatter: function (val, rec) {
                     return rec.testname;
                 }},
-            {field: 'category', title: '课程门类*', width: 80, align: 'center',
+            {field: 'category', title: '课程门类*', width: 75, align: 'center',
                 editor: {type: 'combobox', options: {url: '{$ROOT}/all/option/coursecat', valueField: 'category', textField: 'name', panelHeight: 'auto', required: true,
                     onSelect: function (rec) {
                         var tt = $('#dg');
@@ -114,9 +114,10 @@ $(function () {
         columns: [[
             {field: 'checkbox', title: '选中', checkbox: true},
             {field: 'courseno', title: '课号', width: 55, align: 'center'},
-            {field: 'coursename', title: '课名', width: 180, align: 'center'},
-            {field: 'schoolname', title: '学院', width: 80, align: 'center'},
-            {field: 'credits', title: '学分', width: 30, align: 'center'}
+            {field: 'coursename', title: '课名', width: 150, align: 'center'},
+            {field: 'schoolname', title: '学院', width: 70, align: 'center'},
+            {field: 'credits', title: '学分', width: 30, align: 'center'},
+            {field: 'total', title: '总学时', width: 40, align: 'center'}
         ]],
         //标题行右键菜单
         onHeaderContextMenu: function (e, field) {

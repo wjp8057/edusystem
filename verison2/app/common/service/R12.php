@@ -43,7 +43,7 @@ class R12 extends MyService{
             ->page($page,$rows)
             ->field('r12.courseno,r12.courseno oldcourseno,rtrim(courses.coursename) coursename,convert(varchar(10),courses.credits) credits,convert(varchar(10),courses.hours)  hours,
                 schools.school,rtrim(schools.name) schoolname,r12.year ,r12.term,r12.examtype,rtrim(et.value) examtypename,r12.coursetype,rtrim(ct.value) coursetypename,test,
-                rtrim(testlevel.value) testname,category,rtrim(coursecat.value) categoryname,r12.weeks')
+                rtrim(testlevel.value) testname,category,rtrim(coursecat.value) categoryname,r12.weeks,courses.total total')
             ->where($condition)->order('year,term,courseno')->select();
         $count= $this->query->table('r12')->join('courses','courses.courseno=r12.courseno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)
