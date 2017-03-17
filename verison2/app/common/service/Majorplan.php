@@ -147,4 +147,36 @@ class Majorplan extends MyService{
         return $result;
     }
 
+    public function copy($rowid,$module,$rem=''){
+        //检查输入有效性
+        $result=null;
+        if(MyAccess::checkMajorPlanSchool($rowid)) {
+            $this->query->startTrans();
+            try {
+                //增加一个教学计划
+                $condition=null;
+                $condition['rowid']=$rowid;
+                $this->query->table('programs')
+                    ->where($condition)
+                    ->field("'".$nprogramno."','".$nprogramname."','".$date."','".$rem."',school,type")
+                    ->selectInsert('programno,progname,date,rem,school,type', 'programs');
+
+                $this->query->table('r12')
+                    ->where($condition)
+                    ->field("'".$nprogramno."',courseno,coursetype,examtype,test,category,year,term,weeks")
+                    ->selectInsert('programno,courseno,coursetype,examtype,test,category,year,term,weeks', 'r12');
+
+                $result = ['status' => 1, 'info' => '复制完成！'];
+            } catch (\Exception $e) {
+                $this->query->rollback();
+                throw $e;
+            }
+            $this->query->commit();
+        }
+        else
+            $result = ['status' => 0, 'info' => '您无法复制其他学院的教学计划'];
+
+        return $result;
+    }
+
 } 

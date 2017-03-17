@@ -76,7 +76,34 @@ class Plan extends MyController
         }
         return json($result);
     }
-
+    //复制教学计划
+    public function  programcopy()
+    {
+        $result = null;
+        $postData=$_POST['updated'];
+        $postData=json_decode($postData);
+        try {
+            $program=new Program();
+            $result = $program->copy($postData->programno,$postData->nprogramno,$postData->nprogramname,$postData->date,$postData->rem);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
+    //培养方案复制
+    public function  majorplancopy()
+    {
+        $result = null;
+        $postData=$_POST['updated'];
+        $postData=json_decode($postData);
+        try {
+            $program=new Majorplan();
+            $result = $program->copy($postData->programno,$postData->nprogramno,$postData->nprogramname,$postData->date,$postData->rem);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json($result);
+    }
     //读取教学计划
     public function programcourselist($page = 1, $rows = 20,$programno,$courseno='%',$coursename='%',$school='')
     {

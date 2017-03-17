@@ -123,8 +123,13 @@ class Program extends MyService{
                 foreach ($listUpdated as $one) {
                     $condition = null;
                     $condition['programno'] = $one->programno;
-                    if(MyAccess::checkProgramSchool($one->programno))
+                    if(MyAccess::checkProgramSchool($one->programno)) {
                         $deleteRow += $this->query->table('programs')->where($condition)->delete();
+                        $this->query->table('r12')->where($condition)->delete(); //删除课程
+                        $condition=null;
+                        $condition['progno']= $one->programno;
+                        $this->query->table('r30')->where($condition)->delete(); //删除培养方案绑定的教学计划
+                    }
                     else{
                         $info.=$one->name.'不是本学院教学计划，无法删除</br>';
                         $errorRow++;
@@ -221,4 +226,36 @@ class Program extends MyService{
         return $result;
     }
 
+    //复制教学计划
+    public function copy($programno,$nprogramno,$nprogramname,$date,$rem=''){
+        //检查输入有效性
+        $result=null;
+        if(MyAccess::checkProgramSchool($programno)) {
+            $this->query->startTrans();
+            try {
+                 //增加一个教学计划
+                $condition=null;
+                $condition['programno']=$programno;
+                $this->query->table('programs')
+                    ->where($condition)
+                    ->field("'".$nprogramno."','".$nprogramname."','".$date."','".$rem."',school,type")
+                    ->selectInsert('programno,progname,date,rem,school,type', 'programs');
+
+                $this->query->table('r12')
+                    ->where($condition)
+                    ->field("'".$nprogramno."',courseno,coursetype,examtype,test,category,year,term,weeks")
+                    ->selectInsert('programno,courseno,coursetype,examtype,test,category,year,term,weeks', 'r12');
+
+                $result = ['status' => 1, 'info' => '复制完成！'];
+            } catch (\Exception $e) {
+                $this->query->rollback();
+                throw $e;
+            }
+            $this->query->commit();
+        }
+        else
+            $result = ['status' => 0, 'info' => '您无法复制其他学院的教学计划'];
+
+        return $result;
+    }
 } 

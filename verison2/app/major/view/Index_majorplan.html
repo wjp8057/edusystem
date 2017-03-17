@@ -176,6 +176,14 @@ $(function () {
             parent.menuTabs.addTab(row.directionname+"-"+row.module+"绑定学生","{$ROOT}/major/index/majorplanstudent?majorplanid="+row.rowid,"icon icon-person");
         }
     });
+    $("#menu_copy,#copy").click(function () {
+        var row= $('#dg').datagrid('getSelected');
+        if(!row){
+            $.messager.alert('提示','请先选择一个培养方案！','info');
+            return;
+        }
+        parent.menuTabs.addTab("复制培养方案《"+row.directionname+"》","{$ROOT}/major/index/copymajorplan?majorplanid="+row.rowid,"icon icon-dict");
+    });
     //导出
     $('#export,#menu_export').click(function () {
         var year = encodeURI($('#year').val());
@@ -203,6 +211,7 @@ $(function () {
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:100px;">
         <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增</div>
+        <div id='menu_copy' data-options="iconCls:'icon icon-dict'">复制</div>
         <div id='menu_edit' data-options="iconCls:'icon icon-pencil'">编辑</div>
         <div id='menu_save' data-options="iconCls:'icon icon-save'">保存</div>
         <div class="menu-sep"></div>
@@ -217,6 +226,7 @@ $(function () {
     <div id="toolbar">
         <div>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'" id="insert">新增</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-dict',plain:'true'" id="copy">复制</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-pencil',plain:'true'" id="edit">编辑</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'" id="delete">删除</a>
             <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-save',plain:'true'" id="save">保存</a>

@@ -1,0 +1,21 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'role', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/student/score/sport',toolbar:'#toolbar',
+            queryParams: {
+
+            },
+            columns:[[
+                {field:'year',title:'年度',width:50,align:'center'},
+                {field:'grade',title:'等级',width:50,align:'center'},
+                {field:'score',title:'分数',width:200,align:'center'},
+                {field:'date',title:'时间',width:200,align:'center'}
+            ]]
+        });
+    });
+</script>
+<div class="container">
+    <table id="dg"></table>
+</div>

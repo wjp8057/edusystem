@@ -17,6 +17,7 @@ namespace app\student\controller;
 use app\common\access\MyAccess;
 use app\common\access\MyController;
 use app\common\service\AddCredit;
+use app\common\service\Sport;
 use app\common\service\ViewGradeScore;
 
 class Score extends MyController{
@@ -55,13 +56,22 @@ class Score extends MyController{
     }
 //    学期积点分
     public function point($page=1,$rows=20){
-      //  try {
+        try {
             $obj=new \app\common\service\Score();
             $studentno=session('S_USER_NAME');
             return $obj->getPointList($page,$rows,$studentno);
-      //  } catch (\Exception $e) {
-      //      MyAccess::throwException($e->getCode(), $e->getMessage());
-     //   }
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
     }
 
+    public function sport($page=1,$rows=20){
+        try {
+            $obj=new Sport();
+            $studentno=session('S_USER_NAME');
+            return $obj->getList($page,$rows,$studentno);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+    }
 }

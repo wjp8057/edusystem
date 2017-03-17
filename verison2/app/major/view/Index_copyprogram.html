@@ -1,0 +1,78 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        //数据预处理
+        {
+            var nprogramno = $('#nprogramno');
+            nprogramno.validatebox({required: true, validType: 'equalLength[7]'});
+
+            var nprogramname = $('#nprogramname');
+            nprogramname.validatebox({required: true, validType: 'maxLength[20]'});
+
+            var rem = $('#rem');
+            rem.validatebox({validType: 'maxLength[20]'});
+
+            var date = $('#date');
+            date.datebox({required: true});
+
+        }
+        $("#save").click(function() {
+            if($("#myForm").form('validate')){
+                var data={};
+                var effectRow ={};
+                data['programno']='{$program.programno}';
+                data['nprogramno']=nprogramno.val();
+                data['nprogramname']=nprogramname.val();
+                data['date']=date.datebox('getValue');
+                data['rem']=rem.val();
+                effectRow['updated']= $.toJSON(data);
+                $.post('{$ROOT}/major/plan/programcopy',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+   .mytable {
+        width: 80%;
+   }
+</style>
+<div class="container">
+    <div class="pagetitle">复制教学计划</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th>原计划号</th>
+            <td><label id="programnno">{$program.programno}</label></td>
+            <th>原计划名</th>
+            <td><label id="programname">{$program.progname}</label></td>
+        </tr>
+        <tr>
+            <th><label for="nprogramno">新计划号</label></th>
+            <td><input id="nprogramno" size="7"/></td>
+            <th><label for="nprogramname">新计划名</label></th>
+            <td><input id="nprogramname" size="20"/></td>
+        </tr>
+        <tr>
+            <th><label for="date">制定日期</label></th>
+            <td><input id="date" size="16"/></td>
+            <th><label for="rem">备注</label></th>
+            <td><input id="rem" size="20"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">开始复制</a>
+    </div>
+</div>

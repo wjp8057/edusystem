@@ -77,4 +77,11 @@ class Index extends Template{
         return $this->fetch('graduatedetail');
     }
 
+    //复制教学计划页面
+
+    public function copyprogram($programno){
+        $result=Item::getProgramItem($programno);
+        $this->assign('program',$result);
+        return $this->fetch();
+    }
 }

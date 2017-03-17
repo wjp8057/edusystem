@@ -72,7 +72,7 @@ class Item {
         $result=null;
         $condition=null;
         $condition['programno']=$programno;
-        $data=Db::table('programs')->where($condition)->field('rtrim(progname) as progname,programno')->select();
+        $data=Db::table('programs')->where($condition)->field('rtrim(progname) as progname,rtrim(programno) programno')->select();
         if(!is_array($data)||count($data)!=1) {
             if($alert)
                 throw new Exception('programno:' . $programno, MyException::ITEM_NOT_EXISTS);
