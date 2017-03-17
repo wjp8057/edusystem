@@ -88,10 +88,11 @@ class Studentplan extends MyService{
             ->join('schools','schools.school=classes.school')
             ->join('majors','majors.rowid=majorplan.map')
             ->join('majordirection','majordirection.direction=majors.direction')
+            ->join('statusoptions','statusoptions.name=students.status')
             ->page($page,$rows)
             ->field("students.studentno,students.classno,rtrim(students.name) name,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,rtrim(majordirection.name) as directionname,
             studentplan.majorplanid,majorplan.module,studentplan.credits,gcredits,addcredits,allplan,allpass,partplan,partpass,allpartplan,allpartpass,publicplan,publicpass,convert(varchar,date, 120) date,
-            totalresult,allresult,partresult,allpartresult,publicresult")
+            totalresult,allresult,partresult,allpartresult,publicresult,(statusoptions.value) statusname")
             ->order('studentno')
             ->where($condition)->select();
         $count= $this->query->table('studentplan')

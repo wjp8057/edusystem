@@ -122,6 +122,24 @@ class Info
         }
         return json(["status" => $status, 'teachername' => $teachername,'schoolname'=>$schoolname]);
     }
-
-
+    //获取学生信息
+    public function  getstudentinfo($studentno)
+    {
+        $result = null;
+        $status = 1;
+        $studentname= null;
+        try {
+            $result = Item::getStudentItem($studentno, false);
+            if ($result != null) {
+                $studentname= $result['name'];
+                $status = 1;
+            } else {
+                $studentname = '该学生不存在!';
+                $status = 0;
+            }
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return json(["status" => $status, 'studentname' => $studentname]);
+    }
 }

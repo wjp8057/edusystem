@@ -101,7 +101,7 @@ class Graduate extends MyService{
             $totalresult=$fail;
         $data['totalcredits']=$data['gcredits']+$data['addcredits'];
         $data['totalresult']=$totalresult;
-        $resultString.='<div class="student">学号：'.$data['studentno'].' 姓名：'.$data['name'].' 学院：'.$data['schoolname'].' 班级：'.$data['classname'].'专业方向：'.$data['directionname'].' 模块方向：'.$data['module'].'审核时间：'.$data['date'].'</div>';
+        $resultString.='<div class="student">学号：'.$data['studentno'].' 姓名：'.$data['name'].' 学籍状态：'.$data['statusname'].' 学院：'.$data['schoolname'].' 班级：'.$data['classname'].'专业方向：'.$data['directionname'].' 模块方向：'.$data['module'].'审核时间：'.$data['date'].'</div>';
         $resultString.='<div class="subtitle">培养方案应获得学分：'.$data['credits'].' ,已获得课程学分：'.$data['gcredits'].' ,
                 创新技能素质学分（已包含在公共选修课学分中）：'.$data['addcredits'].',获得总学分：'.$data['totalcredits'].',总体结论：'.$data['totalresult'].'</div>';
         $detail='';

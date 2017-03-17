@@ -1,0 +1,127 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    var studentnocheck=true;
+    var coursecheck=true;
+    var eqcoursecheck=true;
+    $(function(){
+        //数据预处理
+        {
+            var studentno = $('#studentno');
+            studentno.validatebox({required: true, validType: 'equalLength[9]'});
+
+            var courseno = $('#courseno');
+            courseno.validatebox({required: true, validType: 'equalLength[7]'});
+
+            var eqcourseno = $('#eqcourseno');
+            eqcourseno.validatebox({required: true, validType: 'equalLength[7]'});
+
+        }
+        $("#save").click(function() {
+            if(courseno.val()==eqcourseno.val()){
+                $.messager.alert('错误','顶替的课号不能相同！','error');
+                return;
+            }
+            if($("#myForm").form('validate')&&studentnocheck&&coursecheck&&eqcoursecheck){
+                var data={};
+                var effectRow ={};
+                data['studentno']=studentno.val();
+                data['courseno']=courseno.val();
+                data['eqcourseno']=eqcourseno.val();
+                effectRow["inserted"]=$.toJSON(data);
+                $.post('{$ROOT}/major/graduate/insteadupdate',effectRow,function(result){
+                    if (result.status==1){
+                        $.messager.alert("成功",result.info,"info");
+                    }
+                    else {
+                        $.messager.alert("错误",result.info,"error");
+                    }
+                },'json');
+            }
+            else{
+                $.messager.alert('错误','输入数据有误，请检查！','error');
+            }
+        });
+        //当教学计划号填写完成后。
+        studentno.blur(function(){
+            $('#programname').text('');
+            if(studentno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getstudentinfo',{studentno:studentno.val()},function(result){
+                if (result.status==1){
+                    $('#studentname').text(result.studentname);
+                    studentnocheck=true;
+                }
+                else {
+                    $('#roomname').html("<div class='warn'>" + result.studentname + "</div>");
+                    studentnocheck = false;
+                }
+            },'json');
+        });
+
+        courseno.blur(function(){
+            $('#coursename').text('');
+            if(courseno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:courseno.val()},function(result){
+                if (result.status==1){
+                    $('#coursename').text(result.coursename);
+                    coursecheck=true;
+                }
+                else {
+                    $('#coursename').html("<div class='warn'>" + result.coursename + "</div>");
+                    coursecheck = false;
+                }
+            },'json');
+        });
+
+        eqcourseno.blur(function(){
+            $('#eqcoursename').text('');
+            if(eqcourseno.val()=='')
+                return;
+            $.post('{$ROOT}/all/info/getcourseinfo',{courseno:eqcourseno.val()},function(result){
+                if (result.status==1){
+                    $('#eqcoursename').text(result.coursename);
+                    eqcoursecheck=true;
+                }
+                else {
+                    $('#eqcoursename').html("<div class='warn'>" + result.coursename + "</div>");
+                    eqcoursecheck = false;
+                }
+            },'json');
+        });
+
+        $("#myForm").form('validate');
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">新增课程顶替</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="studentno">学号</label></th>
+            <td><input id="studentno"  size="9"/></td>
+            <th>姓名</th>
+            <td><label id="studentname"></label></td>
+        </tr>
+        <tr>
+            <th><label for="courseno">课号</label></th>
+            <td><input id="courseno" size="7"/></td>
+            <th>课名</th>
+            <td><label id="coursename"></label></td>
+        </tr>
+        <tr>
+            <th><label for="eqcourseno">等价课号</label></th>
+            <td><input id="eqcourseno" size="7"/></td>
+            <th>等价课名</th>
+            <td><label id="eqcoursename"></label></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-save'" id="save">保存顶替信息</a>
+    </div>
+</div>

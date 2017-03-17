@@ -1,0 +1,154 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        var school=$('#school');
+        school.combobox({
+            url:'{$ROOT}/all/option/school?only=0&active=1',
+            valueField:'school',
+            textField:'name'
+        });
+        //设置默认学院，非管理部门为本学院
+        if('{$USERINFO.manage}'!='1')
+            school.combobox('select','{$USERINFO.school}');
+        $('#dg').datagrid({
+            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/major/graduate/insteadcourselist',toolbar:'#toolbar',
+            queryParams: {programschool:school.combobox('getValue')},
+            pageList:[20,50,100,200],
+            columns: [[
+                {field: 'studentno', title: '学号', width: 60, align: 'center',rowspan:2},
+                {field: 'studentname', title: '姓名', width: 60, align: 'center',rowspan:2},
+                {field: 'classname', title: '班级', width: 180, align: 'center',rowspan:2},
+                {field: 'schoolname', title: '学院', width: 90, align: 'center',rowspan:2},
+                {title: '原课程', width: 80, align: 'center',colspan:4},
+                {title: '顶替课程', width: 80, align: 'center',colspan:4}
+            ],[
+                {field: 'courseno', title: '课号', width: 60, align: 'center'},
+                {field: 'coursename', title: '课名', width: 160, align: 'center'},
+                {field: 'credits', title: '学分', width: 40, align: 'center'},
+                {field: 'courseschoolname', title: '开课学院', width: 90, align: 'center'},
+                {field: 'eqcourseno', title: '课号', width: 60, align: 'center'},
+                {field: 'eqcoursename', title: '课名', width: 150, align: 'center'},
+                {field: 'eqcredits', title: '学分', width: 40, align: 'center'},
+                {field: 'eqcourseschoolname', title: '开课学院', width: 90, align: 'center'},
+            ]],
+            //标题行右键菜单
+            onHeaderContextMenu: function(e, field){
+                e.preventDefault();
+                if (!cmenu_obj.cmenu)//没有的话创建一个
+                    $('#dg').datagrid('createColumnMenu',cmenu_obj);
+                cmenu_obj.cmenu.menu('show', {
+                    left:e.pageX,
+                    top:e.pageY
+                });
+            },
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                var tt=$('#dg');
+                tt.datagrid('endEditing');
+                if(tt.datagrid('editIndex')!=undefined) return;
+                e.preventDefault();  //该方法将通知 Web 浏览器不要执行与事件关联的默认动作（如果存在这样的动作）
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        //右键菜单删除按钮
+        $("#menu_delete,#delete").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                if(row.studentschool!='{$USERINFO.school}'&&'{$USERINFO.manage}'!='1'){
+                    $.messager.alert('错误','你无法删除其他学院的等价课程（'+row.studentno+'-'+row.studentname+'）！','error');
+                    return false;
+                }
+                $.messager.confirm('确认', "数据删除后无法恢复！您确定删除本条课程顶替记录？", function (r) {
+                    if (r) {
+                        var data = {};
+                        var effectRow = {};
+                        data['id']=row.id;
+                        data['studentno']=row.studentno;
+                        effectRow["deleted"] = $.toJSON(data);
+                        $.post('{$ROOT}/major/graduate/insteadupdate', effectRow, function (result) {
+                            if (result.status == 1) {
+                                var rowIndex = tt.datagrid('getRowIndex', row);
+                                tt.datagrid('deleteRow', rowIndex);
+                                $.messager.show({	// show error message
+                                    title: '成功',
+                                    msg: result.info
+                                });
+                            } else {
+                                $.messager.alert('错误', result.info, 'error');
+                            }
+                        }, 'json');
+                    }
+                });
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+
+        });
+        //检索
+        $("#search").click(function(){
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                courseno: $('#courseno').val(),
+                equalcourseno:$('#equalcourseno').val(),
+                studentno: $('#studentno').val(),
+                school:$('#school').combobox('getValue')
+            });
+        });
+        /**
+         * 导出课程
+         */
+        $('#export,#menu_export').click(function(){
+            var courseno=encodeURI($('#courseno').val());
+            var eqcourseno=encodeURI($('#eqcourseno').val());
+            var studentno=encodeURI($('#studentno').val());
+            var school=encodeURI($('#school').combobox('getValue'));
+                $.fileDownload("{$ROOT}/major/graduate/insteadexport?courseno=" +courseno+"&eqcourseno="+eqcourseno+'&school='+school+"&studentno="+studentno, {
+                    preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                    dialogOptions: {modal: true, title: '提示'},
+                    failCallback: function (html, url) {
+                        $.messager.alert('错误',html,'error');
+                        }
+                });
+        });
+        $('#insert,#menu_insert').click(function(){
+            parent.menuTabs.addTab("新增等价","{$ROOT}/major/index/courseinsteadadd","icon icon-add");
+        });
+
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:100px;">
+        <div id='menu_insert' data-options="iconCls:'icon icon-add'">新增顶替</div>
+        <div id='menu_export' data-options="iconCls:'icon icon-excel'">导出课程</div>
+        <div class="menu-sep"></div>
+        <div id='menu_delete' data-options="iconCls:'icon icon-remove'">删除</div>
+    </div>
+        <div id="toolbar">
+            <div>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-add',plain:'true'"  id="insert">新增</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-remove',plain:'true'"  id="delete">删除</a>|
+                <label for="studentno">学号：</label><input id="studentno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="equalcourseno">等价课号：</label><input id="equalcourseno" class="easyui-validatebox" size="7" value="%"/>
+                <label for="school">学生学院：</label>
+                <input id="school">
+                <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
+                <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-excel',plain:'true'" id="export">导出数据</a>
+            </div>
+        </div>
+        <table id="dg">
+        </table>
+    <div class="information">
+        <ol>说明：
+            <li>有*标注的为可编辑单元，双击后可以修改内容,Tab键切换到下一个单元格，Enter键切换到下一行</li>
+        </ol>
+    </div>
+</div>
