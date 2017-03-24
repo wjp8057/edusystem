@@ -137,7 +137,7 @@ class Student extends MyController {
             $title='学生信息列表';
             $template= array("studentno"=>"学号","name"=>"姓名","sexname"=>"性别","years"=>"学制","grade"=>"年级","classno"=>"班号","classname"=>"班名",
                 "schoolname"=>"学院","nationalityname"=>"民族","partyname"=>"政治面貌","major"=>"专业代码","majorname"=>"专业","direction"=>"专业方向代码","directionname"=>"专业方向",
-                "id"=>"身份证号","examno"=>"准考证号","address"=>"家庭地址","tel"=>"联系电话","origin"=>"籍贯","provincename"=>"省份",
+                "id"=>"身份证号","birthday"=>"出生日期","examno"=>"准考证号","address"=>"家庭地址","tel"=>"联系电话","origin"=>"籍贯","provincename"=>"省份",
                 "classcodename"=>"生源类型","statusname"=>"学籍状态");
             $string=array("studentno","classno","id","examno","tel","major");
             $array[]=array("sheet"=>$sheet,"title"=>$title,"template"=>$template,"data"=>$data,"string"=>$string);

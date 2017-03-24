@@ -103,10 +103,10 @@ class Student extends MyService {
             students.classno,rtrim(classes.classname) as classname,classes.school,rtrim(schools.name) schoolname,
             personal.party,rtrim(partycode.name) partyname,personal.nationality,rtrim(nationalitycode.name) nationalityname,
             personal.major,rtrim(majorcode.name) majorname,students.status,rtrim(statusoptions.value) statusname,
-            students.years,personal.id,personal.examno,personal.province,rtrim(provincecode.name) provincename,personal.birthday,
+            students.years,personal.id,personal.examno,personal.province,rtrim(provincecode.name) provincename,
             rtrim(personal.midschool) midschool,rtrim(personal.address) address,rtrim(tel) tel,rtrim(origin) as origin,
-            cast('20'+substring(classes.classno,1,2) as char(4)) as grade,students.enterdate,personal.class classcode,
-            rtrim(classcode.name) classcodename,rtrim(personal.photo) photo,majordirection.direction,rtrim(majordirection.name) directionname")
+            majorplan.year as grade,students.enterdate,personal.class classcode,
+            rtrim(classcode.name) classcodename,rtrim(personal.photo) photo,majordirection.direction,rtrim(majordirection.name) directionname,CONVERT(varchar(100),birthday, 112) birthday")
             ->where($condition)->order('studentno')->select();
         $count= $this->query->table('students')->join('classes  ',' classes.classno=students.classno')->where($condition)->count();
         if(is_array($data)&&count($data)>0)

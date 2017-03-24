@@ -547,7 +547,19 @@ class Option {
      * 测试专用
      */
     public function test(){
-        $obj=new R32();
-        $obj->selectedTable('2016','2','1630408');
+       set_time_limit(5);
+
+        self::t();
+    }
+    public static function t(){
+        set_time_limit(0);
+        $i=0;
+        while ($i<=10)
+        {
+            echo "i=$i ";
+            sleep(1);
+            $i++;
+        }
+
     }
 }
