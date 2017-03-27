@@ -157,7 +157,6 @@ class Student extends MyService {
         if(is_array($result)&&count($result)==1)
         {
             $data['password']=$newPassword;
-            $data['enterdate']=date("Y-m-d H:i:s");
             $this->query->table('students')->where($condition)->setField($data);
             $status = 1;
             $info = "密码修改成功";
