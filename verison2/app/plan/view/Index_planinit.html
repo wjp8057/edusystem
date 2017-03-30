@@ -1,0 +1,45 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+    $(function(){
+        $("#init").click(function() {
+            $.messager.confirm('确认','你确定要重新生成开课计划么？',function(r){
+                if (r){
+                    $.post('{$ROOT}/plan/plan/init',{year:$('#year').val(),term:$('#term').val()},function(result){
+                        if (result.status==1){
+                            $.messager.alert("成功",result.info,"info");
+                        }
+                        else {
+                            $.messager.alert("错误",result.info,"error");
+                        }
+                    },'json');
+                }
+            });
+        });
+
+    });
+</script>
+<style type="text/css">
+   #toolbar{height: 50px;line-height: 50px;text-align: center}
+</style>
+<div class="container">
+    <div class="pagetitle">基础设置</div>
+    <form id="myForm">
+    <table class="mytable" align="center" cellspacing="0" cellpadding="0">
+        <tr>
+            <th><label for="year">学年</label></th>
+            <td><input id="year" class="easyui-validatebox" size="4" value="{$NEXTYEARTERM.year}"/></td>
+            <th><label for="term">学期</label></th>
+            <td><input id="term" class="easyui-validatebox" size="1" value="{$NEXTYEARTERM.term}"/></td>
+        </tr>
+    </table>
+    </form>
+    <div id="toolbar">
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="init">初始化</a>
+    </div>
+    <div class="space"></div>
+    <div class="information">
+        <ol>
+            <li>初始化会删除所有开课计划记录，重新生成。</li>
+        </ol>
+    </div>
+</div>
