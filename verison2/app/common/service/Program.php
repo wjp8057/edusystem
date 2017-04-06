@@ -65,8 +65,9 @@ class Program extends MyService{
         $status=1;
         //更新部分
         //开始事务
-        $this->query->startTrans();
-        try {
+      //  $this->query->startTrans();
+      //  try
+       {
             if (isset($postData["inserted"])) {
                 $updated = $postData["inserted"];
                 $listUpdated = json_decode($updated);
@@ -138,11 +139,11 @@ class Program extends MyService{
                 }
             }
         }
-        catch(\Exception $e){
+      /*  catch(\Exception $e){
             $this->query->rollback();
             throw $e;
         }
-        $this->query->commit();
+        $this->query->commit();*/
         if($updateRow+$deleteRow+$insertRow+$errorRow==0){
             $status=0;
             $info="没有数据更新";

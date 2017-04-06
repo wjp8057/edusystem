@@ -28,14 +28,14 @@ class CAS {
             header('Location:'.$ssoURL."login?service=".$service);
             die();
         }
+
         $validateURL=$ssoURL."serviceValidate?ticket=".$ticket."&service=".$service;
         $string= file_get_contents($validateURL);
         $p = xml_parser_create();
         xml_parse_into_struct($p, $string, $vals, $index);
         xml_parser_free($p);
-
+        Log::log($vals);
         $userid=($vals[2]["value"]);
-        Log::log($string);
         $result=MyAccess::signInAsTeacherNo($userid);
         if($result==0)
             $result=MyAccess::signInAsStudent($userid);
