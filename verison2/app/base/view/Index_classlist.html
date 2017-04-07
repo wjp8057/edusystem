@@ -19,6 +19,7 @@
                 {field:'checkbox',title:'选中',checkbox:true},
                 {field:'classno',title:'班号*',width:70,align:'center',editor:{type:'validatebox',options:{validType:'minmaxLength[6,7]',required:true}}},
                 {field:'classname',title:'班级名称*',width:110,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[15]',required:true}}},
+                {field:'englishname',title:'英文班名*',width:110,align:'center',editor:{type:'validatebox',options:{validType:'maxLength[15]'}}},
                 {field:'school',title:'学院*',width:100,align:'center', editor:{type:'combobox', options:{url:'{$ROOT}/all/option/school',valueField:'school',textField:'name',panelWidth:'120',required:true,
                     onSelect:function(rec) {
                         var tt=$('#dg');
@@ -98,7 +99,6 @@
             tt.datagrid('insertRow',{
                 index: 0,
                 row: {
-
                 }
             });
             tt.datagrid('startEditing',{field:'classno',index:0});
@@ -286,6 +286,7 @@
     <div class="information">
         <ol>说明：
             <li>班号设置后无法更改！</li>
+            <li>y英文班名没有请保留为空，英文课表中会显示中文班名。</li>
         </ol>
     </div>
 </div>

@@ -58,7 +58,23 @@ class Index extends Template
         }
         return $this->fetch('all@index/timetable');
     }
+    function processtable_english($year, $term,$who)
+    {
+        try {
+            $title['year'] = $year;
+            $title['term'] = $term;
+            $title['time'] = date("d/m/Y");
+            $title['name'] = Item::getTeacherItem($who)['teachername'];
+            $this->assign('title', $title);
+            $schedule = new Schedule();
+            $time = $schedule->getTeacherTimeTableEnglish($year, $term, $who);
+            $this->assign('time', $time);
 
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch('all@index/timetable-english');
+    }
     /**教室课程列表
      * @param $year
      * @param $term
@@ -78,12 +94,7 @@ class Index extends Template
         return $this->fetch();
     }
 
-    /**课程学生列表
-     * @param string $year
-     * @param string $term
-     * @param string $courseno
-     * @param int $page
-     */
+
     function processcoursestudent($year='',$term='',$courseno='',$page=1){
         try{
             //头部信息

@@ -38,7 +38,7 @@ class Course  extends  MyService{
             ->join('coursetypeoptions','coursetypeoptions.name=courses.type')
             ->join('courseform','courseform.name=courses.form','LEFT')
             ->page($page,$rows)
-            ->field('rtrim(courses.courseno) courseno,rtrim(courses.coursename) coursename,courses.total,
+            ->field('rtrim(courses.courseno) courseno,rtrim(courses.coursename) coursename,rtrim(courses.englishname) englishname,courses.total,
             convert(varchar(10),credits) credits, convert(varchar(10),hours) hours,
             convert(varchar(10),lhours) lhours,convert(varchar(10),experiments) experiments,
             convert(varchar(10),computing) computing,convert(varchar(10),khours) khours,convert(varchar(10),shours) shours,
@@ -60,8 +60,8 @@ class Course  extends  MyService{
         $status=1;
         //更新部分
         //开始事务
-        $this->query->startTrans();
-        try {
+     //   $this->query->startTrans();
+      //  try {
             if (isset($postData["inserted"])) {
                 $updated = $postData["inserted"];
                 $listUpdated = json_decode($updated);
@@ -69,6 +69,7 @@ class Course  extends  MyService{
                     $data = null;
                     $data['courseno'] = $one->courseno;
                     $data['coursename'] = $one->coursename;
+                    $data['englishname'] = $one->englishname;
                     $data['school'] = $one->school;
                     $data['total'] = $one->total;
                     $data['credits'] = $one->credits;
@@ -105,6 +106,7 @@ class Course  extends  MyService{
                     $data = null;
                     $condition['courseno'] = $one->courseno;
                     $data['coursename'] = $one->coursename;
+                    $data['englishname'] = $one->englishname;
                     $data['school'] = $one->school;
                     $data['total'] = $one->total;
                     $data['credits'] = $one->credits;
@@ -147,12 +149,12 @@ class Course  extends  MyService{
                     }
                 }
             }
-        }
+  /*      }
         catch(\Exception $e){
             $this->query->rollback();
             throw $e;
         }
-        $this->query->commit();
+        $this->query->commit();*/
         if($updateRow+$deleteRow+$insertRow+$errorRow==0){
             $status=0;
             $info="没有数据更新";

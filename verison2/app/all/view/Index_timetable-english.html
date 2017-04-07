@@ -1,0 +1,81 @@
+<include file="all@index/header" />
+<script type="text/javascript">
+$(function(){
+    var year=getQueryString('year');
+    var term=getQueryString('term');
+    var who=getQueryString('who');
+    year=year==null?'{$YEARTERM.year}':year;
+    term=term==null?'{$YEARTERM.term}':term;
+    $("#print").click(function(){
+        window.print();
+    });
+    $("#last").click(function(){
+        if(term=='1'){
+            year=parseInt(year)-1;
+            term=2;
+        }
+        else
+        {
+            term=parseInt(term)-1;
+        }
+        location=getURLString()+"?year="+year+"&term="+term+"&who="+who;
+    });
+    $("#next").click(function(){
+        if(term=='2'){
+            year=parseInt(year)+1;
+            term=1;
+        }
+        else
+        {
+            term=parseInt(term)+1;
+        }
+        location=getURLString()+"?year="+year+"&term="+term+"&who="+who;
+    });
+});
+
+</script>
+<style type="text/css">
+    .course{text-align: center;font-size: 11pt;line-height:20px;height: 20px;}
+    #timetable{width:100%;margin: 0 auto}
+    th,td{ border: solid #000 1px;text-align: center;height:50px;line-height: 17px;width: 13%}
+    table{border-collapse: collapse;border: none;}
+    th{height:50px;background-color:#CCE6FF;font-weight:100}
+    th.lesson{min-width:60px;;height:auto;width: 9%}
+    .tip ol li,.information ol{line-height: 30px;font-size:10pt;margin-left: 30px;}
+    .container2{padding:0 5px;}
+    #last,#next{padding: 0 5px}
+    #rem p{text-indent: 2em;line-height: 20px;}
+    @media print {
+        #last,#next,#print{display: none}
+        th.lesson{min-width:60px;;height:auto}
+        th,td{ border: solid #000 1px;text-align: center;height:auto;line-height: 17px;width: auto}
+    }
+</style>
+<div class="container2">
+    <div class="print_title">{$title.name} Schedule at {$title.year} Semester {$title.term}(updated {$title.time})</div>
+    <div class="course"><a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="print"></a>
+        <a id="last" href="#">上学期</a><a id="next" href="#">下学期</a>
+    </div>
+    <table id="timetable">
+        <tr><th class="lesson">&nbsp;</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th></tr>
+        <tr><th class="lesson">Session1</th><td rowspan="2">{$time[1][1]}</td><td rowspan="2">{$time[2][1]}</td><td rowspan="2">{$time[3][1]}</td><td rowspan="2">{$time[4][1]}</td><td rowspan="2">{$time[5][1]}</td></tr>
+        <tr><th class="lesson">Session2</th></tr>
+        <tr><th class="lesson">Session3</th><td rowspan="2">{$time[1][2]}</td><td rowspan="2">{$time[2][2]}</td><td rowspan="2">{$time[3][2]}</td><td rowspan="2">{$time[4][2]}</td><td rowspan="2">{$time[5][2]}</td></tr>
+        <tr><th class="lesson">Session4</th></tr>
+        <tr><th class="lesson">Session5</th><td rowspan="2">{$time[1][3]}</td><td rowspan="2">{$time[2][3]}</td><td rowspan="2">{$time[3][3]}</td><td rowspan="2">{$time[4][3]}</td><td rowspan="2">{$time[5][3]}</td></tr>
+        <tr><th class="lesson">Session6</th></tr>
+        <tr><th class="lesson">Session7</th><td rowspan="2">{$time[1][4]}</td><td rowspan="2">{$time[2][4]}</td><td rowspan="2">{$time[3][4]}</td><td rowspan="2">{$time[4][4]}</td><td rowspan="2">{$time[5][4]}</td></tr>
+        <tr><th class="lesson">Session8</th></tr>
+        <tr><th class="lesson">Session9</th><td rowspan="2">{$time[1][5]}</td><td rowspan="2">{$time[2][5]}</td><td rowspan="2">{$time[3][5]}</td><td rowspan="2">{$time[4][5]}</td><td rowspan="2">{$time[5][5]}</td></tr>
+        <tr><th class="lesson">Session10</th></tr>
+    </table>
+    <div id="rem">
+        <p><strong>WEEK A</strong>: e.g. 1<sup>st</sup> week, 3<sup>rd</sup> week, 5<sup>th</sup> week, 7<sup>th</sup> week, 9<sup>th</sup> week, 11<sup>th</sup> week etc.</p>
+        <p><strong>WEEK B</strong>: e.g. 2<sup>nd</sup> week, 4<sup>th</sup> week, 6<sup>th</sup> week, 8<sup>th</sup> week, 10<sup>th</sup> week, 12<sup>th</sup> week etc.</p>
+        <p>Session 1：8：15--9：00,Session 2：9：05--9：50  </p>
+        <p>Session 3：10：05--10：50,Session 4：10：55--11：40 </p>
+        <p>Session 5：13：00--13：45,Session 6：13：50--14：35 </p>
+        <p>Session 7：14：50--15：35,Session 8：15：40--16：25 </p>
+        <p>Session 9：18：00--18：45,Session 10：18：50--19：35</p>
+    </div>
+</div>

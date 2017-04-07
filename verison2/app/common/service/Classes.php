@@ -49,7 +49,7 @@ class Classes extends MyService{
             ->join('majordirection ','majordirection.direction=majors.direction','LEFT')
             ->join($subsql.' t ',' t.classno=classes.classno','LEFT')
             ->page($page,$rows)
-            ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,schools.school,rtrim(schools.name) schoolname,
+            ->field('rtrim(classes.classno) classno,rtrim(classes.classname) classname,rtrim(classes.englishname) englishname,schools.school,rtrim(schools.name) schoolname,
             rtrim(majors.majorno) major,rtrim(majorcode.name) as majorname,classes.students,isnull(t.amount,0) amount,
             classes.year,rtrim(majordirection.name) directionname,rtrim(majors.direction) direction,classes.area,areas.value areaname')
             ->where($condition)->order('classno')->select();
@@ -82,6 +82,7 @@ class Classes extends MyService{
                     $data = null;
                     $data['classno'] = $one->classno;
                     $data['classname'] = $one->classname;
+                    $data['englishname'] = $one->englishname;
                     $data['school'] = $one->school;
                     $data['year'] = $one->year;
                     $data['area'] = $one->area;
@@ -106,6 +107,7 @@ class Classes extends MyService{
                     $data = null;
                     $condition['classno'] = $one->classno;
                     $data['classname'] = $one->classname;
+                    $data['englishname'] = $one->englishname;
                     $data['school'] = $one->school;
                     $data['year'] = $one->year;
                     $data['area'] = $one->area;

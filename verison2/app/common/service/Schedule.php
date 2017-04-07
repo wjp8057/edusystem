@@ -18,7 +18,7 @@ use think\Exception;
  */
 class Schedule extends MyService {
     private $oew=array(262143=>'',87381=>'(单周)',174762=>'(双周)');
-
+    private $oew_english=array(262143=>'',87381=>'(Week A)',174762=>'(Week B)');
     /**将单条课程信息放入课表数组
      * @param $result
      * @param $one string 数据集
@@ -187,7 +187,58 @@ classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,courses.c
         }
         return $result;
     }
+    /**获取某个教师指定学年学期的课表，二维数组，第一维为星期第二维为节次(英文版)
+     * @param string $year
+     * @param string $term
+     * @param string $teacherno
+     * @return mixed|null
+     * @throws \think\Exception
+     */
+    public function getTeacherTimeTableEnglish($year='',$term='',$teacherno=''){
+        if($year==''||$term==''||$teacherno=='')
+            throw new Exception('year term teacherno is empty ',MyException::PARAM_NOT_CORRECT);
 
+        $condition=null;
+        $result=null;
+        for($i=0;$i<10;$i++){
+            for($j=0;$j<10;$j++)
+                $result[$i][$j]='';
+        }
+        $result[0][0]='';
+        $condition['teacherplan.teacherno']=$teacherno;
+        $condition['schedule.year']=$year;
+        $condition['schedule.term']=$term;
+        //读取教师的排课记录。
+        $data=$this->query->table('schedule')->join('teacherplan ',' teacherplan.recno=schedule.map')
+            ->join('oewoptions ',' oewoptions.code=schedule.oew')
+            ->join('classrooms ',' classrooms.roomno=schedule.roomno')
+            ->join('courseplan ',' courseplan.courseno+courseplan.[group]=schedule.courseno+schedule.[group] and courseplan.year=schedule.year and courseplan.term=schedule.term')
+            ->join('classes ',' classes.classno=courseplan.classno')
+            ->join('courses ',' courses.courseno=schedule.courseno')
+            ->join('taskoptions ',' taskoptions.code=teacherplan.task')
+            ->join('timesections ',' timesections.name=schedule.time')
+            ->field("dbo.GROUP_CONCAT(distinct rtrim(classes.englishname),'，') as englishclass,dbo.GROUP_CONCAT(distinct rtrim(classes.classname),'，') as classname,
+            dbo.GROUP_OR(schedule.weeks&oewoptions.timebit2) week,
+            classrooms.jsn roomname,schedule.courseno+schedule.[group] as courseno,rtrim(courses.englishname) englishcourse,courses.coursename,schedule.day,schedule.time,taskoptions.name taskname,
+            timesections.value as timename")
+            ->group('classrooms.jsn,schedule.courseno+schedule.[group],courses.englishname,courses.coursename,taskoptions.name,schedule.day,schedule.time,timesections.value')->where($condition)->select();
+        foreach($data as $one){
+            $coursename=$one['englishcourse']==""?$one['coursename']:$one['englishcourse'];
+            $classname=$one['englishclass']==""?$one['classname']:$one['englishclass'];
+            $string=$one['courseno'].':'.$coursename.'('.$one['roomname'].')<br/>'.$classname;
+            $common_week=isset($this->oew_english[$one['week']]);
+            $string=$common_week?$this->oew_english[$one['week']].$string.'<br/>':$string.'<br/>week:'.implode(' ',str_split(week_dec2bin_reserve($one['week'],20), 4)).'<br/>';
+            $result=$this->_buildSingle($result,$one,$string);
+        }
+        //读取教师未排时间地点的课程
+        $unschedule=$this->_getTeacherCourseUnschedule($year,$term,$teacherno);
+        if(count($unschedule)>0){
+            foreach($unschedule as $one){
+                $result[0][0].=$one['courseno'].':'.$one['coursename'].' '.$one['classname'];
+            }
+        }
+        return $result;
+    }
     /**获取教室指定学年学期的课表
      * @param string $year
      * @param string $term

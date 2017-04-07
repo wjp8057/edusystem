@@ -18,6 +18,7 @@
             columns: [[
                 {field: 'courseno', title: '课号*', width: 60, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'equalLength[7]',required:true}}},
                 {field: 'coursename', title: '课名*', width: 180, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[50]',required:true}}},
+                {field: 'englishname', title: '英文名*', width: 180, align: 'center',rowspan:2,editor:{type:'validatebox',options:{validType:'maxLength[100]'}}},
                 {field: 'credits', title: '学分*', width: 30, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 1}}},
                 {field: 'total', title: '总学时*', width: 50, align: 'center',rowspan:2,editor:{type:'numberbox',options:{required:true, precision: 0}}},
                 {title: '每周学时', width: 80, align: 'center',colspan:7},

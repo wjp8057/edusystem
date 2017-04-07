@@ -76,7 +76,14 @@ $(function () {
         window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&who="+teacherno);
 
     });
+    $('#menu_timetable_english,#timetable_english').click(function(){
+        var year=$('#year').val();
+        var term=$('#term').val();
+        var teacherno=getTeacherNo();
+        var url='/analysis/index/processtable_english?';
+        window.open('{$ROOT}'+url+'year='+year+"&term="+term+"&who="+teacherno);
 
+    });
     $('#menu_course,#course').click(function(){
         var year=$('#year').val();
         var term=$('#term').val();
@@ -105,7 +112,8 @@ $(function () {
 <div class="container">
     <div id="menu" class="easyui-menu" style="width:100px;">
         <div id='menu_course' data-options="iconCls:'icon icon-book'">查看课程列表</div>
-        <div id='menu_ttimetable' data-options="iconCls:'icon icon-print'">打印学期课表</div>
+        <div id='menu_timetable' data-options="iconCls:'icon icon-print'">打印学期课表</div>
+        <div id='menu_timetable_english' data-options="iconCls:'icon icon-print'">打印学期课表</div>
     </div>
     <div id="toolbar">
         <div>
@@ -117,10 +125,9 @@ $(function () {
             <input id="school">
             <a href="javascript:void(0)" class="easyui-linkbutton"
                data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a> |
-            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-book',plain:'true'"
-               id="course">查看课程列表</a>
-            <a href="javascript:void(0)" class="easyui-linkbutton"
-               data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">打印学期课表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-book',plain:'true'" id="course">查看课程列表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="timetable">打印学期课表</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon icon-print',plain:'true'" id="timetable_english">打印学期课表(英文)</a>
         </div>
     </div>
     <table id="dg">
