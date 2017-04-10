@@ -13,7 +13,7 @@ use app\common\access\Item;
 use app\common\access\Template;
 use app\common\service\Action;
 use app\common\service\Graduate;
-use app\common\service\Majorplan;
+use app\common\service\MajorPlan;
 use app\common\service\R12;
 use app\common\service\Studentplan;
 
@@ -54,7 +54,7 @@ class Index extends Template{
         if($rowid!='')
         {
             $operate="编辑详情";
-            $obj=new Majorplan();
+            $obj=new MajorPlan();
             $majorplan=$obj->getList(1,1,'','',$rowid)["rows"];
             $majorplan=$majorplan[0];
         }
@@ -82,6 +82,12 @@ class Index extends Template{
     public function copyprogram($programno){
         $result=Item::getProgramItem($programno);
         $this->assign('program',$result);
+        return $this->fetch();
+    }
+    //复制培养方案页面
+    public function copymajorplan($majorplanid){
+        $result=Item::getMajorPlanItem($majorplanid);
+        $this->assign('majorplan',$result);
         return $this->fetch();
     }
 }

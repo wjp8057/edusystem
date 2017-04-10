@@ -19,12 +19,12 @@ use app\common\access\MyController;
 use app\common\service\CoursePlan;
 
 class Plan extends MyController {
-    public function init($year,$term)
+    public function init($year,$term,$classno,$start)
     {
         $result = null;
         try {
             $obj = new CoursePlan();
-            $result = $obj->init($year,$term);
+            $result = $obj->init($year,$term,$classno,$start);
 
         } catch (\Exception $e) {
            MyAccess::throwException($e->getCode(), $e->getMessage());

@@ -20,19 +20,20 @@ use think\Db;
 
 class CoursePlan extends MyService {
 
-    function init($year,$term){
+    function init($year,$term,$classno,$start){
         $row=0;
+        $public=0;
         try {
             MyAccess::checkAccess('E');
-            $bind=["year"=>$year,"term"=>$term];
+            $bind=["year"=>$year,"term"=>$term,'classno'=>$classno];
             //删除原有记录
             $sql='delete from courseplan
-                where year=:year and term=:term';
+                where year=:year and term=:term and classno like :classno';
            Db::execute($sql,$bind);
-            $bind=["year"=>$year,"term"=>$term,'year2'=>$year,'term2'=>$term];
+            $bind=["year"=>$year,"term"=>$term,'year2'=>$year,'term2'=>$term,'classno'=>$classno,'start'=>$start];
             //生成开课记录
             $sql="insert into courseplan(year,term,courseno,[group],attendents,weeks,school,coursetype,examtype,classno,date)
-            select :year,:term,r12.courseno,dbo.fn_10to36((ROW_NUMBER() over(partition by r12.courseno order by classplan.classno)-1)),classes.students,r12.weeks,
+            select :year,:term,r12.courseno,dbo.fn_10to36((ROW_NUMBER() over(partition by r12.courseno order by classplan.classno)-1+:start)),classes.students,r12.weeks,
             courses.school,r12.coursetype,r12.examtype,classes.classno,getdate()
             from classplan
             inner join majorplan on majorplan.rowid=classplan.MAJORPLANID
@@ -40,10 +41,11 @@ class CoursePlan extends MyService {
             inner join r12 on r12.programno=r30.progno
             inner join classes on classes.classno=classplan.classno
             inner join courses on courses.courseno=r12.courseno
-            where majorplan.year+r12.year-1=:year2 and r12.term=:term2 and courses.courseno not like 'A1%' ";
+            where majorplan.year+r12.year-1=:year2 and r12.term=:term2 and courses.courseno not like 'A1%' and classes.classno like :classno";
             $row+=Db::execute($sql,$bind);
-            $bind=["year"=>$year,"term"=>$term,'year2'=>$year,'term2'=>$term,'quarter'=>'%'.$term.'%'];
-            $sql="INSERT INTO COURSEPLAN
+            if($classno!='%') {
+                $bind = ["year" => $year, "term" => $term, 'year2' => $year, 'term2' => $term, 'quarter' => '%' . $term . '%'];
+                $sql = "INSERT INTO COURSEPLAN
                   (SCHOOL, YEAR, TERM, COURSENO, [GROUP], WEEKS, ATTENDENTS,COURSETYPE, EXAMTYPE, CLASSNO)
                   SELECT SCHOOL, :year AS Expr1, :term AS Expr2, COURSENO, '00' AS Expr3,262143 AS Expr4, Limit, 'E' AS Expr5, 'E' AS Expr6, '000000' AS Expr7
                    FROM COURSES
@@ -52,13 +54,14 @@ class CoursePlan extends MyService {
                       (SELECT *
                      FROM courseplan
                      WHERE year = :year2 AND term = :term2 AND courseplan.courseno = courses.courseno))";
-            $row+=Db::execute($sql,$bind);
+                $public += Db::execute($sql, $bind);
+            }
 
         }
         catch(\Exception $e){
             throw $e;
         }
-        return ["info"=>"成功生成！".$row."条开课记录","status"=>"1"];
+        return ["info"=>"成功生成！".$row."条一般开课记录".$public."条公选课记录","status"=>"1"];
     }
 
 }

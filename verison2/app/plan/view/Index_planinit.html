@@ -2,9 +2,13 @@
 <script type="text/javascript">
     $(function(){
         $("#init").click(function() {
+            if ($('#classno').val()!='%'&&$('#start').val()==0){
+                $.messager.alert("提示",'非全体生成时，起始组号不能为0',"info");
+                return;
+            }
             $.messager.confirm('确认','你确定要重新生成开课计划么？',function(r){
                 if (r){
-                    $.post('{$ROOT}/plan/plan/init',{year:$('#year').val(),term:$('#term').val()},function(result){
+                    $.post('{$ROOT}/plan/plan/init',{year:$('#year').val(),term:$('#term').val(),classno:$('#classno').val(),start:$('#start').val()},function(result){
                         if (result.status==1){
                             $.messager.alert("成功",result.info,"info");
                         }
@@ -31,10 +35,16 @@
             <th><label for="term">学期</label></th>
             <td><input id="term" class="easyui-validatebox" size="1" value="{$NEXTYEARTERM.term}"/></td>
         </tr>
+        <tr>
+            <th><label for="classno">班号</label></th>
+            <td><input id="classno" class="easyui-validatebox" size="7" value="%"/></td>
+            <th><label for="start">起始组号</label></th>
+            <td><input id="start" class="easyui-validatebox" size="4" value="0"/></td>
+        </tr>
     </table>
     </form>
     <div id="toolbar">
-        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-reload'" id="init">初始化</a>
+        <a href="#" class="easyui-linkbutton" data-options="iconCls:'icon icon-tip'" id="init">生成开课计划</a>
     </div>
     <div class="space"></div>
     <div class="information">

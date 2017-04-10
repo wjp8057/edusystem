@@ -547,19 +547,8 @@ class Option {
      * 测试专用
      */
     public function test(){
-       set_time_limit(5);
-
-        self::t();
+        $data['name']='111';
+        dump(Db::table('my')->insertGetId($data));
     }
-    public static function t(){
-        set_time_limit(0);
-        $i=0;
-        while ($i<=10)
-        {
-            echo "i=$i ";
-            sleep(1);
-            $i++;
-        }
 
-    }
 }

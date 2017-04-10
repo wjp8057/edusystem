@@ -199,6 +199,20 @@ class Item {
         }
         return $result[0];
     }
+    //获取某个培养方案
+    public static function getMajorPlanItem($majorplanid,$alert=true)
+    {
+        $condition['majorplan.rowid']=$majorplanid;
+        $result=Db::table('majorplan')
+            ->join('majors', 'majors.majorschool=majorplan.majorschool')
+            ->join('majordirection','majordirection.direction=majors.direction')
+            ->field('rtrim(majordirection.name) directionname,majorplan.rowid ,rtrim(majorplan.module) module')->where($condition)->select();
+        if(!is_array($result)||count($result)!=1) {
+            if($alert)
+                throw new Exception('majorplanid' . $majorplanid, MyException::ITEM_NOT_EXISTS);
+        }
+        return $result[0];
+    }
     //获取有效时间段
     public static function getValidItem($type,$alert=true){
         $condition=null;

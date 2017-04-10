@@ -19,7 +19,7 @@ use app\common\service\Classplan;
 use app\common\service\Course;
 use app\common\service\Majorcode;
 use app\common\service\Majordirection;
-use app\common\service\Majorplan;
+use app\common\service\MajorPlan;
 use app\common\service\Program;
 use app\common\service\R12;
 use app\common\service\R30;
@@ -97,8 +97,8 @@ class Plan extends MyController
         $postData=$_POST['updated'];
         $postData=json_decode($postData);
         try {
-            $program=new Majorplan();
-            $result = $program->copy($postData->programno,$postData->nprogramno,$postData->nprogramname,$postData->date,$postData->rem);
+            $obj=new MajorPlan();
+            $result = $obj->copy($postData->rowid,$postData->module,$postData->rem);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
         }
@@ -160,7 +160,7 @@ class Plan extends MyController
     {
         $result = null;
         try {
-            $majorplan=new Majorplan();
+            $majorplan=new MajorPlan();
             $result = $majorplan->getList($page, $rows,$year,$school);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -172,7 +172,7 @@ class Plan extends MyController
     {
         $result = null;
         try {
-            $obj=new Majorplan();
+            $obj=new MajorPlan();
             $result = $obj->update($_POST);//无法用I('post.')获取二维数组
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
@@ -184,7 +184,7 @@ class Plan extends MyController
     {
         $result = null;
         try {
-            $majorplan=new Majorplan();
+            $majorplan=new MajorPlan();
             $result = $majorplan->getList(1, 1000,$year,$school);
             $file="培养方案列表";
             $data = $result['rows'];
@@ -364,7 +364,7 @@ class Plan extends MyController
     {
         $result = null;
         try {
-            $majorplan=new Majorplan();
+            $majorplan=new MajorPlan();
             $result = $majorplan->getList($page, $rows,$year,$school);
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

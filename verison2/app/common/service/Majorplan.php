@@ -13,13 +13,16 @@ namespace app\common\service;
 
 
 use app\common\access\MyAccess;
+use app\common\access\MyException;
 use app\common\access\MyService;
+use think\Db;
+use think\Exception;
 
 /**教学计划课程
  * Class R12
  * @package app\common\service
  */
-class Majorplan extends MyService{
+class MajorPlan extends MyService{
 
     /**读取
      * @param int $page
@@ -120,6 +123,9 @@ class Majorplan extends MyService{
                     $condition['rowid'] = $one->rowid;
                     if(MyAccess::checkMajorSchool($one->majorschool)) {
                         $deleteRow += $this->query->table('majorplan')->where($condition)->delete();
+                        $condition = null;
+                        $condition['majorplan_rowid'] = $one->rowid;
+                        $this->query->table('r30')->where($condition)->delete();
                     }
                     else{
                         $info.=$one->majorschool.'不是本学院专业，无法删除培养计划</br>';
@@ -146,35 +152,43 @@ class Majorplan extends MyService{
         $result=array('info'=>$info,'status'=>$status);
         return $result;
     }
-
+    private  function getLastRowID($id,$alert=true){
+        $condition['id']=$id;
+        $result=Db::table('majorplan')
+            ->field('rowid')->where($condition)->select();
+        if(!is_array($result)||count($result)!=1) {
+            if($alert)
+                throw new Exception('id' . $id, MyException::ITEM_NOT_EXISTS);
+        }
+        return $result[0]['rowid'];
+    }
     public function copy($rowid,$module,$rem=''){
         //检查输入有效性
         $result=null;
         if(MyAccess::checkMajorPlanSchool($rowid)) {
-            $this->query->startTrans();
-            try {
-                //增加一个教学计划
-                $condition=null;
-                $condition['rowid']=$rowid;
-                $this->query->table('programs')
+            $condition=null;
+            $condition['rowid']=$rowid;
+            $this->query->table('majorplan')
+                ->where($condition)
+                ->field("'".$module."','".$rem."',year,map,mcredits,credits,majorschool")
+                ->selectInsert('module,rem,year,map,mcredits,credits,majorschool', 'majorplan');
+            $id=$this->query->getLastInsID();
+            $new_rowid=self::getLastRowID($id);
+            if($new_rowid) {
+                $condition = null;
+                $condition['majorplan_rowid'] = $rowid;
+                $this->query->table('r30')
                     ->where($condition)
-                    ->field("'".$nprogramno."','".$nprogramname."','".$date."','".$rem."',school,type")
-                    ->selectInsert('programno,progname,date,rem,school,type', 'programs');
-
-                $this->query->table('r12')
-                    ->where($condition)
-                    ->field("'".$nprogramno."',courseno,coursetype,examtype,test,category,year,term,weeks")
-                    ->selectInsert('programno,courseno,coursetype,examtype,test,category,year,term,weeks', 'r12');
+                    ->field("'" . $new_rowid . "',progno,credits,mcredits,form")
+                    ->selectInsert('majorplan_rowid,progno,credits,mcredits,form', 'r30');
 
                 $result = ['status' => 1, 'info' => '复制完成！'];
-            } catch (\Exception $e) {
-                $this->query->rollback();
-                throw $e;
             }
-            $this->query->commit();
+            else
+                $result = ['status' => 1, 'info' => '培养计划复制出错！'];
         }
         else
-            $result = ['status' => 0, 'info' => '您无法复制其他学院的教学计划'];
+            $result = ['status' => 0, 'info' => '您无法复制其他学院的培养方案'];
 
         return $result;
     }
