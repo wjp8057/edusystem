@@ -315,7 +315,7 @@ class PHPExcel
                 $obj=new Student();
                 $graduateInfo=$obj->getGraduate($studentno);
                 $PHPExcel->getActiveSheet($sheetIndex)->mergeCellsByColumnAndRow(0,$rowIndex,9, $rowIndex);
-                $studentinfo="学位:".$graduateInfo['degree']." ".$graduateInfo['majorname']."  证书号:".$graduateInfo['graduateno'];
+                $studentinfo="学位:".$graduateInfo['degree']." 专业:".$graduateInfo['majorname']."  证书号:".$graduateInfo['graduateno'];
                 $info=$PHPExcel->getActiveSheet($sheetIndex)->getCellByColumnAndRow(0, $rowIndex-1);
                 $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex-1,$info." 结论:".$graduateInfo['verdict']);
                 $PHPExcel->getActiveSheet($sheetIndex)->setCellValueByColumnAndRow(0, $rowIndex, $studentinfo);

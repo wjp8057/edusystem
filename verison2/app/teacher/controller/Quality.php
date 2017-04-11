@@ -30,7 +30,7 @@ class Quality extends MyController
         try {
             $quality = new QualityFile();
             $teacherno = session('S_TEACHERNO');
-            $result = $quality->getTeacherQualityList($page, $rows, $teacherno);
+            $result = $quality->getList($page, $rows, $teacherno);
 
         } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());

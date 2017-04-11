@@ -159,12 +159,12 @@ class Plan extends MyController
     public function majorplanlist($page = 1, $rows = 20,$year='',$school='')
     {
         $result = null;
-        try {
+       // try {
             $majorplan=new MajorPlan();
             $result = $majorplan->getList($page, $rows,$year,$school);
-        } catch (\Exception $e) {
+      /*  } catch (\Exception $e) {
             MyAccess::throwException($e->getCode(), $e->getMessage());
-        }
+        }*/
         return json($result);
     }
     //更新培养方案

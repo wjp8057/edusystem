@@ -1,0 +1,107 @@
+<layout name="all@index/layout" />
+<script type="text/javascript">
+
+    $(function(){
+        $('#dg').datagrid({
+            title:'',idField:'id', striped:'true',pagination:'true',rownumbers:true,singleSelect:true,pageSize:20,
+            url:'{$ROOT}/quality/student/filequery',toolbar:'#toolbar',
+            queryParams: {
+                year: $('#year').val(),
+                term: $('#term').val()
+            },
+            columns:[[
+                {field:'courseno',title:'课号',width:80,align:'center'},
+                {field:'coursename',title:'课名',width:200,align:'center'},
+                {field:'courseschool',title:'开课学院',width:120,align:'center'},
+                {field:'teachername',title:'教师',width:70,align:'center'},
+                {field:'teacherschool',title:'所在学院',width:100,align:'center'},
+                {field:'type',title:'类型',width:80,align:'center'},
+                {field:'attendent',title:'总人数',width:60,align:'center'},
+                {field:'done',title:'参加人数',width:60,align:'center'},
+                {field:'used',title:'计分人数',width:60,align:'center'},
+                {field:'attitude',title:'态度',width:40,align:'center'},
+                {field:'content',title:'内容',width:40,align:'center'},
+                {field:'effect',title:'效果',width:40,align:'center'},
+                {field:'method',title:'方法',width:40,align:'center'},
+                {field:'score',title:'总分',width:60,align:'center'},
+                {field:'valid',title:'有效',width:40,align:'center'}
+            ]],
+            //数据行上右键菜单
+            onRowContextMenu:function(e,rowindex,row){
+                e.preventDefault();
+                var tt=$('#dg');
+                tt.datagrid('selectRow',rowindex);
+                $('#menu').menu('show',{
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            }
+        });
+        $("#search").click(function() {
+            var tt=$('#dg');
+            tt.datagrid('loadData',{total:0,rows:[]});
+            tt.datagrid('load', {
+                year: $('#year').val(),
+                term: $('#term').val(),
+                courseno: $('#courseno').val(),
+                teachername: $('#teachername').val(),
+                coursename: $('#coursename').val()
+            });
+        });
+
+        $("#menu_detail,#detail").click(function(){
+            var tt=$('#dg');
+            var row = tt.datagrid('getSelected');
+            if (row) {
+                parent.menuTabs.addTab(row.courseno+"-详细得分","{$ROOT}/quality/index/studentdetail?id="+row.id,"icon icon-people");
+            }
+            else{
+                $.messager.alert('错误','请先选中一条记录','error')
+            }
+        });
+        $('#menu_export,#export').click(function(){
+            var year=$('#year').val();
+            var term= $('#term').val();
+            var courseno= $('#courseno').val();
+            var teachername= encodeURI($('#teachername').val());
+            var coursename= encodeURI($('#coursename').val());
+            var school=$('#school').combobox('getValue');
+            var type=$('#type').combobox('getValue');
+            var enabled=$('#enabled').combobox('getValue');
+            var valid=$('#valid').combobox('getValue');
+            $.fileDownload("{$ROOT}/quality/student/exportscore?year="+year+"&term="+term+"&courseno="+courseno+"&teachername="+teachername+"&coursename="+coursename+"&school="+school
+            +"&type="+type+"&enabled="+enabled+"&valid="+valid, {
+                preparingMessageHtml: "正在导出数据，请稍候...<br/>请勿做其它操作！.",
+                dialogOptions: {modal: true, title: '提示'},
+                failCallback: function (html, url) {
+                    $.messager.alert('错误',html,'error');
+                }
+            });
+        });
+    });
+</script>
+<div class="container">
+    <div id="menu" class="easyui-menu" style="width:150px;">
+        <div id='menu_detail' data-options="iconCls:'icon icon-people'">详细得分</div>
+        <div data-options="iconCls:'icon icon-excel'" id="menu_export">导出</div>
+    </div>
+    <div id="toolbar">
+        <div>
+            <label for="year">学年：</label><input id="year" class="easyui-validatebox" size="4" value="{$YEARTERM.year}"/>
+            <label for="term">学期：</label><input id="term" class="easyui-validatebox" size="1" value="{$YEARTERM.term}"/>
+            <label for="courseno">课号：</label><input id="courseno" class="easyui-validatebox" size="7" value="%"/>
+            <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="12" value="%"/>
+            <label for="teacherno">教师号：</label><input id="teacherno" class="easyui-validatebox" size=6 value="%"/>
+            <label for="teachername">姓名：</label><input id="teachername" class="easyui-validatebox" size="6" value="%"/>
+
+            <a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon icon-search',plain:'true'" id="search">检索</a>
+        </div>
+    </div>
+    <table id="dg"></table>
+    <div class="space"></div>
+    <div class="information">
+        <ol>说明：
+            <li>参评人数不到总参加人数的一半为无效。</li>
+        </ol>
+    </div>
+</div>

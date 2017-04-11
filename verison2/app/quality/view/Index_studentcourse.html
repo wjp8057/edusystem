@@ -25,13 +25,6 @@
             textField:'name',
             panelHeight:'auto'
         });
-        var lock=$('#lock');
-        lock.combobox({
-            url:'{$ROOT}/all/option/zo?only=0',
-            valueField:'zo',
-            textField:'name',
-            panelHeight:'auto'
-        });
         //显示更多项目
         $("#more").click(function() {
             var toolbar=$("#toolbar_hide");
@@ -102,8 +95,7 @@
                 coursename: $('#coursename').val(),
                 school:school.combobox('getValue'),
                 type:type.combobox('getValue'),
-                enabled:enabled.combobox('getValue'),
-                lock:lock.combobox('getValue')
+                enabled:enabled.combobox('getValue')
             });
         });
         $("#menu_insert,#insert").click(function(){
@@ -245,8 +237,7 @@
         </div>
         <span id="toolbar_hide">
             <label for="coursename">课名：</label><input id="coursename" class="easyui-validatebox" size="12" value="%"/>
-            <label for="enabled">是否有效：</label><input id="enabled" size="8"/>
-            <label for="lock">是否锁定：</label><input id="lock" size="8"/>
+            <label for="enabled">是否参加：</label><input id="enabled" size="8"/>
         </span>
     </div>
     <table id="dg"></table>

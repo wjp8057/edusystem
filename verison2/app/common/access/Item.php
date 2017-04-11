@@ -264,9 +264,14 @@ class Item {
 //   /读取学生评教信息
     public static function getQualityStudentItem($id,$alert=true){
         $condition=null;
-        $condition['id']=$id;
-        $data=Db::table('qualitystudent')->where($condition)
-            ->field('id,year,term,teacherno,type,courseno')
+        $condition['qualitystudent.id']=$id;
+        $data=Db::table('qualitystudent')
+            ->join('teachers','teachers.teacherno=qualitystudent.teacherno')
+            ->join('courses','courses.courseno=substring(qualitystudent.courseno,1,7)')
+            ->join('qualitystudenttype','qualitystudenttype.type=qualitystudent.type')
+            ->where($condition)
+            ->field('qualitystudent.id,year,term,teachers.teacherno,qualitystudent.type,rtrim(qualitystudenttype.name) typename,qualitystudent.courseno,rtrim(courses.coursename) coursename,
+            rtrim(teachers.name) teachername')
             ->find();
         if(!is_array($data)) {
             if($alert)

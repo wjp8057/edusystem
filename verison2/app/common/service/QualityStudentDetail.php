@@ -63,7 +63,8 @@ class QualityStudentDetail extends MyService{
             ->join('statusoptions','statusoptions.name=students.status')
             ->where($condition)
             ->field('distinct qualitystudentdetail.id,map,students.studentno,rtrim(students.name) studentname,rtrim(classes.classname)  classname,rtrim(schools.name) schoolname,
-            rtrim(statusoptions.value) statusname')
+            rtrim(statusoptions.value) statusname,qualitystudentdetail.one,qualitystudentdetail.two,qualitystudentdetail.three,qualitystudentdetail.four,qualitystudentdetail.total,
+            qualitystudentdetail.done,qualitystudentdetail.used,qualitystudentdetail.rank')
             ->order('studentno')->select();
         $count= $this->query->table('qualitystudentdetail')
             ->join('qualitystudent','qualitystudent.id=qualitystudentdetail.map')

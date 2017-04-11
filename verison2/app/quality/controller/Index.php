@@ -51,4 +51,14 @@ class Index extends Template
         }
         return $this->fetch();
     }
+
+    function studentdetail($id){
+        try {
+            $course=Item::getQualityStudentItem($id);
+            $this->assign('course', $course);
+        } catch (\Exception $e) {
+            MyAccess::throwException($e->getCode(), $e->getMessage());
+        }
+        return $this->fetch();
+    }
 }

@@ -49,7 +49,7 @@ class QualityStudent extends MyService {
         return ["info"=>"同步课程成功！".$row."条记录添加","status"=>"1"];
     }
 
-    function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$teachername='%',$school='',$type='',$enabled='',$lock=''){
+    function getList($page=1,$rows=20,$year,$term,$courseno='%',$coursename='%',$teachername='%',$school='',$type='',$enabled='',$valid=''){
         $result=['total'=>0,'rows'=>[]];
         $condition=null;
         $condition['year']=$year;
@@ -60,7 +60,7 @@ class QualityStudent extends MyService {
         if($school!='')$condition['qualitystudent.school']=$school;
         if($type!='')$condition['qualitystudent.type']=$type;
         if($enabled!='')$condition['qualitystudent.enabled']=$enabled;
-        if($lock!='')$condition['qualitystudent.lock']=$lock;
+        if($valid!='')$condition['qualitystudent.valid']=$valid;
         $data=$this->query->table('qualitystudent')->page($page,$rows)
             ->join('schools','schools.school=qualitystudent.school')
             ->join('courses','courses.courseno=substring(qualitystudent.courseno,1,7)')
@@ -69,7 +69,7 @@ class QualityStudent extends MyService {
             ->where($condition)
             ->field('qualitystudent.id,qualitystudent.year,qualitystudent.term,qualitystudent.teacherno,rtrim(teachers.name) teachername,qualitystudent.type,
             rtrim(qualitystudenttype.name) typename,qualitystudent.courseno,rtrim(courses.coursename) coursename,qualitystudent.school,rtrim(schools.name) schoolname,
-            qualitystudent.enabled,amount')
+            qualitystudent.enabled,amount,done,used,valid,one,two,three,four,score')
             ->order('year,term,courseno,teacherno')->select();
         $count= $this->query->table('qualitystudent')
             ->join('teachers','teachers.teacherno=qualitystudent.teacherno')

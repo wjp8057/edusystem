@@ -288,7 +288,7 @@ class CheckAction extends RightAction {
             if( $effectRow>0) $info.="计算形势与政策、公司制，共". $effectRow.'条！</br>';
 
             $effectRow=$Model->execute("UPDATE WORKS
-            SET WORK=ATTENDENT*1.0/STAND*TOTAL*2
+            SET WORK=ATTENDENT*1.0/STAND*TOTAL*1.2
             WHERE  WORKS.LOCK=0 AND YEAR=".$year." AND TERM=".$term."  AND WORKTYPE='K'");
             if( $effectRow>0) $info.="计算职业素养，共". $effectRow.'条！</br>';
 
@@ -441,7 +441,7 @@ class CheckAction extends RightAction {
             if( $effectRow>0) $info.="计算形势与政策、公司制，共". $effectRow.'条！</br>';
 
             $effectRow=$Model->execute("UPDATE WORKS
-            SET WORK=ATTENDENT*1.0/STAND*TOTAL*2
+            SET WORK=ATTENDENT*1.0/STAND*TOTAL*1.2
             WHERE  WORKS.LOCK=0 AND YEAR=".$year." AND TERM=".$term."  AND WORKTYPE='K'");
             if( $effectRow>0) $info.="计算职业素养，共". $effectRow.'条！</br>';
 
@@ -503,7 +503,7 @@ class CheckAction extends RightAction {
             if( $effectRow>0) $info.= $effectRow.'条已确认的普通课程重复系数初始化为1！</br>';
 
             $effectRow=$Model->execute("UPDATE WORKDETAIL
-            SET REPEAT=0.85
+            SET REPEAT=0.9
             FROM WORKDETAIL INNER JOIN WORKS ON WORKS.ID=WORKDETAIL.MAP
             INNER JOIN TEACHERS ON TEACHERS.TEACHERNO=WORKDETAIL.TEACHERNO
             INNER JOIN (
@@ -511,7 +511,7 @@ class CheckAction extends RightAction {
              FROM WORKS INNER JOIN WORKDETAIL ON WORKDETAIL.MAP=WORKS.ID
             WHERE WORKS.YEAR=".$year." AND WORKS.TERM=".$term.") AS T ON T.ID=WORKDETAIL.ID
             WHERE WORKS.WORKTYPE='A' AND TEACHERS.SCHOOL!='10' AND WORKDETAIL.TYPE='A' AND RANK!=1 AND CHECKED=1");
-            if( $effectRow>0) $info.="共". $effectRow.'条记录非外聘任课教师重复课系数设置为0.85！</br>';
+            if( $effectRow>0) $info.="共". $effectRow.'条记录非外聘任课教师重复课系数设置为0.9！</br>';
 
             $error=$Trans->getDBError();
             if($error!=''){

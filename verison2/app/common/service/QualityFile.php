@@ -23,17 +23,20 @@ class QualityFile extends MyService{
      * @return array|null
      * @throws \think\Exception
      */
-    function getTeacherQualityList($page=1,$rows=20,$teacherno=''){
-        if($teacherno=='')
-            throw new Exception('teacherno is empty ', MyException::PARAM_NOT_CORRECT);
-
-        $result=null;
+    function getList($page=1,$rows=20,$teacherno='%',$year='',$term='',$courseno='%',$coursename='%',$teachername='%'){
+           $result=null;
         $condition=null;
-        $condition['teacherno']=$teacherno;
+        if($teacherno!='%') $condition['teacherno']=array('like',$teacherno);
+        if($courseno!='%') $condition['courseno']=array('like',$courseno);
+        if($coursename!='%') $condition['coursename']=array('like',$coursename);
+        if($teachername!='%') $condition['teacherno']=array('like',$teachername);
+        if($year!='') $condition['year']=$year;
+        if($term!='') $condition['term']=$term;
         $count= $this->query->table('qualityfile')->where($condition)->count();// 查询满足要求的总记录数
         $data=$this->query->table('qualityfile')->where($condition)->page($page,$rows)->order('year desc,term desc')->select();
         if(is_array($data)&&count($data)>0)
             $result=array('total'=>$count,'rows'=>$data);
         return $result;
     }
+
 }
