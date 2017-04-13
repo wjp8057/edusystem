@@ -43,7 +43,7 @@ class CoursePlan extends MyService {
             inner join courses on courses.courseno=r12.courseno
             where majorplan.year+r12.year-1=:year2 and r12.term=:term2 and courses.courseno not like 'A1%' and classes.classno like :classno";
             $row+=Db::execute($sql,$bind);
-            if($classno!='%') {
+            if($classno=='%') {
                 $bind = ["year" => $year, "term" => $term, 'year2' => $year, 'term2' => $term, 'quarter' => '%' . $term . '%'];
                 $sql = "INSERT INTO COURSEPLAN
                   (SCHOOL, YEAR, TERM, COURSENO, [GROUP], WEEKS, ATTENDENTS,COURSETYPE, EXAMTYPE, CLASSNO)
