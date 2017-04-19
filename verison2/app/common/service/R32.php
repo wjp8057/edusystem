@@ -463,7 +463,8 @@ class R32 extends  MyService {
                 foreach ($listUpdated as $one) {
                     //获取教学计划类型
                     $studentno=$one->studentno;
-                    if(!self::checkFee($studentno)){
+
+                      if(!self::checkFee($studentno)){
                         $info.=$studentno."欠费，无法选课！";
                         $status=0;
                         continue;
@@ -492,7 +493,7 @@ class R32 extends  MyService {
                 self::updateAttendent($year,$term,$courseno);
             }
         }
-        if($updateRow+$deleteRow+$errorRow+$insertRow==0){
+        if($updateRow+$deleteRow+$errorRow+$insertRow==0&&$info==''){
             $status=0;
             $info="没有数据更新";
         }
@@ -512,7 +513,7 @@ class R32 extends  MyService {
             select year,term,courseno,[group],studentno ,1,coursetype,examtype
             from courseplan
             inner join students on students.classno=courseplan.classno
-             where year=:year and term=:term and courseplan.classno like :classno and coursetype=:type
+             where year=:year and term=:term and courseplan.classno like :classno and coursetype=:type  and students.status='A'
             and  not exists (select * from r32 where r32.year=courseplan.year and r32.term=courseplan.term
              and r32.courseno+r32.[group]=courseplan.courseno+courseplan.[group]  and r32.studentno=students.studentno)";
         $row=Db::execute($sql,$bind);
