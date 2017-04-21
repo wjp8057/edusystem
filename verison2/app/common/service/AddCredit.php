@@ -39,7 +39,6 @@ class AddCredit extends MyService {
             ->where($condition)
             ->field('rtrim(isnull(sum(credit),0)) total')
             ->find();
-
         return $data['total'];
     }
 }
